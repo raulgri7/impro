@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+//comentario. Busca ParaTestear, para poner avisos
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impro CientoCinco 10¹¹</title>
+    <style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    text-align: center;
+    padding: 20px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+h1 { color: #333; font-size: 2rem; }
+
+/* Clase para organizar los controles, esencial para móvil */
+.controls-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap; 
+    max-width: 90%;
+}
+
+button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin: 10px 5px;
+    border-radius: 8px;
+    min-width: 100px;
+}
+
+button:hover { background: #45a049; }
+
+/* Botón de Reinicio con color distintivo */
+button[onclick="reiniciarSorteo()"] {
+    background: #007bff; /* Azul para reiniciar */
+}
+button[onclick="reiniciarSorteo()"]:hover {
+    background: #0056b3;
+}
+
+
+.result {
+    margin-top: 25px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    padding: 20px;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    max-width: 95%;
+    word-wrap: break-word;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left; 
+}
+
+/* Estilo de la categoría (título) */
+.category { 
+    font-weight: bold; 
+    color: #444; 
+    margin-right: 5px; /* Espacio después de los dos puntos */
+}
+
+select {
+    padding: 8px;
+    font-size: 1rem;
+    margin-right: 10px;
+}
+
+/* Estilo para los selects dentro del modal */
+#modalContent select {
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* Modal ausentes */
+#modalAusentes {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7); 
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 10px;
+}
+
+#modalContent {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-height: 90vh; 
+    overflow-y: auto;
+    text-align: left;
+    max-width: 480px;
+    width: 95%; 
+}
+
+#modalContent h2 { margin-top: 0; }
+#listaAusentes label { 
+    display:block; 
+    margin:8px 0; 
+    font-size: 16px; 
+    cursor: pointer;
+}
+#listaAusentes input[type="checkbox"] {
+    transform: scale(1.3); 
+    margin-right: 10px;
+}
+div > label[for="numParticipantes"] {
+    font-size: 1rem;
+    margin-right: 10px;
+    margin-bottom: 5px; 
+}
+
+
+/* ----------------------------------------------- */
+/* ESTILOS DEL BOTÓN DE REGENERACIÓN (CORREGIDOS) */
+/* ----------------------------------------------- */
+
+/* Versión más compacta y discreta */
+.regenerate-btn {
+    background: none; 
+    color: #4CAF50; 
+    border: none;
+    padding: 0 4px; 
+    margin-right: 8px;
+    font-size: 1.1rem; 
+    cursor: pointer;
+    line-height: 1; 
+    transition: color 0.1s;
+    
+    /* PROPIEDADES CLAVE PARA RESPONSIVE Y ALINEACIÓN: */
+    flex-shrink: 0; 
+    align-self: flex-start;
+}
+
+.regenerate-btn:hover {
+    color: #007bff; 
+    text-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Alineación de los párrafos del resultado (SOLUCIÓN RESPONSIVE) */
+#resultado-content p {
+    display: flex;
+    /* Permite que el contenido salte a una nueva línea si no cabe */
+    flex-wrap: wrap; 
+    /* Alinea el botón y el texto por la base de la línea */
+    align-items: baseline; 
+    padding-right: 5px; 
+}
+
+/* ----------------------------------------------- */
+
+/* Media queries para móviles */
+@media (max-width: 600px) {
+    body { padding: 10px; }
+    h1 { font-size: 1.8rem; }
+    p { font-size: 1rem; }
+    
+    .controls-container {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    div > label[for="numParticipantes"] {
+        display: block;
+        margin-right: 0;
+        text-align: center;
+        width: 100%;
+    }
+
+    select {
+        font-size: 1.1rem;
+        padding: 12px 10px; 
+        margin: 5px 0 15px 0;
+        width: 80%;
+        max-width: 260px;
+    }
+    
+    button {
+        font-size: 1.1rem;
+        padding: 14px 20px;
+        margin: 8px 0;
+        min-width: 140px;
+        width: 80%; 
+        max-width: 260px;
+    }
+    
+    .result { 
+        font-size: 1.1rem; 
+        padding: 20px; 
+        max-width: 95%; 
+        width: auto;
+    }
+    
+    #modalContent { 
+        width: 90%; 
+        max-width: 400px;
+    }
+}
+    </style>
+</head>
+<body>
+
+<div class="controls-container">
+    <h1>🎲 Impro CientoCinco 10¹¹</h1>
+    <p></p>
+</div>
+
+<div class="controls-container">
+    <label for="numParticipantes">¿Participantes?</label>
+    <select id="numParticipantes"></select>
+    <button onclick="generar()">Generar</button>
+    
+    <button onclick="reiniciarSorteo()">Reiniciar Sorteo</button> 
+    
+    </div>
+
+<div class="result" id="resultado">
+    Haz clic en el botón para empezar
+</div>
+
+<div id="modalAusentes" aria-hidden="true">
+    <div id="modalContent" role="dialog" aria-modal="true" aria-label="Seleccionar clase y ausentes">
+        
+        <label for="selectClase">¿De qué clase se trata?</label>
+        <select id="selectClase" onchange="actualizarListaAlumnos()"></select>
+        
+        <h2>Selecciona los ausentes de hoy</h2>
+        <div id="listaAusentes"></div>
+        
+        <div style="text-align:right; margin-top:10px;">
+            <button onclick="confirmarAusentes(true)" style="background:#f44336; margin-right: 10px;">Cerrar (Todos Presentes)</button>
+            <button onclick="confirmarAusentes()">Confirmar Ausentes</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ====================================================================================
+// 1. DATOS DINÁMICOS POR CLASE (MODIFICADOS PARA INCLUIR NIVEL: Nombre|Nivel)
+// Nivel 0 = Nuevo. Nivel 1 (o superior) = Veterano/Estándar.
+// ====================================================================================
+
+const ALUMNOS_POR_CLASE = {
+    "Lunes": [
+        "Alba|0", "Andrea|1", "Beatriz|1", "Beatriz Law|1", "Elena|1", "Estela|1",
+        "Jesús|0", "Lucía|0", "María|0", "Marta|1", "Mery|1", "Patricia|1",
+        "Raquel|0", "Victoria|0", "Yolanda|1"
+    ],
+    "Martes": ["Ainhoa|0", "AnaG|0", "Daniel|1", "Javier|1", "Judith|1", "Laura|1", 
+        "Marcos|1", "Marta|1", "Maite|1", "Nerea|1", "Pablo|1", "Samira|1", 
+        "Sofía|1"],
+    "Miércoles": ["Bea|0", "Chuchi|0", "Elenita|1", "Esther|1", "Isa|1", "Isra|1", 
+        "María|1", "Natalia|1", "Paloma|1", "Yesi|1"],
+    "Jueves 5": ["Alex|0", "David|0", "Elena|1", "Félix|1", "Fuen|1", "Gema|1", 
+        "Héctor|1", "Irene|1", "Sara|1"],
+    "Jueves 7": ["Ángeles|0", "Aroa|0", "Beloki|1", "Elena|1", "Jesús|1", "María|1", 
+        "Paula|1", "Pilar|1", "Raúl|1", "Rosa|1", "Virgi|1"],
+    "Viernes": ["Rubén|0", "Lucía|0", "Guillermo|1", "Marina|1", "Álvaro|1", "Cristina|1", "Jorge|1", "Silvia|1"]
+};
+
+let ausentesSeleccionados = []; // Alumnos marcados como ausentes por el usuario
+let alumnosBase = []; // Lista completa de la clase seleccionada (con nivel)
+let alumnosRestantes = []; // Lista de alumnos disponibles para el sorteo (con nivel)
+let alumnosPresentesEnClase = []; // Lista de alumnos presentes al iniciar la tanda (con nivel)
+
+// ====================================================================================
+// 2. CONSTANTES E INICIALIZACIÓN
+// ====================================================================================
+
+const selectNum = document.getElementById("numParticipantes");
+const modalAusentes = document.getElementById("modalAusentes");
+const listaAusentesDiv = document.getElementById("listaAusentes");
+const selectClase = document.getElementById("selectClase");
+const btnGenerar = document.querySelector('button[onclick="generar()"]');
+let lastSelected = 1;
+
+// Cuentas de las listas: 
+// lugares: 290
+// personajes: 195
+// objetos: 295
+// objetosRaros: 261
+// formatos: 31
+// sentimientos: 85
+
+
+const lugares = `Parque de atracciones,Desierto,Parque de atracciones fantasma,Nube acolchada,Agujero negro,Safari,Coche abandonado,Iglesia,Mundo de Lego,Casa del terror,Río,Estación de tren sin vías,Estrella fugaz,Estación orbital,Mercado callejero,Carpa de circo,Cementerio,Universo paralelo,Lago de fuego,Lago,Coliseo romano,Flor carnívora,Puerta interdimensional,Templo budista,Mansión,Banco,Armario encantado,Árbol de cristal,Cueva,Pirámides de Egipto,Espejo mágico,Colonia espacial,Mezquita,Torreón,Ayuntamiento,Nevera gigante,Baño,Cascada,Muralla china,Ciudad fantasma,Dentro de un huevo,Sinagoga,Prisión de máxima seguridad,Playa,Televisión por dentro,Garaje,Volcán,Autobús escolar,Sala de arena movediza,En una canción,Basílica,Isla volcánica,Montaña,Interior de un videojuego,Oficina,Acantilado,Machu Picchu,Bosque de árboles parlantes,Página de un libro,Catacumbas,Foso de cocodrilos,Bosque,Circo abandonado,Escuela,Campo de flores,Avión estrellado,Campo de relojes derretidos,Bolso sin fondo,Oasis,Muralla medieval,Selva,Sala de espejos infinitos,Biblioteca,Granja,Palacio real,Ciudad de gatos,Cajón del olvido,Monasterio,Campo de refugiados,Habitación de hotel,Atalaya,Supermercado,Viñedo,Cueva prehistórica,Ciudad subterránea,Tejado de cristal,Palacio de hielo,Refugio de montaña,Vestuario,Mirador,Parque,Invernadero,Campo de batalla medieval,Teatro bajo el mar,Ciudad flotante,Galería de arte,Peluquería,Base secreta,Plaza,Parque acuático,Castillo embrujado,Cementerio de robots,Feria de monstruos,Torre transparente,Trastero,Spa,Laboratorio clandestino,Cine,Glaciar,Laboratorio,Biblioteca viviente,Dentro de una lágrima,Cúpula de cristal,Desván,Sauna,Mundo postapocalíptico,Teatro,Polo Norte,Fábrica,Planeta de helado,Fondo del mar de arena,Ciudad bajo tierra,Sótano,Balneario,Refugio nuclear,Restaurante,Circo,Central eléctrica,Calle hecha de chocolate,Callejón oscuro,Mercado intergaláctico,Bodega,Zapato gigante,Marte,Cafetería,Isla desierta,Planta nuclear,Mundo al revés,Azotea,Autobús volador,Casa en ruinas,Piel de dragón,Luna,Bar,Barco,Estudio de grabación,Isla en un frasco,Rascacielos,Colegio virtual,Espacio onírico,Montaña que canta,Tienda de antigüedades,Discoteca,Submarino,Plató de cine,Castillo de naipes,Puente colgante,Sala de realidad aumentada,Laberinto,Desierto de hielo,Rastro,Panadería,Avión,Estación de radio,Pista de atletismo,Túnel,Cápsula del tiempo,Ruinas arqueológicas,Mar de lava,Mercado medieval,Tienda de ropa,Helicóptero,Torre de control,Cancha de baloncesto,Aparcamiento,Edificio inteligente,Plaza de toros,Campo de plumas,Taller de artistas,Farmacia,Cohete espacial,Centro comercial,Campo de fútbol,Tráfico eterno,En un chicle mascado,Establo,Isla de niebla,Biblioteca futurista,Hospital,Estación espacial,Tienda de cómics,Campo de golf,Cabina telefónica,Dentro de una lavadora,Arena de gladiadores,Volcán dormido,Sala de conciertos,Comisaría,Nave extraterrestre,Parque infantil,Tatami,Andén,Cama elástica infinita,Faro abandonado,Jardín eterno,Backstage,Estación de tren,Caravana,Ring de boxeo,Fuente,Nevera parlante,Sala de espera,Estepa infinita,Cámara acorazada,Aeropuerto,Tren bala,Colegio abandonado,Circuito de Fórmula 1,Baño portátil,Baño de oro,Taquilla,Hotel,Carretera que nunca acaba,Metro,Tiovivo,Universidad,Skatepark,Contenedor de basura,Castillo de arena gigante,Vestíbulo,Hostal,Biblioteca de los sueños,Autobús,Dentro de una tostadora,Bosque encantado,Pista de esquí,Nevera vacía,Caja de cerillas,Orfanato,Camping,Castillo en las nubes,Gasolinera,Estómago de ballena,Biblioteca secreta,Pista de patinaje,Armario ropero,Cajón de calcetines,Guardería,Museo,Isla flotante,Taller mecánico,Planeta de chicle,Sala de ordenadores,Playa nudista,Maleta perdida,Dentro de un volcán,Aula vacía,Cárcel,Mina,Gimnasio,Ciudad bajo el mar,Club social,Faro,Lavandería,Globo aerostático pinchado,Taller de coches,Sala de juicios,Pozo,Estadio,Casa inflable,Estación de bomberos,Gruta escondida,Cajero automático,Zoológico,Cocina industrial,Despacho presidencial,Árbol gigante,Piscina,Feria de pueblo,Aeródromo,Pantano,Supermercado 24h,Acuario,Refugio secreto,Sala de profesores,Cementerio de trenes,Cabaña en el lago,Embarcadero,Espacio de Coworking,Torre de vigilancia`.split(",");
+
+//fin lugares
+
+   const personajes = `Abeja,Abogado,Acrobata,Actor,Adivino,Adolf Hitler,Agricultor,Albañil,Albert Einstein,Alcalde,Alejandro Magno,Alfarero,Alienígena,Alquimista,Ama de llaves,Anciano,Araña,Arqueólogo,Arquitecto,Artista surrealista,Astrólogo,Astronauta,Azafata,Bad Bunny,Bailarín,Ballena,Baloncestista,Banquero,Barbero,Barrendero,Beyoncé,Bibliotecario,Biólogo,Bombero,Brad Pitt,Bruja,Buzo,Caballero Jedi,Caballero medieval,Camarógrafo,Cangrejo,Cantante,Cantinero,Capitán de barco,Carnicero,Carpintero,Cartero,Cazador de fantasmas,Cerrajero,Charles Darwin,Charlie Chaplin,Chico del barrio,Chófer,Ciclista,Científico,Cleopatra,Cocinero,Comediante,Conde,Conductor,Conejo,Corredor,Cristiano Ronaldo,Cristóbal Colón,Cura,Decorador,Delfín,Dependiente,Dentista,Deportista,Detective,DJ,Doctor,Domador,Dragón,Electricista,Elefante,Elon Musk,Empresario,Enfermero,Entrenador,Escritor,Escultor,Esgrimista,Estrella de cine,Estrella de rock,Estudiante,Explorador,Extraterrestre,Fantasma,Florista,Fontanero,Fotógrafo,Freddie Mercury,Frida Kahlo,Frutero,Futbolista,Ganadero,Gato,Genio de la lámpara,Gladiador,Granjero,Guardia de seguridad,Guerrero,Hada,Hechicero,Hipnotizador,Hombre invisible,Hombre lobo,Influencer,Inventor,Investigador,Jardinero,Jinete,Joyero,Juez,Julio César,Ladrón,León,Leonardo da Vinci,Lionel Messi,Lobo,Locutor,Luchador,Madonna,Mago,Marinero,Marilyn Monroe,Mayordomo,Mecánico,Médico,Mensajero,Michael Jackson,Michael Jordan,Michelangelo,Monja,Monje,Mono,Murciélago,Músico,Nadador,Napoleón Bonaparte,Niño,Oso,Pablo Picasso,Panadero,Pastor,Patinador,Payaso,Periodista,Perro,Pescadero,Pescador,Pez,Piloto,Pingüino,Pintor,Pintor de brocha gorda,Pirata,Platón,Poeta,Policía,Político,Presentador,Princesa,Príncipe,Profesor,Ratón,Recepcionista,Reina,Repartidor,Reportero,Rey,Robot,Salvador Dalí,Saltimbanqui,Samurai,Sastre,Sepulturero,Serpiente,Shakira,Sirena,Soldado,Superhéroe,Taxista,Tenista,Tiburón,Tom Cruise,Tom Hanks,Tortuga,Vampiro,Vendedor,William Shakespeare,Zapatero,Zombi`.split(",");
+
+//fin personajes
+
+
+    const objetos = `Silla,Proyector,Bolsa,Espátula,Maquinilla de afeitar,Agua oxigenada,Reproductor de música,Collar,Aceite,
+Mesa,Pizarra,Mochila,Cuchara,Cortauñas,Jeringa,Semáforo,Pendiente,Bidón,
+Sofá,Bolígrafo,Maleta,Tenedor,Pinzas,Medicamentos,Señal de tráfico,Bolso,Herramienta,
+Cama,Lápiz,Billetera,Cuchillo,Perfume,Muleta,Farola,Reloj de bolsillo,Martillo,
+Almohada,Rotulador,Cartera,Tabla de cortar,Crema,Bastón,Banco de parque,Casco,Destornillador,
+Colchón,Goma de borrar,Monedero,Nevera,Pasta de dientes,Silla de ruedas,Gafas,Alicates,
+Manta,Sacapuntas,Llave,Congelador,Cepillo de dientes,Andador,Papeleras,Gafas de sol,Llave inglesa,
+Sábana,Cuaderno,Candado,Horno,Enjuague bucal,Carrito de bebé,Paraguas,Mochila escolar,Toalla,Carpeta,Cerradura,Microondas,Bastoncillo,Cuna,Sombrilla,Uniforme,Tornillo,
+Armario,Libro,Manilla,Tostadora,Pañuelo,Trona,Sombrero,Traje,Clavo,
+Espejo,Diccionario,Interruptor,Batidora,Papel higiénico,Juguete,Gorra,Bata,Tuerca,
+Lámpara,Agenda,Enchufe,Exprimidor,Servilleta,Pelota,Bufanda,Delantal,Taladro,
+Bombilla,Calendario,Cable,Licuadora,Mantel,Muñeca,Guantes,Guantes de cocina,Sierra,
+Ventana,Reloj de pulsera,Bombona,Lavavajillas,Estropajo,Osito de peluche,Abrigo,Guantes de obra,Hacha,
+Puerta,Reloj de pared,Linterna,Lavadora,Bol,Puzzle,Chaqueta,Casco de obra,Lima,
+Persiana,Reloj despertador,Vela,Secadora,Bloques de construcción,Camiseta,Chaleco,Cinta métrica,
+Cortina,Regla,Cerillas,Plancha,Cacerola,Coche de juguete,Camisa,Botas de seguridad,Disco duro,
+Silla de oficina,Compás,Encendedor,Tabla de planchar,Sopera,Pistola de agua,Vestido,Balón de fútbol,Escalera,
+Ordenador,Transportador,Cenicero,Aspiradora,Rallador,Cometa,Falda,Balón de baloncesto,Andamio,
+Teclado,Tijeras,Botella,Escoba,Abrelatas,Balón,Pantalón,Balón de rugby,Carretilla,
+Ratón,Pegamento,Jarra,Recogedor,Sacacorchos,Raqueta,Pijama,Pelota de tenis,Guantes de trabajo,
+Pantalla,Celo,Vaso,Fregona,Palillos,Bicicleta,Calcetines,Pelota de golf,Pincel,
+Auriculares,Chinchetas,Copa,Cubo,Salero,Patinete,Zapatos,Palo de golf,Rodillo,
+Altavoz,Clip,Plato,Plumero,Pimentero,Monopatín,Zapatillas,Palo de hockey,Bote de pintura,
+Teléfono,Grapadora,Taza,Esponja,Aceitera,Pendrive,Botas,Bate de béisbol,Paleta de pintura,
+Tablet,Grapas,Tetera,Jabón,Vinagrera,Moto,Sandalias,Guante de béisbol,Lienzo,
+Cargador,Sobre,Cafetera,Detergente,Botiquín,Disco de vinilo,Bañador,Casco de moto,Escultura,
+Televisión,Carta,Olla,Champú,Termómetro,CD,Cinturón,Cinturón de seguridad,Tinta,
+Radio,Sello,Cazo,Gel de ducha,Tirita,DVD,Corbata,Airbag,Pluma estilográfica,
+Micrófono,Caja,Sartén,Cepillo,Vendas,Mando a distancia,Pajarita,Volante,Máquina de escribir,
+Cámara de fotos,Cajón,Colador,Peine,Gasas,Consola de videojuegos,Anillo,Neumático,Sellos de caucho,
+Cámara de vídeo,Estantería,Cucharón,Secador,Alcohol,Barco,Pulsera,Batería,Tinta de impresora,Abridor de botellas,Bandeja,Calculadora,Cinta adhesiva,Frasco,Grapa,Manguera,Moneda,Postal,Tiza`.split(",");
+
+
+//fin objetos
+
+
+    const objetosRaros = `Reloj que camina,Cadena que baila,Pluma que dibuja sola,Peine que silba,Pepino que flota,Silla que canta,Anillo que habla,Tintero que nunca se vacía,Perfume que te elige,Zanahoria que silba,Mesa que se derrite,Collar que flota alrededor,Cuaderno que te responde,Pasta de dientes que brilla,Lechuga que baila,Puerta que desaparece,Pulsera que atrapa pensamientos,Mapa que cambia,Cepillo que flota,Patata que canta,Ventana que abre al mar,Arete que brilla en la oscuridad,Globo terráqueo que gira solo,Papel higiénico infinito,Berenjena que ríe,Cuchillo que corta el tiempo,Sombrero que oculta tormentas,Linterna que ilumina el futuro,Servilleta que se escapa,Calabacín que habla,Cuchara infinita,Guantes que convierten en oro lo que tocan,Cámara que roba almas,Mantel que se estira,Brócoli que grita,Taza que levita,Botas que corren sin ti,Foto que sonríe sola,Estropajo que canta,Coliflor que flota,Sombrero que hace que llueva,Capa de invisibilidad,Pintura que se mueve,Cuchara que nunca cae,Seta que canta,Zapatos que bailan solos,Trono de cristal,Escultura que respira,Tenedor que flota,Seta venenosa que ríe,Calcetines invisibles,Corona que arde,Pincel que pinta sueños,Cuchillo que se esconde,Coche que corre sin conductor,Camisa que grita,Cetro que truena,Paleta que flota,Plato que gira,Avión de papel que nunca cae,Chaqueta que cambia de color según tu humor,Espada que canta,Martillo que canta,Vaso que nunca se rompe,Barco que navega en el aire,Sombrilla de fuego,Escudo que se queja,Destornillador que gira solo,Copa que canta,Submarino que nada en la arena,Paraguas que llora,Arco que dispara luz,Sierra que ríe,Botella que atrapa estrellas,Tren que atraviesa paredes,Cama que flota,Flecha que regresa,Hacha que llora,Barril que llora,Moto que se multiplica,Almohada que susurra,Lanza que flota,Lima que vibra,Jarra que ríe,Bicicleta que vuela,Manta que se mueve sola,Pistola de burbujas infinitas,Clavo que baila,Calabaza que habla,Patinete que canta,Colchón que sueña por ti,Cañón de arcoíris,Tornillo que grita,Manzana que flota,Monopatín que baila,Espejo que te contradice,Robot que sueña,Tuerca que canta,Plátano que corre,Zapato que vuela,Lámpara que ilumina recuerdos,Androide que llora,Carretilla que corre sola,Naranja que canta,Calcetín que habla,Bombilla que canta,Dron que te sigue,Andamio que se dobla,Uva que ríe,Pantalón que corre,Vela que nunca se apaga,Holograma sólido,Escalera infinita,Fresa que grita,Cerilla que se enciende sola,Teléfono que llama a los muertos,Ventilador que congela,Limón que llora,Falda que vuela,Encendedor que congela,Ordenador que escribe solo,Aspiradora que sopla,Piña que vuela,Vestido que canta,Caja que ríe,Pantalla que te mira,Fregona que baila,Mango que canta,Abrigo que arde,Baúl que vuela,Ratón que muerde,Cubo que canta,Coco que rueda solo,Bufanda que flota,Maleta sin fondo,Teclado que canta,Plumero que habla,Durazno que brilla,Gorra que habla,Bolso que muerde,Micrófono que grita,Toalla que se esconde,Pera que flota,Gafas que muestran otros mundos,Llave que abre nubes,Auriculares que cuentan secretos,Jabón que no se gasta,Kiwi que canta,Candado que atrapa sombras,Radio que transmite pensamientos,Champú que canta en la ducha,Granada que explota en risas,Cuerda que se multiplica,Libro que se lee a sí mismo,Cepillo que muerde,Tomate que llora,Espejo que roba reflejos,Telaraña que teje historias,Mano biónica con mente propia,Poción que invierte la gravedad,Lupa que agranda sentimientos,Moneda que compra recuerdos,Libro que cambia de idioma,Cámara que revela miedos,Pala que excava sueños,Huevo que nunca se rompe,Peonza que detiene el tiempo,Tijeras que cortan el aire,Piedra que imita voces,Cofre que oculta el silencio,Soplo que apaga estrellas,Póster que te transporta,Reloj de arena que mide el dolor,Planta que cultiva ideas,Gafas que ven el pasado,Candelabro que quema sombras,Máquina de escribir que adivina,Botella con mensaje que se auto-escribe,Flauta que invoca lluvia,Móvil que solo recibe llamadas del futuro,Cepillo de pelo que peina el alma,Tatuaje temporal que se vuelve real,Trozo de tarta que nunca se acaba,Agujero de gusano de bolsillo,Fósforo que crea calor en el hielo,Pincel que da vida a los dibujos,Puñal que corta la mala suerte,Sopa que otorga sabiduría,Polo que te hace volar,Capa que te hace invisible a las mentiras,Silbato que llama a los lobos,Lámpara que ilumina la verdad,Esfera de cristal que muestra deseos,Ventana que te permite escuchar el espacio,Mazo que construye castillos de arena,Pergamino que reescribe errores,Plato que sirve la felicidad,Televisor que solo emite sueños,Gota de rocío que cura enfermedades,Guijarro que viaja a través de dimensiones,Máscara que revela la personalidad,Instrumento musical que toca el viento,Libreta de direcciones de fantasmas,Burbuja de jabón irrompible,Globo que flota en el subsuelo,Zumo que te da la fuerza de un gigante,Ancla que sujeta el cielo,Bomba de humo que te teletransporta,Dado que siempre cae en seis,Cubo de Rubik que resuelve problemas,Chicle que te permite respirar bajo el agua,Monóculo que ve a través de la materia,Sello que te autentifica como héroe,Alfiler que cose la noche,Caja de música que toca el silencio,Zapato que da pasos en falso,Trono que te hace sentir invencible,Semilla que crece en segundos,Anzuelo que pesca planetas,Teléfono sin cables que habla con animales,Cuchara que remueve la conciencia,Lápiz labial que te da el don de la palabra,Pizarra que se limpia sola con pensamientos,Tostadora que convierte el pan en oro,Mochila que siempre tiene lo que buscas,Cinturón que controla el tiempo,Bufanda que te abriga del miedo,Esponja que absorbe la tristeza,Abrelatas que abre portales,Pistola que dispara estrellas,Ajedrez donde las piezas se mueven solas,Diario que escribe sobre tu futuro,Llave que abre cualquier cerradura,Pértiga que te ayuda a saltar edificios,Rueda que gira hacia el pasado,Venda que cura heridas emocionales,Mortero que machaca la ira,Cepillo de dientes que limpia culpas,Cinturón de seguridad que te protege de errores,Corbata que te hace más inteligente,Anillo que duplica tu suerte,Monedero que siempre tiene un billete,Espejo de mano que muestra tu yo interior,Botella que convierte el agua en vino,Perchero que sostiene el universo,Ladrillo que construye esperanzas,Clavo que sujeta la realidad,Pequeño sol embotellado,Fuente que mana tinta,Guantes que te permiten tocar las nubes,Papel que arde con ideas,Sábana que te envuelve en sueños,Palo que te hace invisible a los ojos malvados,Chupete que da sabiduría,Mechero que crea universos,Peluca que cambia el clima,Regla que mide el miedo,Sombrero que convierte palabras en pájaros,Taza que bebe café sola,Zapatillas que caminan al revés,Lápiz que borra recuerdos`.split(",");
+
+//fin objetos raros
+
+    const formatos = `Acción,Ciencia ficción,Cine familiar,Cine mudo,Comedia,Documental,Drama,Fantasía,Histórica,Melodrama,Musical,Ópera,Policíaco,Reality show,Road movie,Romántica,Sitcom,Suspense,Telenovela,Terror,Thriller,Tragicomedia,Western,Artes marciales,Aventura,Cine bélico,Cine religioso,Comedia romántica,Drama judicial,Romántica adolescente,Superhéroes`.split(",");
+
+//fin formatos
+
+    const sentimientos = `Abatimiento,Aburrimiento,Admiración,Afecto,Agobio,Agresividad,Alegría,Alivio,Altivez,Ambición,Amor,Angustia,Ansiedad,Añoranza,Apatía,Apoyo,Arrepentimiento,Asco,Calma,Celos,Cobardía,Compasión,Confianza,Confusión,Culpabilidad,Curiosidad,Decepción,Deseo,Desilusión,Desprecio,Devoción,Dolor,Duda,Empatía,Empoderamiento,Entusiasmo,Envidia,Escepticismo,Esperanza,Euforia,Exaltación,Éxtasis,Fascinación,Fervor,Frustración,Generosidad,Gozo,Gratitud,Hostilidad,Humildad,Ilusión,Incredulidad,Indiferencia,Inquietud,Inseguridad,Inspiración,Ira,Melancolía,Miedo,Nostalgia,Obstinación,Odio,Orgullo,Pánico,Pasión,Pena,Rabia,Rebeldía,Recelo,Resignación,Respeto,Satisfacción,Serenidad,Sinceridad,Soberbia,Solidaridad,Sorpresa,Temor,Ternura,Traición,Tranquilidad,Tristeza,Valentía,Vergüenza,Vulnerabilidad`.split(",");
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// 3. FUNCIONES PRINCIPALES
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
+    // Helper para manejar el formato "Nombre|Nivel"
+    function parsearAlumno(alumnoConNivel) {
+        const parts = alumnoConNivel.split('|');
+        return {
+            nombre: parts[0].trim(),
+            nivel: parts.length > 1 ? parseInt(parts[1], 10) : 1 // 0=Nuevo, 1=Estandar/Veterano
+        };
+    }
+
+    function azar(lista) {
+      return lista[Math.floor(Math.random() * lista.length)];
+    }
+
+    function poblarSelect() {
+      if (alumnosRestantes.length === 0) {
+        selectNum.innerHTML = '<option value="0">0 (sin alumnos)</option>';
+        selectNum.disabled = true;
+        btnGenerar.disabled = true;
+        return;
+      }
+      const max = alumnosRestantes.length;
+      selectNum.innerHTML = "";
+      for (let i = 1; i <= max; i++) {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = i;
+        selectNum.appendChild(opt);
+      }
+      const want = (typeof lastSelected === "number" && lastSelected >= 1) ? Math.min(lastSelected, max) : 1;
+      selectNum.value = want;
+      selectNum.disabled = false;
+      btnGenerar.disabled = false;
+    }
+    
+    function poblarSelectClases() {
+        selectClase.innerHTML = "";
+        const clases = Object.keys(ALUMNOS_POR_CLASE);
+        clases.forEach(clase => {
+            const opt = document.createElement("option");
+            opt.value = clase;
+            opt.textContent = clase;
+            selectClase.appendChild(opt);
+        });
+        // Intenta cargar la última clase seleccionada si existe
+        const lastClass = localStorage.getItem('lastClass') || clases[0];
+        selectClase.value = lastClass;
+    }
+    
+    function actualizarListaAlumnos() {
+        const claseSeleccionada = selectClase.value;
+        localStorage.setItem('lastClass', claseSeleccionada);
+        alumnosBase = ALUMNOS_POR_CLASE[claseSeleccionada] || [];
+        
+        listaAusentesDiv.innerHTML = "";
+        if (alumnosBase.length === 0) {
+            listaAusentesDiv.innerHTML = "<p>No hay alumnos definidos para esta clase.</p>";
+            return;
+        }
+
+        alumnosBase.forEach(alumnoConNivel => {
+            const { nombre } = parsearAlumno(alumnoConNivel); // Extraer solo el nombre para el checkbox
+            const label = document.createElement("label");
+            const cb = document.createElement("input");
+            cb.type = "checkbox";
+            cb.value = nombre;
+            
+            // Marca los ausentes previamente seleccionados para esta clase
+            if(ausentesSeleccionados.includes(nombre)) {
+                cb.checked = true;
+            }
+
+            label.appendChild(cb);
+            label.appendChild(document.createTextNode(" " + nombre));
+            listaAusentesDiv.appendChild(label);
+        });
+    }
+
+    // Mantenemos esta función, que ahora solo se llama al inicio (o si se quiere reintroducir el botón)
+    function mostrarModalAusentes() {
+      poblarSelectClases();
+      actualizarListaAlumnos(); 
+      
+      modalAusentes.style.display = "flex";
+      modalAusentes.setAttribute("aria-hidden", "false");
+      selectNum.innerHTML = '<option>--</option>';
+      selectNum.disabled = true;
+      btnGenerar.disabled = true;
+    }
+
+    function confirmarAusentes(todosPresentes = false) {
+      if (alumnosBase.length === 0) {
+          alert("Por favor, selecciona una clase válida.");
+          return;
+      }
+      
+      if (todosPresentes) {
+        // Opción: Todos presentes
+        ausentesSeleccionados = [];
+      } else {
+        // Opción: Confirmar ausentes
+        const checks = Array.from(listaAusentesDiv.querySelectorAll("input[type=checkbox]"));
+        ausentesSeleccionados = checks.filter(c => c.checked).map(c => c.value);
+      }
+
+      // Filtramos la lista base (con niveles) por el nombre
+      alumnosRestantes = alumnosBase.filter(alumnoConNivel => {
+          const { nombre } = parsearAlumno(alumnoConNivel);
+          return !ausentesSeleccionados.includes(nombre);
+      });
+      
+      // CLAVE: Guardar la lista de alumnos presentes para la lógica de "primer sorteo"
+      alumnosPresentesEnClase = [...alumnosRestantes]; 
+      
+      modalAusentes.style.display = "none";
+      modalAusentes.setAttribute("aria-hidden", "true");
+      lastSelected = 1;
+      poblarSelect();
+      document.getElementById("resultado").innerHTML = `Clase: ${selectClase.value}. ¡Listo para generar!`;
+      if (alumnosRestantes.length === 0) {
+        document.getElementById("resultado").innerHTML = `<p style="color:crimson;">No hay alumnos presentes en la clase ${selectClase.value}.</p>`;
+      }
+    }
+
+  function generar() {
+      if (selectNum.disabled || alumnosRestantes.length === 0) return;
+      
+      const num = parseInt(selectNum.value, 10);
+      if (isNaN(num) || num < 1 || num > alumnosRestantes.length) {
+        alert(`Solo quedan ${alumnosRestantes.length} alumnos disponibles.`);
+        return;
+      }
+      
+      lastSelected = num;
+      
+      const participantes = []; // Nombres de los participantes elegidos (Resultado final, solo nombres)
+      let alumnosSorteadosConNivel = []; // Lista temporal para rastrear los alumnos sorteados (cadenas con nivel)
+
+      // 1. Clonar y Particionar el pool de alumnos restantes (cadenas con nivel)
+      let poolSorteable = [...alumnosRestantes];
+      // Nota: Al usar filter, estos arrays ya contienen copias de las cadenas originales (con nivel)
+      let veteranosSorteables = poolSorteable.filter(a => parsearAlumno(a).nivel !== 0);
+      let novatosSorteables = poolSorteable.filter(a => parsearAlumno(a).nivel === 0);
+      let spotsToFill = num;
+      let avisoNuevos = "";
+  
+      // Determinar si es el primer sorteo
+      const esPrimerSorteo = alumnosRestantes.length === alumnosPresentesEnClase.length;
+      
+      // Función helper para sacar un alumno de una lista y moverlo al resultado
+      // Esta función modifica la lista de origen (splice) y el array de alumnosSorteadosConNivel
+      const sacarAlumno = (listaFuente) => {
+          if (listaFuente.length === 0) return null;
+          const idx = Math.floor(Math.random() * listaFuente.length);
+          const alumno = listaFuente.splice(idx, 1)[0];
+          alumnosSorteadosConNivel.push(alumno);
+          spotsToFill--;
+          return alumno;
+      };
+
+      // ---------------------------------------------------------------------------
+      // LÓGICA DE SORTEO BASADA EN EL NÚMERO DE PARTICIPANTES (num)
+      // ---------------------------------------------------------------------------
+
+      if (esPrimerSorteo) {
+          // PRIMER SORTEO (Regla: Solo veteranos si es posible)
+          
+          let numVeteranos = veteranosSorteables.length;
+          
+          if (spotsToFill <= numVeteranos) {
+              // Si hay suficientes veteranos, elegimos SOLO veteranos.
+              while (spotsToFill > 0) {
+                  sacarAlumno(veteranosSorteables);
+              }
+              //PARA TESTEAR avisoNuevos = "(Primer Sorteo: Solo Veteranos)";
+              
+          } else {
+              // Si no hay suficientes veteranos: elegimos todos los veteranos disponibles
+              while (veteranosSorteables.length > 0) {
+                  sacarAlumno(veteranosSorteables);
+              }
+              
+              // Rellenamos el resto con novatos (por necesidad).
+              while (spotsToFill > 0 && novatosSorteables.length > 0) {
+                  sacarAlumno(novatosSorteables);
+              }
+              
+              //PARA TESTEAR avisoNuevos = "(Primer Sorteo: Veteranos + Novatos por necesidad)";
+          }
+          
+      } else {
+          // SORTEOS POSTERIORES (Desde el segundo sorteo en adelante)
+          
+          if (num === 1) {
+              // REGLA 1 (num=1, posterior): Da igual (aleatorio).
+              let poolCombinado = [...veteranosSorteables, ...novatosSorteables];
+              while (spotsToFill > 0 && poolCombinado.length > 0) {
+                  const idx = Math.floor(Math.random() * poolCombinado.length);
+                  alumnosSorteadosConNivel.push(poolCombinado.splice(idx, 1)[0]);
+                  spotsToFill--; 
+              }
+              //PARA TESTEAR avisoNuevos = "(Sorteo individual aleatorio)";
+
+          } 
+          // Caso 2: Parejas (num=2). Regla: Máximo un novato.
+          else if (num === 2) {
+              
+              let veteranPicked = false;
+              let poolRestante = [...veteranosSorteables, ...novatosSorteables];
+              
+              // 1. Intentamos garantizar al menos un veterano para cumplir 'Máximo un novato'.
+              if (veteranosSorteables.length > 0) {
+                  // Elegimos 1 Veterano
+                  const idx = Math.floor(Math.random() * veteranosSorteables.length);
+                  const alumnoVeterano = veteranosSorteables.splice(idx, 1)[0];
+                  alumnosSorteadosConNivel.push(alumnoVeterano);
+                  
+                  // Eliminar de poolRestante (la lista combinada) para evitar duplicados
+                  const nombreVeterano = parsearAlumno(alumnoVeterano).nombre;
+                  const idxInPoolRestante = poolRestante.findIndex(a => parsearAlumno(a).nombre === nombreVeterano);
+                  if (idxInPoolRestante > -1) poolRestante.splice(idxInPoolRestante, 1);
+                  
+                  veteranPicked = true;
+                  spotsToFill--;
+              }
+              
+              // 2. Rellenar el spot restante (spotsToFill = 1) con el pool combinado (que ahora incluye novatos y veteranos restantes)
+              if (spotsToFill > 0 && poolRestante.length > 0) {
+                  const idx = Math.floor(Math.random() * poolRestante.length);
+                  alumnosSorteadosConNivel.push(poolRestante.splice(idx, 1)[0]);
+                  spotsToFill--;
+              }
+
+              // 3. Revisar el resultado final para los avisos y las reglas
+              const numNovatosSorteados = alumnosSorteadosConNivel.filter(a => parsearAlumno(a).nivel === 0).length;
+              
+              if (numNovatosSorteados === 0) {
+                  //PARA TESTEAR avisoNuevos = "(Sorteo Parejas: 2 Veteranos)";
+              } else if (numNovatosSorteados === 1) {
+                  //PARA TESTEAR avisoNuevos = "(Sorteo Parejas: 1 Novato, 1 Veterano - Máx. 1 Novato cumplido)";
+              } else if (numNovatosSorteados === 2) {
+                  //PARA TESTEAR avisoNuevos = "(Sorteo Parejas: 2 Novatos por necesidad extrema)";
+              }
+
+          } 
+          // Caso 3: Tríos o más (num >= 3). Regla: Mínimo un veterano.
+          else if (num >= 3) {
+              
+              let veteranPicked = false;
+              let poolRestante = [...veteranosSorteables, ...novatosSorteables];
+              
+              // 1. Garantizar al menos un veterano (si hay disponibles)
+              if (veteranosSorteables.length > 0) {
+                  // Elegimos 1 Veterano
+                  const idx = Math.floor(Math.random() * veteranosSorteables.length);
+                  const alumnoVeterano = veteranosSorteables.splice(idx, 1)[0];
+                  alumnosSorteadosConNivel.push(alumnoVeterano);
+                  
+                  // Eliminar de poolRestante
+                  const nombreVeterano = parsearAlumno(alumnoVeterano).nombre;
+                  const idxInPoolRestante = poolRestante.findIndex(a => parsearAlumno(a).nombre === nombreVeterano);
+                  if (idxInPoolRestante > -1) poolRestante.splice(idxInPoolRestante, 1);
+                  
+                  veteranPicked = true;
+                  spotsToFill--;
+              }
+              
+              // 2. Rellenar el resto de los spots (completamente al azar)
+              while (spotsToFill > 0 && poolRestante.length > 0) {
+                  const idx = Math.floor(Math.random() * poolRestante.length);
+                  alumnosSorteadosConNivel.push(poolRestante.splice(idx, 1)[0]);
+                  spotsToFill--;
+              }
+              
+              if (veteranPicked) {
+                  //PARA TESTEAR avisoNuevos = "(Sorteo Grupal: Mínimo 1 Veterano garantizado)";
+              } else {
+                  //PARA TESTEAR avisoNuevos = "(Sorteo Grupal: Solo Novatos por necesidad extrema)";
+              }
+          }
+      } // Fin de Sorteos Posteriores
+      
+      // ---------------------------------------------------------------------------
+      // 4. Post-Sorteo: Mover los alumnos sorteados a la lista final y actualizar alumnosRestantes
+      // ---------------------------------------------------------------------------
+      
+      // Convertir alumnosConNivel a solo nombres para el resultado final
+      alumnosSorteadosConNivel.forEach(alumnoConNivel => {
+          participantes.push(parsearAlumno(alumnoConNivel).nombre);
+      });
+      
+      // Actualizar alumnosRestantes eliminando los participantes elegidos (usando la lista original con nivel)
+      const nombresElegidosSet = new Set(participantes);
+      
+      alumnosRestantes = alumnosRestantes.filter(alumnoConNivel => {
+          const { nombre } = parsearAlumno(alumnoConNivel);
+          return !nombresElegidosSet.has(nombre);
+      });
+
+      // Actualizar la lista de participantes disponibles en el select
+      poblarSelect();
+      
+      // >>> GENERACIÓN DE IDEAS (LÓGICA DE PERSONAJES MÚLTIPLES) <<<
+      const lugar = azar(lugares);
+      
+      const numParticipantes = participantes.length;
+      const numPersonajesAdicionales = numParticipantes > 1 ? numParticipantes - 1 : 0;
+      
+      let personajePrincipal = azar(personajes);
+      let personajesExtras = [];
+      
+      // Creamos una copia de la lista de personajes para evitar duplicar el principal
+      let personajesDisponibles = [...personajes].filter(p => p !== personajePrincipal); 
+      
+      for (let i = 0; i < numPersonajesAdicionales; i++) {
+          const idx = Math.floor(Math.random() * personajesDisponibles.length);
+          // Usamos splice para tomar uno y quitarlo, evitando repeticiones
+          personajesExtras.push(personajesDisponibles.splice(idx, 1)[0]); 
+      }
+      
+      let personajeResultado = personajePrincipal;
+      if (personajesExtras.length > 0) {
+          personajeResultado += ` (${personajesExtras.join(", ")})`;
+      }
+      // <<< FIN DE GENERACIÓN DE IDEAS
+      
+      const objeto = azar(objetos);
+      const objetoRaro = azar(objetosRaros);
+      const formato = azar(formatos);
+      const sentimiento = azar(sentimientos);
+
+      let aviso = "";
+      if (alumnosRestantes.length === 0) {
+        aviso = `<div style="color:crimson; font-weight:bold; text-align:center; margin-top:10px;">
+                    No quedan participantes. Pulsa "Reiniciar Sorteo" para volver a empezar.
+                  </div>`;
+      }
+      
+      // Añadir avisoNuevos al resultado de participantes
+      const avisoParticipantes = avisoNuevos ? `<span style="font-size:0.9em; color:#0056b3; font-weight:bold; margin-left:10px;">${avisoNuevos}</span>` : '';
+
+      // >>> SECCIÓN MODIFICADA PARA AÑADIR LOS BOTONES DE REGENERACIÓN <<<
+      const btn = (categoria) => 
+        `<button class="regenerate-btn" onclick="regenerarCategoria('${categoria}')" title="Generar solo ${categoria}">🔄</button>`;
+
+      document.getElementById("resultado").innerHTML = `
+        <div id="resultado-content">
+          <p><span class="category">CLASE:</span> ${selectClase.value}</p>
+          <p><span class="category">👥 Participantes: </span> ${participantes.join(", ")}${avisoParticipantes}</p>
+          <p id="lugar">${btn('lugar')}<span class="category">🌍 Lugar: </span> ${lugar}</p>
+          <p id="personaje">${btn('personaje')}<span class="category">👤 Personaje: </span> ${personajeResultado}</p>
+          <p id="objeto">${btn('objeto')}<span class="category">📦 Objeto: </span> ${objeto}</p>
+          <p id="objetoRaro">${btn('objetoRaro')}<span class="category">✨ Objeto raro: </span> ${objetoRaro}</p>
+          <p id="formato">${btn('formato')}<span class="category">🎬 Formato: </span> ${formato}</p>
+          <p id="sentimiento">${btn('sentimiento')}<span class="category">💭 Sentimiento: </span> ${sentimiento}</p>
+        </div>
+        ${aviso}
+      `;
+    }
+    
+    // Función de Reiniciar Sorteo (mantiene la clase y los ausentes fijos)
+    function reiniciarSorteo() {
+      // Re-aplica la lista base, excluyendo solo a los ausentes previamente seleccionados
+      alumnosBase = ALUMNOS_POR_CLASE[selectClase.value] || [];
+      alumnosRestantes = alumnosBase.filter(alumnoConNivel => {
+          const { nombre } = parsearAlumno(alumnoConNivel);
+          return !ausentesSeleccionados.includes(nombre);
+      });
+      
+      // CLAVE: Reiniciar la lista de alumnos presentes para la lógica de "primer sorteo"
+      alumnosPresentesEnClase = [...alumnosRestantes];
+      
+      lastSelected = 1;
+      poblarSelect();
+      document.getElementById("resultado").innerHTML = `Sorteo de ${selectClase.value} reiniciado. ¡A elegir de nuevo!`;
+      if (alumnosRestantes.length === 0) {
+        document.getElementById("resultado").innerHTML = `<p style="color:crimson;">No hay alumnos presentes en la clase ${selectClase.value}.</p>`;
+      }
+    }
+
+// Función para regenerar una categoría específica (lugar, personaje, etc.)
+    function regenerarCategoria(categoria) {
+        const elemento = document.getElementById(categoria);
+        let nuevoValor = "";
+        let prefijo = "";
+        let lista = [];
+
+        // Definimos la lista a sortear y el prefijo para mostrar el resultado
+        switch (categoria) {
+            case 'lugar':
+                lista = lugares;
+                prefijo = '🌍 Lugar:';
+                break;
+            case 'personaje':
+                lista = personajes;
+                prefijo = '👤 Personaje:';
+                break;
+            case 'objeto':
+                lista = objetos;
+                prefijo = '📦 Objeto:';
+                break;
+            case 'objetoRaro':
+                lista = objetosRaros;
+                prefijo = '✨ Objeto raro:';
+                break;
+            case 'formato':
+                lista = formatos;
+                prefijo = '🎬 Formato:';
+                break;
+            case 'sentimiento':
+                lista = sentimientos;
+                prefijo = '💭 Sentimiento:';
+                break;
+            default:
+                return; // No hacer nada si la categoría no existe
+        }
+
+        const btn = (cat) => 
+            `<button class="regenerate-btn" onclick="regenerarCategoria('${cat}')" title="Generar solo ${cat}">🔄</button>`;
+        
+        // >>> LÓGICA DE PERSONAJE MÚLTIPLE <<<
+        if (categoria === 'personaje') {
+            
+            // 1. Obtener el texto de los participantes (ej: "Ainhoa, Laura, Javier (aviso)")
+            const participantesParrafo = document.querySelector('#resultado-content p:nth-child(2)');
+            if (!participantesParrafo) return; 
+
+            // Extrae solo la lista de nombres (todo después de los dos puntos), ignorando posibles avisos
+            const participantesTexto = participantesParrafo.textContent.split(':').pop().trim().replace(/\s*\(.*\)$/, '');
+            
+            // 2. Contar el número de participantes
+            const numParticipantes = participantesTexto ? participantesTexto.split(',').length : 1;
+            const numPersonajesAdicionales = numParticipantes > 1 ? numParticipantes - 1 : 0;
+            
+            // 3. Aplicar la lógica de sorteo múltiple
+            let personajePrincipal = azar(personajes);
+            let personajesExtras = [];
+            
+            let personajesDisponibles = [...personajes].filter(p => p !== personajePrincipal); 
+            
+            for (let i = 0; i < numPersonajesAdicionales; i++) {
+                const idx = Math.floor(Math.random() * personajesDisponibles.length);
+                // Usamos splice para tomar uno y quitarlo, evitando repeticiones
+                personajesExtras.push(personajesDisponibles.splice(idx, 1)[0]); 
+            }
+            
+            nuevoValor = personajePrincipal;
+            if (personajesExtras.length > 0) {
+                nuevoValor += ` (${personajesExtras.join(", ")})`;
+            }
+
+        } else {
+            // Para las demás categorías, solo se genera un resultado simple
+            nuevoValor = azar(lista);
+        }
+        // >>> FIN LÓGICA DE PERSONAJE MÚLTIPLE <<<
+        
+        // Actualiza el HTML del elemento con el nuevo valor
+        elemento.innerHTML = `${btn(categoria)}<span class="category">${prefijo}</span> ${nuevoValor}`;
+    }
+
+    // 4. LISTENERS E INICIALIZACIÓN
+    
+    selectNum.addEventListener('change', () => {
+      const v = parseInt(selectNum.value, 10);
+      if (!isNaN(v)) lastSelected = v;
+    });
+
+    // Llamar a mostrarModalAusentes() directamente al cargar la ventana
+    window.addEventListener('load', () => {
+      mostrarModalAusentes();
+    });
+</script>
+
+
+<hr style="margin-top: 40px; border-color: #ccc;">
+    <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
+        <a href="index.html" style="
+            text-decoration: none;
+            color: #5f6368;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        ">
+            ← Volver al Menú Principal
+        </a>
+    </div>
+
+</body>
+</html>
