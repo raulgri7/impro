@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Narraciones de Movimiento</title>
+    <style>
+        body { font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background-color: #f0f8ff; }
+        h1 { color: #cc0000; border-bottom: 2px solid #cc0000; padding-bottom: 10px; margin-bottom: 30px; }
+        p.instruccion { color: #5f6368; margin-bottom: 25px; font-style: italic; }
+        
+        button { 
+            padding: 14px 25px; 
+            background-color: #cc0000; /* Color rojo para el tema frenético */
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 18px; 
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.1s; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+        }
+        button:hover { background-color: #990000; }
+        button:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        #resultado { 
+            margin-top: 35px; 
+            padding: 25px; 
+            border: 2px solid #cc0000; 
+            background-color: #fff0f0; /* Fondo más claro para el área de resultado */
+            border-radius: 10px; 
+            min-height: 250px; 
+            white-space: pre-wrap; 
+            font-size: 1.1em; 
+            line-height: 1.8;
+        }
+        pre { 
+            font-family: inherit; 
+            margin: 0; 
+            padding: 0; 
+            white-space: pre-wrap; 
+            line-height: inherit; 
+            font-weight: 500;
+            text-align: justify;
+        }
+        .cargando { color: #cc0000; font-weight: bold; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1>🚨 Guion de Viaje Frenético y Activo 🚨</h1>
+    <p class="instruccion">Viaje imaginario estresante que requiere movimiento físico constante, rápido y brusco en el espacio. Ojos abiertos.</p>
+    
+    <button onclick="generarContenido()">Generar Narración</button>
+    
+    <div id="resultado"></div>
+
+
+    <script>
+        // ----------------------------------------------------------
+        // --- CLAVE API Y CONFIGURACIÓN ---
+        // ----------------------------------------------------------
+        const API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; // ¡RECUERDA SUSTITUIR ESTO CON TU CLAVE REAL!
+        const MODEL_NAME = 'gemini-2.5-flash';
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+
+
+        // FUNCIÓN CLAVE: Prompt para la Narración Guiada (Frenética, con movimiento)
+        function construirPromptNarracion() {
+            const contexto = `**INSTRUCCIÓN ESTRICTA:** Genera ÚNICAMENTE el texto narrativo completo. No añadas introducciones, explicaciones de rol, títulos, ni indicaciones para el narrador. El texto debe ser continuo y empezar directamente con la primera frase.
+
+**OBJETIVO:** Crea un viaje imaginario de **5 a 7 minutos** diseñado para provocar una sensación de **frenesí, pánico, urgencia y caos** en el oyente, que debe **moverse físicamente de forma activa y enérgica** por el espacio (ojos abiertos). El guion debe exigir un alto gasto energético.
+
+**CRITERIOS OBLIGATORIOS:**
+1.  **Segunda persona del singular (tuteo):** Usar 'corres', 'esquivas', 'sientes', etc.
+2.  **Ritmo Acelerado:** Frases muy cortas y comandos directos que exijan **velocidad y cambios bruscos**.
+3.  **Foco en el Esfuerzo Físico y el Peligro:** Usar descripciones sensoriales que justifiquen el movimiento rápido (humo, persecución, caída de objetos, suelo inestable, etc.).
+4.  **Instrucciones de Movimiento Intensas:** Incluir **correr, saltar, esquivar, girar rápidamente, agacharse de golpe, desequilibrarse y recuperar la estabilidad**. Los movimientos deben ser grandes y rápidos.
+5.  **Progresión Narrativa:**
+    * Inicio: Un evento repentino que obliga a la huida inmediata.
+    * Desarrollo: Serie de obstáculos que requieren esfuerzo físico continuo y rápido.
+    * Clímax: Un momento de pánico total o desorientación extrema.
+    * Cierre: Detención forzada y abrupta, seguida de una inestabilidad temblorosa.
+6.  **Espacios Imaginarios:** Usar ambientes peligrosos y dinámicos (Ej: túneles colapsando, una ciudad en caos, una persecución por tejados, una fábrica averiada).
+
+**EJEMPLO DE GUÍA:** "¡Corre, corre ahora! El suelo cede detrás de ti. Gira en seco a la derecha. Tienes que saltar ese hueco, ¡salta!"
+
+La narración debe ser agotadora y mantener el estado de alerta constante, usando un lenguaje que fuerce la acción inmediata.
+`;
+            
+            const instruccionFinal = "Genera el texto narrativo completo basado en los criterios, enfocándote en una huida incontrolable a través de un entorno urbano o industrial en colapso. Añade al inicio el tiempo aproximado (ej: Duración aproximada: 5–7 minutos).";
+
+            return `${contexto}\n\n--- GENERACIÓN ---\n${instruccionFinal}`;
+        }
+
+        // Función principal para llamar a la API
+        async function generarContenido() {
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = '<span class="cargando">Creando el guion para el viaje...</span>';
+            
+            const prompt = construirPromptNarracion();
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: [{ text: prompt }] }],
+                        generationConfig: { 
+                            temperature: 0.9, 
+                            maxOutputTokens: 4096,
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({error: {message: 'Respuesta de error no es JSON'}}));
+                    
+                    let errorMessage = errorData.error ? errorData.error.message : response.statusText;
+                    
+                    if (response.status === 429) {
+                         errorMessage = "Límite de cuota superado (Error 429). ¡Necesitas esperar o revisar tus créditos de API!";
+                    } else if (response.status === 400) {
+                        errorMessage = "Error de autenticación o solicitud incorrecta (Error 400). Verifica que tu CLAVE API sea correcta y no haya expirado.";
+                    }
+
+                    throw new Error(`Error ${response.status}: ${errorMessage}`);
+                }
+
+                const data = await response.json();
+                
+                let textoGenerado = "No se pudo generar el contenido. Vuelve a intentarlo o revisa el diagnóstico de la API.";
+
+                try {
+                    textoGenerado = data.candidates[0].content.parts[0].text.trim();
+                } catch (e) {
+                    // Si falla (por contenido vacío o safety block)
+                }
+
+                // Muestra el resultado final
+                resultadoDiv.innerHTML = `
+                    <pre>${textoGenerado}</pre>
+                `;
+
+            } catch (error) {
+                // Manejo de ERRORES CRÍTICOS
+                resultadoDiv.innerHTML = `
+                    <strong style="color: #c53929;">Error crítico al conectar con la API:</strong> ${error.message}.<br><br>
+                    <strong>¡PASO URGENTE!</strong> Debes sustituir la clave 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ' en la línea 58 del código con una **clave API nueva y válida** de Google AI Studio.
+                `;
+            }
+        }
+    </script>
+
+
+<hr style="margin-top: 40px; border-color: #ccc;">
+    <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
+        <a href="index.html" style="
+            text-decoration: none;
+            color: #5f6368;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        ">
+            ← Volver al Menú Principal
+        </a>
+    </div>
+
+</body>
+</html>

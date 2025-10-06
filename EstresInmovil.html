@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Narraciones de Movimiento</title>
+    <style>
+        body { font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background-color: #f0f8ff; }
+        h1 { color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 30px; }
+        p.instruccion { color: #5f6368; margin-bottom: 25px; font-style: italic; }
+        
+        button { 
+            padding: 14px 25px; 
+            background-color: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 18px; 
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.1s; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+        }
+        button:hover { background-color: #0056b3; }
+        button:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        #resultado { 
+            margin-top: 35px; 
+            padding: 25px; 
+            border: 2px solid #007bff; 
+            background-color: #e6f2ff;
+            border-radius: 10px; 
+            min-height: 250px; 
+            white-space: pre-wrap; 
+            font-size: 1.1em; 
+            line-height: 1.8;
+        }
+        pre { 
+            font-family: inherit; 
+            margin: 0; 
+            padding: 0; 
+            white-space: pre-wrap; 
+            line-height: inherit; 
+            font-weight: 500;
+            text-align: justify;
+        }
+        .cargando { color: #007bff; font-weight: bold; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1>📖 Guion de Viaje Estresante e Inmóvil</h1>
+    <p class="instruccion">Viaje imaginario frenético para realizar con los ojos cerrados y el cuerpo inmóvil. Enfoque en la percepción interna (estrés, velocidad, presión).</p>
+    
+    <button onclick="generarContenido()">Generar Narración</button>
+    
+    <div id="resultado"></div>
+
+
+    <script>
+        // ----------------------------------------------------------
+        // --- CLAVE API Y CONFIGURACIÓN ---
+        // ----------------------------------------------------------
+        const API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; // ¡RECUERDA SUSTITUIR ESTO CON TU CLAVE REAL!
+        const MODEL_NAME = 'gemini-2.5-flash';
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+
+
+        // FUNCIÓN CLAVE: Prompt para la Narración Guiada (Estresante, ojos cerrados)
+        function construirPromptNarracion() {
+            const contexto = `**INSTRUCCIÓN ESTRICTA:** Genera ÚNICAMENTE el texto narrativo completo. No añadas introducciones, explicaciones de rol, títulos, indicaciones al lector ('Pausa', 'Voz urgente') ni frases de meditación tranquila. El texto debe ser continuo y empezar directamente con la primera frase de la historia.
+
+**OBJETIVO:** Crea un viaje imaginario de **3 a 5 minutos** diseñado para provocar una sensación de **frenesí, estrés, urgencia y claustrofobia** en el oyente, que tiene los **ojos cerrados** y está completamente **tumbado e inmóvil**. La narración debe compensar la inmovilidad del cuerpo con una gran actividad mental y sensorial.
+
+**CRITERIOS OBLIGATORIOS:**
+1.  **Segunda persona del singular (tuteo):** Usar 'sientes', 'debes', 'oído', 'cabeza', etc.
+2.  **Ritmo Acelerado:** Frases muy cortas, con sensación de peligro inminente y velocidad.
+3.  **Foco Sensorial Interno/Táctil:** Enfatizar la respiración, el pulso, la presión, el calor, el equilibrio forzado, el zumbido o sonidos internos.
+4.  **Instrucciones de "Movimiento" Mental:** Pedir al oyente que **imagine y fuerce** la sensación de rotación, caída, subida, o ser presionado, aunque el cuerpo esté quieto.
+5.  **Progresión Narrativa:**
+    * Inicio: Presión y confinamiento inmediato.
+    * Desarrollo: Aceleración descontrolada, sensación de caída o persecución.
+    * Clímax: Sobrecarga sensorial o punto de no retorno.
+    * Cierre: El movimiento se detiene abruptamente y se pasa a una calma forzada/inestable.
+6.  **Espacios Imaginarios:** No usar paisajes naturales abiertos. Usar túneles, laberintos oscuros, espacios que giran, pasillos industriales estrechos o caída libre sin referencia visual.
+
+**EJEMPLO DE GUÍA:** "El aire es denso. Siente la falta de oxígeno en tu pecho. El suelo tiembla. Cierra los puños, la vibración te atraviesa."
+
+La narración debe ser estresante y agotadora, usando un lenguaje que fuerce la concentración en las sensaciones físicas internas.
+`;
+            
+            const instruccionFinal = "Genera el texto narrativo completo basado en los criterios, enfocándote en un espacio de confinamiento y movimiento mecánico/incontrolable. Añade al inicio el tiempo aproximado (ej: Duración aproximada: 3–5 minutos).";
+
+            return `${contexto}\n\n--- GENERACIÓN ---\n${instruccionFinal}`;
+        }
+
+        // Función principal para llamar a la API
+        async function generarContenido() {
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = '<span class="cargando">Creando el guion para el viaje...</span>';
+            
+            const prompt = construirPromptNarracion();
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: [{ text: prompt }] }],
+                        generationConfig: { 
+                            temperature: 0.9, 
+                            maxOutputTokens: 4096,
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({error: {message: 'Respuesta de error no es JSON'}}));
+                    
+                    let errorMessage = errorData.error ? errorData.error.message : response.statusText;
+                    
+                    if (response.status === 429) {
+                         errorMessage = "Límite de cuota superado (Error 429). ¡Necesitas esperar o revisar tus créditos de API!";
+                    } else if (response.status === 400) {
+                        errorMessage = "Error de autenticación o solicitud incorrecta (Error 400). Verifica que tu CLAVE API sea correcta y no haya expirado.";
+                    }
+
+                    throw new Error(`Error ${response.status}: ${errorMessage}`);
+                }
+
+                const data = await response.json();
+                
+                let textoGenerado = "No se pudo generar el contenido. Vuelve a intentarlo o revisa el diagnóstico de la API.";
+
+                try {
+                    textoGenerado = data.candidates[0].content.parts[0].text.trim();
+                } catch (e) {
+                    // Si falla (por contenido vacío o safety block)
+                }
+
+                // Muestra el resultado final
+                resultadoDiv.innerHTML = `
+                    <pre>${textoGenerado}</pre>
+                `;
+
+            } catch (error) {
+                // Manejo de ERRORES CRÍTICOS
+                resultadoDiv.innerHTML = `
+                    <strong style="color: #c53929;">Error crítico al conectar con la API:</strong> ${error.message}.<br><br>
+                    <strong>¡PASO URGENTE!</strong> Debes sustituir la clave 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU' en la línea 58 del código con una **clave API nueva y válida** de Google AI Studio.
+                `;
+            }
+        }
+    </script>
+
+<hr style="margin-top: 40px; border-color: #ccc;">
+    <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
+        <a href="index.html" style="
+            text-decoration: none;
+            color: #5f6368;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        ">
+            ← Volver al Menú Principal
+        </a>
+    </div>
+
+
+</body>
+</html>
