@@ -6,7 +6,7 @@
 
 // --- CONFIGURACIÓN DE LA API DE GOOGLE GEMINI ---
 // CLAVE API VÁLIDA INTEGRADA
-const IA_API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; 
+const IA_API_KEY = 'AIzaSyCzEdHp8-GzOtexcjxT1I6FSv6YQpVOdVA'; 
 const MODEL_NAME = 'gemini-2.5-flash';
 const IA_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${IA_API_KEY}`;
 // -----------------------------------------------------------------------------------
@@ -343,7 +343,7 @@ async function generarOnline() {
                 contents: [{ role: "user", parts: [{ text: finalPrompt }] }],
                 generationConfig: { 
                     temperature: 0.6, // Ajuste para obediencia al formato
-                    maxOutputTokens: 500,
+                    maxOutputTokens: 4096,
                 },
                 // ELIMINADO: systemInstruction
             })
