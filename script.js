@@ -6,7 +6,7 @@
 
 // --- CONFIGURACIÓN DE LA API DE GOOGLE GEMINI ---
 // ¡IMPORTANTE! VERIFICA QUE ESTA CLAVE SEA LA VÁLIDA.
-const IA_API_KEY = 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU'; 
+const IA_API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; 
 const MODEL_NAME = 'gemini-2.5-flash';
 const IA_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${IA_API_KEY}`;
 // -----------------------------------------------------------------------------------
