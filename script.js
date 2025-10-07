@@ -261,7 +261,18 @@ function generar() {
         }
         generarOnline();
     } else {
-        generarOffline();
+        // *** CAMBIO CRÍTICO DE DIAGNÓSTICO: Si no es Online, no genera Offline. ***
+        document.getElementById("resultado").innerHTML = `
+            <p style="color:blue; font-weight:bold; text-align: left; padding: 15px; border: 1px solid blue; background-color: #eaf3ff;">
+                <strong style="font-size: 1.1em;">DIAGNÓSTICO DEL SWITCH:</strong><br>
+                El modo **Online NO está marcado** (el script lee **modeSwitch.checked = false**).<br>
+                Si lo ves marcado, la caché o el HTML del switch están fallando.<br>
+                Generación cancelada.
+            </p>
+        `;
+        console.warn("DIAGNÓSTICO DEL SWITCH: modeSwitch.checked es FALSE. Ejecución detenida.");
+        // **IMPORTANTE:** Si ves el mensaje AZUL y estabas en Online, el fallo es el switch/caché.
+        return; 
     }
 }
 
@@ -389,15 +400,12 @@ async function generarOnline() {
         mostrarResultado(participantes, lugar, personajeResultado, objeto, objetoRaro, formato, sentimiento, true); 
 
     } catch (error) {
-        // Log para que el usuario pueda verlo en la consola (F12)
-        console.error("GENERAR ONLINE - ERROR CRÍTICO EN TRY/CATCH FINAL:", error);
-        
         // Muestra el error detallado al usuario y NO llama a generarOffline()
         document.getElementById("resultado").innerHTML = `<p style="color:red; font-weight:bold; text-align: left; padding: 15px; border: 1px solid red; background-color: #ffeaea;">
             ⚠️ **DIAGNÓSTICO CRÍTICO - FALLO IA** ⚠️<br><br>
             **Motivo del Fallo:** ${error.message}<br><br>
             **--- DETÉNGASE AQUÍ ---** Este es el error. Por favor, reporta el mensaje exacto de arriba.<br>
-            Si necesitas usar la aplicación ahora, pulsa el switch a modo Offline.
+            Si necesitas usar la aplicación, pulsa el switch a modo Offline y vuelve a generar.
         </p>`;
     }
 }
