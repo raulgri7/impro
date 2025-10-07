@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador Avanzado de Clase de Improvisación</title>
+    <style>
+        * {
+            box-sizing: border-box; 
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+        }
+        h1 {
+            color: #4285f4;
+            font-size: 2em;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #4285f4;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        p {
+            color: #5f6368;
+            margin-bottom: 20px;
+            font-size: 1em;
+            text-align: center;
+        }
+        
+        /* Controles de Formulario */
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #1a73e8;
+            margin-top: 10px;
+        }
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #1a73e8;
+        }
+        
+        /* Área de Resultados */
+        #resultado {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+            text-align: left;
+            min-height: 150px;
+            font-size: 0.95em;
+        }
+        
+        #resultado pre {
+            font-family: inherit;
+            margin: 0;
+            padding: 0;
+        }
+
+        .loading {
+            text-align: center;
+            color: #4285f4;
+            font-size: 1.2em;
+        }
+
+        /* Responsividad básica */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 20px 15px;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🧠 Planificación de Clase Personalizada con Gemini</h1>
+        <p>Selecciona el tipo de clase y la asistencia para generar un plan que trabaje las debilidades específicas de tu grupo.</p>
+
+        <form id="claseForm">
+            <label for="tipoClase">Tipo de Clase/Bloque a Trabajar:</label>
+            <select id="tipoClase" required>
+                <option value="Bloque 1: ejercicios en círculo de conocerse">Bloque 1: Conocerse (Círculo)</option>
+                <option value="Bloque 2: ejercicios en círculo">Bloque 2: Foco y Grupo (Círculo)</option>
+                <option value="Bloque 3: ejercicios moviéndose por el espacio">Bloque 3: Movimiento y Espacio</option>
+                <option value="Bloque 4: ejercicios para jugar en pareja">Bloque 4: Foco en Parejas</option>
+                <option value="Bloque 5: ejercicios para jugar en grupo">Bloque 5: Foco en Subgrupos</option>
+                <option value="Bloque 6: juegos de improvisación para hacer en pareja">Bloque 6: Juegos de Impro (Parejas)</option>
+                <option value="Bloque 7: ídem para tríos">Bloque 7: Juegos de Impro (Tríos)</option>
+                <option value="Bloque 8: ídem para cuatro">Bloque 8: Juegos de Impro (Cuartetos)</option>
+                <option value="Bloque 9: Ídem para dos grupos">Bloque 9: Juegos de Impro (Dos Grupos)</option>
+                <option value="Bloque 10: ídem para el grupo completo">Bloque 10: Juegos de Impro (Grupo Completo)</option>
+                <option value="Clase completa con un hilo conductor" selected>Clase Completa (120 min) con Hilo Conductor</option>
+            </select>
+            
+            <label for="alumnosPresentes">Alumnos presentes hoy (Máximo 14):</label>
+            <input type="number" id="alumnosPresentes" value="10" min="4" max="14" required>
+
+            <button type="submit">Generar Plan de Clase (120 Minutos)</button>
+        </form>
+
+        <div id="resultado">
+            <h2>El Plan de Clase aparecerá aquí.</h2>
+            <p style="text-align: center; color: #5f6368;">(La IA usará la descripción de tus alumnos para adaptar los ejercicios).</p>
+        </div>
+    </div>
+
+    <script>
+        // 🔑 CLAVE DE API DE GEMINI (Asumiendo que es la misma que proporcionaste antes)
+        const API_KEY = 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU'; 
+        const PROMPT_FILE = 'prompt_impro_coach.json'; 
+
+        const form = document.getElementById('claseForm');
+        const resultadoDiv = document.getElementById('resultado');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            generarClase();
+        });
+
+        async function generarClase() {
+            const tipoClase = document.getElementById('tipoClase').value;
+            const alumnosPresentes = document.getElementById('alumnosPresentes').value;
+
+            resultadoDiv.innerHTML = '<div class="loading">Cargando... 💡 La IA está analizando los perfiles y diseñando tu plan.</div>';
+
+            try {
+                // 1. Cargar el prompt base y los perfiles de alumnos desde el JSON
+                const promptResponse = await fetch(PROMPT_FILE);
+                if (!promptResponse.ok) {
+                    throw new Error(`No se pudo cargar el archivo de prompt: ${PROMPT_FILE}`);
+                }
+                
+                const promptData = await promptResponse.json(); 
+                let prompt = promptData.prompt_template;
+                const perfiles = promptData.descripcion_alumnos;
+                
+                // 2. Generar la lista de perfiles para el prompt (los 14 originales)
+                const perfilesLista = perfiles.map(p => `- ${p.id}: ${p.caracteristicas}`).join('\n');
+
+                // 3. Reemplazar los marcadores de posición
+                prompt = prompt
+                    .replace('{alumnos_presentes}', alumnosPresentes)
+                    .replace('{perfiles_lista}', perfilesLista)
+                    .replace('{tipo_clase}', tipoClase); 
+
+                // 4. Llamar a la API de Gemini
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: [{ text: prompt }] }],
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Error en la API: ${response.status}. Detalle: ${JSON.stringify(errorData)}`);
+                }
+
+                const data = await response.json();
+                
+                const contenido = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No se pudo generar el plan de clase. Intenta nuevamente.';
+
+                // 5. Mostrar el resultado
+                resultadoDiv.innerHTML = `<pre>${contenido}</pre>`;
+
+            } catch (error) {
+                console.error('Error durante la generación de la clase:', error);
+                
+                let errorMessage = `Error: ${error.message}`;
+                if (error.message.includes("404")) {
+                    errorMessage = `Error 404: No se encuentra el archivo '${PROMPT_FILE}'. Asegúrate de que está en el mismo directorio.`;
+                } else if (error.message.includes("API")) {
+                     errorMessage = `Error de API. Revisa la clave o el límite de uso.`;
+                }
+
+                resultadoDiv.innerHTML = `<h2>⚠️ Error al generar la clase</h2><p style="color:red; text-align:center;">${errorMessage}</p>`;
+            }
+        }
+    </script>
+
+</body>
+</html>

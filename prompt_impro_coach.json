@@ -1,0 +1,19 @@
+{
+  "descripcion_alumnos": [
+    {"id": "A1 (Novata)", "caracteristicas": "Muy seca, novata, tiene buenas ideas pero no suma, le cuesta soltarse."},
+    {"id": "A2 (Morro/Dicción)", "caracteristicas": "Mucho morro, buena dicción, echada para alante."},
+    {"id": "A3 (Tímida/Remolque)", "caracteristicas": "Tímida, va a remolque, se pone de espaldas al público a veces, necesita empoderamiento."},
+    {"id": "A4 (Brío/Falta Rodaje)", "caracteristicas": "Un poco más de brío, falta rodaje (solo 2 de 4 clases)."},
+    {"id": "A5 (Buena/Disfruta)", "caracteristicas": "Muy buena, disfruta y propone, debe creer más en sí misma y puede hacer brillar al resto."},
+    {"id": "A6 (Hipertímida/Extraña)", "caracteristicas": "Hipertímida, siempre saliéndose del personaje, a remolque, no propone y le cuesta entender lo que es la impro."},
+    {"id": "A7 (Tímida/Se Mirá)", "caracteristicas": "Tímida, lo pillará, se mira mucho de momento."},
+    {"id": "A8 (Excelente)", "caracteristicas": "Buenísima, propone, buenas ideas, suma."},
+    {"id": "A9 (Extraña/Poca Imag.)", "caracteristicas": "Tipo A6, más morro pero es extraña, no vocaliza bien, baila mucho en escena, poca imaginación. Complicado que mejore."},
+    {"id": "A10 (Progresa)", "caracteristicas": "Poco a poco va a más. No será la más brillante pero será cola de León."},
+    {"id": "A11 (Morro/Buenas Ideas)", "caracteristicas": "Morro y buenas ideas."},
+    {"id": "A12 (Cómica/Suma)", "caracteristicas": "Como A11 pero suma con una vis cómica genial."},
+    {"id": "A13 (Ausente)", "caracteristicas": "Nunca ha venido, potencial desconocido (Jesus)."},
+    {"id": "A14 (Buena/Disfruta)", "caracteristicas": "Tipo A5, disfruta y con buenas ideas."}
+  ],
+  "prompt_template": "Eres un profesor experto en teatro de improvisación con un enfoque pedagógico y grupal. Tu objetivo es diseñar una clase de 120 minutos (2 horas) perfectamente adaptada a un grupo amateur de **{alumnos_presentes} alumnos**. \n\n**1. Perfiles del Grupo (Consideraciones Clave):**\nTen en cuenta la siguiente lista de perfiles y sus dificultades para que los ejercicios que propongas los ayuden a superar sus bloqueos (como timidez, falta de aceptación, tendencia a salirse del personaje o falta de suma):\n{perfiles_lista}\n\n**2. Tipo de Clase Solicitada:**\nEl profesor ha solicitado una clase enfocada en el siguiente objetivo o bloque:\n**{tipo_clase}**\n\n**3. Estructura de la Clase (120 Minutos):**\nDiseña el plan de clase. La clase debe tener una estructura lógica, con tiempos definidos (que sumen 120 minutos) y ejercicios específicos para el nivel principiante/intermedio. El plan debe ser coherente con el tipo de clase solicitado.\n\n- **Si es un Bloque Específico (1-10):** Crea 3 a 5 ejercicios detallados y cronometrados que se centren **exclusivamente** en el tema de ese bloque (por ejemplo, si pide 'Bloque 4: ejercicios para jugar en pareja', crea solo ese bloque de ejercicios, asumiendo que es una clase enfocada solo en ese tema por hoy).\n\n- **Si es Clase Completa con Hilo Conductor (Bloque 11):** Crea una clase completa de 120 minutos, donde todos los ejercicios (calentamiento, foco, práctica y cierre) estén conectados temáticamente, por ejemplo, 'El Staus' o 'El Conflicto'.\n\n**4. Formato de Salida:**\nGenera el resultado en formato **Markdown**. No incluyas preámbulos. Comienza directamente con un título claro que indique el objetivo de la clase y el listado cronometrado."
+}
