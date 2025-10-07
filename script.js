@@ -6,7 +6,7 @@
 
 // --- CONFIGURACIÓN DE LA API DE GOOGLE GEMINI ---
 // ¡IMPORTANTE! VERIFICA QUE ESTA CLAVE SEA LA VÁLIDA.
-const IA_API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; 
+const IA_API_KEY = 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU'; 
 const MODEL_NAME = 'gemini-2.5-flash';
 const IA_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${IA_API_KEY}`;
 // -----------------------------------------------------------------------------------
@@ -241,14 +241,12 @@ function sortearParticipantes(num) {
 // FUNCIÓN PRINCIPAL DE INTERRUPTOR
 function generar() {
     
-    // --- DIAGNÓSTICO DEL SWITCH ---
     const modeSwitch = document.getElementById("modeSwitch");
     if (!modeSwitch) {
         document.getElementById("resultado").innerHTML = "<strong style='color:red;'>ERROR JS CRÍTICO:</strong> No se encuentra el elemento HTML con **id='modeSwitch'**. ¡Verifica tu HTML!";
         return;
     }
-    // Si modeSwitch.checked es true, entramos en online.
-
+    
     if (selectNum.disabled || alumnosRestantes.length === 0) return;
 
     if (modeSwitch.checked) {
@@ -342,6 +340,12 @@ async function generarOnline() {
     `;
 
     try {
+        // --- DIAGNÓSTICO EN CONSOLA ---
+        const keyStatus = IA_API_KEY.includes('RU') ? '¡CLAVE DE EJEMPLO ACTIVA!' : 'Clave Real Detectada';
+        console.log("GENERAR ONLINE - DIAGNÓSTICO CLAVE/URL:", { url: IA_API_URL, status: keyStatus });
+        console.log("GENERAR ONLINE - PROMPT ENVIADO (fragmento):", promptText.substring(0, 150) + '...');
+        // ------------------------------
+
         const response = await fetch(IA_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -361,26 +365,25 @@ async function generarOnline() {
             let errorMessage = errorData.error ? errorData.error.message : response.statusText;
             let diagnosis = `Status: ${response.status}. `;
 
-            if (response.status === 0 && !response.statusText) {
-                // Típico error de CORS/Red cuando se usa file://
-                diagnosis = "Error de red/CORS (Status: 0). Si ves esta ruta en tu navegador (file:///), la llamada a la API es bloqueada por seguridad. ";
-            } else if (response.status === 400 || response.status === 403) {
-                diagnosis += `Error de API: Causa probable: Clave API inválida o sin saldo/permisos (403). Mensaje: ${errorMessage}`;
+            if (response.status === 400 || response.status === 403) {
+                diagnosis += `Error de API: Causa probable: Clave API inválida o sin saldo/permisos. Mensaje: ${errorMessage}`;
             } else {
                  diagnosis += `Error desconocido: ${errorMessage}`;
             }
-
             throw new Error(diagnosis);
         }
-
+        
         const data = await response.json();
-        let ia_result_text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "Error de formato de IA (candidato vacío)";
+        // Consola muestra el resultado de la llamada (útil para debug de formato)
+        console.log("GENERAR ONLINE - Respuesta de la API recibida (para debug de formato):", data);
+
+        let ia_result_text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "Error de formato de IA (candidato vacío o bloqueado por política de seguridad de la IA)";
 
         // --- 4. PARSING CHECK ---
         const elementos = ia_result_text.split(';').map(e => e.trim());
 
         if (elementos.length !== 6 || elementos.some(e => e === '')) {
-             throw new Error("Error de formato de IA. La respuesta no contiene 6 elementos separados por punto y coma (';') o uno está vacío. Respuesta sin parsear: " + ia_result_text);
+             throw new Error(`Error de formato de IA. La respuesta no contiene 6 elementos separados por punto y coma (';') o uno está vacío. Esperados 6, recibidos ${elementos.length}. Respuesta de la IA: "${ia_result_text}"`);
         }
         
         const [lugar, personajePrincipal, objeto, objetoRaro, formato, sentimiento] = elementos;
@@ -395,13 +398,13 @@ async function generarOnline() {
         mostrarResultado(participantes, lugar, personajeResultado, objeto, objetoRaro, formato, sentimiento, true); 
 
     } catch (error) {
-        console.error("GENERAR ONLINE - ERROR CRÍTICO:", error);
+        console.error("GENERAR ONLINE - ERROR CRÍTICO EN TRY/CATCH:", error);
         
         // Muestra el error detallado al usuario
         document.getElementById("resultado").innerHTML = `<p style="color:red; font-weight:bold; text-align: left; padding: 15px; border: 1px solid red; background-color: #ffeaea;">
             ⚠️ **ERROR CRÍTICO MODO ONLINE** ⚠️<br><br>
             **Motivo del Fallo:** ${error.message}<br><br>
-            **¡ACCIÓN URGENTE!** Si el error es de tipo **CORS/Status: 0**, la única solución es abrir el archivo desde un **servidor web local** (como Live Server en VS Code) en lugar de la ruta **file:///**. Generando en modo **Offline** como respaldo.
+            **Pista:** Si el Status es 400/403, tu clave está mal o sin cuota. Si el error es de Formato, la IA no está siguiendo la instrucción de usar punto y coma. Generando en modo **Offline** como respaldo.
         </p>`;
         
         // Fallback
