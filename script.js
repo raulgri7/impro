@@ -307,7 +307,7 @@ function generarOffline() {
 }
 
 
-// MODO ONLINE: Conexión a la API de IA (Con Fallback)
+// MODO ONLINE: Conexión a la API de IA (MODO DEBUG TEMPORAL)
 async function generarOnline() {
     document.getElementById("resultado").innerHTML = '<span class="cargando">Conectando con la IA... generando ideas únicas...</span>';
     
@@ -329,8 +329,8 @@ async function generarOnline() {
         sentimientos: sentimientos.join(', ')
     };
 
-    // ARREGLO FINAL DE PROMPT: Hacemos la instrucción de sistema más ESTRICTA e IMPERATIVA
-    const systemInstruction = "ERES UN GENERADOR ESTRICTO DE IDEAS. TU RESPUESTA DEBE CONTENER EXCLUSIVAMENTE 6 ELEMENTOS SEPARADOS POR PUNTO Y COMA (;). NO USES INTRODUCCIONES, EXPLICACIONES O TEXTO ADICIONAL. FORMATO OBLIGATORIO: Lugar;Personaje;Objeto;Objeto Raro (descripción);Formato;Sentimiento.";
+    // PROMPT FINAL Y MÁS ESTRICTO
+    const systemInstruction = "ERES UN GENERADOR ESTRICTO DE IDEAS. TU RESPUESTA DEBE CONTENER EXCLUSIVAMENTE 6 ELEMENTOS SEPARADOS POR PUNTO Y COMA (;). NO USES INTRODUCCIONES, EXPLICACIONES O TEXTO ADICIONAL. FORMATO OBLIGATORIO: Lugar;Personaje;Objeto;Objeto Raro (descripción);Formato;Sentimiento. Las ideas deben ser divertidas y apropiadas para una clase de improvisación.";
 
     const userPromptText = `
         Tu misión es crear una idea totalmente nueva y única para cada una de las 6 categorías.
@@ -352,7 +352,7 @@ async function generarOnline() {
                 // Usamos el prompt combinado
                 contents: [{ role: "user", parts: [{ text: finalPrompt }] }],
                 generationConfig: { 
-                    temperature: 0.8, 
+                    temperature: 0.6, // AJUSTE CLAVE: Reducido para mayor obediencia
                     maxOutputTokens: 500,
                 },
                 // ELIMINADO: systemInstruction
@@ -374,35 +374,43 @@ async function generarOnline() {
         }
         
         const data = await response.json();
-        let ia_result_text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "Error de formato de IA (candidato vacío o bloqueado por política de seguridad de la IA)";
+        // Captura la respuesta o el error de bloqueo
+        let ia_result_text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "ERROR: CANDIDATO VACÍO O BLOQUEADO POR POLÍTICA DE SEGURIDAD";
 
-        // --- 4. PARSING CHECK ---
+        // =========================================================================
+        // 🛑🛑 TEMPORAL: MODO DEBUG - Muestra la respuesta RAW y DETIENE la ejecución
+        // =========================================================================
+        document.getElementById("resultado").innerHTML = `<p style="text-align: left; padding: 15px; border: 2px solid #007bff; background-color: #e3f2fd; color: #007bff;">
+            **RESPUESTA RAW DE LA IA (Modo Debug)**<br>
+            <pre style="white-space: pre-wrap; word-break: break-all; margin: 10px 0; font-weight: bold; font-size: 1.1em; color: #0d47a1;">${ia_result_text}</pre>
+            **DIAGNÓSTICO:** Por favor, copia el texto exacto que aparece arriba (después de la línea azul) y compártelo. Una vez resuelto, tendrás que volver al código anterior.
+        </p>`;
+        return; // Detener la ejecución aquí
+        // =========================================================================
+        
+        // --- 4. PARSING CHECK --- (El código de aquí abajo NO se ejecutará)
         const elementos = ia_result_text.split(';').map(e => e.trim());
 
-        // Si el modelo falla o es bloqueado, lanza un error de formato.
         if (elementos.length !== 6 || elementos.some(e => e === '')) {
              throw new Error(`Error de formato de IA. La respuesta no contiene 6 elementos separados por punto y coma (';') o uno está vacío. Esperados 6, recibidos ${elementos.length}. Respuesta de la IA: "${ia_result_text}"`);
         }
         
         const [lugar, personajePrincipal, objeto, objetoRaro, formato, sentimiento] = elementos;
 
-        // Lógica de Personaje para Online: un principal + aviso de extras
         let personajeResultado = personajePrincipal; 
         if (participantes.length > 1) {
              personajeResultado += ` (y ${participantes.length - 1} más)`;
         }
 
-        // 5. Mostrar Resultado
         mostrarResultado(participantes, lugar, personajeResultado, objeto, objetoRaro, formato, sentimiento, true); 
 
     } catch (error) {
         // Muestra el error detallado, pero luego hace fallback seguro.
         document.getElementById("resultado").innerHTML = `<p style="color:red; font-weight:bold; text-align: left; padding: 15px; border: 1px solid red; background-color: #ffeaea;">
-            ⚠️ **DIAGNÓSTICO AUTOMÁTICO - FALLO IA** ⚠️<br><br>
-            **Motivo:** La IA falló al generar el formato estricto o fue bloqueada. (${error.message})<br><br>
+            ⚠️ **DIAGNÓSTICO AUTOMÁTICO - FALLO DE CONEXIÓN/API** ⚠️<br><br>
+            **Motivo:** Error de red o en la llamada inicial. (${error.message})<br><br>
             Generando automáticamente en modo **Offline** como respaldo.
         </p>`;
-        // RESTAURAMOS EL FALLBACK SEGURO
         generarOffline();
     }
 }
