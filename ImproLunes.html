@@ -5,6 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Impro CientoCinco 10¹¹</title>
     <style>
+/* ... (TODOS TUS ESTILOS CSS AQUÍ) ... */
+
+/* CSS AÑADIDO PARA EL SWITCH ONLINE/OFFLINE */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #4CAF50;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #4CAF50;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 24px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+/* FIN CSS SWITCH */
+
 body {
     font-family: Arial, sans-serif;
     background: #f5f5f5;
@@ -223,11 +283,18 @@ div > label[for="numParticipantes"] {
 <div class="controls-container">
     <label for="numParticipantes">¿Participantes?</label>
     <select id="numParticipantes"></select>
-    <button onclick="generar()">Generar</button>
     
-    <button onclick="reiniciarSorteo()">Reiniciar Sorteo</button> 
-    
+    <div style="display:flex; align-items:center; margin: 10px 15px;">
+        <span style="font-weight:bold; color: #555;">Offline</span>
+        <label class="switch" style="margin: 0 10px;">
+            <input type="checkbox" id="modeSwitch">
+            <span class="slider round"></span>
+        </label>
+        <span style="font-weight:bold; color: #4CAF50;">Online (IA)</span>
     </div>
+    <button onclick="generar()">Generar</button>
+    <button onclick="reiniciarSorteo()">Reiniciar Sorteo</button> 
+</div>
 
 <div class="result" id="resultado">
     Haz clic en el botón para empezar
@@ -249,444 +316,8 @@ div > label[for="numParticipantes"] {
     </div>
 </div>
 
-<script>
-// ====================================================================================
-// 1. DATOS DINÁMICOS POR CLASE (MODIFICADOS PARA INCLUIR NIVEL: Nombre|Nivel)
-// ====================================================================================
-
-const ALUMNOS_POR_CLASE = {
-    "Lunes": [
-        "Alba|0", "Andrea|1", "Beatriz|1", "Beatriz Law|1", "Elena|1", "Estela|1",
-        "Jesús|0", "Lucía|0", "María|0", "Marta|1", "Mery|1", "Patricia|1",
-        "Raquel|0", "Victoria|0", "Yolanda|1"
-    ],
-    "Martes": ["Ainhoa|0", "AnaG|0", "Daniel|1", "Javier|1", "Judith|1", "Laura|1", 
-        "Marcos|1", "Marta|1", "Maite|1", "Nerea|1", "Pablo|1", "Samira|1", 
-        "Sofía|1"],
-    "Miércoles": ["Bea|0", "Chuchi|0", "Elenita|1", "Esther|1", "Isa|1", "Isra|1", 
-        "María|1", "Natalia|1", "Paloma|1", "Yesi|1"],
-    "Jueves 5": ["Alex|0", "David|0", "Elena|1", "Félix|1", "Fuen|1", "Gema|1", 
-        "Héctor|1", "Irene|1", "Sara|1"],
-    "Jueves 7": ["Ángeles|0", "Aroa|0", "Beloki|1", "Elena|1", "Jesús|1", "María|1", 
-        "Paula|1", "Pilar|1", "Raúl|1", "Rosa|1", "Virgi|1"],
-    "Viernes": ["Rubén|0", "Lucía|0", "Guillermo|1", "Marina|1", "Álvaro|1", "Cristina|1", "Jorge|1", "Silvia|1"]
-};
-
-let ausentesSeleccionados = []; // Alumnos marcados como ausentes por el usuario
-let alumnosBase = []; // Lista completa de la clase seleccionada (con nivel)
-let alumnosRestantes = []; // Lista de alumnos disponibles para el sorteo (con nivel)
-let alumnosPresentesEnClase = []; // Lista de alumnos presentes al iniciar la tanda (con nivel)
-
-// ====================================================================================
-// 2. CONSTANTES E INICIALIZACIÓN
-// ====================================================================================
-
-const selectNum = document.getElementById("numParticipantes");
-const modalAusentes = document.getElementById("modalAusentes");
-const listaAusentesDiv = document.getElementById("listaAusentes");
-const selectClase = document.getElementById("selectClase");
-const btnGenerar = document.querySelector('button[onclick="generar()"]');
-let lastSelected = 1;
-
-
-const lugares = `Parque de atracciones,Desierto,Río,Estación orbital,Mercado callejero`.split(",");
-const personajes = `Abeja,Abogado,Acrobata,Actor,Adivino`.split(",");
-const objetos = `Silla,Proyector,Bolsa,Espátula,Maquinilla de afeitar`.split(",");
-const objetosRaros = `Reloj que camina,Cadena que baila,Pluma que dibuja sola,Peine que silba,Pepino que flota`.split(",");
-const formatos = `Acción,Ciencia ficción,Cine familiar,Cine mudo,Comedia`.split(",");
-const sentimientos = `Abatimiento,Aburrimiento,Admiración,Afecto,Agobio`.split(",");
-
-
-// ---------------------------------------------------------------------------------------------------------------------------------------------
-// 3. FUNCIONES PRINCIPALES
-// ---------------------------------------------------------------------------------------------------------------------------------------------
-
-    // Helper para manejar el formato "Nombre|Nivel"
-    function parsearAlumno(alumnoConNivel) {
-        const parts = alumnoConNivel.split('|');
-        return {
-            nombre: parts[0].trim(),
-            nivel: parts.length > 1 ? parseInt(parts[1], 10) : 1 // 0=Nuevo, 1=Estandar/Veterano
-        };
-    }
-
-    function azar(lista) {
-      return lista[Math.floor(Math.random() * lista.length)];
-    }
-
-    function poblarSelect() {
-      if (alumnosRestantes.length === 0) {
-        selectNum.innerHTML = '<option value="0">0 (sin alumnos)</option>';
-        selectNum.disabled = true;
-        btnGenerar.disabled = true;
-        return;
-      }
-      const max = alumnosRestantes.length;
-      selectNum.innerHTML = "";
-      for (let i = 1; i <= max; i++) {
-        const opt = document.createElement("option");
-        opt.value = i;
-        opt.textContent = i;
-        selectNum.appendChild(opt);
-      }
-      const want = (typeof lastSelected === "number" && lastSelected >= 1) ? Math.min(lastSelected, max) : 1;
-      selectNum.value = want;
-      selectNum.disabled = false;
-      btnGenerar.disabled = false;
-    }
-    
-    function poblarSelectClases() {
-        selectClase.innerHTML = "";
-        const clases = Object.keys(ALUMNOS_POR_CLASE);
-        clases.forEach(clase => {
-            const opt = document.createElement("option");
-            opt.value = clase;
-            opt.textContent = clase;
-            selectClase.appendChild(opt);
-        });
-        // Intenta cargar la última clase seleccionada si existe
-        const lastClass = localStorage.getItem('lastClass') || clases[0];
-        selectClase.value = lastClass;
-    }
-    
-    function actualizarListaAlumnos() {
-        const claseSeleccionada = selectClase.value;
-        localStorage.setItem('lastClass', claseSeleccionada);
-        alumnosBase = ALUMNOS_POR_CLASE[claseSeleccionada] || [];
-        
-        listaAusentesDiv.innerHTML = "";
-        if (alumnosBase.length === 0) {
-            listaAusentesDiv.innerHTML = "<p>No hay alumnos definidos para esta clase.</p>";
-            return;
-        }
-
-        alumnosBase.forEach(alumnoConNivel => {
-            const { nombre } = parsearAlumno(alumnoConNivel); // Extraer solo el nombre para el checkbox
-            const label = document.createElement("label");
-            const cb = document.createElement("input");
-            cb.type = "checkbox";
-            cb.value = nombre;
-            
-            // Marca los ausentes previamente seleccionados para esta clase
-            if(ausentesSeleccionados.includes(nombre)) {
-                cb.checked = true;
-            }
-
-            label.appendChild(cb);
-            label.appendChild(document.createTextNode(" " + nombre));
-            listaAusentesDiv.appendChild(label);
-        });
-    }
-
-    function mostrarModalAusentes() {
-      poblarSelectClases();
-      actualizarListaAlumnos(); 
-      
-      modalAusentes.style.display = "flex";
-      modalAusentes.setAttribute("aria-hidden", "false");
-      selectNum.innerHTML = '<option>--</option>';
-      selectNum.disabled = true;
-      btnGenerar.disabled = true;
-    }
-
-    function confirmarAusentes(todosPresentes = false) {
-      if (alumnosBase.length === 0) {
-          alert("Por favor, selecciona una clase válida.");
-          return;
-      }
-      
-      if (todosPresentes) {
-        ausentesSeleccionados = [];
-      } else {
-        const checks = Array.from(listaAusentesDiv.querySelectorAll("input[type=checkbox]"));
-        ausentesSeleccionados = checks.filter(c => c.checked).map(c => c.value);
-      }
-
-      alumnosRestantes = alumnosBase.filter(alumnoConNivel => {
-          const { nombre } = parsearAlumno(alumnoConNivel);
-          return !ausentesSeleccionados.includes(nombre);
-      });
-      
-      alumnosPresentesEnClase = [...alumnosRestantes]; 
-      
-      modalAusentes.style.display = "none";
-      modalAusentes.setAttribute("aria-hidden", "true");
-      lastSelected = 1;
-      poblarSelect();
-      document.getElementById("resultado").innerHTML = `Clase: ${selectClase.value}. ¡Listo para generar!`;
-      if (alumnosRestantes.length === 0) {
-        document.getElementById("resultado").innerHTML = `<p style="color:crimson;">No hay alumnos presentes en la clase ${selectClase.value}.</p>`;
-      }
-    }
-
-  function generar() {
-      if (selectNum.disabled || alumnosRestantes.length === 0) return;
-      
-      const num = parseInt(selectNum.value, 10);
-      if (isNaN(num) || num < 1 || num > alumnosRestantes.length) {
-        const max = alumnosRestantes.length;
-        if (num === 0 || max === 0) return;
-        
-        // Ajusta el sorteo al máximo disponible si el número solicitado es mayor
-        lastSelected = max;
-        selectNum.value = max;
-        // La variable 'num' seguirá siendo la original (ej: 2), pero la lógica de spotsToFill lo gestionará
-      }
-      
-      lastSelected = num;
-      
-      const participantes = []; 
-      let alumnosSorteadosConNivel = []; // Lista temporal para rastrear los alumnos sorteados (cadenas con nivel)
-
-      // 1. Clonar el pool de alumnos restantes: esta será la ÚNICA lista que modificaremos.
-      let poolSorteable = [...alumnosRestantes]; 
-      let spotsToFill = num;
-      let avisoNuevos = "";
-  
-      const esPrimerSorteo = alumnosRestantes.length === alumnosPresentesEnClase.length;
-      
-      // Predicados de filtrado
-      const isVeteran = (a) => parsearAlumno(a).nivel !== 0;
-      const isAnyone = () => true;
-
-
-      // ---------------------------------------------------------------------------
-      // NUEVA FUNCIÓN HELPER: Selecciona un alumno (filtrado por criterio) y lo elimina
-      // del poolSorteable, a la vez que actualiza el resultado y los spots restantes.
-      // ---------------------------------------------------------------------------
-      const seleccionarYRemover = (filterFn) => {
-          // 1. Aplicar el filtro para encontrar candidatos válidos en el pool actual
-          const candidatos = poolSorteable.filter(filterFn);
-          if (candidatos.length === 0) return null; // No se decrementa spotsToFill si falla
-
-          // 2. Elegir uno al azar de los candidatos
-          const alumno = azar(candidatos);
-          
-          // 3. Eliminarlo del poolSorteable principal
-          const idxInPool = poolSorteable.findIndex(a => parsearAlumno(a).nombre === parsearAlumno(alumno).nombre);
-          if (idxInPool > -1) {
-              poolSorteable.splice(idxInPool, 1); // Lo elimina del pool principal
-          }
-          
-          // 4. Actualizar el resultado y el contador
-          alumnosSorteadosConNivel.push(alumno);
-          spotsToFill--;
-          return alumno;
-      };
-
-      // ---------------------------------------------------------------------------
-      // LÓGICA DE SORTEO
-      // ---------------------------------------------------------------------------
-
-      if (esPrimerSorteo) {
-          // PRIMER SORTEO (Regla: Solo veteranos si es posible)
-          
-          const veteranosRestantes = poolSorteable.filter(isVeteran);
-          const numVeteranos = veteranosRestantes.length;
-          
-          const numVeteranosAReunir = Math.min(spotsToFill, numVeteranos);
-          
-          for(let i=0; i < numVeteranosAReunir; i++) {
-             seleccionarYRemover(isVeteran); 
-          }
-          
-          while (spotsToFill > 0 && poolSorteable.length > 0) {
-              // Rellenamos el resto con lo que quede (novatos)
-              seleccionarYRemover(isAnyone); 
-          }
-          
-      } else {
-          // SORTEOS POSTERIORES (Desde el segundo sorteo en adelante)
-          
-          if (num === 1) {
-              // REGLA 1 (num=1, posterior): Aleatorio.
-              while (spotsToFill > 0 && poolSorteable.length > 0) {
-                  seleccionarYRemover(isAnyone);
-              }
-
-          } 
-          // Caso 2: Parejas (num=2). Regla: Máximo un novato.
-          // ¡LÓGICA CORREGIDA! 
-          else if (num === 2) {
-              
-              // 1. Intentamos garantizar al menos un veterano (si hay disponibles).
-              // Si no lo hay, spotsToFill no se decrementa (sigue en 2).
-              seleccionarYRemover(isVeteran); 
-              
-              // 2. Rellenar los spots restantes (hasta que spotsToFill = 0)
-              // Esto asegura que se completen los 2 cupos incluso si el paso 1 falló (quedan 3 novatos).
-              while (spotsToFill > 0 && poolSorteable.length > 0) {
-                  seleccionarYRemover(isAnyone); 
-              }
-
-          } 
-          // Caso 3: Tríos o más (num >= 3). Regla: Mínimo un veterano.
-          // ¡LÓGICA CORREGIDA! 
-          else if (num >= 3) {
-              
-              // 1. Garantizar al menos un veterano (si hay disponibles)
-              seleccionarYRemover(isVeteran);
-              
-              // 2. Rellenar el resto de los spots (completamente al azar)
-              // Esto asegura que el resto de los cupos se llenen.
-              while (spotsToFill > 0 && poolSorteable.length > 0) {
-                  seleccionarYRemover(isAnyone);
-              }
-          }
-      } // Fin de Sorteos Posteriores
-      
-      // ---------------------------------------------------------------------------
-      // 4. Post-Sorteo: Mover los alumnos sorteados a la lista final y actualizar alumnosRestantes
-      // ---------------------------------------------------------------------------
-      
-      // Convertir alumnosConNivel a solo nombres para el resultado final
-      alumnosSorteadosConNivel.forEach(alumnoConNivel => {
-          participantes.push(parsearAlumno(alumnoConNivel).nombre);
-      });
-      
-      // CLAVE: alumnosRestantes es lo que quedó en el 'poolSorteable'
-      alumnosRestantes = poolSorteable; 
-      
-      // Actualizar la lista de participantes disponibles en el select
-      poblarSelect();
-      
-      // >>> GENERACIÓN DE IDEAS (LÓGICA DE PERSONAJES MÚLTIPLES) <<<
-      const lugar = azar(lugares);
-      
-      const numParticipantes = participantes.length;
-      const numPersonajesAdicionales = numParticipantes > 1 ? numParticipantes - 1 : 0;
-      
-      let personajePrincipal = azar(personajes);
-      let personajesExtras = [];
-      
-      let personajesDisponibles = [...personajes].filter(p => p !== personajePrincipal); 
-      
-      for (let i = 0; i < numPersonajesAdicionales; i++) {
-          const idx = Math.floor(Math.random() * personajesDisponibles.length);
-          personajesExtras.push(personajesDisponibles.splice(idx, 1)[0]); 
-      }
-      
-      let personajeResultado = personajePrincipal;
-      if (personajesExtras.length > 0) {
-          personajeResultado += ` (${personajesExtras.join(", ")})`;
-      }
-      // <<< FIN DE GENERACIÓN DE IDEAS
-      
-      const objeto = azar(objetos);
-      const objetoRaro = azar(objetosRaros);
-      const formato = azar(formatos);
-      const sentimiento = azar(sentimientos);
-
-      let aviso = "";
-      if (alumnosRestantes.length === 0) {
-        aviso = `<div style="color:crimson; font-weight:bold; text-align:center; margin-top:10px;">
-                    No quedan participantes. Pulsa "Reiniciar Sorteo" para volver a empezar.
-                  </div>`;
-      }
-      
-      const avisoParticipantes = avisoNuevos ? `<span style="font-size:0.9em; color:#0056b3; font-weight:bold; margin-left:10px;">${avisoNuevos}</span>` : '';
-
-      // >>> SECCIÓN MODIFICADA PARA AÑADIR LOS BOTONES DE REGENERACIÓN <<<
-      const btn = (categoria) => 
-        `<button class="regenerate-btn" onclick="regenerarCategoria('${categoria}')" title="Generar solo ${categoria}">🔄</button>`;
-
-      document.getElementById("resultado").innerHTML = `
-        <div id="resultado-content">
-          <p><span class="category">CLASE:</span> ${selectClase.value}</p>
-          <p><span class="category">👥 Participantes: </span> ${participantes.join(", ")}${avisoParticipantes}</p>
-          <p id="lugar">${btn('lugar')}<span class="category">🌍 Lugar: </span> ${lugar}</p>
-          <p id="personaje">${btn('personaje')}<span class="category">👤 Personaje: </span> ${personajeResultado}</p>
-          <p id="objeto">${btn('objeto')}<span class="category">📦 Objeto: </span> ${objeto}</p>
-          <p id="objetoRaro">${btn('objetoRaro')}<span class="category">✨ Objeto raro: </span> ${objetoRaro}</p>
-          <p id="formato">${btn('formato')}<span class="category">🎬 Formato: </span> ${formato}</p>
-          <p id="sentimiento">${btn('sentimiento')}<span class="category">💭 Sentimiento: </span> ${sentimiento}</p>
-        </div>
-        ${aviso}
-      `;
-    }
-    
-    // Función de Reiniciar Sorteo (mantiene la clase y los ausentes fijos)
-    function reiniciarSorteo() {
-      alumnosBase = ALUMNOS_POR_CLASE[selectClase.value] || [];
-      alumnosRestantes = alumnosBase.filter(alumnoConNivel => {
-          const { nombre } = parsearAlumno(alumnoConNivel);
-          return !ausentesSeleccionados.includes(nombre);
-      });
-      
-      alumnosPresentesEnClase = [...alumnosRestantes];
-      
-      lastSelected = 1;
-      poblarSelect();
-      document.getElementById("resultado").innerHTML = `Sorteo de ${selectClase.value} reiniciado. ¡A elegir de nuevo!`;
-      if (alumnosRestantes.length === 0) {
-        document.getElementById("resultado").innerHTML = `<p style="color:crimson;">No hay alumnos presentes en la clase ${selectClase.value}.</p>`;
-      }
-    }
-
-// Función para regenerar una categoría específica (lugar, personaje, etc.)
-    function regenerarCategoria(categoria) {
-        const elemento = document.getElementById(categoria);
-        let nuevoValor = "";
-        let prefijo = "";
-        let lista = [];
-
-        switch (categoria) {
-            case 'lugar': lista = lugares; prefijo = '🌍 Lugar:'; break;
-            case 'personaje': lista = personajes; prefijo = '👤 Personaje:'; break;
-            case 'objeto': lista = objetos; prefijo = '📦 Objeto:'; break;
-            case 'objetoRaro': lista = objetosRaros; prefijo = '✨ Objeto raro:'; break;
-            case 'formato': lista = formatos; prefijo = '🎬 Formato:'; break;
-            case 'sentimiento': lista = sentimientos; prefijo = '💭 Sentimiento:'; break;
-            default: return; 
-        }
-
-        const btn = (cat) => 
-            `<button class="regenerate-btn" onclick="regenerarCategoria('${cat}')" title="Generar solo ${cat}">🔄</button>`;
-        
-        if (categoria === 'personaje') {
-            
-            const participantesParrafo = document.querySelector('#resultado-content p:nth-child(2)');
-            if (!participantesParrafo) return; 
-
-            const participantesTexto = participantesParrafo.textContent.split(':').pop().trim().replace(/\s*\(.*\)$/, '');
-            
-            const numParticipantes = participantesTexto ? participantesTexto.split(',').length : 1;
-            const numPersonajesAdicionales = numParticipantes > 1 ? numParticipantes - 1 : 0;
-            
-            let personajePrincipal = azar(personajes);
-            let personajesExtras = [];
-            
-            let personajesDisponibles = [...personajes].filter(p => p !== personajePrincipal); 
-            
-            for (let i = 0; i < numPersonajesAdicionales; i++) {
-                const idx = Math.floor(Math.random() * personajesDisponibles.length);
-                personajesExtras.push(personajesDisponibles.splice(idx, 1)[0]); 
-            }
-            
-            nuevoValor = personajePrincipal;
-            if (personajesExtras.length > 0) {
-                nuevoValor += ` (${personajesExtras.join(", ")})`;
-            }
-
-        } else {
-            nuevoValor = azar(lista);
-        }
-        
-        elemento.innerHTML = `${btn(categoria)}<span class="category">${prefijo}</span> ${nuevoValor}`;
-    }
-
-    // 4. LISTENERS E INICIALIZACIÓN
-    
-    selectNum.addEventListener('change', () => {
-      const v = parseInt(selectNum.value, 10);
-      if (!isNaN(v)) lastSelected = v;
-    });
-
-    // Llamar a mostrarModalAusentes() directamente al cargar la ventana
-    window.addEventListener('load', () => {
-      mostrarModalAusentes();
-    });
-</script>
+<script src="data.js"></script>
+<script src="script.js"></script>
 
 
 <hr style="margin-top: 40px; border-color: #ccc;">
