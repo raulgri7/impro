@@ -5,8 +5,8 @@
 // ====================================================================================
 
 // --- CONFIGURACIÓN DE LA API DE GOOGLE GEMINI ---
-// ¡IMPORTANTE! VERIFICA QUE ESTA CLAVE SEA LA VÁLIDA.
-const IA_API_KEY = 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU'; 
+// ¡IMPORTANTE! CLAVE API VÁLIDA INTEGRADA
+const IA_API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; 
 const MODEL_NAME = 'gemini-2.5-flash';
 const IA_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${IA_API_KEY}`;
 // -----------------------------------------------------------------------------------
@@ -251,28 +251,20 @@ function generar() {
 
     if (modeSwitch.checked) {
         // En modo Online, verificamos si la clave es de ejemplo
-        if (IA_API_KEY === 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ') {
+        if (IA_API_KEY === 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU') {
             document.getElementById("resultado").innerHTML = `
-                <strong style="color:red;">ADVERTENCIA:</strong> ¡La clave API de ejemplo está activa! No se puede conectar a la IA. 
-                Generando en modo **Offline** por defecto. Por favor, sustituye la clave en **script.js**.
+                <p style="color:red; font-weight:bold; text-align: left; padding: 15px; border: 1px solid red; background-color: #ffeaea;">
+                    <strong style="font-size: 1.1em;">⚠️ DIAGNÓSTICO CLAVE API:</strong><br>
+                    ¡La clave API de ejemplo está activa! **AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU**<br>
+                    <strong>EJECUCIÓN DETENIDA.</strong> Por favor, sustituye la clave en la línea 13 de **script.js** y vuelve a subir el código.
+                </p>
             `;
-            generarOffline();
-            return;
+            return; 
         }
+        
         generarOnline();
     } else {
-        // *** CAMBIO CRÍTICO DE DIAGNÓSTICO: Si no es Online, no genera Offline. ***
-        document.getElementById("resultado").innerHTML = `
-            <p style="color:blue; font-weight:bold; text-align: left; padding: 15px; border: 1px solid blue; background-color: #eaf3ff;">
-                <strong style="font-size: 1.1em;">DIAGNÓSTICO DEL SWITCH:</strong><br>
-                El modo **Online NO está marcado** (el script lee **modeSwitch.checked = false**).<br>
-                Si lo ves marcado, la caché o el HTML del switch están fallando.<br>
-                Generación cancelada.
-            </p>
-        `;
-        console.warn("DIAGNÓSTICO DEL SWITCH: modeSwitch.checked es FALSE. Ejecución detenida.");
-        // **IMPORTANTE:** Si ves el mensaje AZUL y estabas en Online, el fallo es el switch/caché.
-        return; 
+        generarOffline(); // Restablecemos el fallback a Offline por usabilidad
     }
 }
 
@@ -337,30 +329,33 @@ async function generarOnline() {
         sentimientos: sentimientos.join(', ')
     };
 
-    const promptText = `
-        Eres un generador de ideas para improvisación teatral.
-        Tu misión es crear una idea **totalmente nueva y única** para cada una de las 6 categorías.
-        Las nuevas ideas **NO DEBEN ESTAR INCLUIDAS** en las listas proporcionadas.
+    // ARREGLO CRÍTICO: Mover la systemInstruction al inicio del prompt
+    const systemInstruction = "Eres un generador de ideas de improvisación que siempre responde ÚNICAMENTE con los 6 elementos nuevos, separados por un punto y coma (;). NO incluyas introducciones ni explicaciones. Sigue exactamente este formato: Lugar;Personaje;Objeto;Objeto Raro (con descripción);Formato;Sentimiento.";
+
+    const userPromptText = `
+        Tu misión es crear una idea totalmente nueva y única para cada una de las 6 categorías.
+        Las nuevas ideas NO DEBEN ESTAR INCLUIDAS en las listas proporcionadas.
         
         Listas a EVITAR: Lugar: [${promptData.lugares}], Personaje: [${promptData.personajes}], Objeto: [${promptData.objetos}], Objeto Raro (con descripción): [${promptData.objetosRaros}], Formato: [${promptData.formatos}], Sentimiento: [${promptData.sentimientos}]
         
-        Responde ÚNICAMENTE con los 6 elementos nuevos, separados por un punto y coma (;). 
-        El personaje debe ser singular. El objeto raro debe incluir una breve descripción de su rareza.
-        
         EJEMPLO DE RESPUESTA PERFECTA: La Luna;Un astronauta jubilado;Una aspiradora;Un mapa que se desintegra al leerlo;Thriller medieval;Pánico
     `;
+    
+    const finalPrompt = systemInstruction + '\n\n' + userPromptText;
+
 
     try {
         const response = await fetch(IA_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                contents: [{ role: "user", parts: [{ text: promptText }] }],
+                // Usamos el prompt combinado
+                contents: [{ role: "user", parts: [{ text: finalPrompt }] }],
                 generationConfig: { 
                     temperature: 0.8, 
                     maxOutputTokens: 500,
                 },
-                systemInstruction: "Eres un generador de ideas de improvisación que siempre responde con 6 elementos nuevos separados por punto y coma (Lugar;Personaje;Objeto;Objeto Raro;Formato;Sentimiento).",
+                // ELIMINAMOS el campo 'systemInstruction' que causaba el error 400
             })
         });
 
@@ -400,13 +395,13 @@ async function generarOnline() {
         mostrarResultado(participantes, lugar, personajeResultado, objeto, objetoRaro, formato, sentimiento, true); 
 
     } catch (error) {
-        // Muestra el error detallado al usuario y NO llama a generarOffline()
+        // Muestra el error detallado al usuario y llama a generarOffline()
         document.getElementById("resultado").innerHTML = `<p style="color:red; font-weight:bold; text-align: left; padding: 15px; border: 1px solid red; background-color: #ffeaea;">
             ⚠️ **DIAGNÓSTICO CRÍTICO - FALLO IA** ⚠️<br><br>
             **Motivo del Fallo:** ${error.message}<br><br>
-            **--- DETÉNGASE AQUÍ ---** Este es el error. Por favor, reporta el mensaje exacto de arriba.<br>
-            Si necesitas usar la aplicación, pulsa el switch a modo Offline y vuelve a generar.
+            **Pista:** El error persiste. Si es 403/400, revisa cuota o validez de la clave. Generando en modo **Offline** como respaldo.
         </p>`;
+        generarOffline();
     }
 }
 
