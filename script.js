@@ -329,8 +329,8 @@ async function generarOnline() {
         sentimientos: sentimientos.join(', ')
     };
 
-    // ARREGLO CRÍTICO: Mover la systemInstruction al inicio del prompt
-    const systemInstruction = "Eres un generador de ideas de improvisación que siempre responde ÚNICAMENTE con los 6 elementos nuevos, separados por un punto y coma (;). NO incluyas introducciones ni explicaciones. Sigue exactamente este formato: Lugar;Personaje;Objeto;Objeto Raro (con descripción);Formato;Sentimiento.";
+    // ARREGLO FINAL DE PROMPT: Hacemos la instrucción de sistema más ESTRICTA e IMPERATIVA
+    const systemInstruction = "ERES UN GENERADOR ESTRICTO DE IDEAS. TU RESPUESTA DEBE CONTENER EXCLUSIVAMENTE 6 ELEMENTOS SEPARADOS POR PUNTO Y COMA (;). NO USES INTRODUCCIONES, EXPLICACIONES O TEXTO ADICIONAL. FORMATO OBLIGATORIO: Lugar;Personaje;Objeto;Objeto Raro (descripción);Formato;Sentimiento.";
 
     const userPromptText = `
         Tu misión es crear una idea totalmente nueva y única para cada una de las 6 categorías.
@@ -355,7 +355,7 @@ async function generarOnline() {
                     temperature: 0.8, 
                     maxOutputTokens: 500,
                 },
-                // ELIMINADO: systemInstruction, que causaba el error 400
+                // ELIMINADO: systemInstruction
             })
         });
 
@@ -374,13 +374,12 @@ async function generarOnline() {
         }
         
         const data = await response.json();
-        // Captura la respuesta o el error de bloqueo
         let ia_result_text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "Error de formato de IA (candidato vacío o bloqueado por política de seguridad de la IA)";
 
         // --- 4. PARSING CHECK ---
         const elementos = ia_result_text.split(';').map(e => e.trim());
 
-        // AQUI ESTÁ EL ARREGLO: Si el modelo falla o es bloqueado, lanza un error de formato.
+        // Si el modelo falla o es bloqueado, lanza un error de formato.
         if (elementos.length !== 6 || elementos.some(e => e === '')) {
              throw new Error(`Error de formato de IA. La respuesta no contiene 6 elementos separados por punto y coma (';') o uno está vacío. Esperados 6, recibidos ${elementos.length}. Respuesta de la IA: "${ia_result_text}"`);
         }
@@ -399,8 +398,8 @@ async function generarOnline() {
     } catch (error) {
         // Muestra el error detallado, pero luego hace fallback seguro.
         document.getElementById("resultado").innerHTML = `<p style="color:red; font-weight:bold; text-align: left; padding: 15px; border: 1px solid red; background-color: #ffeaea;">
-            ⚠️ **DIAGNÓSTICO CRÍTICO - FALLO IA (FORMATO/BLOQUEO)** ⚠️<br><br>
-            **Motivo del Fallo:** La IA falló al generar el formato o fue bloqueada. (${error.message})<br><br>
+            ⚠️ **DIAGNÓSTICO AUTOMÁTICO - FALLO IA** ⚠️<br><br>
+            **Motivo:** La IA falló al generar el formato estricto o fue bloqueada. (${error.message})<br><br>
             Generando automáticamente en modo **Offline** como respaldo.
         </p>`;
         // RESTAURAMOS EL FALLBACK SEGURO
