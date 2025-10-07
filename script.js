@@ -355,7 +355,7 @@ async function generarOnline() {
                     temperature: 0.8, 
                     maxOutputTokens: 500,
                 },
-                // ELIMINAMOS el campo 'systemInstruction' que causaba el error 400
+                // ELIMINADO: systemInstruction, que causaba el error 400
             })
         });
 
@@ -366,7 +366,8 @@ async function generarOnline() {
             let diagnosis = `Status: ${response.status}. `;
 
             if (response.status === 400 || response.status === 403) {
-                diagnosis += `Error de API: Causa probable: Clave API inválida o sin saldo/permisos. Mensaje: ${errorMessage}`;
+                // Esto ocurrirá si la clave es inválida o si hay problemas de cuota
+                diagnosis += `Error de API: Clave API inválida o sin saldo/permisos. Mensaje: ${errorMessage}`;
             } else {
                  diagnosis += `Error desconocido: ${errorMessage}`;
             }
@@ -401,6 +402,7 @@ async function generarOnline() {
             **Motivo del Fallo:** ${error.message}<br><br>
             **Pista:** El error persiste. Si es 403/400, revisa cuota o validez de la clave. Generando en modo **Offline** como respaldo.
         </p>`;
+        // Usamos la función original de Offline si el modo Online falla
         generarOffline();
     }
 }
