@@ -340,12 +340,6 @@ async function generarOnline() {
     `;
 
     try {
-        // --- DIAGNÓSTICO EN CONSOLA ---
-        const keyStatus = IA_API_KEY.includes('RU') ? '¡CLAVE DE EJEMPLO ACTIVA!' : 'Clave Real Detectada';
-        console.log("GENERAR ONLINE - DIAGNÓSTICO CLAVE/URL:", { url: IA_API_URL, status: keyStatus });
-        console.log("GENERAR ONLINE - PROMPT ENVIADO (fragmento):", promptText.substring(0, 150) + '...');
-        // ------------------------------
-
         const response = await fetch(IA_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -374,9 +368,6 @@ async function generarOnline() {
         }
         
         const data = await response.json();
-        // Consola muestra el resultado de la llamada (útil para debug de formato)
-        console.log("GENERAR ONLINE - Respuesta de la API recibida (para debug de formato):", data);
-
         let ia_result_text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "Error de formato de IA (candidato vacío o bloqueado por política de seguridad de la IA)";
 
         // --- 4. PARSING CHECK ---
@@ -398,17 +389,16 @@ async function generarOnline() {
         mostrarResultado(participantes, lugar, personajeResultado, objeto, objetoRaro, formato, sentimiento, true); 
 
     } catch (error) {
-        console.error("GENERAR ONLINE - ERROR CRÍTICO EN TRY/CATCH:", error);
+        // Log para que el usuario pueda verlo en la consola (F12)
+        console.error("GENERAR ONLINE - ERROR CRÍTICO EN TRY/CATCH FINAL:", error);
         
-        // Muestra el error detallado al usuario
+        // Muestra el error detallado al usuario y NO llama a generarOffline()
         document.getElementById("resultado").innerHTML = `<p style="color:red; font-weight:bold; text-align: left; padding: 15px; border: 1px solid red; background-color: #ffeaea;">
-            ⚠️ **ERROR CRÍTICO MODO ONLINE** ⚠️<br><br>
+            ⚠️ **DIAGNÓSTICO CRÍTICO - FALLO IA** ⚠️<br><br>
             **Motivo del Fallo:** ${error.message}<br><br>
-            **Pista:** Si el Status es 400/403, tu clave está mal o sin cuota. Si el error es de Formato, la IA no está siguiendo la instrucción de usar punto y coma. Generando en modo **Offline** como respaldo.
+            **--- DETÉNGASE AQUÍ ---** Este es el error. Por favor, reporta el mensaje exacto de arriba.<br>
+            Si necesitas usar la aplicación ahora, pulsa el switch a modo Offline.
         </p>`;
-        
-        // Fallback
-        generarOffline();
     }
 }
 
