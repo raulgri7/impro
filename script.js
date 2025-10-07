@@ -5,7 +5,7 @@
 // ====================================================================================
 
 // --- CONFIGURACIÓN DE LA API DE GOOGLE GEMINI ---
-// ¡IMPORTANTE! CLAVE API VÁLIDA INTEGRADA
+// CLAVE API VÁLIDA INTEGRADA
 const IA_API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; 
 const MODEL_NAME = 'gemini-2.5-flash';
 const IA_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${IA_API_KEY}`;
@@ -264,7 +264,7 @@ function generar() {
         
         generarOnline();
     } else {
-        generarOffline(); // Restablecemos el fallback a Offline por usabilidad
+        generarOffline();
     }
 }
 
@@ -307,7 +307,7 @@ function generarOffline() {
 }
 
 
-// MODO ONLINE: Conexión a la API de IA (Con Diagnóstico Mejorado)
+// MODO ONLINE: Conexión a la API de IA (Sin Fallback en caso de error)
 async function generarOnline() {
     document.getElementById("resultado").innerHTML = '<span class="cargando">Conectando con la IA... generando ideas únicas...</span>';
     
@@ -366,8 +366,7 @@ async function generarOnline() {
             let diagnosis = `Status: ${response.status}. `;
 
             if (response.status === 400 || response.status === 403) {
-                // Esto ocurrirá si la clave es inválida o si hay problemas de cuota
-                diagnosis += `Error de API: Clave API inválida o sin saldo/permisos. Mensaje: ${errorMessage}`;
+                diagnosis += `Error de API: Revisa cuota o validez de la clave. Mensaje: ${errorMessage}`;
             } else {
                  diagnosis += `Error desconocido: ${errorMessage}`;
             }
@@ -396,14 +395,12 @@ async function generarOnline() {
         mostrarResultado(participantes, lugar, personajeResultado, objeto, objetoRaro, formato, sentimiento, true); 
 
     } catch (error) {
-        // Muestra el error detallado al usuario y llama a generarOffline()
+        // Muestra el error detallado y NO hace fallback
         document.getElementById("resultado").innerHTML = `<p style="color:red; font-weight:bold; text-align: left; padding: 15px; border: 1px solid red; background-color: #ffeaea;">
-            ⚠️ **DIAGNÓSTICO CRÍTICO - FALLO IA** ⚠️<br><br>
+            ⚠️ **DIAGNÓSTICO CRÍTICO - FALLO IA FORZADO** ⚠️<br><br>
             **Motivo del Fallo:** ${error.message}<br><br>
-            **Pista:** El error persiste. Si es 403/400, revisa cuota o validez de la clave. Generando en modo **Offline** como respaldo.
+            **--- DETÉNGASE AQUÍ ---** Este es el error. Por favor, reporta el mensaje exacto de arriba.
         </p>`;
-        // Usamos la función original de Offline si el modo Online falla
-        generarOffline();
     }
 }
 
