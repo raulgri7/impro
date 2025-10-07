@@ -307,7 +307,7 @@ function generarOffline() {
 }
 
 
-// MODO ONLINE: Conexión a la API de IA (MODO DEBUG TEMPORAL)
+// MODO ONLINE: Conexión a la API de IA (Con Fallback y Temperatura ajustada)
 async function generarOnline() {
     document.getElementById("resultado").innerHTML = '<span class="cargando">Conectando con la IA... generando ideas únicas...</span>';
     
@@ -319,24 +319,14 @@ async function generarOnline() {
     alumnosRestantes = poolSorteable; 
     poblarSelect();
     
-    // 2. Construcción del Prompt
-    const promptData = {
-        lugares: lugares.join(', '),
-        personajes: personajes.join(', '),
-        objetos: objetos.join(', '),
-        objetosRaros: objetosRaros.join(', '),
-        formatos: formatos.join(', '),
-        sentimientos: sentimientos.join(', ')
-    };
+    // 2. Construcción del Prompt (¡SIMPLIFICADO!)
+    
+    // INSTRUCCIÓN DE SISTEMA: Máxima obediencia al formato
+    const systemInstruction = "ERES UN GENERADOR ESTRICTO DE IDEAS. TU RESPUESTA DEBE CONTENER EXCLUSIVAMENTE 6 ELEMENTOS SEPARADOS POR PUNTO Y COMA (;). NO USES INTRODUCCIONES, EXPLICACIONES O TEXTO ADICIONAL. FORMATO OBLIGATORIO: Lugar;Personaje;Objeto;Objeto Raro (descripción);Formato;Sentimiento.";
 
-    // PROMPT FINAL Y MÁS ESTRICTO
-    const systemInstruction = "ERES UN GENERADOR ESTRICTO DE IDEAS. TU RESPUESTA DEBE CONTENER EXCLUSIVAMENTE 6 ELEMENTOS SEPARADOS POR PUNTO Y COMA (;). NO USES INTRODUCCIONES, EXPLICACIONES O TEXTO ADICIONAL. FORMATO OBLIGATORIO: Lugar;Personaje;Objeto;Objeto Raro (descripción);Formato;Sentimiento. Las ideas deben ser divertidas y apropiadas para una clase de improvisación.";
-
+    // PROMPT DE USUARIO: Simplemente pide la generación
     const userPromptText = `
-        Tu misión es crear una idea totalmente nueva y única para cada una de las 6 categorías.
-        Las nuevas ideas NO DEBEN ESTAR INCLUIDAS en las listas proporcionadas.
-        
-        Listas a EVITAR: Lugar: [${promptData.lugares}], Personaje: [${promptData.personajes}], Objeto: [${promptData.objetos}], Objeto Raro (con descripción): [${promptData.objetosRaros}], Formato: [${promptData.formatos}], Sentimiento: [${promptData.sentimientos}]
+        Genera una idea única y creativa para cada una de las 6 categorías solicitadas. La respuesta debe ser apropiada para una clase de improvisación.
         
         EJEMPLO DE RESPUESTA PERFECTA: La Luna;Un astronauta jubilado;Una aspiradora;Un mapa que se desintegra al leerlo;Thriller medieval;Pánico
     `;
@@ -352,7 +342,7 @@ async function generarOnline() {
                 // Usamos el prompt combinado
                 contents: [{ role: "user", parts: [{ text: finalPrompt }] }],
                 generationConfig: { 
-                    temperature: 0.6, // AJUSTE CLAVE: Reducido para mayor obediencia
+                    temperature: 0.6, // Ajuste para obediencia al formato
                     maxOutputTokens: 500,
                 },
                 // ELIMINADO: systemInstruction
@@ -374,43 +364,35 @@ async function generarOnline() {
         }
         
         const data = await response.json();
-        // Captura la respuesta o el error de bloqueo
         let ia_result_text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "ERROR: CANDIDATO VACÍO O BLOQUEADO POR POLÍTICA DE SEGURIDAD";
 
-        // =========================================================================
-        // 🛑🛑 TEMPORAL: MODO DEBUG - Muestra la respuesta RAW y DETIENE la ejecución
-        // =========================================================================
-        document.getElementById("resultado").innerHTML = `<p style="text-align: left; padding: 15px; border: 2px solid #007bff; background-color: #e3f2fd; color: #007bff;">
-            **RESPUESTA RAW DE LA IA (Modo Debug)**<br>
-            <pre style="white-space: pre-wrap; word-break: break-all; margin: 10px 0; font-weight: bold; font-size: 1.1em; color: #0d47a1;">${ia_result_text}</pre>
-            **DIAGNÓSTICO:** Por favor, copia el texto exacto que aparece arriba (después de la línea azul) y compártelo. Una vez resuelto, tendrás que volver al código anterior.
-        </p>`;
-        return; // Detener la ejecución aquí
-        // =========================================================================
-        
-        // --- 4. PARSING CHECK --- (El código de aquí abajo NO se ejecutará)
+        // --- 4. PARSING CHECK ---
         const elementos = ia_result_text.split(';').map(e => e.trim());
 
-        if (elementos.length !== 6 || elementos.some(e => e === '')) {
-             throw new Error(`Error de formato de IA. La respuesta no contiene 6 elementos separados por punto y coma (';') o uno está vacío. Esperados 6, recibidos ${elementos.length}. Respuesta de la IA: "${ia_result_text}"`);
+        // Si el modelo falla (incluido el error de "CANDIDATO VACÍO/BLOQUEADO"), lanza un error de formato.
+        if (elementos.length !== 6 || elementos.some(e => e === '') || ia_result_text.startsWith("ERROR:")) {
+             throw new Error(`Error de formato de IA. La respuesta no contiene 6 elementos separados por punto y coma (';') o uno está vacío. Respuesta de la IA: "${ia_result_text}"`);
         }
         
         const [lugar, personajePrincipal, objeto, objetoRaro, formato, sentimiento] = elementos;
 
+        // Lógica de Personaje para Online: un principal + aviso de extras
         let personajeResultado = personajePrincipal; 
         if (participantes.length > 1) {
              personajeResultado += ` (y ${participantes.length - 1} más)`;
         }
 
+        // 5. Mostrar Resultado
         mostrarResultado(participantes, lugar, personajeResultado, objeto, objetoRaro, formato, sentimiento, true); 
 
     } catch (error) {
-        // Muestra el error detallado, pero luego hace fallback seguro.
+        // Muestra el error de diagnóstico (solo en caso de fallo crítico) pero siempre cae a Offline
         document.getElementById("resultado").innerHTML = `<p style="color:red; font-weight:bold; text-align: left; padding: 15px; border: 1px solid red; background-color: #ffeaea;">
-            ⚠️ **DIAGNÓSTICO AUTOMÁTICO - FALLO DE CONEXIÓN/API** ⚠️<br><br>
-            **Motivo:** Error de red o en la llamada inicial. (${error.message})<br><br>
+            ⚠️ **DIAGNÓSTICO AUTOMÁTICO - FALLO IA** ⚠️<br><br>
+            **Motivo:** La IA falló al generar el formato o fue bloqueada. Detalles: ${error.message}.<br><br>
             Generando automáticamente en modo **Offline** como respaldo.
         </p>`;
+        // FALLBACK SEGURO
         generarOffline();
     }
 }
