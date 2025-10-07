@@ -411,8 +411,8 @@ function mostrarResultado(participantes, lugar, personajeResultado, objeto, obje
     }
     
     const modeMessage = isOnline 
-        ? '<span style="color:#4CAF50; font-weight:bold;"> [MODO ONLINE (IA) 🤖]</span>'
-        : '<span style="color:#5f6368; font-weight:bold;"> [MODO OFFLINE 💾]</span>';
+        ? '<span style="color:#4CAF50; font-weight:bold;"> &nbsp;[Online (IA) 🤖]</span>'
+        : '<span style="color:#5f6368; font-weight:bold;"> &nbsp;[Offline 💾]</span>';
 
     const btn = (categoria) => 
         `<button class="regenerate-btn" onclick="regenerarCategoria('${categoria}')" title="Generar solo ${categoria} (Offline)">🔄</button>`;
