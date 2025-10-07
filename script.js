@@ -307,7 +307,7 @@ function generarOffline() {
 }
 
 
-// MODO ONLINE: Conexión a la API de IA (Sin Fallback en caso de error)
+// MODO ONLINE: Conexión a la API de IA (Con Fallback)
 async function generarOnline() {
     document.getElementById("resultado").innerHTML = '<span class="cargando">Conectando con la IA... generando ideas únicas...</span>';
     
@@ -374,11 +374,13 @@ async function generarOnline() {
         }
         
         const data = await response.json();
+        // Captura la respuesta o el error de bloqueo
         let ia_result_text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "Error de formato de IA (candidato vacío o bloqueado por política de seguridad de la IA)";
 
         // --- 4. PARSING CHECK ---
         const elementos = ia_result_text.split(';').map(e => e.trim());
 
+        // AQUI ESTÁ EL ARREGLO: Si el modelo falla o es bloqueado, lanza un error de formato.
         if (elementos.length !== 6 || elementos.some(e => e === '')) {
              throw new Error(`Error de formato de IA. La respuesta no contiene 6 elementos separados por punto y coma (';') o uno está vacío. Esperados 6, recibidos ${elementos.length}. Respuesta de la IA: "${ia_result_text}"`);
         }
@@ -395,12 +397,14 @@ async function generarOnline() {
         mostrarResultado(participantes, lugar, personajeResultado, objeto, objetoRaro, formato, sentimiento, true); 
 
     } catch (error) {
-        // Muestra el error detallado y NO hace fallback
+        // Muestra el error detallado, pero luego hace fallback seguro.
         document.getElementById("resultado").innerHTML = `<p style="color:red; font-weight:bold; text-align: left; padding: 15px; border: 1px solid red; background-color: #ffeaea;">
-            ⚠️ **DIAGNÓSTICO CRÍTICO - FALLO IA FORZADO** ⚠️<br><br>
-            **Motivo del Fallo:** ${error.message}<br><br>
-            **--- DETÉNGASE AQUÍ ---** Este es el error. Por favor, reporta el mensaje exacto de arriba.
+            ⚠️ **DIAGNÓSTICO CRÍTICO - FALLO IA (FORMATO/BLOQUEO)** ⚠️<br><br>
+            **Motivo del Fallo:** La IA falló al generar el formato o fue bloqueada. (${error.message})<br><br>
+            Generando automáticamente en modo **Offline** como respaldo.
         </p>`;
+        // RESTAURAMOS EL FALLBACK SEGURO
+        generarOffline();
     }
 }
 
