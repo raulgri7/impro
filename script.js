@@ -251,7 +251,7 @@ function generar() {
 
     if (modeSwitch.checked) {
         // En modo Online, verificamos si la clave es de ejemplo
-        if (IA_API_KEY === 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU') {
+        if (IA_API_KEY === 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ') {
             document.getElementById("resultado").innerHTML = `
                 <strong style="color:red;">ADVERTENCIA:</strong> ¡La clave API de ejemplo está activa! No se puede conectar a la IA. 
                 Generando en modo **Offline** por defecto. Por favor, sustituye la clave en **script.js**.
