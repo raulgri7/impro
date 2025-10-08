@@ -30,27 +30,23 @@
     
     <script>
         // --- CLAVE API Y CONFIGURACIÓN ---
-        // ¡IMPORTANTE! Se ha insertado la clave que has confirmado como válida.
+        // ¡ADVERTENCIA! Reemplaza 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ' con tu CLAVE API real
         const API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; 
         const MODEL_NAME = 'gemini-2.5-flash';
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
-        const resultadoDiv = document.getElementById('resultado');
 
         // Función para construir el PROMPT detallado y MEJORADO
         function construirPrompt() {
-            // ... (Toda la definición del prompt, reglas, formato y ejemplos que ya tenías)
-            // Para simplificar y no repetir 50 ejemplos, lo dejo truncado aquí, pero el contenido completo es el mismo.
-
             const rol = `
                 **ROL:** Eres un **Maestro de Ceremonias de Improvisación** experto en generar detonantes de escena de alto potencial dramático y cómico. Tu única función es crear una base de escena siguiendo instrucciones estrictas.
             `;
 
             const reglas = `
                 **REGLAS DE CONTENIDO:**
-                1.  **¿Quiénes son?:** Debe ser una **relación o vínculo conflictivo/interesante** entre **2 o 3 personajes**. Incluye su ocupación, relación familiar o un rasgo de personalidad clave (ej: Dos rivales que han tenido un accidente, Un padre ultraconservador y su hija que acaba de tatuarse). **IMPORTANTE: Evita repetir temas o tipos de personajes recurrentes como inspectores de sanidad, cocineros, o hermanos.**
+                1.  **¿Quiénes son?:** Debe ser una **relación o vínculo conflictivo/interesante** entre **2 o 3 personajes**. Incluye su ocupación, relación familiar o un rasgo de personalidad clave (ej: Dos rivales que han tenido un accidente, Un padre ultraconservador y su hija que acaba de tatuarse).
                 2.  **¿Dónde están? (Opción Surrealista):** Un lugar **totalmente absurdo, mágico o imposible** que fuerce la aceptación de una realidad completamente nueva (ej: En la dimensión donde viven los recuerdos olvidados, En el interior de un motor de reacción a punto de encenderse).
                 3.  **¿Dónde están? (Opción Mundana con Giro Cómico/Realista):** Un lugar cotidiano, pero que contenga una **complicación divertida, socialmente incómoda o un problema ridículo, pero totalmente plausible en la vida real** (ej: En un restaurante caro y tienen la cartera olvidada, En una reunión familiar donde todos deben llevar un sombrero ridículo).
-                4.  **¿Dónde están? (Opción Mundana Aburrida):** Un lugar **extremadamente común, neutral y sin ningún giro o conflicto inicial**. Evita lugares ya usados en el resto de opciones (ej: En la cola para pagar en el supermercado, En una parada de autobús vacía, En un pasillo de oficina).
+                4.  **¿Dónde están? (Opción Mundana Aburrida):** Un lugar **extremadamente común, neutral y sin ningún giro o conflicto inicial** (ej: En la cola para pagar en el supermercado, En una parada de autobús vacía, En un pasillo de oficina).
             `;
 
             const formato = `
@@ -62,94 +58,184 @@
                 Línea 3: Dónde están (Mundana con Giro Cómico/Realista): [Lugar común con un giro divertido y realista]
                 Línea 4: Dónde están (Mundana Aburrida): [Lugar extremadamente común, neutral y sin gancho]
             `;
-            
-            // Los ejemplos completos son demasiado largos para incluir aquí de nuevo, pero el prompt final debe incluirlos.
-            // Para fines de funcionamiento, el texto completo del prompt es la unión de rol + reglas + formato + todos los ejemplos.
 
-            return rol + reglas + formato + "\n\n**EJEMPLOS DE OUTPUT PARA APRENDIZAJE**\n" + [
+            const ejemplos = [
                 "Ejemplo 1:\nQuiénes son: Dos inspectores de sanidad muy serios.\nDónde están (Surrealista): Dentro de un calcetín sucio gigante, donde las pelusas son montañas.\nDónde están (Mundana con Giro Cómico/Realista): En el probador de una tienda de ropa infantil de lujo, probando ropa para un bebé y uno de ellos se ha quedado atascado con un mono.\nDónde están (Mundana Aburrida): En un ascensor que sube lentamente al piso 3.",
-                // ... (El resto de tus 49 ejemplos van aquí) ...
-                "Ejemplo 33:\nQuiénes son: Un instructor de supervivencia que nunca ha salido de la ciudad y su alumno, un niño de 10 años.\nDónde están (Surrealista): En un bosque de plastilina, donde los animales son de goma.\nDónde están (Mundana con Giro Cómico/Realista): En un camping de lujo, intentando encender un fuego con piedras.\nDónde están (Mundana Aburrida): En la puerta de un cine, esperando a que salgan sus amigos."
-            ].join('\n\n');
+                "Ejemplo 2:\nQuiénes son: Una madre y su hijo adolescente que discuten por las notas.\nDónde están (Surrealista): En la luna, intentando encontrar cobertura.\nDónde están (Mundana con Giro Cómico/Realista): En una boda, en la que la madre ha confundido al novio con el camarero.\nDónde están (Mundana Aburrida): En un parking subterráneo, buscando el coche.",
+                "Ejemplo 3:\nQuiénes son: Tres compañeros de trabajo que acaban de ganar la lotería.\nDónde están (Surrealista): Cruzando un desierto donde el suelo es gelatina.\nDónde están (Mundana con Giro Cómico/Realista): En la sección de comida congelada de un supermercado, en pleno verano, fingiendo que no se conocen para no repartir el premio.\nDónde están (Mundana Aburrida): En la sala de espera de un médico, esperando un turno.",
+                // --- 50 EJEMPLOS ADICIONALES PARA ENRIQUECER LA CREATIVIDAD ---
+                "Ejemplo 4:\nQuiénes son: Un chef famoso y su crítico culinario encubierto, que están en una cita a ciegas.\nDónde están (Surrealista): En el centro de un arcoíris que empieza a desvanecerse por un apagón cósmico.\nDónde están (Mundana con Giro Cómico/Realista): En una lavandería automática, donde han confundido sus cestas de ropa interior.\nDónde están (Mundana Aburrida): En un banco del parque, mirando a la gente pasar.",
+                "Ejemplo 5:\nQuiénes son: Dos extraterrestres camuflados como humanos que asisten a una clase de yoga.\nDónde están (Surrealista): En la mente de un caracol, donde los pensamientos son laberintos viscosos.\nDónde están (Mundana con Giro Cómico/Realista): En una reunión de la comunidad de vecinos, intentando explicar por qué su nave espacial ocupa tres plazas de garaje.\nDónde están (Mundana Aburrida): En la recepción de un hotel de tres estrellas.",
+                "Ejemplo 6:\nQuiénes son: Un cazador de vampiros retirado y su nieto, un fanático de Crepúsculo.\nDónde están (Surrealista): En el interior de un reloj de arena, donde el tiempo corre hacia atrás.\nDónde están (Mundana con Giro Cómico/Realista): En una tienda de muebles IKEA, discutiendo sobre cómo montar una estantería que parece imposible.\nDónde están (Mundana Aburrida): En la caja de un peaje en carretera.",
+                "Ejemplo 7:\nQuiénes son: Un ilusionista fracasado y su ayudante, que están hartos de ser cortados por la mitad.\nDónde están (Surrealista): Flotando en una nube hecha de excusas no dichas.\nDónde están (Mundana con Giro Cómico/Realista): En un coche que ha quedado atascado en un túnel de lavado automático y el programa es interminable.\nDónde están (Mundana Aburrida): En una cafetería, esperando que les sirvan.",
+                "Ejemplo 8:\nQuiénes son: Un político honesto (recién llegado al cargo) y su asesor cínico.\nDónde están (Surrealista): En el sótano del edificio del tiempo, donde guardan los minutos que sobran.\nDónde están (Mundana con Giro Cómico/Realista): En un gimnasio, intentando usar una máquina de pesas que solo tiene las instrucciones en chino antiguo.\nDónde están (Mundana Aburrida): En un pasillo de hospital, esperando noticias.",
+                "Ejemplo 9:\nQuiénes son: Dos estatuas de museo que han cobrado vida de repente.\nDónde están (Surrealista): En el corazón de un volcán inactivo, debatiendo quién debe despertar primero.\nDónde están (Mundana con Giro Cómico/Realista): En un cine, donde uno no para de mandar mensajes de texto con el brillo a tope y el otro intenta callarlo.\nDónde están (Mundana Aburrida): En la cola de una taquilla para comprar entradas.",
+                "Ejemplo 10:\nQuiénes son: El director de una orquesta y el músico que nunca afina el violín.\nDónde están (Surrealista): Dentro de una nota musical que flota por el espacio.\nDónde están (Mundana con Giro Cómico/Realista): En un ascensor que solo suena música de ascensor ridículamente alegre y se estropea.\nDónde están (Mundana Aburrida): En el andén de una estación de tren.",
+                "Ejemplo 11:\nQuiénes son: Dos mejores amigos que secretamente están enamorados, pero uno se va a casar.\nDónde están (Surrealista): En el reflejo de un espejo que solo muestra futuros alternativos.\nDónde están (Mundana con Giro Cómico/Realista): En una despedida de soltero/a donde el artista contratado para el show es terriblemente malo y ellos deben disimular.\nDónde están (Mundana Aburrida): En una librería, buscando el mismo libro.",
+                "Ejemplo 12:\nQuiénes son: Un bibliotecario obsesionado con el silencio y un vendedor a gritos.\nDónde están (Surrealista): En el mundo creado por un niño con sus bloques de construcción.\nDónde están (Mundana con Giro Cómico/Realista): En una subasta de arte donde no tienen dinero, pero accidentalmente levantan la mano y ganan una obra.\nDónde están (Mundana Aburrida): En un autobús nocturno vacío.",
+                "Ejemplo 13:\nQuiénes son: Un fantasma y el nuevo inquilino de su casa, que no le tiene miedo.\nDónde están (Surrealista): En el fondo de un vaso de leche a punto de derramarse.\nDónde están (Mundana con Giro Cómico/Realista): En un mercadillo de segunda mano, intentando vender objetos robados que son claramente falsos.\nDónde están (Mundana Aburrida): En la ventanilla de un cajero automático que no funciona.",
+                "Ejemplo 14:\nQuiénes son: Dos payasos que acaban de ser despedidos de un circo.\nDónde están (Surrealista): En una jaula de circo, pero el domador es un gorila.\nDónde están (Mundana con Giro Cómico/Realista): En un funeral, y no pueden parar de tener ataques de risa nerviosa.\nDónde están (Mundana Aburrida): En una ferretería, buscando un tornillo específico.",
+                "Ejemplo 15:\nQuiénes son: Un maestro de artes marciales muy sabio y su alumno despistado.\nDónde están (Surrealista): En el tejado de una casa que se ha convertido en un barco.\nDónde están (Mundana con Giro Cómico/Realista): En la consulta de un dentista, donde descubren que el asistente es su ex pareja.\nDónde están (Mundana Aburrida): En un paso de cebra, esperando que el semáforo cambie.",
+                "Ejemplo 16:\nQuiénes son: Dos ladrones muy torpes intentando robar una galleta.\nDónde están (Surrealista): En la boca de un dragón dormido.\nDónde están (Mundana con Giro Cómico/Realista): En una reunión de Alcohólicos Anónimos, donde uno de ellos está intentando esconder que está bebiendo un refresco.\nDónde están (Mundana Aburrida): En el probador de unas gafas de sol.",
+                "Ejemplo 17:\nQuiénes son: Una mujer que ve el futuro y su marido, un escéptico radical.\nDónde están (Surrealista): En el interior de un sueño que es compartido por mil personas.\nDónde están (Mundana con Giro Cómico/Realista): En un atasco de tráfico de 6 horas, donde solo tienen una botella de agua y un paquete de chicles.\nDónde están (Mundana Aburrida): En una cola para devolver un producto en una tienda.",
+                "Ejemplo 18:\nQuiénes son: Un inventor de máquinas inútiles y su inversor impaciente.\nDónde están (Surrealista): En la sombra de una persona, donde los miedos cobran forma.\nDónde están (Mundana con Giro Cómico/Realista): En un restaurante de lujo de 'todo lo que puedas comer', donde han comido demasiado y no pueden moverse.\nDónde están (Mundana Aburrida): En una gasolinera a medianoche.",
+                "Ejemplo 19:\nQuiénes son: Dos actores que están interpretando a la misma persona en dos películas distintas.\nDónde están (Surrealista): En un teatro donde el público son sus personajes fallidos.\nDónde están (Mundana con Giro Cómico/Realista): En una audición donde el director les pide que ladren, pero no saben cómo ladra un perro salchicha.\nDónde están (Mundana Aburrida): En la entrada de un centro comercial.",
+                "Ejemplo 20:\nQuiénes son: Un padre y un hijo que compiten por el mismo puesto de trabajo.\nDónde están (Surrealista): En el reflejo de una cucharilla de café que distorsiona la realidad.\nDónde están (Mundana con Giro Cómico/Realista): En un curso de cocina de alta gastronomía, pero solo saben hacer huevos fritos.\nDónde están (Mundana Aburrida): En una parada de taxis lloviendo a cántaros.",
+                "Ejemplo 21:\nQuiénes son: Un agente secreto y el repartidor de pizza que lo ha visto todo.\nDónde están (Surrealista): En una gota de lluvia que cae lentamente sobre una ciudad.\nDónde están (Mundana con Giro Cómico/Realista): En un balneario de relax y masajes, donde no pueden parar de hablar por teléfono en voz alta.\nDónde están (Mundana Aburrida): En un autobús, esperando que llegue su parada.",
+                "Ejemplo 22:\nQuiénes son: Dos abuelos que se han escapado de la residencia.\nDónde están (Surrealista): En una nube de algodón de azúcar que les da poderes.\nDónde están (Mundana con Giro Cómico/Realista): En una discoteca de moda a las 3 de la mañana, intentando pedir un té de hierbas.\nDónde están (Mundana Aburrida): En un campo de golf, buscando una pelota perdida.",
+                "Ejemplo 23:\nQuiénes son: Una vendedora de Herbalife y una cliente que solo quiere agua.\nDónde están (Surrealista): En el estómago de un ratón de biblioteca.\nDónde están (Mundana con Giro Cómico/Realista): En una reunión de tupperware donde nadie ha traído tuppers, sino que están discutiendo sobre el significado de la vida.\nDónde están (Mundana Aburrida): En una tienda de electrónica mirando televisores.",
+                "Ejemplo 24:\nQuiénes son: El entrenador de un equipo perdedor y su estrella que solo piensa en vacaciones.\nDónde están (Surrealista): En un balón de fútbol que es el centro del universo.\nDónde están (Mundana con Giro Cómico/Realista): En la cola de un parque temático que no avanza desde hace dos horas, y han de ir urgentemente al baño.\nDónde están (Mundana Aburrida): En un semáforo que está en rojo permanentemente.",
+                "Ejemplo 25:\nQuiénes son: Dos hermanos siameses que han roto su relación y quieren independizarse.\nDónde están (Surrealista): En una isla que solo aparece los martes a las 4 de la mañana.\nDónde están (Mundana con Giro Cómico/Realista): En el baño de un avión, en pleno despegue, debatiendo quién debe usar primero el inodoro.\nDónde están (Mundana Aburrida): En un parking subterráneo, buscando el coche.",
+                "Ejemplo 26:\nQuiénes son: Un profesor de filosofía y su estudiante que le rebate todo con argumentos de memes.\nDónde están (Surrealista): En el pozo de los deseos, donde solo hay deseos irónicos.\nDónde están (Mundana con Giro Cómico/Realista): En un sex shop, comprando un regalo para su abuela.\nDónde están (Mundana Aburrida): En la sala de espera de un tatuador.",
+                "Ejemplo 27:\nQuiénes son: Una pareja que está intentando romper, pero viven en un piso minúsculo.\nDónde están (Surrealista): En una pecera gigante, donde el suelo es arena de colores.\nDónde están (Mundana con Giro Cómico/Realista): En un concierto de música clásica, donde se han sentado en el sitio equivocado y no pueden levantarse sin molestar a mil personas.\nDónde están (Mundana Aburrida): En la sección de libros de autoayuda de una tienda.",
+                "Ejemplo 28:\nQuiénes son: Dos historiadores que descubren que el pasado es falso.\nDónde están (Surrealista): En un cuadro renacentista, debatiendo con los modelos.\nDónde están (Mundana con Giro Cómico/Realista): En una fiesta de disfraces, donde ambos se han vestido del mismo personaje de un videojuego muy oscuro.\nDónde están (Mundana Aburrida): En una estación de metro a las horas pico.",
+                "Ejemplo 29:\nQuiénes son: Un cartero que lee todas las cartas y la dueña de una de ellas.\nDónde están (Surrealista): En un buzón, donde las cartas son seres vivos.\nDónde están (Mundana con Giro Cómico/Realista): En la cola de un buffet libre, donde la comida se está acabando y solo queda un trozo de tarta de cumpleaños.\nDónde están (Mundana Aburrida): En una oficina de correos, enviando un paquete.",
+                "Ejemplo 30:\nQuiénes son: Un astronauta que teme el espacio y su jefe, un fanático de la ciencia ficción.\nDónde están (Surrealista): En el agujero negro de la lavadora, donde se pierden los calcetines.\nDónde están (Mundana con Giro Cómico/Realista): En un camping de lujo, intentando montar una tienda de campaña de tres pisos con las instrucciones en alemán.\nDónde están (Mundana Aburrida): En una cabina de fotos antigua.",
+                "Ejemplo 31:\nQuiénes son: Un experto en feng shui y un coleccionista de objetos desordenados.\nDónde están (Surrealista): En la dimensión donde las matemáticas son poesía.\nDónde están (Mundana con Giro Cómico/Realista): En una clase de manualidades donde tienen que hacer algo bonito con plastilina y uno no tiene ni idea.\nDónde están (Mundana Aburrida): En un túnel peatonal.",
+                "Ejemplo 32:\nQuiénes son: El villano de una película y el extra que interrumpe su monólogo.\nDónde están (Surrealista): En el plató de una película que ha quedado abandonado en la luna.\nDónde están (Mundana con Giro Cómico/Realista): En una piscina pública, donde no pueden encontrar sus chanclas y deben caminar descalzos por el suelo mojado.\nDónde están (Mundana Aburrida): En una tienda de segunda mano, buscando vinilos.",
+                "Ejemplo 33:\nQuiénes son: Dos modelos de pasarela que solo comen lechuga.\nDónde están (Surrealista): En la pasarela de una nube que solo tiene forma de zanahoria.\nDónde están (Mundana con Giro Cómico/Realista): En un restaurante de comida rápida, intentando pedir un menú saludable sin que nadie les juzgue.\nDónde están (Mundana Aburrida): En un quiosco de prensa, comprando una revista.",
+                "Ejemplo 34:\nQuiénes son: Un cazador de ovnis que por fin encuentra uno y su cuñado, que pasaba por allí.\nDónde están (Surrealista): Dentro de una melodía que nadie ha escuchado aún.\nDónde están (Mundana con Giro Cómico/Realista): En un supermercado, en la sección de frutos secos, debatiendo sobre si la fruta confitada es un fruto seco.\nDónde están (Mundana Aburrida): En el portal de un edificio de apartamentos.",
+                "Ejemplo 35:\nQuiénes son: Una hija que trae a casa su novio invisible y su padre, que intenta actuar normal.\nDónde están (Surrealista): En el fondo de una taza de café, donde la cafeína es un océano.\nDónde están (Mundana con Giro Cómico/Realista): En un coche que han llenado de globos y no pueden salir.\nDónde están (Mundana Aburrida): En la sala de espera de un veterinario.",
+                "Ejemplo 36:\nQuiénes son: Dos vigilantes de seguridad que se han dormido en el trabajo.\nDónde están (Surrealista): En un mundo donde la ley de la gravedad se invierte cada 30 segundos.\nDónde están (Mundana con Giro Cómico/Realista): En una tienda de colchones, probando uno que es demasiado cómodo y no pueden levantarse.\nDónde están (Mundana Aburrida): En el tejado de una casa, tomando el sol.",
+                "Ejemplo 37:\nQuiénes son: Una pareja que solo se comunica con refranes y el camarero que les atiende.\nDónde están (Surrealista): En un diccionario que ha cobrado vida y los persigue con el significado de las palabras.\nDónde están (Mundana con Giro Cómico/Realista): En una cena de gala donde uno de ellos ha olvidado los modales y come con las manos.\nDónde están (Mundana Aburrida): En una peluquería, esperando su turno.",
+                "Ejemplo 38:\nQuiénes son: Un director de recursos humanos y el candidato que miente en su CV.\nDónde están (Surrealista): En el pasillo de una memoria olvidada.\nDónde están (Mundana con Giro Cómico/Realista): En la oficina del director, pero el escritorio está lleno de gatos.\nDónde están (Mundana Aburrida): En un vestuario de gimnasio, buscando la taquilla.",
+                "Ejemplo 39:\nQuiénes son: Dos turistas que han contratado al mismo guía en dos idiomas diferentes.\nDónde están (Surrealista): En el centro de un laberinto donde las paredes son hechas de palabras sin sentido.\nDónde están (Mundana con Giro Cómico/Realista): En un tour por un cementerio, y el guía está más muerto que los habitantes.\nDónde están (Mundana Aburrida): En una plaza de un pueblo pequeño.",
+                "Ejemplo 40:\nQuiénes son: Un crítico de arte que odia el arte moderno y la artista de la obra.\nDónde están (Surrealista): En la boca de una aspiradora gigante que se traga los colores.\nDónde están (Mundana con Giro Cómico/Realista): En un museo de arte moderno, donde la 'obra de arte' es una banana pegada a la pared, y se la han comido por accidente.\nDónde están (Mundana Aburrida): En la terraza de un bar, tomando algo.",
+                "Ejemplo 41:\nQuiénes son: Dos vigilantes nocturnos de un museo de cera que creen que las figuras se mueven.\nDónde están (Surrealista): En un tablero de ajedrez donde las piezas son personas.\nDónde están (Mundana con Giro Cómico/Realista): En el piso de arriba de un autobús turístico descubierto, en un día de lluvia torrencial, sin paraguas.\nDónde están (Mundana Aburrida): En un taller de coches, esperando la reparación.",
+                "Ejemplo 42:\nQuiénes son: Un científico que ha encogido a su colega por error.\nDónde están (Surrealista): En el campo de fútbol de un juguete, debatiendo cómo volver a la normalidad.\nDónde están (Mundana con Giro Cómico/Realista): En una reunión de padres y maestros, donde el maestro solo habla con metáforas de Star Wars.\nDónde están (Mundana Aburrida): En la entrada de un ascensor concurrido.",
+                "Ejemplo 43:\nQuiénes son: Un pirata que ha perdido su loro y un policía que lo ha encontrado.\nDónde están (Surrealista): En una isla flotante hecha de queso.\nDónde están (Mundana con Giro Cómico/Realista): En un centro de adopción de mascotas, donde el pirata intenta convencer al policía de que el loro es suyo y el loro le insulta.\nDónde están (Mundana Aburrida): En una tienda de disfraces, comprando una peluca.",
+                "Ejemplo 44:\nQuiénes son: Una mujer que ha despertado con un acento diferente y su mejor amiga, que la graba para TikTok.\nDónde están (Surrealista): En un castillo de naipes que se desmorona por cada mentira que se dicen.\nDónde están (Mundana con Giro Cómico/Realista): En una piscina de bolas para niños, donde se han quedado atascadas y necesitan ayuda para salir.\nDónde están (Mundana Aburrida): En el pasillo de un tren de alta velocidad.",
+                "Ejemplo 45:\nQuiénes son: Un carnicero vegetariano y su cliente carnívoro.\nDónde están (Surrealista): En el paladar de un gigante dormido, donde el moho es bosque.\nDónde están (Mundana con Giro Cómico/Realista): En una barbacoa vegana, donde intentan convencerse mutuamente de que su comida es mejor.\nDónde están (Mundana Aburrida): En una frutería, comprando manzanas.",
+                "Ejemplo 46:\nQuiénes son: El director de una banda de *heavy metal* y un monje tibetano que busca la paz.\nDónde están (Surrealista): En el interior de un tambor que resuena con los sonidos del universo.\nDónde están (Mundana con Giro Cómico/Realista): En un karaoke, donde el monje debe cantar una canción de Bad Bunny para ganar una cena.\nDónde están (Mundana Aburrida): En la cola de un concierto de música popular.",
+                "Ejemplo 47:\nQuiénes son: Dos vecinos que se odian y accidentalmente han intercambiado a sus perros.\nDónde están (Surrealista): En el collar de un perro, donde las pulgas son pequeños detectives.\nDónde están (Mundana con Giro Cómico/Realista): En el veterinario, donde los perros son idénticos y el chip no funciona.\nDónde están (Mundana Aburrida): En un portal, buscando su llave.",
+                "Ejemplo 48:\nQuiénes son: Una pareja de novios que se conocieron en la cárcel.\nDónde están (Surrealista): En la cerradura de una puerta que da a un jardín secreto.\nDónde están (Mundana con Giro Cómico/Realista): En una joyería de lujo, intentando comprar un anillo con el dinero que les queda del robo de un banco.\nDónde están (Mundana Aburrida): En una parada de taxis lloviendo a cántaros.",
+                "Ejemplo 49:\nQuiénes son: Un adivino que solo predice cosas aburridas y una cliente dramática.\nDónde están (Surrealista): En un huevo de Pascua que nunca se rompe.\nDónde están (Mundana con Giro Cómico/Realista): En una clase de *spinning*, donde el adivino intenta predecir el número de pedaladas del cliente.\nDónde están (Mundana Aburrida): En un gimnasio, en la cinta de correr.",
+                "Ejemplo 50:\nQuiénes son: El CEO de una gran corporación y el becario que conoce todos sus secretos.\nDónde están (Surrealista): En el interior de un botón de guardar de un ordenador.\nDónde están (Mundana con Giro Cómico/Realista): En un restaurante de comida china, donde el CEO confunde un palillo con un tenedor y no puede comer.\nDónde están (Mundana Aburrida): En una oficina, en la máquina de café.",
+                "Ejemplo 51:\nQuiénes son: Un vendedor de seguros que quiere venderle una póliza a la Muerte.\nDónde están (Surrealista): En el borde de un precipicio que se asoma a la nada.\nDónde están (Mundana con Giro Cómico/Realista): En una lavandería, donde el vendedor intenta convencer a la Muerte de que asegure sus túnicas.\nDónde están (Mundana Aburrida): En una sala de conferencias con poca luz.",
+                "Ejemplo 52:\nQuiénes son: Dos magos rivales que están comprando un conejo en una tienda de mascotas.\nDónde están (Surrealista): En un sombrero de copa donde el interior es infinito.\nDónde están (Mundana con Giro Cómico/Realista): En una tienda de mascotas, donde el conejo que quieren es el único que habla.\nDónde están (Mundana Aburrida): En el pasillo de un tren de cercanías.",
+                "Ejemplo 53:\nQuiénes son: Un crítico de cine y el actor que solo hace películas de terror de bajo presupuesto.\nDónde están (Surrealista): En el carrete de una película donde la realidad se mezcla con la ficción.\nDónde están (Mundana con Giro Cómico/Realista): En una cena de Nochevieja, donde el actor intenta convencer al crítico de que su última película es una obra maestra.\nDónde están (Mundana Aburrida): En una tienda de regalos comprando una tarjeta.",
+            ];
+
+            const instruccionFinal = "Ahora, genera un **NUEVO** ejemplo original, creativo y que siga **EXACTAMENTE** este formato de **cuatro** líneas. **Inspírate en la variedad de los ejemplos proporcionados.**";
+
+
+            // Se combinan todas las partes del prompt mejorado
+            return `${rol}\n\n${reglas}\n\n${formato}\n\n**EJEMPLOS DE REFERENCIA:**\n${ejemplos.join('\n')}\n\n${instruccionFinal}`;
         }
 
-        // Función principal para generar y mostrar la base de improvisación
         async function generarImpro() {
-            // 1. Mostrar estado de carga
-            resultadoDiv.innerHTML = '<p class="cargando">Generando base de improvisación, espera un momento...</p>';
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = '<span class="cargando">Generando la base de la escena...</span>';
             
-            const promptTexto = construirPrompt();
+            const prompt = construirPrompt();
             
-            // 2. Configuración de la solicitud a la API
-            const requestBody = {
-                contents: [{ role: "user", parts: [{ text: promptTexto }] }],
-                config: {
-                    temperature: 0.9, // Valor alto para creatividad
-                }
-            };
-
             try {
-                // 3. Llamada a la API
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: [{ text: prompt }] }],
+                        generationConfig: { 
+                            temperature: 0.9, 
+                            maxOutputTokens: 2048, 
+                        }
+                    })
                 });
 
-                const data = await response.json();
-
-                // 4. Manejo de errores de la API
-                if (!response.ok || data.error) {
-                    const errorMessage = data.error?.message || `Error de la API: ${response.status} ${response.statusText}`;
-                    resultadoDiv.innerHTML = `<div class="api-warning">❌ Error al conectar o recibir datos: ${errorMessage}</div>`;
-                    return;
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({error: {message: 'Respuesta de error no es JSON'}}));
+                    throw new Error(`Error ${response.status}: ${errorData.error ? errorData.error.message : response.statusText}`);
                 }
 
-                // 5. Procesar y mostrar el resultado
-                const generatedText = data.candidates[0].content.parts[0].text.trim();
-                mostrarResultado(generatedText);
+                const data = await response.json();
+                
+                let textoGenerado = "No se pudo generar el contenido. Vuelve a intentarlo.";
+
+                try {
+                    textoGenerado = data.candidates[0].content.parts[0].text.trim();
+                } catch (e) {
+                    // Si falla la extracción, se mantiene el mensaje de error.
+                }
+
+                // --- PROCESAMIENTO AVANZADO DE LA RESPUESTA para 3 opciones ---
+                const partes = textoGenerado.split('\n');
+                let quienes = 'N/A';
+                let donde_surreal = 'N/A';
+                let donde_mundana_giro = 'N/A';
+                let donde_mundana_aburrida = 'N/A'; 
+
+                // Usamos expresiones regulares para una extracción más flexible
+                const regexQuienes = /Quiénes son:\s*(.*)/i;
+                const regexSurreal = /Dónde están \(Surrealista\):\s*(.*)/i;
+                const regexMundanaGiro = /Dónde están \(Mundana con Giro Cómico\/Realista\):\s*(.*)/i; // Regex actualizada
+                const regexMundanaAburrida = /Dónde están \(Mundana Aburrida\):\s*(.*)/i; 
+
+                for (const linea of partes) {
+                    let match;
+                    if (match = linea.match(regexQuienes)) {
+                        quienes = match[1].trim();
+                    } else if (match = linea.match(regexSurreal)) {
+                        donde_surreal = match[1].trim();
+                    } else if (match = linea.match(regexMundanaGiro)) {
+                        donde_mundana_giro = match[1].trim();
+                    } else if (match = linea.match(regexMundanaAburrida)) {
+                        donde_mundana_aburrida = match[1].trim();
+                    }
+                }
+                
+                // Si la extracción falló por completo
+                if (quienes === 'N/A' || donde_surreal === 'N/A' || donde_mundana_giro === 'N/A' || donde_mundana_aburrida === 'N/A') {
+                    resultadoDiv.innerHTML = `
+                        <strong>¡Aviso de Formato!</strong> El modelo no siguió el formato estricto de 4 líneas. Esto es lo que generó:<br><br>
+                        <pre>${textoGenerado}</pre>
+                    `;
+                    return; 
+                }
+
+                resultadoDiv.innerHTML = `
+                    <div class="titulo-seccion">¿Quiénes son?</div>
+                    <div class="respuesta">${quienes}</div>
+                    
+                    <div class="titulo-seccion">¿Dónde están? (Elige una opción)</div>
+                    <div class="opcion-lugar">
+                        <strong>Opción A (Surrealista):</strong> ${donde_surreal}
+                    </div>
+                    <div class="opcion-lugar">
+                        <strong>Opción B (Mundana con Giro Cómico/Realista):</strong> ${donde_mundana_giro}
+                    </div>
+                    <div class="opcion-lugar">
+                        <strong>Opción C (Mundana Aburrida):</strong> ${donde_mundana_aburrida}
+                    </div>
+                `;
 
             } catch (error) {
-                // 6. Manejo de errores de red o internos
-                console.error("Error en la solicitud de red o procesamiento:", error);
-                resultadoDiv.innerHTML = `<div class="api-warning">❌ Error de red o interno. Revisa la consola para más detalles. (${error.message})</div>`;
+                // Manejo de ERRORES CRÍTICOS
+                resultadoDiv.innerHTML = `
+                    <div class="api-warning">
+                        <strong>Error crítico al conectar con la API:</strong> ${error.message}.<br>
+                        Esto suele ser un problema con la **CLAVE API** o los **CRÉDITOS**. Asegúrate de que tu clave es correcta y está activa.
+                    </div>
+                `;
             }
         }
-
-        // Función para formatear y renderizar el texto recibido del modelo
-        function mostrarResultado(texto) {
-            // Dividir el texto en las cuatro líneas obligatorias
-            const lineas = texto.split('\n').filter(linea => linea.trim() !== '');
-
-            if (lineas.length < 4) {
-                 resultadoDiv.innerHTML = `<div class="api-warning">⚠️ Formato de respuesta incorrecto. El modelo no devolvió las 4 líneas esperadas. Respuesta: <pre>${texto}</pre></div>`;
-                 return;
-            }
-
-            // Mapear cada línea a su sección correspondiente
-            const resultadoHTML = `
-                <div class="titulo-seccion">👥 ¿Quiénes son?</div>
-                <p class="respuesta">${lineas[0].replace('Quiénes son:', ' ')}</p>
-
-                <div class="titulo-seccion">📍 ¿Dónde están? (Elige uno)</div>
-                <div class="opcion-lugar">
-                    <strong>Surrealista:</strong> <span class="respuesta">${lineas[1].replace('Dónde están (Surrealista):', ' ')}</span>
-                </div>
-                <div class="opcion-lugar">
-                    <strong>Con Giro Cómico/Realista:</strong> <span class="respuesta">${lineas[2].replace('Dónde están (Mundana con Giro Cómico/Realista):', ' ')}</span>
-                </div>
-                <div class="opcion-lugar">
-                    <strong>Mundana Aburrida:</strong> <span class="respuesta">${lineas[3].replace('Dónde están (Mundana Aburrida):', ' ')}</span>
-                </div>
-            `;
-
-            resultadoDiv.innerHTML = resultadoHTML;
-        }
-
-        // Inicializar el div de resultado con un mensaje de bienvenida
-        resultadoDiv.innerHTML = '<p>Pulsa el botón "Nueva Base de Escena" para empezar a generar ideas.</p>';
-
     </script>
+
+<hr style="margin-top: 40px; border-color: #ccc;">
+    <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
+        <a href="index.html" style="
+            text-decoration: none;
+            color: #5f6368;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        ">
+            ← Volver al Menú Principal
+        </a>
+    </div>
+
 </body>
 </html>
-
