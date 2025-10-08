@@ -38,13 +38,13 @@
         // Función para construir el PROMPT detallado y MEJORADO
         function construirPrompt() {
             const rol = `
-                **ROL:** Eres un **Maestro de Ceremonias de Improvisación** experto en generar detonantes de escena de alto potencial dramático y cómico. Tu única función es crear una base de escena siguiendo instrucciones estrictas y **garantizando la máxima diversidad temática y ocupacional en cada generación.**
+                **ROL:** Eres un **Maestro de Ceremonias de Improvisación** experto. Tu única misión es crear bases de escena de **ALTO CONTRASTE y MÁXIMA DIVERSIDAD**, asegurando que cada nueva generación sea temáticamente distinta a las anteriores.
             `;
 
             const reglas = `
                 **REGLAS DE CONTENIDO:**
                 1.  **¿Quiénes son?:** Debe ser una **relación o vínculo conflictivo/interesante** entre **2 o 3 personajes**. Incluye su ocupación, relación familiar o un rasgo de personalidad clave (ej: Dos rivales que han tenido un accidente, Un padre ultraconservador y su hija que acaba de tatuarse).
-                2.  **RESTRICCIÓN DE DIVERSIDAD:** **PROHIBIDO** utilizar las ocupaciones: 'Influencer', 'Youtuber', 'Streamer', 'Crítico Culinario/de Cine', o cualquier personaje relacionado con redes sociales o medios digitales. Fomenta profesiones menos comunes o históricas.
+                2.  **PRINCIPIO DEL CONTRASTE (CLAVE):** **PROHIBIDO** reutilizar las profesiones (ej: Cartógrafo, Influencer) o el tema central de los ejemplos de referencia. Cada generación debe presentar una profesión, un entorno y un tono significativamente diferentes a los anteriores. Fomenta profesiones menos comunes, históricas o con alto potencial dramático/cómico (ej: taxidermista, guardián de faros, pregonero, notario, domador de pulgas, etc.).
                 3.  **¿Dónde están? (Opción Surrealista):** Un lugar **totalmente absurdo, mágico o imposible** que fuerce la aceptación de una realidad completamente nueva (ej: En la dimensión donde viven los recuerdos olvidados, En el interior de un motor de reacción a punto de encenderse).
                 4.  **¿Dónde están? (Opción Mundana con Giro Cómico/Realista):** Un lugar cotidiano, pero que contenga una **complicación divertida, socialmente incómoda o un problema ridículo, pero totalmente plausible en la vida real** (ej: En un restaurante caro y tienen la cartera olvidada, En una reunión familiar donde todos deben llevar un sombrero ridículo).
                 5.  **¿Dónde están? (Opción Mundana Aburrida):** Un lugar **extremadamente común, neutral y sin ningún giro o conflicto inicial** (ej: En la cola para pagar en el supermercado, En una parada de autobús vacía, En un pasillo de oficina).
@@ -117,7 +117,7 @@
                 "Ejemplo 53:\nQuiénes son: Un crítico de cine y el actor que solo hace películas de terror de bajo presupuesto.\nDónde están (Surrealista): En el carrete de una película donde la realidad se mezcla con la ficción.\nDónde están (Mundana con Giro Cómico/Realista): En una cena de Nochevieja, donde el actor intenta convencer al crítico de que su última película es una obra maestra.\nDónde están (Mundana Aburrida): En una tienda de regalos comprando una tarjeta.",
             ];
 
-            const instruccionFinal = "Ahora, genera un **NUEVO** ejemplo original, creativo y que siga **EXACTAMENTE** este formato de **cuatro** líneas. **Inspírate en la variedad de los ejemplos proporcionados.**";
+            const instruccionFinal = "Ahora, genera un **NUEVO** ejemplo original, creativo y que siga **EXACTAMENTE** este formato de **cuatro** líneas. **Asegúrate de que el resultado cumpla con el PRINCIPIO DEL CONTRASTE (Regla 2).**";
 
 
             // Se combinan todas las partes del prompt mejorado
