@@ -59,7 +59,7 @@
 
 <script>
 // !!! CLAVE API UTILIZADA POR EL USUARIO !!!
-const API_KEY = "AIzaSyAtHNHWudk-SUpsNgjSZ7DH5IVc0VVRYIM"; 
+const API_KEY = "AIzaSyBnJLGnt2Y_FppKufxyPT3AK9OabjylBSY"; 
 
 // Función principal para construir el prompt y llamar a la IA
 async function buscarObras() {
@@ -116,7 +116,7 @@ async function buscarObras() {
                 }],
                 // CONFIGURACIÓN: Límite de tokens y mayor temperatura para creatividad/flexibilidad
                 generationConfig: {
-                    maxOutputTokens: 1024, 
+                    maxOutputTokens: 4096, 
                     temperature: 0.8 // Aumenta la diversidad de la búsqueda para encontrar mejores coincidencias.
                 }
             })
