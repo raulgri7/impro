@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador Avanzado de Clase de Improvisación</title>
+    <title>Planificador de Clase de Improvisación</title>
     <style>
-        * {
-            box-sizing: border-box; 
-        }
-
+        /* Estilos base */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f4f7f6;
@@ -16,8 +13,9 @@
             margin: 0;
             padding: 20px;
             display: flex;
+            flex-direction: column;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
             min-height: 100vh;
         }
         .container {
@@ -27,7 +25,9 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 800px;
+            margin-bottom: 20px;
         }
+
         h1 {
             color: #4285f4;
             font-size: 2em;
@@ -36,14 +36,35 @@
             padding-bottom: 10px;
             text-align: center;
         }
-        p {
-            color: #5f6368;
-            margin-bottom: 20px;
-            font-size: 1em;
-            text-align: center;
+
+        /* Controles y Formularios */
+        .asistencia-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
         }
-        
-        /* Controles de Formulario */
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .checkbox-item:hover {
+            background-color: #f0f0ff;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.1);
+        }
+
         label {
             display: block;
             margin-bottom: 5px;
@@ -51,7 +72,8 @@
             color: #1a73e8;
             margin-top: 10px;
         }
-        input[type="number"], select {
+
+        select {
             width: 100%;
             padding: 10px;
             margin-bottom: 20px;
@@ -59,11 +81,12 @@
             border-radius: 5px;
             font-size: 1em;
         }
+
         button {
             display: block;
             width: 100%;
             padding: 15px;
-            background-color: #4285f4;
+            background-color: #4CAF50; /* Verde */
             color: white;
             border: none;
             border-radius: 8px;
@@ -73,21 +96,21 @@
             transition: background-color 0.2s;
         }
         button:hover {
-            background-color: #1a73e8;
+            background-color: #45a049;
         }
-        
+
         /* Área de Resultados */
         #resultado {
-            margin-top: 30px;
+            margin-top: 25px;
             padding: 20px;
             border: 1px solid #ddd;
             border-radius: 8px;
             background-color: #f9f9f9;
             text-align: left;
             min-height: 150px;
-            font-size: 1em; /* Ajuste para mejor lectura */
+            font-size: 1em;
         }
-        
+
         /* Estilos para el Contenido Generado (Markdown simulado) */
         .result-subtitle {
             color: #1a73e8; /* Azul Fuerte */
@@ -111,7 +134,6 @@
             margin: 20px 0;
         }
         
-        /* Asegura que las listas se vean bien */
         #resultado ul, #resultado ol {
             padding-left: 25px;
             margin-bottom: 1em;
@@ -126,51 +148,43 @@
 
         /* Responsividad básica */
         @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-            .container {
-                padding: 20px 15px;
-                border-radius: 0;
-                box-shadow: none;
-            }
-            h1 {
-                font-size: 1.5em;
-            }
+            body { padding: 10px; }
+            .container { padding: 20px 15px; }
+            .asistencia-grid { grid-template-columns: repeat(2, 1fr); }
+            h1 { font-size: 1.5em; }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>🧠 Planificación de Clase Personalizada con Gemini</h1>
-        <p>Selecciona el tipo de clase y la asistencia para generar un plan que trabaje las debilidades específicas de tu grupo.</p>
+        <h1>🧠 Planificación de Clase de Improvisación (Lunes)</h1>
+        <p>Marca a los alumnos que están **AUSENTES** hoy. El plan se adaptará a los alumnos **PRESENTES**.</p>
 
         <form id="claseForm">
+            <label>✔️ Alumnos Presentes (Desmarca los Ausentes):</label>
+            <div id="listaAlumnosPresentes" class="asistencia-grid">
+                </div>
+
             <label for="tipoClase">Tipo de Clase/Bloque a Trabajar:</label>
             <select id="tipoClase" required>
-                <option value="Bloque 1: ejercicios en círculo de conocerse">Bloque 1: Conocerse (Círculo)</option>
+                <option value="Bloque 1: ejercicios en círculo de conocerse">Bloque 1: Calentamiento Inicial</option>
                 <option value="Bloque 2: ejercicios en círculo">Bloque 2: Foco y Grupo (Círculo)</option>
                 <option value="Bloque 3: ejercicios moviéndose por el espacio">Bloque 3: Movimiento y Espacio</option>
                 <option value="Bloque 4: ejercicios para jugar en pareja">Bloque 4: Foco en Parejas</option>
                 <option value="Bloque 5: ejercicios para jugar en grupo">Bloque 5: Foco en Subgrupos</option>
-                <option value="Bloque 6: juegos de improvisación para hacer en pareja">Bloque 6: Juegos de Impro (Parejas)</option>
-                <option value="Bloque 7: ídem para tríos">Bloque 7: Juegos de Impro (Tríos)</option>
-                <option value="Bloque 8: ídem para cuatro">Bloque 8: Juegos de Impro (Cuartetos)</option>
-                <option value="Bloque 9: Ídem para dos grupos">Bloque 9: Juegos de Impro (Dos Grupos)</option>
-                <option value="Bloque 10: ídem para el grupo completo">Bloque 10: Juegos de Impro (Grupo Completo)</option>
                 <option value="Clase completa con un hilo conductor" selected>Clase Completa (120 min) con Hilo Conductor</option>
             </select>
             
-            <label for="alumnosPresentes">Alumnos presentes hoy (Máximo 14):</label>
-            <input type="number" id="alumnosPresentes" value="10" min="4" max="14" required>
+            <label>Alumnos PRESENTES contados:</label>
+            <input type="number" id="alumnosPresentesCount" value="14" min="0" max="14" required readonly style="width: 100px; text-align: center; margin: 0 auto 20px auto; display: block;">
 
-            <button type="submit">Generar Plan de Clase (120 Minutos)</button>
+            <button type="submit">Generar Plan de Clase Personalizado</button>
         </form>
 
         <div id="resultado">
             <h2>El Plan de Clase aparecerá aquí.</h2>
-            <p style="text-align: center; color: #5f6368;">(La IA usará la descripción de tus alumnos para adaptar los ejercicios).</p>
+            <p style="text-align: center; color: #5f6368;">(La IA usará los perfiles de los alumnos presentes para adaptar los ejercicios).</p>
         </div>
     </div>
 
@@ -179,10 +193,80 @@
         const API_KEY = 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU'; 
         const PROMPT_FILE = 'prompt_impro_coach.json'; 
 
+        // ====================================================================================
+        // 1. DATOS DE ALUMNOS Y PERFILES
+        // Usamos los nombres completos y adaptamos el JSON de perfiles
+        // ====================================================================================
+        const ALUMNOS_LUNES = [
+            // { nombre: "Nombre Completo", inicial: "Inicial Usada en el JSON", caracteristicas: "Descripción" }
+            { nombre: "Alba", inicial: "Al", caracteristicas: "Muy seca, novata, no suma, le cuesta soltarse. Necesita enfoque en la base." },
+            { nombre: "Andrea", inicial: "An", caracteristicas: "Mucho morro, buena dicción, echada para alante. Debe empoderar a los tímidos." },
+            { nombre: "Beatriz Law", inicial: "BeL", caracteristicas: "Tímida, va a remolque, se pone de espaldas, necesita empoderamiento." },
+            { nombre: "Beatriz", inicial: "Be", caracteristicas: "Un poco más de brío, falta rodaje. Se enfoca en lo visual." },
+            { nombre: "Elena", inicial: "El", caracteristicas: "Muy buena, disfruta y propone, debe creer más en sí misma. Evita ser el centro." },
+            { nombre: "Estela", inicial: "Es", caracteristicas: "Hipertímida, siempre saliéndose del personaje, a remolque, no propone. Necesita mucha estructura." },
+            { nombre: "Jesús", inicial: "Je", caracteristicas: "Nunca ha venido, potencial desconocido (tratar como novato tímido)." },
+            { nombre: "Lucía", inicial: "Lu", caracteristicas: "Tímida, lo pillará, se mira mucho de momento. Necesita foco en la escucha y el cuerpo." },
+            { nombre: "Marta", inicial: "Ma", caracteristicas: "Buenísima, propone, buenas ideas, suma. Debe ayudar a los menos experimentados." },
+            { nombre: "María", inicial: "MaC", caracteristicas: "Extraña, más morro pero es extraña, no vocaliza bien, baila mucho. Necesita enfoque y claridad." },
+            { nombre: "Patricia", inicial: "Pa", caracteristicas: "Poco a poco va a más. No será la más brillante pero será cola de León. Necesita continuidad." },
+            { nombre: "Raquel", inicial: "Ra", caracteristicas: "Morro y buenas ideas. Tiende a liderar demasiado. Debe sumar." },
+            { nombre: "Victoria", inicial: "Vi", caracteristicas: "Disfruta y con buenas ideas. Debe atreverse a fallar más y proponer más." },
+            { nombre: "Yolanda", inicial: "Yo", caracteristicas: "Suma con una vis cómica genial. Debe usar su energía para centrarse en el conflicto." }
+        ];
+
+        // Mapeo inverso de iniciales para generar el prompt (lo que espera la IA)
+        const perfilMap = ALUMNOS_LUNES.reduce((acc, alumno) => {
+            acc[alumno.nombre] = `${alumno.inicial}: ${alumno.caracteristicas}`;
+            return acc;
+        }, {});
+
+        // ====================================================================================
+        // 2. INICIALIZACIÓN Y MANEJO DE ASISTENCIA
+        // ====================================================================================
+
         const form = document.getElementById('claseForm');
         const resultadoDiv = document.getElementById('resultado');
+        const listaAlumnosDiv = document.getElementById('listaAlumnosPresentes');
+        const alumnosCountInput = document.getElementById('alumnosPresentesCount');
 
-        // Función para convertir Markdown simple (títulos y listas) a HTML para el contenedor
+        // Función para generar la lista de checkboxes de asistencia
+        function generarListaAsistencia() {
+            listaAlumnosDiv.innerHTML = '';
+            ALUMNOS_LUNES.forEach(alumno => {
+                const label = document.createElement('label');
+                label.className = 'checkbox-item';
+                
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.value = alumno.nombre;
+                // Por defecto, nadie está AUSENTE (checkbox desmarcado).
+                // Al marcar el checkbox, el alumno estará AUSENTE.
+                cb.id = `cb_${alumno.nombre.replace(/\s/g, '')}`;
+                cb.checked = false; // Inicialmente todos presentes
+                
+                cb.addEventListener('change', actualizarConteoPresentes);
+
+                label.appendChild(cb);
+                label.appendChild(document.createTextNode(alumno.nombre));
+                listaAlumnosDiv.appendChild(label);
+            });
+            actualizarConteoPresentes(); // Contar al inicio
+        }
+
+        // Función para actualizar el contador de alumnos presentes
+        function actualizarConteoPresentes() {
+            const checks = Array.from(listaAlumnosDiv.querySelectorAll('input[type="checkbox"]'));
+            // Los presentes son los que NO están marcados (checked) como ausentes
+            const presentes = checks.filter(c => !c.checked).length; 
+            alumnosCountInput.value = presentes;
+        }
+
+        // ====================================================================================
+        // 3. LÓGICA DE LA IA Y CONVERSIÓN DE MARKDOWN
+        // ====================================================================================
+
+        // Función para convertir Markdown simple a HTML para el contenedor
         function markdownToHtml(markdown) {
             let html = markdown;
 
@@ -197,44 +281,59 @@
             html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
             
-            // 4. Convertir saltos de línea doble a párrafos (para que las listas y texto no se junten)
+            // 4. Asegurar saltos de línea y párrafos correctos
+            
+            // Convertir listas simples (se asume que la IA genera listas con * o - o 1.)
+            html = html.replace(/^[*-]\s+(.*)$/gm, '<li>$1</li>');
+            html = html.replace(/<li>.*<\/li>(\s*<li>.*<\/li>)*?/gs, '<ul>$&</ul>');
+            
+            // Convertir listas numeradas
+            html = html.replace(/^[0-9]+\.\s+(.*)$/gm, '<li>$1</li>');
+            html = html.replace(/<li>.*<\/li>(\s*<li>.*<\/li>)*?/gs, '<ol>$&</ol>');
+            
+            // Eliminar ul/ol anidados incorrectamente por la conversión
+            html = html.replace(/<\/ul>\s*<ul>/g, '').replace(/<\/ol>\s*<ol>/g, '');
+
+            // Convertir saltos de línea restantes en <br> dentro de bloques de texto (simulando párrafos simples)
             html = html.split('\n\n').map(p => {
-                // Si la línea contiene una lista, no la envuelve en <p>
-                if (p.match(/^[\*\-]\s/m) || p.match(/^[0-9]\.\s/m) || p.match(/^<h/)) {
+                // Si la línea contiene una lista o título, no la envuelve en <p>
+                if (p.match(/^<[uo]l>|<h[23]>/)) {
                     return p;
                 }
                 // Si la línea es solo texto, lo envuelve y convierte saltos simples a <br>
                 return `<p>${p.replace(/\n/g, '<br>')}</p>`;
             }).join('');
             
-            // 5. Convertir listas (el CSS se encarga de darles estilo de bloque)
-            html = html.replace(/^[\*\-]\s+(.*)$/gm, '<li>$1</li>');
-            html = html.replace(/<li>.*<\/li>(\s*<li>.*<\/li>)*?/gs, '<ul>$&</ul>');
-            
-            // 6. Convertir listas numeradas
-            html = html.replace(/^[0-9]\.\s+(.*)$/gm, '<li>$1</li>');
-            html = html.replace(/<li>.*<\/li>(\s*<li>.*<\/li>)*?/gs, '<ol>$&</ol>');
-
-
-            // Limpieza de ul/ol anidados
-            html = html.replace(/<\/ul>\s*<ul>/g, '').replace(/<\/ol>\s*<ol>/g, '');
+            // Finalmente, eliminar cualquier tag <br> que quede inmediatamente antes de un elemento de bloque
+            html = html.replace(/<br>(?=<h[23]>|<hr>|<[uo]l>)/g, '');
             
             return html;
         }
 
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
-            generarClase();
-        });
-
         async function generarClase() {
             const tipoClase = document.getElementById('tipoClase').value;
-            const alumnosPresentes = document.getElementById('alumnosPresentes').value;
+            const checks = Array.from(listaAlumnosDiv.querySelectorAll('input[type="checkbox"]'));
+            
+            // Los presentes son los que NO están marcados (checked) como ausentes
+            const alumnosPresentesChecks = checks.filter(c => !c.checked);
+            const alumnosPresentesNombres = alumnosPresentesChecks.map(c => c.value);
+            const alumnosPresentesCount = alumnosPresentesNombres.length;
+
+            if (alumnosPresentesCount === 0) {
+                 resultadoDiv.innerHTML = `<h2>⚠️ Sin Alumnos</h2><p style="color:red; text-align:center;">Debes desmarcar al menos un alumno para generar el plan.</p>`;
+                 return;
+            }
+
+            // 1. Generar la lista de perfiles SÓLO para los presentes
+            const perfilesLista = alumnosPresentesNombres.map(nombre => perfilMap[nombre]).join('\n');
+            
+            // Actualizar el contador final
+            alumnosCountInput.value = alumnosPresentesCount;
 
             resultadoDiv.innerHTML = '<div class="loading">Cargando... 💡 La IA está analizando los perfiles y diseñando tu plan.</div>';
 
             try {
-                // 1. Cargar el prompt base y los perfiles de alumnos desde el JSON
+                // 2. Cargar el prompt base (se asume que es el mismo prompt_impro_coach.json)
                 const promptResponse = await fetch(PROMPT_FILE);
                 if (!promptResponse.ok) {
                     throw new Error(`No se pudo cargar el archivo de prompt: ${PROMPT_FILE}`);
@@ -242,25 +341,19 @@
                 
                 const promptData = await promptResponse.json(); 
                 let prompt = promptData.prompt_template;
-                const perfiles = promptData.descripcion_alumnos;
                 
-                // 2. Generar la lista de perfiles para el prompt (los 14 originales)
-                const perfilesLista = perfiles.map(p => `- ${p.id}: ${p.caracteristicas}`).join('\n');
-
-                // 3. Reemplazar los marcadores de posición
+                // 3. Reemplazar los marcadores de posición con los datos filtrados
                 prompt = prompt
-                    .replace('{alumnos_presentes}', alumnosPresentes)
-                    .replace('{perfiles_lista}', perfilesLista)
+                    .replace('{alumnos_presentes}', alumnosPresentesCount)
+                    .replace('{perfiles_lista}', perfilesLista) // USAMOS LA LISTA FILTRADA
                     .replace('{tipo_clase}', tipoClase); 
-
+                
                 // 4. Llamar a la API de Gemini
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
                 
                 const response = await fetch(url, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         contents: [{ role: "user", parts: [{ text: prompt }] }],
                     }),
@@ -283,8 +376,8 @@
                 console.error('Error durante la generación de la clase:', error);
                 
                 let errorMessage = `Error: ${error.message}`;
-                if (error.message.includes("404")) {
-                    errorMessage = `Error 404: No se encuentra el archivo '${PROMPT_FILE}'. Asegúrate de que está en el mismo directorio.`;
+                if (error.message.includes("404") || error.message.includes("No se pudo cargar")) {
+                    errorMessage = `Error: No se encuentra el archivo de configuración 'prompt_impro_coach.json'.`;
                 } else if (error.message.includes("API")) {
                      errorMessage = `Error de API. Revisa la clave o el límite de uso.`;
                 }
@@ -292,6 +385,16 @@
                 resultadoDiv.innerHTML = `<h2>⚠️ Error al generar la clase</h2><p style="color:red; text-align:center;">${errorMessage}</p>`;
             }
         }
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            generarListaAsistencia();
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                generarClase();
+            });
+        });
+
     </script>
 
 </body>
