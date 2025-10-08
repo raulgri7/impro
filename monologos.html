@@ -145,8 +145,13 @@ async function generarMonologos() {
                 contents: [{
                     parts: [{ text: finalPrompt }]
                 }],
-                // Ajustar temperatura para más creatividad en el surrealista
-                config: { temperature: selectedOption === 'surrealista' || selectedOption === 'todos' ? 0.9 : 0.7 }
+                // ***********************************************
+                // CORRECCIÓN APLICADA: USANDO 'generationConfig' 
+                // EN LUGAR DE 'config' PARA EVITAR EL ERROR 400
+                // ***********************************************
+                generationConfig: {
+                    temperature: selectedOption === 'surrealista' || selectedOption === 'todos' ? 0.9 : 0.7 
+                }
             })
         });
 
