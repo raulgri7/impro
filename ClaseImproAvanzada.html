@@ -171,8 +171,11 @@
                 <option value="Bloque 1: ejercicios en círculo de conocerse">Bloque 1: Calentamiento Inicial</option>
                 <option value="Bloque 2: ejercicios en círculo">Bloque 2: Foco y Grupo (Círculo)</option>
                 <option value="Bloque 3: ejercicios moviéndose por el espacio">Bloque 3: Movimiento y Espacio</option>
-                <option value="Bloque 4: ejercicios para jugar en pareja">Bloque 4: Foco en Parejas</option>
-                <option value="Bloque 5: ejercicios para jugar en grupo">Bloque 5: Foco en Subgrupos</option>
+                <option value="Bloque 4: juegos de improvisación para hacer en pareja">Bloque 4: Juegos de Impro (Parejas)</option>
+                <option value="Bloque 5: juegos de improvisación para hacer en tríos">Bloque 5: Juegos de Impro (Tríos)</option>
+                <option value="Bloque 6: juegos de improvisación para hacer en cuartetos">Bloque 6: Juegos de Impro (Cuartetos)</option>
+                <option value="Bloque 7: juegos de improvisación para hacer en dos grupos">Bloque 7: Juegos de Impro (Dos Grupos)</option>
+                <option value="Bloque 8: juegos de improvisación para hacer con el grupo entero">Bloque 8: Juegos de Impro (Grupo Entero)</option>
                 <option value="Clase completa con un hilo conductor" selected>Clase Completa (120 min) con Hilo Conductor</option>
             </select>
             
@@ -195,7 +198,7 @@
 
         // ====================================================================================
         // 1. DATOS DE ALUMNOS Y PERFILES
-        // Usamos los nombres completos y adaptamos el JSON de perfiles
+        // Mapeo corregido y completo para el grupo de los Lunes.
         // ====================================================================================
         const ALUMNOS_LUNES = [
             // { nombre: "Nombre Completo", inicial: "Inicial Usada en el JSON", caracteristicas: "Descripción" }
@@ -240,7 +243,6 @@
                 const cb = document.createElement('input');
                 cb.type = 'checkbox';
                 cb.value = alumno.nombre;
-                // Por defecto, nadie está AUSENTE (checkbox desmarcado).
                 // Al marcar el checkbox, el alumno estará AUSENTE.
                 cb.id = `cb_${alumno.nombre.replace(/\s/g, '')}`;
                 cb.checked = false; // Inicialmente todos presentes
@@ -377,7 +379,7 @@
                 
                 let errorMessage = `Error: ${error.message}`;
                 if (error.message.includes("404") || error.message.includes("No se pudo cargar")) {
-                    errorMessage = `Error: No se encuentra el archivo de configuración 'prompt_impro_coach.json'.`;
+                    errorMessage = `Error: No se encuentra el archivo de configuración 'prompt_impro_coach.json'. Asegúrate de que está en el mismo directorio.`;
                 } else if (error.message.includes("API")) {
                      errorMessage = `Error de API. Revisa la clave o el límite de uso.`;
                 }
