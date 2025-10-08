@@ -34,6 +34,8 @@
         const API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; 
         const MODEL_NAME = 'gemini-2.5-flash';
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+        // Temperatura ajustada a 0.75 para mayor estabilidad en el formato.
+        const TEMPERATURE = 0.75; 
 
         // Función para construir el PROMPT detallado y MEJORADO
         function construirPrompt() {
@@ -51,8 +53,8 @@
             `;
 
             const formato = `
-                **FORMATO ESTRICTO DE SALIDA:**
-                Debes responder **EXCLUSIVAMENTE** con **cuatro** líneas de texto. **No incluyas NINGUNA otra explicación, encabezado, introducción, o despedida.**
+                **FORMATO ESTRICTO DE SALIDA (4 LÍNEAS EXACTAS):**
+                Debes responder **EXCLUSIVAMENTE** con **cuatro** líneas de texto. **NO INCLUYAS NINGÚN TEXTO EXTRA, encabezado, introducción, corchete o despedida.** Solo el texto de las 4 líneas.
 
                 Línea 1: Quiénes son: [Relación de 2-3 personajes, concisa y con gancho]
                 Línea 2: Dónde están (Surrealista): [Lugar absurdo o imposible]
@@ -139,7 +141,7 @@
                     body: JSON.stringify({
                         contents: [{ role: "user", parts: [{ text: prompt }] }],
                         generationConfig: { 
-                            temperature: 0.9, 
+                            temperature: TEMPERATURE, // Usamos la temperatura ajustada
                             maxOutputTokens: 2048, 
                         }
                     })
@@ -155,13 +157,16 @@
                 let textoGenerado = "No se pudo generar el contenido. Vuelve a intentarlo.";
 
                 try {
+                    // Extracción simple: obtener el texto, limpiarlo de espacios extra
                     textoGenerado = data.candidates[0].content.parts[0].text.trim();
                 } catch (e) {
                     // Si falla la extracción, se mantiene el mensaje de error.
                 }
 
-                // --- PROCESAMIENTO AVANZADO DE LA RESPUESTA para 3 opciones ---
-                const partes = textoGenerado.split('\n');
+                // --- PROCESAMIENTO AVANZADO DE LA RESPUESTA - MÁS RESILIENTE ---
+                // Dividimos la respuesta por saltos de línea y limpiamos líneas vacías
+                const partes = textoGenerado.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+                
                 let quienes = 'N/A';
                 let donde_surreal = 'N/A';
                 let donde_mundana_giro = 'N/A';
@@ -170,9 +175,10 @@
                 // Usamos expresiones regulares para una extracción más flexible
                 const regexQuienes = /Quiénes son:\s*(.*)/i;
                 const regexSurreal = /Dónde están \(Surrealista\):\s*(.*)/i;
-                const regexMundanaGiro = /Dónde están \(Mundana con Giro Cómico\/Realista\):\s*(.*)/i; // Regex actualizada
+                const regexMundanaGiro = /Dónde están \(Mundana con Giro Cómico\/Realista\):\s*(.*)/i;
                 const regexMundanaAburrida = /Dónde están \(Mundana Aburrida\):\s*(.*)/i; 
 
+                // Mapeamos las líneas extraídas a las variables
                 for (const linea of partes) {
                     let match;
                     if (match = linea.match(regexQuienes)) {
@@ -186,10 +192,10 @@
                     }
                 }
                 
-                // Si la extracción falló por completo
-                if (quienes === 'N/A' || donde_surreal === 'N/A' || donde_mundana_giro === 'N/A' || donde_mundana_aburrida === 'N/A') {
+                // Si el número de partes no es 4, o si alguna variable sigue en 'N/A', mostramos el error de formato.
+                if (partes.length !== 4 || quienes === 'N/A' || donde_surreal === 'N/A' || donde_mundana_giro === 'N/A' || donde_mundana_aburrida === 'N/A') {
                     resultadoDiv.innerHTML = `
-                        <strong>¡Aviso de Formato!</strong> El modelo no siguió el formato estricto de 4 líneas. Esto es lo que generó:<br><br>
+                        <strong>¡Aviso de Formato!</strong> El modelo no siguió el formato estricto de 4 líneas (o generó texto extra). Esto es lo que generó:<br><br>
                         <pre>${textoGenerado}</pre>
                     `;
                     return; 
