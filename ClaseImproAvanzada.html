@@ -83,16 +83,39 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             background-color: #f9f9f9;
-            white-space: pre-wrap;
             text-align: left;
             min-height: 150px;
-            font-size: 0.95em;
+            font-size: 1em; /* Ajuste para mejor lectura */
         }
         
-        #resultado pre {
-            font-family: inherit;
-            margin: 0;
-            padding: 0;
+        /* Estilos para el Contenido Generado (Markdown simulado) */
+        .result-subtitle {
+            color: #1a73e8; /* Azul Fuerte */
+            font-size: 1.6em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 5px;
+        }
+
+        .result-subtitle-minor {
+            color: #4285f4; /* Azul Google */
+            font-size: 1.2em;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+
+        #resultado hr {
+            border: 0;
+            border-top: 1px dashed #ccc;
+            margin: 20px 0;
+        }
+        
+        /* Asegura que las listas se vean bien */
+        #resultado ul, #resultado ol {
+            padding-left: 25px;
+            margin-bottom: 1em;
+            color: #333;
         }
 
         .loading {
@@ -152,12 +175,52 @@
     </div>
 
     <script>
-        // 🔑 CLAVE DE API DE GEMINI (Asumiendo que es la misma que proporcionaste antes)
+        // 🔑 CLAVE DE API DE GEMINI - REEMPLAZA ESTA CLAVE CON LA TUYA
         const API_KEY = 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU'; 
         const PROMPT_FILE = 'prompt_impro_coach.json'; 
 
         const form = document.getElementById('claseForm');
         const resultadoDiv = document.getElementById('resultado');
+
+        // Función para convertir Markdown simple (títulos y listas) a HTML para el contenedor
+        function markdownToHtml(markdown) {
+            let html = markdown;
+
+            // 1. Reemplazar Títulos de Markdown (H2, H3) por etiquetas HTML estilizadas
+            html = html.replace(/^##\s*(.*)$/gm, '<h2 class="result-subtitle">$1</h2>');
+            html = html.replace(/^###\s*(.*)$/gm, '<h3 class="result-subtitle-minor">$1</h3>');
+            
+            // 2. Reemplazar líneas horizontales
+            html = html.replace(/^-{3,}$/gm, '<hr>');
+
+            // 3. Reemplazar negritas y cursivas
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            // 4. Convertir saltos de línea doble a párrafos (para que las listas y texto no se junten)
+            html = html.split('\n\n').map(p => {
+                // Si la línea contiene una lista, no la envuelve en <p>
+                if (p.match(/^[\*\-]\s/m) || p.match(/^[0-9]\.\s/m) || p.match(/^<h/)) {
+                    return p;
+                }
+                // Si la línea es solo texto, lo envuelve y convierte saltos simples a <br>
+                return `<p>${p.replace(/\n/g, '<br>')}</p>`;
+            }).join('');
+            
+            // 5. Convertir listas (el CSS se encarga de darles estilo de bloque)
+            html = html.replace(/^[\*\-]\s+(.*)$/gm, '<li>$1</li>');
+            html = html.replace(/<li>.*<\/li>(\s*<li>.*<\/li>)*?/gs, '<ul>$&</ul>');
+            
+            // 6. Convertir listas numeradas
+            html = html.replace(/^[0-9]\.\s+(.*)$/gm, '<li>$1</li>');
+            html = html.replace(/<li>.*<\/li>(\s*<li>.*<\/li>)*?/gs, '<ol>$&</ol>');
+
+
+            // Limpieza de ul/ol anidados
+            html = html.replace(/<\/ul>\s*<ul>/g, '').replace(/<\/ol>\s*<ol>/g, '');
+            
+            return html;
+        }
 
         form.addEventListener('submit', function(event) {
             event.preventDefault();
@@ -212,8 +275,9 @@
                 
                 const contenido = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No se pudo generar el plan de clase. Intenta nuevamente.';
 
-                // 5. Mostrar el resultado
-                resultadoDiv.innerHTML = `<pre>${contenido}</pre>`;
+                // 5. Mostrar el resultado: APLICA LA CONVERSIÓN DE MARKDOWN A HTML
+                const contenidoHTML = markdownToHtml(contenido);
+                resultadoDiv.innerHTML = contenidoHTML;
 
             } catch (error) {
                 console.error('Error durante la generación de la clase:', error);
