@@ -13,6 +13,11 @@
         .input-group > div { flex-grow: 1; }
         label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
         select, input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        /* Nuevo estilo para el grupo de checkbox */
+        .checkbox-group { display: flex; align-items: center; margin-top: 10px; }
+        .checkbox-group input[type="checkbox"] { width: auto; margin-right: 10px; transform: scale(1.2); }
+        .checkbox-group label { margin-bottom: 0; font-weight: normal; }
+
         button { padding: 12px 25px; background-color: #34a853; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 17px; font-weight: bold; transition: background-color 0.3s, transform 0.1s; }
         button:hover { background-color: #1e8e3e; transform: translateY(-1px); }
         button:disabled { background-color: #a1c6a7; cursor: not-allowed; }
@@ -26,7 +31,6 @@
     </style>
 </head>
 <body>
-
 <div class="container">
     <h1>📚 Buscador de Obras de Teatro Contemporáneas</h1>
 
@@ -37,7 +41,7 @@
                 <option value="Drama">Drama</option>
                 <option value="Comedia">Comedia</option>
                 <option value="Tragedia">Tragedia</option>
-                <option value="Libre (cualquier género)">Libre</option>
+                <option value="Libre (cualquier género)" selected>Libre</option>
             </select>
         </div>
         <div>
@@ -47,11 +51,14 @@
         <button id="searchButton" onclick="buscarObras()">Buscar Obras</button>
     </div>
 
-    <div id="loading">... Buscando obras contemporáneas que coincidan con tu criterio. Un momento, por favor...</div>
+    <div class="checkbox-group">
+        <input type="checkbox" id="extraLanguages">
+        <label for="extraLanguages">Incluir obras en Inglés, Francés, Catalán e Italiano</label>
+    </div>
 
+    <div id="loading">... Buscando obras contemporáneas que coincidan con tu criterio. Un momento, por favor...</div>
     <div id="results">
-        </div>
-    
+    </div>
     <div style="margin-top: 25px; font-size: 0.9em; color: #666;">
         <p>⚠️ La clave API está expuesta en este código. En un entorno de producción, DEBE ser manejada desde un servidor seguro.</p>
     </div>
@@ -70,6 +77,8 @@ async function buscarObras() {
     // Obtener valores del formulario
     const genre = document.getElementById('genre').value;
     const characters = document.getElementById('characters').value;
+    // CAMBIO 2: Obtener estado del checkbox
+    const searchExtraLanguages = document.getElementById('extraLanguages').checked;
 
     // Validación simple
     if (!characters || parseInt(characters) < 1) {
@@ -81,13 +90,19 @@ async function buscarObras() {
     loadingDiv.style.display = 'block';
     button.disabled = true;
 
-    // --- El PROMPT DINÁMICO (Ajustado para mayor flexibilidad) ---
+    // Lógica para definir el requisito de idioma
+    let languageRequirement = 'en español';
+    if (searchExtraLanguages) {
+        languageRequirement += ' o en inglés, francés, catalán o italiano';
+    }
+
+    // --- El PROMPT DINÁMICO (Ajustado para mayor flexibilidad y nuevo idioma) ---
     const PROMPT = `
         Busca 5 obras de teatro de autores contemporáneos (de los últimos 50 años) que sean **estrictamente en prosa**.
-        Las obras deben ser fácilmente accesibles y conocidas **en español**.
+        Las obras deben ser fácilmente accesibles y conocidas **${languageRequirement}**.
         El género debe ser **"${genre}"**.
         La obra debe tener aproximadamente **${characters} personajes**, o un número ligeramente mayor que sea adaptable (ej. 1-2 personajes extra).
-        
+
         Devuelve la respuesta **ÚNICAMENTE** como un objeto JSON válido, sin ningún texto adicional fuera de las llaves JSON, y **SIN usar bloques de código markdown (\`\`\`json...\`\`\`)**.
         El JSON debe contener un array llamado "obras" con la siguiente estructura para cada elemento:
 
@@ -96,7 +111,7 @@ async function buscarObras() {
                 {
                     "titulo": "Título de la Obra",
                     "autor": "Autor Contemporáneo",
-                    "explicacion": "Breve explicación de la trama (máximo dos frases) y el número real de personajes."
+                    "explicacion": "Breve explicación de la trama (máximo dos frases) y el número real de personajes. Si la obra NO está en español, indica el idioma original (ej. [Idioma Original])."
                 },
                 // ... 4 obras más ...
             ]
@@ -140,12 +155,13 @@ async function buscarObras() {
         // --- MANEJO ROBUSTO DEL JSON ---
         let obrasData;
         try {
+            // Limpieza más agresiva por si la IA añade prefijos/sufijos
             rawContent = rawContent.replace(/```json\s*|```/g, '').trim(); 
             obrasData = JSON.parse(rawContent);
         } catch (e) {
             throw new Error(`Error de Parseo JSON. La IA no devolvió un JSON limpio. Respuesta cruda: ${rawContent.substring(0, 200)}...`);
         }
-        
+
         // Mostrar resultados
         displayResults(obrasData.obras);
 
@@ -185,8 +201,6 @@ function displayResults(obras) {
     html += '</div>';
     resultsDiv.innerHTML = html;
 }
-
 </script>
-
 </body>
 </html>
