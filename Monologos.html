@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de Monólogos Contemporáneos</title>
+    <style>
+        /* Estilos CSS */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f0f2f5; color: #333; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+        h1 { color: #1a73e8; text-align: center; margin-bottom: 25px; }
+        button { padding: 12px 25px; background-color: #34a853; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 17px; font-weight: bold; transition: background-color 0.3s, transform 0.1s; display: block; width: 100%; margin-top: 15px;}
+        button:hover { background-color: #1e8e3e; transform: translateY(-1px); }
+        button:disabled { background-color: #a1c6a7; cursor: not-allowed; }
+        #loading { text-align: center; color: #fbbc05; margin-top: 20px; font-weight: bold; display: none; }
+        .monologo-section { margin-top: 30px; padding: 25px; border: 1px solid #ddd; border-radius: 10px; background-color: #f7f7f7; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); }
+        .monologo-section h2 { color: #4285f4; border-bottom: 2px solid #4285f4; padding-bottom: 8px; margin-top: 0; }
+        .monologo-section h3 { color: #3c7f0d; margin-top: 15px; }
+        .monologo-section p { white-space: pre-wrap; text-align: justify; line-height: 1.6; margin-top: 15px; }
+        .reference { font-style: italic; margin-top: 15px; padding: 10px; background-color: #fff3cd; border-left: 5px solid #ffbb00; color: #856404; border-radius: 4px; }
+        .error-message { color: white; background-color: #dc3545; padding: 15px; border-radius: 8px; margin-top: 20px; font-weight: bold; }
+        /* Estilo para el selector dropdown */
+        #monologo-selector { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; background-color: #fff; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🎭 Generador de Monólogos Contemporáneos con IA (Gemini)</h1>
+
+    <div style="margin-bottom: 20px;">
+        <label for="monologo-selector" style="display: block; margin-bottom: 8px; font-weight: bold; color: #555;">Selecciona los monólogos a generar:</label>
+        <select id="monologo-selector">
+            <option value="todos">Los 4 Monólogos (Estándar, Largo, Inventado, Surrealista)</option>
+            <option value="estandar">Monólogo Real (Estándar, 2-4 min)</option>
+            <option value="largo">Monólogo Real (Largo, 4-6 min)</option>
+            <option value="inventado">Monólogo Inventado (Serio, 2-4 min)</option>
+            <option value="surrealista">Monólogo Real (Surrealista/Absurdo, 2-4 min)</option>
+        </select>
+    </div>
+    
+    <button id="searchButton" onclick="generarMonologos()">Buscar y Generar Monólogo(s)</button>
+    
+    <div id="loading">... La IA está escribiendo y buscando contenido. Un momento, por favor...</div>
+    <div id="results"></div>
+    
+    <div style="margin-top: 25px; font-size: 0.9em; color: #666;">
+        <p>⚠️ **Nota de Seguridad:** La clave API está expuesta en este código. En un entorno de producción, DEBE ser manejada desde un servidor seguro para proteger tu cuota.</p>
+    </div>
+</div>
+<script>
+// !!! CLAVE API UTILIZADA POR EL USUARIO !!!
+const API_KEY = "AIzaSyAtHNHWudk-SUpsNgjSZ7DH5IVc0VVRYIM"; 
+
+// --- El PROMPT (Instrucción a la IA) MODIFICADO ---
+const PROMPT_BASE = `Genera un objeto JSON válido que contenga la(s) siguiente(s) sección(es) de monólogo(s) en español. La respuesta debe ser **ÚNICAMENTE** el objeto JSON, **sin ningún texto adicional** fuera de las llaves JSON, y **SIN usar bloques de código markdown (\`\`\`json...\`\`\`)**.
+
+Debes incluir solo las claves de monólogos solicitadas: {CLAVES_SOLICITADAS}.
+
+Todos los monólogos reales deben ser fragmentos de obras existentes, y todos deben ser **estrictamente en prosa (no en verso)**, con un tono y temas **contemporáneos**.
+
+{PROMPTS_ESPECIFICOS}`;
+
+const PROMPT_PARTIALS = {
+    // 1. Monólogo REAL (Estándar) - 2 a 4 minutos
+    monologoRealEstandar: {
+        clave: "monologoRealEstandar",
+        instruccion: `1. **Monólogo REAL (monologoRealEstandar - Estándar):**
+    * Duración estimada: **2 a 4 minutos** (aprox. 250 a 450 palabras).
+    * Debe ser un fragmento en prosa de una obra o publicación contemporánea (de los últimos 50 años).
+    * Debe incluir las claves "titulo", "referencia" (autor, obra, página o URL), y "texto" (el monólogo en sí).`,
+        tituloDisplay: '📜 Monólogo Real Contemporáneo y Referenciado (Estándar)'
+    },
+    // 2. Monólogo INVENTADO (Serio) - 2 a 4 minutos
+    monologoInventado: {
+        clave: "monologoInventado",
+        instruccion: `2. **Monólogo INVENTADO (monologoInventado - Serio):**
+    * Duración estimada: **2 a 4 minutos** (aprox. 250 a 450 palabras).
+    * Debe ser un monólogo original **en prosa**, serio, profundo, con un tono reflexivo y temática moderna (ej. redes sociales, tecnología, ansiedad laboral, identidad).
+    * Debe incluir las claves "titulo" (inventado) y "texto" (el monólogo en sí).`,
+        tituloDisplay: '🧠 Monólogo Inventado (Contemporáneo y Serio)'
+    },
+    // 3. Monólogo REAL (Largo) - 4 a 6 minutos (NUEVO)
+    monologoRealLargo: {
+        clave: "monologoRealLargo",
+        instruccion: `3. **Monólogo REAL (monologoRealLargo - Largo):**
+    * Duración estimada: **4 a 6 minutos** (aprox. 500 a 800 palabras) para una pieza más sustancial.
+    * Debe ser un fragmento en prosa de una obra o publicación contemporánea (de los últimos 50 años).
+    * Debe incluir las claves "titulo", "referencia" (autor, obra, página o URL), y "texto" (el monólogo en sí).`,
+        tituloDisplay: '📚 Monólogo Real Contemporáneo y Referenciado (Largo)'
+    },
+    // 4. Monólogo REAL (Surrealista) - 2 a 4 minutos (NUEVO)
+    monologoRealSurrealista: {
+        clave: "monologoRealSurrealista",
+        instruccion: `4. **Monólogo REAL (monologoRealSurrealista - Surrealista):**
+    * Duración estimada: **2 a 4 minutos** (aprox. 250 a 450 palabras).
+    * Debe ser un fragmento en prosa de una obra o publicación contemporánea (de los últimos 50 años) con un tono **surrealista, onírico, o de teatro del absurdo**.
+    * Debe incluir las claves "titulo", "referencia" (autor, obra, página o URL), y "texto" (el monólogo en sí).`,
+        tituloDisplay: '🌌 Monólogo Real (Surrealista/Absurdo)'
+    }
+};
+
+// Mapeo de la selección del dropdown a las claves internas
+const SELECTION_MAP = {
+    'todos': ['monologoRealEstandar', 'monologoInventado', 'monologoRealLargo', 'monologoRealSurrealista'],
+    'estandar': ['monologoRealEstandar'],
+    'largo': ['monologoRealLargo'],
+    'inventado': ['monologoInventado'],
+    'surrealista': ['monologoRealSurrealista']
+};
+
+// Función principal para llamar a la IA
+async function generarMonologos() {
+    const resultsDiv = document.getElementById('results');
+    const loadingDiv = document.getElementById('loading');
+    const button = document.getElementById('searchButton');
+    const selector = document.getElementById('monologo-selector');
+    const selectedOption = selector.value;
+    const selectedKeys = SELECTION_MAP[selectedOption];
+
+    if (!selectedKeys || selectedKeys.length === 0) {
+        resultsDiv.innerHTML = '<div class="error-message">Por favor, selecciona al menos un tipo de monólogo.</div>';
+        return;
+    }
+
+    // Construir el prompt específico
+    const promptsToInclude = selectedKeys.map(key => PROMPT_PARTIALS[key].instruccion).join('\n\n');
+    const keysForJson = selectedKeys.map(key => `"${key}"`).join(', ');
+    
+    const finalPrompt = PROMPT_BASE
+        .replace('{CLAVES_SOLICITADAS}', keysForJson)
+        .replace('{PROMPTS_ESPECIFICOS}', promptsToInclude);
+
+    resultsDiv.innerHTML = '';
+    loadingDiv.style.display = 'block';
+    button.disabled = true;
+
+    // --- CONFIGURACIÓN DE LA LLAMADA A LA API DE GEMINI ---
+    const API_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+    
+    try {
+        const response = await fetch(API_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: finalPrompt }]
+                }],
+                // ***********************************************
+                // CORRECCIÓN APLICADA: USANDO 'generationConfig' 
+                // EN LUGAR DE 'config' PARA EVITAR EL ERROR 400
+                // ***********************************************
+                generationConfig: {
+                    temperature: selectedOption === 'surrealista' || selectedOption === 'todos' ? 0.9 : 0.7 
+                }
+            })
+        });
+
+        // Manejo de errores HTTP 
+        if (!response.ok) {
+            const errorBody = await response.json();
+            const errorMessage = errorBody.error ? errorBody.error.message : response.statusText;
+            throw new Error(`Error ${response.status}: ${errorMessage}`);
+        }
+
+        const data = await response.json();
+        
+        // Extracción de la respuesta JSON del campo 'text'
+        let rawContent = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!rawContent) {
+            throw new Error("La IA no devolvió contenido de texto. Revise si la API está activada y si la clave es válida.");
+        }
+
+        // --- MANEJO ROBUSTO DEL JSON ---
+        let monologos;
+        try {
+            // Limpiamos el texto para eliminar cualquier bloque de código Markdown (\`\`\`json \`\`\`)
+            rawContent = rawContent.replace(/```json\s*|```/g, '').trim(); 
+            monologos = JSON.parse(rawContent);
+        } catch (e) {
+            throw new Error(`Error de Parseo JSON. La IA no devolvió un JSON limpio. Respuesta cruda (primeros 200 caracteres): ${rawContent.substring(0, 200)}...`);
+        }
+        
+        // Mostrar resultados
+        selectedKeys.forEach(key => {
+            if (monologos[key]) {
+                displayMonologo(monologos[key], PROMPT_PARTIALS[key].tituloDisplay, key.startsWith('monologoReal'));
+            } else {
+                 resultsDiv.innerHTML += `<div class="error-message" style="background-color: #ffc107; color: #333;">Advertencia: La IA no incluyó la clave esperada: ${key}</div>`;
+            }
+        });
+
+    } catch (error) {
+        console.error("Hubo un error en la solicitud o el parseo:", error);
+        resultsDiv.innerHTML = `<div class="error-message">
+            <strong>¡Error! No se pudieron obtener los monólogos.</strong>
+            <br>Detalle del Error: ${error.message}
+            <br><br><strong>Próximo Paso:</strong> Si el error persiste y el código HTTP es 403 (Forbidden) o 400, casi siempre es un problema de **restricción de clave** (Google Cloud > Credenciales > tu clave API > Restricciones).
+        </div>`;
+    } finally {
+        loadingDiv.style.display = 'none';
+        button.disabled = false;
+    }
+}
+
+// Función para mostrar cada monólogo en el DOM
+function displayMonologo(monologo, titleDisplay, isReal) {
+    const resultsDiv = document.getElementById('results');
+    const titulo = monologo.titulo || 'Monólogo sin Título';
+    const texto = monologo.texto || 'Contenido no disponible.';
+    const referencia = monologo.referencia || 'Referencia no especificada.';
+
+    let html = `
+        <div class="monologo-section">
+            <h2>${titleDisplay}</h2>
+            <h3>${titulo}</h3>
+            <p>${texto}</p>
+    `;
+    
+    // Solo mostramos la referencia si el monólogo es 'Real'
+    if (isReal) {
+        html += `<div class="reference"><strong>Referencia:</strong> ${referencia}</div>`;
+    }
+
+    html += `</div>`;
+    resultsDiv.innerHTML += html;
+}
+</script>
+
+<hr style="margin-top: 40px; border-color: #ccc;">
+    <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
+        <a href="index.html" style="
+            text-decoration: none;
+            color: #5f6368;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        ">
+            ← Volver al Menú Principal
+        </a>
+    </div>
+
+</body>
+</html>
