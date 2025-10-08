@@ -1,65 +1,78 @@
 {
-"descripcion_alumnos": [
-{"id": "Al (Novata)", "caracteristicas": "Muy seca, novata, tiene buenas ideas pero no suma, le cuesta soltarse."},
-{"id": "An (Morro/Dicción)", "caracteristicas": "Mucho morro, buena dicción, echada para alante."},
-{"id": "BeL (Tímida/Remolque)", "caracteristicas": "Tímida, va a remolque, se pone de espaldas al público a veces, necesita empoderamiento."},
-{"id": "Be (Brío/Falta Rodaje)", "caracteristicas": "Un poco más de brío, falta rodaje (solo 2 de 4 clases)."},
-{"id": "El (Buena/Disfruta)", "caracteristicas": "Muy buena, disfruta y propone, debe creer más en sí misma y puede hacer brillar al resto."},
-{"id": "Es (Hipertímida/Extraña)", "caracteristicas": "Hipertímida, siempre saliéndose del personaje, a remolque, no propone y le cuesta entender lo que es la impro."},
-{"id": "Lu (Tímida/Se Mirá)", "caracteristicas": "Tímida, lo pillará, se mira mucho de momento."},
-{"id": "Ma (Excelente)", "caracteristicas": "Buenísima, propone, buenas ideas, suma."},
-{"id": "MaC (Extraña/Poca Imag.)", "caracteristicas": "Tipo Es, más morro pero es extraña, no vocaliza bien, baila mucho en escena, poca imaginación. Complicado que mejore."},
-{"id": "Pa (Progresa)", "caracteristicas": "Poco a poco va a más. No será la más brillante pero será cola de León."},
-{"id": "Ra (Morro/Buenas Ideas)", "caracteristicas": "Morro y buenas ideas."},
-{"id": "Yo (Cómica/Suma)", "caracteristicas": "Como Ra pero suma con una vis cómica genial."},
-{"id": "Je (Ausente)", "caracteristicas": "Nunca ha venido, potencial desconocido (Jesus)."},
-{"id": "Vi (Buena/Disfruta)", "caracteristicas": "Tipo El, disfruta y con buenas ideas."}
-],
-"repertorio_modelo": [
-"Impro con papelitos: Los jugadores sacan un papelito (palabra, frase, emoción, personaje) durante la impro y deben incorporarlo inmediatamente. Entrena la **creatividad**, **rapidez mental** y **adaptación a sorpresas**.",
-"Impro por parejas o tríos con diálogo inicial obligatorio: La escena debe comenzar con un diálogo breve y específico predefinido. Practica la **conexión**, **construcción de personajes** y **generación de contexto**.",
-"Excusas por llegar tarde: Cada jugador improvisa una excusa creativa y convincente para su tardanza. Estimula la **imaginación** y el **ingenio**.",
-"Impro de emociones o sentimientos: Los jugadores interpretan escenas guiadas por un sentimiento asignado. Trabaja la **expresión emocional** y la **empatía**.",
-"Escena de un minuto: Los jugadores crean una escena que debe desarrollarse y concluir en un minuto. Practica la **síntesis**, **rapidez narrativa** y **conclusiones efectivas**.",
-"Sí, y…: Cada jugador acepta la propuesta anterior con 'Sí, y…' y añade información que avance la historia. Fomenta la **colaboración** y la **escucha activa**.",
-"Estatuas o Congelados: Un jugador actúa mientras los demás forman estatuas. Entrena la **creatividad física** y la **conciencia espacial**.",
-"El narrador silencioso: Un jugador narra mientras los demás actúan la escena sin hablar. Entrena la **expresión corporal** y la **sincronización**.",
-"Historias encadenadas: Cada jugador añade una frase a la historia, creando un relato colectivo. Fomenta la **imaginación**, la **improvisación verbal** y la **cohesión grupal**."
-],
-"prompt_template": "Eres un profesor experto en teatro de improvisación con enfoque pedagógico y grupal. Tu objetivo es diseñar sesiones de ejercicios **altamente adaptadas** a un grupo amateur de **{alumnos_presentes} alumnos**.
-
-**1. Análisis de Perfiles del Grupo:**
-Utiliza la lista de perfiles para que los ejercicios propuestos ayuden a cada alumno a superar sus bloqueos (timidez, falta de aceptación, tendencia a salirse del personaje, etc.). Propón **variaciones y adaptaciones específicas** para cada dificultad.
-
-**2. Tipo de Sesión:**
-**{tipo_clase}**
-
-**3. Estructura y Duración:**
-
-* **Clase completa (120 min)**: Diseña la sesión con un **hilo conductor** (tema, técnica o recurso externo). Todos los ejercicios deben estar conectados temáticamente, progresando en dificultad y habilidad.
-
-  * Incluye al menos un **ejercicio final integrador** aplicando lo aprendido.
-* **Bloques de 30-45 min**: Diseña 3 a 5 ejercicios específicos con cronómetro y progresión de dificultad, enfocados en el tema del bloque.
-
-**4. Hilos conductores sugeridos:**
-
-* Creación de un personaje colectivo.
-* Principios de Stanislavski aplicados a la impro.
-* Uso de música para disparar emociones o escenas.
-* Estatus y poder en relaciones.
-* Tensión y conflicto como motor de escena.
-* Impro física vs verbal.
-* Impro con restricciones creativas (palabras limitadas, solo gestos, etc.).
-
-**5. Reglas de Ejercicios:**
-
-* Cada ejercicio que requiera propuestas, conflictos, relaciones o lugares debe tener **al menos 15 ejemplos concretos y variados**.
-* Indica claramente la **duración, objetivo pedagógico y dinámica**.
-* Inspírate en el **repertorio_modelo** para generar **variantes originales y adaptadas** al grupo.
-* Asegúrate de que los ejercicios tengan **progresión y desafío gradual**, fomentando integración de todos los alumnos.
-
-**6. Formato de salida:**
-
-* Markdown, sin preámbulo, con títulos claros y secciones de duración, objetivo, instrucciones y ejemplos. Inicia directamente con el título de la sesión y lista de ejercicios cronometrados.
-* Incluye notas para que el profesor pueda adaptar la sesión según la evolución del grupo durante la clase.
-* Los ejercicios deben fomentar **colaboración, escucha activa, adaptación, creatividad y expresión emocional**, asegurando que todos los alumnos participen y sumen al grupo."
+  "descripcion_alumnos": [
+    {"id": "Al (Novata)", "caracteristicas": "Muy seca, novata, tiene buenas ideas pero no suma, le cuesta soltarse."},
+    {"id": "An (Morro/Dicción)", "caracteristicas": "Mucho morro, buena dicción, echada para alante."},
+    {"id": "BeL (Tímida/Remolque)", "caracteristicas": "Tímida, va a remolque, se pone de espaldas al público a veces, necesita empoderamiento."},
+    {"id": "Be (Brío/Falta Rodaje)", "caracteristicas": "Un poco más de brío, falta rodaje (solo 2 de 4 clases)."},
+    {"id": "El (Buena/Disfruta)", "caracteristicas": "Muy buena, disfruta y propone, debe creer más en sí misma y puede hacer brillar al resto."},
+    {"id": "Es (Hipertímida/Extraña)", "caracteristicas": "Hipertímida, siempre saliéndose del personaje, a remolque, no propone y le cuesta entender lo que es la impro."},
+    {"id": "Lu (Tímida/Se Mirá)", "caracteristicas": "Tímida, lo pillará, se mira mucho de momento."},
+    {"id": "Ma (Excelente)", "caracteristicas": "Buenísima, propone, buenas ideas, suma."},
+    {"id": "MaC (Extraña/Poca Imag.)", "caracteristicas": "Tipo Es, más morro pero es extraña, no vocaliza bien, baila mucho en escena, poca imaginación. Complicado que mejore."},
+    {"id": "Pa (Progresa)", "caracteristicas": "Poco a poco va a más. No será la más brillante pero será cola de León."},
+    {"id": "Ra (Morro/Buenas Ideas)", "caracteristicas": "Morro y buenas ideas."},
+    {"id": "Yo (Cómica/Suma)", "caracteristicas": "Como Ra pero suma con una vis cómica genial."},
+    {"id": "Je (Ausente)", "caracteristicas": "Nunca ha venido, potencial desconocido (Jesus)."},
+    {"id": "Vi (Buena/Disfruta)", "caracteristicas": "Tipo El, disfruta y con buenas ideas."}
+  ],
+  "repertorio_modelo": [
+    "Impro con papelitos: Los jugadores sacan un papelito (palabra, frase, emoción, personaje) durante la impro y deben incorporarlo inmediatamente. Entrena la **creatividad**, **rapidez mental** y **adaptación a sorpresas**.",
+    "Impro por parejas o tríos con diálogo inicial obligatorio: La escena debe comenzar con un diálogo breve y específico predefinido (ej. '¿Has traído lo que te pedí? Sí, pero no lo que tú imaginas'). Practica la **conexión**, **construcción de personajes** y **generación de contexto**.",
+    "Excusas por llegar tarde: Cada jugador improvisa una excusa creativa y convincente para su tardanza (ej. 'Me detuvo un desfile de patos'). Estimula la **imaginación** y el **ingenio**. Se puede jugar en escenas encadenadas.",
+    "Impro de emociones o sentimientos: Los jugadores interpretan escenas donde un sentimiento específico (ej. Rabia, Miedo, Euforia) guía su actuación, extraído de papelitos o asignado. Trabaja la **expresión emocional** y la **empatía**.",
+    "Escena de un minuto: Los jugadores crean una escena que debe desarrollarse y **concluir en un minuto**. Practica la **síntesis**, **rapidez narrativa** y **conclusiones efectivas**.",
+    "Sí, y…: Cada jugador debe aceptar la propuesta del anterior con 'Sí, y…' y añadir información que avance la historia. Fomenta la **colaboración** y la **escucha activa**.",
+    "Estatuas o Congelados: Un jugador actúa mientras los demás forman estatuas que pueden interactuar cuando se les toque o se les dé la señal. Trabaja la **creatividad física** y la **conciencia espacial**.",
+    "El narrador silencioso: Un jugador narra en voz alta la historia mientras los demás actúan la escena **sin hablar**. Entrena la **expresión corporal** y la **sincronización** entre narración y actuación.",
+    "Historias encadenadas: Cada jugador añade una frase o situación a la historia, creando un relato colectivo. Fomenta la **imaginación**, la **improvisación verbal** y la **cohesión grupal**.",
+    "Alien, tigre, vaca!: Todos comienzan con una de las tres posturas/sonidos. Deben sincronizarse grupalmente hasta que todos hagan el mismo. Entrena la **adaptación grupal**, la **sincronización** y el **dejar de lado la idea propia**.",
+    "Experto del chamuyo: Un jugador es un experto extranjero en un tema y da un discurso en un idioma inventado. Un segundo jugador traduce. Entrena la **traducción emocional**, la **escucha activa** y la **justificación verbal**.",
+    "Corte: Dos jugadores comienzan una escena. Cualquier otro puede gritar 'corte!' y empezar una escena nueva con otro jugador. La idea es que todas las escenas cortadas converjan en una única historia. Entrena la **macro-narrativa** y la **convergencia de historias**.",
+    "Sílabas de acción: En círculo, cada persona dice su nombre haciendo un gesto por cada sílaba. Calentamiento para **conocer nombres**, **memoria** y **gestualidad rítmica**.",
+    "Juego del alfabeto: Escena de diálogo de 27 líneas, cada réplica con la letra siguiente del abecedario. El que duda o falla 'muere' y es reemplazado. Entrena la **rapidez verbal**, la **continuidad del personaje** y la **progresión de la historia a través de restricciones**.",
+    "3 some: Un jugador ofrece algo ('soy queso'), el segundo agrega ('soy pan'), el tercero agrega. El primero se va, llevándose uno de los otros, y el restante reinicia. Calentamiento divertido para **aceptación** ('Sí, y...') y **rotación rápida**.",
+    "Círculo de aceptación: En círculo, uno comienza con un gesto/sonido. El vecino lo imita exactamente y se continúa. Fomenta la **observación detallada** y la **aceptación absoluta**.",
+    "Aliteraciones!: En círculo, pasar una pelota. La persona con la pelota debe decir tantas palabras como se le ocurra que comiencen con una letra dada. Entrena la **rapidez verbal**, la **concentración** y el **desbloqueo mental**.",
+    "El Mochilero!: Cuatro sillas simulan un coche. El conductor recoge mochileros, cada uno con un 'tic' físico que el conductor debe adoptar y mantener simultáneamente. Entrena la **justificación**, la **corporalidad** y la **acumulación de detalles**.",
+    "Interpretación para sordos: Tres participantes: experto, entrevistador e intérprete. El intérprete traduce simultáneamente al lenguaje de señas (con mímica y gesto). Entrena la **escucha**, el **ritmo** y la **expresión no verbal**.",
+    "¿Qué haces? (Niños): Uno hace una acción y el compañero le pregunta qué hace. La respuesta debe ser otra acción que el compañero debe realizar. Entrena la **escucha** y la **aceptación de propuestas opuestas**.",
+    "La Narrativa (Niños): El profesor narra una historia y los niños la actúan, fomentando la improvisación sobre una base simple.",
+    "Congelados y Ciegos: Dos improvisan, el resto (de espaldas) grita '¡congelado!'. El que grita sustituye a uno de los actores en su postura, creando una nueva escena. Entrena la **escucha auditiva** y la **adaptación corporal**.",
+    "¡Llueve! (Niños): Caminar de forma aleatoria por el espacio como si llovieran cosas ridículas. Corto y para usar todo el espacio.",
+    "'Esto es un…' (Niños): Tomar un objeto en el centro y darle un uso diferente con mímica. Los otros adivinan el uso. Entrena la **resignificación** y la **mímica**.",
+    "La gran escultura de arcilla (Boal): Dividir en 'escultores' y 'arcillas' (ojos cerrados). Escultores modelan a las arcillas. Entrena la **conciencia corporal**, la **no-verbalidad** y la **precisión de la mímica**.",
+    "Patos y vacas!: Jugadores con ojos cerrados son designados 'patos' u 'vacas'. Al abrirlos, deben juntarse con los de su especie. Calentamiento de **integración** y **concentración**.",
+    "El Revolver: Cuatro participantes en cuadrado. Los de delante improvisan. El anfitrión dice 'izquierda' o 'derecha' para rotar. Los nuevos de delante continúan la historia anterior. Entrena la **continuidad narrativa** y la **rotación de roles**.",
+    "Vampiros: Jugadores con ojos cerrados caminan. Un 'vampiro' toca y 'mata' a las víctimas. Ejercicio de **concentración** y **conciencia espacial**.",
+    "Reacción: Uno señala a otro diciendo el nombre de un tercero. El nombrado debe reaccionar inmediatamente haciendo lo mismo. Ejercicio de **concentración** y **agilidad mental**.",
+    "El modelador de arcilla!: Tres jugadores: 'arcilla' (ojos cerrados), 'modelo' (pose fija) y 'modelador' (sin tocar ni hablar). Entrena la **comunicación no verbal** y la **precisión de la mímica**.",
+    "Hazlo más interesante!: Un actor debe hacer su acción más interesante, sin avanzar en la historia, al escuchar un aplauso. Entrena el **foco en la acción**, el **detalle** y lo **clownesco**.",
+    "Intercambio de actores: En medio de una escena, los personajes son reemplazados por nuevos actores, que deben continuar la historia. Entrena la **continuidad** y la **adaptación de personaje**.",
+    "Saludos: Los jugadores caminan y se saludan según diferentes relaciones o estados emocionales dados. Calentamiento que trabaja el **cambio emocional** y la **relación en segundos**.",
+    "Samurais en cámara lenta: Lucha de samuráis en cámara lenta. Entrena el **control de la energía**, la **cortesía** y el **ritmo grupal**.",
+    "Atrapalos!: Un jugador en una esquina se da la vuelta. Los otros intentan llegar a su extremo sin ser vistos en movimiento. Ejercicio de **concentración** y **congelamiento**.",
+    "El sobreviviente: El público elimina uno a uno a los jugadores. El restante repite y cubre todo lo anterior, hasta que solo queda uno, que hace todos los roles. Ejercicio de **atención**, **memoria** y **desdoblamiento**.",
+    "Sobrecarga: Un jugador debe responder preguntas matemáticas, preguntas personales e imitar movimientos simultáneamente. Entrena la **concentración**, las **habilidades auditivas** y el **foco bajo presión**.",
+    "Sin dobles! (1-10): Contar del 1 al 10. Si dos hablan a la vez, se vuelve al 1. Ejercicio de **concentración**, **escucha de grupo** y **ritmo**.",
+    "Intercambio de personajes: Dos improvisan con características fuertes. Luego invierten los papeles. Entrena la **observación** y la **ruptura de personajes típicos**.",
+    "Superhéroes!: Un jugador presenta un problema y llama a un 'Superhéroe' que empeora la situación. Se repite hasta que el último héroe resuelve. Entrena la **incitación a personajes exagerados** y la **bajada de estatus**.",
+    "Jeopardy: El público da respuestas y los jugadores deben formular las preguntas. Entrena la **agilidad mental**, la **creatividad** y la **construcción de propuestas absurdas**.",
+    "La cuerda: Jugar a tirar de la cuerda con mímica. Enfocarse en la **'cortesía'** (ceder y dejarse perder).",
+    "UPA! (Ubicación, profesión, arma!): Un jugador recibe en secreto Ubicación, Profesión y Objeto. Un segundo jugador intenta adivinarlos en idioma inventado, y al final 'mata' al primero con el Objeto. Entrena la **comunicación no verbal** y la **claridad**.",
+    "Espejo emocional: Jugadores en pares hablan en 'idioma sin sentido' con una emoción. El segundo copia la emoción, luego cambia de emoción. Entrena la **emoción** y la **respuesta instantánea**.",
+    "Volviendo a casa: Representar cómo una persona conocida volvería a casa, prestando atención al entorno y el estado de ánimo. Entrena la **observación** y la **construcción de personajes creíbles**.",
+    "El poeta bohemio: El público da 2 objetos dispares. Cada jugador debe decir un poema improvisado que contenga ambos. Entrena la **rima**, la **palabra** y la **agilidad para integrar elementos**.",
+    "Antes o después: Improvisar una escena corta. Luego, ver lo que pasó ANTES o DESPUÉS. Ejercicio de **estructura narrativa** y **elipsis**.",
+    "3 series: Pasar un elemento de una categoría, señalando. Repetir sin señalar, y añadir más categorías. Entrena la **concentración** y la **escucha colectiva**.",
+    "Estado de orden: Cuatro jugadores con una carta pegada en la frente. Improvisan una escena donde el **orden jerárquico** lo da la carta. Entrena la **observación**, el **estatus** y la **justificación de personaje**.",
+    "El aeróbico: Los jugadores en fila imitan los movimientos del primero que camina. Ejercicio de **observación** y **aceptación**.",
+    "Cinco cosas: Un jugador fuera. El grupo toma una actividad y cambia cinco cosas. El jugador que entra debe adivinar los cambios en idioma inventado. Entrena la **comunicación no verbal** y la **claridad de la propuesta**.",
+    "El adivino: Un jugador hace de 'adivino' e intenta predecir las predicciones dadas por el público, impulsado por mímica o palabras inventadas. Entrena la **intuición** y la **comunicación no verbal**.",
+    "El portero: Un 'portero' recibe propuestas de apertura de escena con personaje y debe reaccionar instantáneamente con un personaje opuesto. Ejercicio de **velocidad**, **transformación** y **reacción**.",
+    "The Good, the Bad and the Ugly advice: Tres jugadores dan un consejo 'bueno', 'malo' y 'feo' a un problema. Entrena la **exageración**, la **escala emocional** y la **toma de decisiones rápidas**.",
+    "Entrevista hacia atrás: Entrevistar sobre un tema, comenzando con la última oración. Entrena la **lógica inversa**, la **escucha para justificar la respuesta** y la **adaptación**.",
+    "10 dedos: En círculo, 10 dedos arriba. Preguntar preguntas SÍ/NO personales. Entrena el **autoconocimiento** y la **integración grupal**.",
+    "Bong bong bong!: Un jugador recibe una acción y la comunica en mímica e 'idioma inventado' al siguiente. Al final, dicen lo que entendieron. Entrena la **comunicación no verbal** y la **interpretación**."
+  ],
+  "prompt_template": "Eres un profesor experto en teatro de improvisación con enfoque pedagógico y grupal. Tu objetivo es diseñar sesiones de ejercicios adaptadas de manera óptima a un grupo amateur de **{alumnos_presentes} alumnos**.\n\n**1. Perfiles del Grupo y Consideraciones Clave:**\nAnaliza la siguiente lista de perfiles y sus bloqueos (timidez, falta de aceptación, tendencia a salirse del personaje, dificultad para sumar ideas). Diseña ejercicios que ayuden a cada alumno a superar estas dificultades y fomentar la confianza, la colaboración y la creatividad.\n{perfiles_lista}\n\n**2. Tipo de Sesión Solicitada:**\nLa sesión requerida es:\n**{tipo_clase}**\n\n**3. Estructura y Duración:**\n- **Clase completa con hilo conductor (120 minutos):**\n    - Todos los ejercicios deben estar conectados mediante un **hilo conductor** que puede ser un tema, una técnica o un recurso creativo.\n    - Diseña la progresión de la clase: desde ejercicios de calentamiento y exploración, pasando por desarrollo de habilidades específicas, hasta un ejercicio final integrador que aplique todo lo aprendido.\n    - Ejemplos de hilos conductores sugeridos:\n        1) Creación de un personaje colectivo y exploración de su historia durante la clase;\n        2) Principios de Stanislavski aplicados a la improvisación (Objetivo, Acción, Motivación);\n        3) Uso de música o sonidos como disparadores emocionales y de escena;\n        4) Estatus y poder en relaciones interpersonales;\n        5) Conflicto y tensión como motor dramático;\n        6) Improvisación física vs verbal;\n        7) Restricciones creativas (ej. diálogo limitado, solo gestos, palabras prohibidas).\n    - El cierre de la clase debe ser **totalmente práctico**, evitando segmentos de reflexión formal; termina con un juego o escena final que integre todo lo trabajado.\n\n- **Bloques temáticos (30-45 minutos):**\n    - Diseña 3 a 5 ejercicios específicos, cronometrados y centrados en el tema del bloque.\n    - Cada ejercicio debe incluir objetivos claros, dinámica detallada y ejemplos de aplicación.\n\n**4. Repertorio y Formato de Salida:**\n- Genera la sesión en **Markdown**, sin preámbulo, con títulos claros y secciones para: duración, objetivo, instrucciones y ejemplos.\n- Cuando un ejercicio requiera propuestas de situaciones, conflictos, relaciones o lugares, incluye **al menos 15 ejemplos variados y concretos** debajo de la descripción.\n\n**5. Estilo y Consistencia de Juegos:**\n- Inspírate en la complejidad y variedad del **'repertorio_modelo'**.\n- Adapta los ejercicios a los perfiles específicos de los alumnos, promoviendo progresión, colaboración, escucha activa, adaptación, creatividad y expresión emocional.\n- Los ejercicios deben ser originales, efectivos y permitir que todos los alumnos participen, sumen y se sientan seguros.\n\n**6. Notas Pedagógicas Adicionales:**\n- Cada ejercicio debe tener un propósito pedagógico explícito.\n- Sugiere variantes para aumentar o disminuir la dificultad según la dinámica del grupo.\n- Prioriza que los alumnos experimenten, se equivoquen y aprendan mediante la práctica activa."
+}
