@@ -34,8 +34,10 @@
         const API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; 
         const MODEL_NAME = 'gemini-2.5-flash';
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
-        // Temperatura ajustada a 0.75 para mayor estabilidad en el formato.
-        const TEMPERATURE = 0.75; 
+        // Temperatura ajustada a 0.65 para MÁXIMA estabilidad en el formato.
+        const TEMPERATURE = 0.65; 
+        // Secuencia de parada para asegurar que la generación no se trunque a mitad de frase.
+        const STOP_SEQUENCE = '###'; 
 
         // Función para construir el PROMPT detallado y MEJORADO
         function construirPrompt() {
@@ -54,12 +56,14 @@
 
             const formato = `
                 **FORMATO ESTRICTO DE SALIDA (4 LÍNEAS EXACTAS):**
-                Debes responder **EXCLUSIVAMENTE** con **cuatro** líneas de texto. **NO INCLUYAS NINGÚN TEXTO EXTRA, encabezado, introducción, corchete o despedida.** Solo el texto de las 4 líneas.
+                Debes responder **EXCLUSIVAMENTE** con **cuatro** líneas de texto. **NO INCLUYAS NINGÚN TEXTO EXTRA, encabezado, introducción, corchete o despedida ANTES O DESPUÉS de las 4 líneas.**
+                
+                Línea 1: Quiénes son: [Contenido]
+                Línea 2: Dónde están (Surrealista): [Contenido]
+                Línea 3: Dónde están (Mundana con Giro Cómico/Realista): [Contenido]
+                Línea 4: Dónde están (Mundana Aburrida): [Contenido]
 
-                Línea 1: Quiénes son: [Relación de 2-3 personajes, concisa y con gancho]
-                Línea 2: Dónde están (Surrealista): [Lugar absurdo o imposible]
-                Línea 3: Dónde están (Mundana con Giro Cómico/Realista): [Lugar común con un giro divertido y realista]
-                Línea 4: Dónde están (Mundana Aburrida): [Lugar extremadamente común, neutral y sin gancho]
+                **INSTRUCCIÓN CRÍTICA DE PARADA:** Después de la Línea 4, añade el token **${STOP_SEQUENCE}** y detente inmediatamente.
             `;
 
             const ejemplos = [
@@ -119,7 +123,9 @@
                 "Ejemplo 53:\nQuiénes son: Un crítico de cine y el actor que solo hace películas de terror de bajo presupuesto.\nDónde están (Surrealista): En el carrete de una película donde la realidad se mezcla con la ficción.\nDónde están (Mundana con Giro Cómico/Realista): En una cena de Nochevieja, donde el actor intenta convencer al crítico de que su última película es una obra maestra.\nDónde están (Mundana Aburrida): En una tienda de regalos comprando una tarjeta.",
             ];
 
-            const instruccionFinal = "Ahora, genera un **NUEVO** ejemplo original, creativo y que siga **EXACTAMENTE** este formato de **cuatro** líneas. **Inspírate en la variedad y el alto contraste de los ejemplos proporcionados.**";
+            const instruccionFinal = `
+                Ahora, genera un **NUEVO** ejemplo original, creativo y que siga **EXACTAMENTE** el formato de **cuatro** líneas, terminando con el token **${STOP_SEQUENCE}**.
+            `;
 
 
             // Se combinan todas las partes del prompt mejorado
@@ -141,8 +147,10 @@
                     body: JSON.stringify({
                         contents: [{ role: "user", parts: [{ text: prompt }] }],
                         generationConfig: { 
-                            temperature: TEMPERATURE, // Usamos la temperatura ajustada
+                            temperature: TEMPERATURE, 
                             maxOutputTokens: 2048, 
+                            // NUEVO: Secuencia de parada para prevenir truncamiento
+                            stopSequences: [STOP_SEQUENCE]
                         }
                     })
                 });
@@ -157,8 +165,11 @@
                 let textoGenerado = "No se pudo generar el contenido. Vuelve a intentarlo.";
 
                 try {
-                    // Extracción simple: obtener el texto, limpiarlo de espacios extra
-                    textoGenerado = data.candidates[0].content.parts[0].text.trim();
+                    // Extracción simple: obtener el texto, limpiarlo del token de parada
+                    textoGenerado = data.candidates[0].content.parts[0].text
+                        .trim()
+                        .replace(new RegExp(STOP_SEQUENCE + '.*$'), '') // Elimina el token y todo lo que venga después
+                        .trim();
                 } catch (e) {
                     // Si falla la extracción, se mantiene el mensaje de error.
                 }
@@ -246,3 +257,4 @@
 
 </body>
 </html>
+
