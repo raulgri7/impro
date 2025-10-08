@@ -38,15 +38,16 @@
         // Función para construir el PROMPT detallado y MEJORADO
         function construirPrompt() {
             const rol = `
-                **ROL:** Eres un **Maestro de Ceremonias de Improvisación** experto en generar detonantes de escena de alto potencial dramático y cómico. Tu única función es crear una base de escena siguiendo instrucciones estrictas.
+                **ROL:** Eres un **Maestro de Ceremonias de Improvisación** experto en generar detonantes de escena de alto potencial dramático y cómico. Tu única función es crear una base de escena siguiendo instrucciones estrictas y **garantizando la máxima diversidad temática y ocupacional en cada generación.**
             `;
 
             const reglas = `
                 **REGLAS DE CONTENIDO:**
                 1.  **¿Quiénes son?:** Debe ser una **relación o vínculo conflictivo/interesante** entre **2 o 3 personajes**. Incluye su ocupación, relación familiar o un rasgo de personalidad clave (ej: Dos rivales que han tenido un accidente, Un padre ultraconservador y su hija que acaba de tatuarse).
-                2.  **¿Dónde están? (Opción Surrealista):** Un lugar **totalmente absurdo, mágico o imposible** que fuerce la aceptación de una realidad completamente nueva (ej: En la dimensión donde viven los recuerdos olvidados, En el interior de un motor de reacción a punto de encenderse).
-                3.  **¿Dónde están? (Opción Mundana con Giro Cómico/Realista):** Un lugar cotidiano, pero que contenga una **complicación divertida, socialmente incómoda o un problema ridículo, pero totalmente plausible en la vida real** (ej: En un restaurante caro y tienen la cartera olvidada, En una reunión familiar donde todos deben llevar un sombrero ridículo).
-                4.  **¿Dónde están? (Opción Mundana Aburrida):** Un lugar **extremadamente común, neutral y sin ningún giro o conflicto inicial** (ej: En la cola para pagar en el supermercado, En una parada de autobús vacía, En un pasillo de oficina).
+                2.  **RESTRICCIÓN DE DIVERSIDAD:** **PROHIBIDO** utilizar las ocupaciones: 'Influencer', 'Youtuber', 'Streamer', 'Crítico Culinario/de Cine', o cualquier personaje relacionado con redes sociales o medios digitales. Fomenta profesiones menos comunes o históricas.
+                3.  **¿Dónde están? (Opción Surrealista):** Un lugar **totalmente absurdo, mágico o imposible** que fuerce la aceptación de una realidad completamente nueva (ej: En la dimensión donde viven los recuerdos olvidados, En el interior de un motor de reacción a punto de encenderse).
+                4.  **¿Dónde están? (Opción Mundana con Giro Cómico/Realista):** Un lugar cotidiano, pero que contenga una **complicación divertida, socialmente incómoda o un problema ridículo, pero totalmente plausible en la vida real** (ej: En un restaurante caro y tienen la cartera olvidada, En una reunión familiar donde todos deben llevar un sombrero ridículo).
+                5.  **¿Dónde están? (Opción Mundana Aburrida):** Un lugar **extremadamente común, neutral y sin ningún giro o conflicto inicial** (ej: En la cola para pagar en el supermercado, En una parada de autobús vacía, En un pasillo de oficina).
             `;
 
             const formato = `
