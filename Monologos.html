@@ -21,6 +21,8 @@
         .error-message { color: white; background-color: #dc3545; padding: 15px; border-radius: 8px; margin-top: 20px; font-weight: bold; }
         /* Estilo para el selector dropdown */
         #monologo-selector { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; background-color: #fff; }
+        /* Estilo para el campo de texto adicional */
+        #prompt-adicional { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; resize: vertical; min-height: 80px; }
     </style>
 </head>
 <body>
@@ -38,6 +40,10 @@
         </select>
     </div>
     
+    <div style="margin-bottom: 25px;">
+        <label for="prompt-adicional" style="display: block; margin-bottom: 8px; font-weight: bold; color: #555;">¿Quieres añadir algo? (Opcional, para enriquecer la búsqueda):</label>
+        <textarea id="prompt-adicional" placeholder="Ej: Que el tema sea sobre la IA, o que el tono sea más cómico."></textarea>
+    </div>
     <button id="searchButton" onclick="generarMonologos()">Buscar y Generar Monólogo(s)</button>
     
     <div id="loading">... La IA está escribiendo y buscando contenido. Un momento, por favor...</div>
@@ -58,7 +64,9 @@ Debes incluir solo las claves de monólogos solicitadas: {CLAVES_SOLICITADAS}.
 
 Todos los monólogos reales deben ser fragmentos de obras existentes, y todos deben ser **estrictamente en prosa (no en verso)**, con un tono y temas **contemporáneos**.
 
-{PROMPTS_ESPECIFICOS}`;
+{PROMPTS_ADICIONAL}
+
+{PROMPTS_ESPECIFICOS}`; // He movido esta variable al final por claridad en la construcción.
 
 const PROMPT_PARTIALS = {
     // 1. Monólogo REAL (Estándar) - 2 a 4 minutos
@@ -114,6 +122,11 @@ async function generarMonologos() {
     const loadingDiv = document.getElementById('loading');
     const button = document.getElementById('searchButton');
     const selector = document.getElementById('monologo-selector');
+    
+    // Obtener el nuevo campo de texto
+    const promptAdicionalElement = document.getElementById('prompt-adicional');
+    const promptAdicional = promptAdicionalElement.value.trim(); // Leer y limpiar el valor
+    
     const selectedOption = selector.value;
     const selectedKeys = SELECTION_MAP[selectedOption];
 
@@ -122,12 +135,19 @@ async function generarMonologos() {
         return;
     }
 
+    // Preparar la parte adicional del prompt
+    let additionalPromptText = '';
+    if (promptAdicional) {
+        additionalPromptText = `INSTRUCCIÓN ADICIONAL DEL USUARIO: Considera esta indicación para los monólogos generados: "${promptAdicional}"\n\n`;
+    }
+    
     // Construir el prompt específico
     const promptsToInclude = selectedKeys.map(key => PROMPT_PARTIALS[key].instruccion).join('\n\n');
     const keysForJson = selectedKeys.map(key => `"${key}"`).join(', ');
     
     const finalPrompt = PROMPT_BASE
         .replace('{CLAVES_SOLICITADAS}', keysForJson)
+        .replace('{PROMPTS_ADICIONAL}', additionalPromptText) // Reemplazar la nueva variable
         .replace('{PROMPTS_ESPECIFICOS}', promptsToInclude);
 
     resultsDiv.innerHTML = '';
@@ -174,7 +194,7 @@ async function generarMonologos() {
         // --- MANEJO ROBUSTO DEL JSON ---
         let monologos;
         try {
-            // Limpiamos el texto para eliminar cualquier bloque de código Markdown (\`\`\`json \`\`\`)
+            // Limpiamos el texto para eliminar cualquier bloque de código Markdown (```json ```)
             rawContent = rawContent.replace(/```json\s*|```/g, '').trim(); 
             monologos = JSON.parse(rawContent);
         } catch (e) {
@@ -205,7 +225,7 @@ async function generarMonologos() {
 
 // Función para mostrar cada monólogo en el DOM
 function displayMonologo(monologo, titleDisplay, isReal) {
-    const resultsDiv = document.getElementById('results');
+    const resultsDiv = document.getElementById('results);
     const titulo = monologo.titulo || 'Monólogo sin Título';
     const texto = monologo.texto || 'Contenido no disponible.';
     const referencia = monologo.referencia || 'Referencia no especificada.';
