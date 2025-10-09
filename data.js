@@ -11,15 +11,15 @@ window.ALUMNOS_POR_CLASE = {
     "Lunes": [
         "Alba|0", "Andrea|1", "Beatriz|1", "Beatriz Law|1", "Elena|1", 
         "Estela|1", "Jesús|0", "Lucía|0", "María|0", "Marta|1", 
-        "Mery|1", "Patricia|1", "Raquel|0", "Victoria|0", "Yolanda|1"
+        "Patricia|1", "Raquel|0", "Victoria|0", "Yolanda|1"
     ],
     "Martes": [
-        "Ainhoa|0", "AnaG|0", "Daniel|1", "Javier|1", "Judith|1", 
-        "Laura|1", "Marcos|1", "Marta|1", "Maite|1", "Nerea|1", 
+        "Ainhoa|0", "AnaG|1", "Cris|1", "Carlos 1|1", "Judith|1", 
+        "Carlos 2|1", "Marcos|1", "Marta|1", "Maite|1", "Nerea|1", 
         "Pablo|1", "Samira|1", "Sofía|1"
     ],
     "Miércoles": [
-        "Bea|0", "Chuchi|0", "Elenita|1", "Esther|1", "Isa|1", 
+        "Bea|1", "Chuchi|1", "Elenita|1", "Esther|1", "Isa|1", 
         "Isra|1", "María|1", "Natalia|1", "Paloma|1", "Yesi|1"
     ],
     "Jueves 5": [
