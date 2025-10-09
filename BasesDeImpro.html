@@ -17,12 +17,40 @@
         .api-warning { color: red; margin-top: 15px; font-size: 0.9em; border: 1px solid red; padding: 10px; background-color: #fee; }
         .cargando { color: #8B4513; font-weight: bold; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* Estilos específicos para la barra de temperatura */
+        #temperature-control {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+        }
     </style>
 </head>
 <body>
 
     <h1>Bases de Impro 💡</h1>
     
+    <div id="temperature-control">
+        <label for="temp-slider" style="font-weight: bold; display: block; margin-bottom: 5px;">
+            Estilo de Creatividad:
+        </label>
+        
+        <input type="range" id="temp-slider" min="0.0" max="1.0" step="0.05" value="0.3" 
+               style="width: 100%; height: 25px;">
+        
+        <div style="display: flex; justify-content: space-between; font-size: 0.85em; margin-top: 5px;">
+            <span style="color: #65340f; font-weight: bold;">0.0 (Aburrido)</span>
+            <span>0.3 (Normal)</span>
+            <span>0.6 (Loco)</span>
+            <span style="color: #8B4513; font-weight: bold;">1.0 (Surrealista)</span>
+        </div>
+        
+        <p style="text-align: right; margin-top: 5px; font-weight: bold;">
+            Temperatura actual: <span id="current-temp">0.3</span>
+        </p>
+    </div>
     <button onclick="generarImpro()">Nueva Base de Escena</button>
     
     <div id="resultado"></div>
@@ -36,68 +64,72 @@
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
 
         // Función para construir el PROMPT detallado y MEJORADO
-function construirPrompt() {
-    const rol = `
-**ROL:** Eres un **Maestro de Ceremonias de Improvisación** con un talento especial para crear detonantes de escena que sorprendan por su originalidad, contraste y potencial interpretativo. 
-Tu misión es generar una base de escena **completamente nueva cada vez**, evitando repetir profesiones, tipos de relación o ambientes de ejemplos anteriores.
-`;
+        function construirPrompt() {
+            const rol = `
+            **ROL:** Eres un **Maestro de Ceremonias de Improvisación** con un talento especial para crear detonantes de escena que sorprendan por su originalidad, contraste y potencial interpretativo. 
+            Tu misión es generar una base de escena **completamente nueva cada vez**, evitando repetir profesiones, tipos de relación o ambientes de ejemplos anteriores.
+            `;
 
-    const reglas = `
-**REGLAS DE CONTENIDO:**
-1. **¿Quiénes son?** Una **relación interesante entre 2 o 3 personajes**, de distintos mundos, edades o épocas. Incluye su vínculo, ocupación o rasgo dominante, pero evita repetir clichés modernos (nada de influencers, policías, detectives, etc. salvo que sea con un giro inusual).
-2. **¿Dónde están? (Opción Surrealista):** Un lugar **imposible, poético o absurdo**, que active la imaginación visual y el humor involuntario. Debe ser inesperado, pero coherente dentro de un universo onírico o simbólico.
-3. **¿Dónde están? (Opción Mundana con Giro Cómico/Realista):** Un sitio cotidiano, pero con una **situación absurda, incómoda o embarazosa**. Algo que podría pasar de verdad, aunque parezca de sketch.
-4. **¿Dónde están? (Opción Mundana Aburrida):** Un lugar corriente, anodino y sin conflicto. Sirve como contraste. Sin ironía, sin giro, solo rutina.
-`;
+            const reglas = `
+            **REGLAS DE CONTENIDO:**
+            1. **¿Quiénes son?** Una **relación interesante entre 2 o 3 personajes**, de distintos mundos, edades o épocas. Incluye su vínculo, ocupación o rasgo dominante, pero evita repetir clichés modernos (nada de influencers, policías, detectives, etc. salvo que sea con un giro inusual).
+            2. **¿Dónde están? (Opción Surrealista):** Un lugar **imposible, poético o absurdo**, que active la imaginación visual y el humor involuntario. Debe ser inesperado, pero coherente dentro de un universo onírico o simbólico.
+            3. **¿Dónde están? (Opción Mundana con Giro Cómico/Realista):** Un sitio cotidiano, pero con una **situación absurda, incómoda o embarazosa**. Algo que podría pasar de verdad, aunque parezca de sketch.
+            4. **¿Dónde están? (Opción Mundana Aburrida):** Un lugar corriente, anodino y sin conflicto. Sirve como contraste. Sin ironía, sin giro, solo rutina.
+            `;
 
-    const formato = `
-**FORMATO ESTRICTO DE SALIDA:**
-Responde **EXCLUSIVAMENTE con cuatro líneas de texto**, sin explicaciones ni añadidos.
+            const formato = `
+            **FORMATO ESTRICTO DE SALIDA:**
+            Responde **EXCLUSIVAMENTE con cuatro líneas de texto**, sin explicaciones ni añadidos.
 
-Línea 1: Quiénes son: [relación de 2-3 personajes, concisa y con gancho]  
-Línea 2: Dónde están (Surrealista): [lugar absurdo o imposible]  
-Línea 3: Dónde están (Mundana con Giro Cómico/Realista): [lugar común con complicación divertida]  
-Línea 4: Dónde están (Mundana Aburrida): [lugar extremadamente normal]
-`;
+            Línea 1: Quiénes son: [relación de 2-3 personajes, concisa y con gancho]  
+            Línea 2: Dónde están (Surrealista): [lugar absurdo o imposible]  
+            Línea 3: Dónde están (Mundana con Giro Cómico/Realista): [lugar común con complicación divertida]  
+            Línea 4: Dónde están (Mundana Aburrida): [lugar extremadamente normal]
+            `;
 
-    const ejemplos = [
-`Ejemplo 1:
-Quiénes son: Un relojero ciego y su aprendiz que odia el silencio.
-Dónde están (Surrealista): Dentro del tiempo detenido entre dos segundos.
-Dónde están (Mundana con Giro Cómico/Realista): En una entrevista de trabajo donde ambos han llegado con la misma ropa.
-Dónde están (Mundana Aburrida): En la ventanilla del ayuntamiento, esperando número.`,
+            const ejemplos = [
+            `Ejemplo 1:
+            Quiénes son: Un relojero ciego y su aprendiz que odia el silencio.
+            Dónde están (Surrealista): Dentro del tiempo detenido entre dos segundos.
+            Dónde están (Mundana con Giro Cómico/Realista): En una entrevista de trabajo donde ambos han llegado con la misma ropa.
+            Dónde están (Mundana Aburrida): En la ventanilla del ayuntamiento, esperando número.`,
 
-`Ejemplo 2:
-Quiénes son: Dos vecinas que no se han hablado en diez años y comparten una planta que crece entre sus balcones.
-Dónde están (Surrealista): En un edificio que flota sobre un mar de sopa caliente.
-Dónde están (Mundana con Giro Cómico/Realista): En una clase de zumba en la que accidentalmente son pareja.
-Dónde están (Mundana Aburrida): En la cola del supermercado.`,
+            `Ejemplo 2:
+            Quiénes son: Dos vecinas que no se han hablado en diez años y comparten una planta que crece entre sus balcones.
+            Dónde están (Surrealista): En un edificio que flota sobre un mar de sopa caliente.
+            Dónde están (Mundana con Giro Cómico/Realista): En una clase de zumba en la que accidentalmente son pareja.
+            Dónde están (Mundana Aburrida): En la cola del supermercado.`,
 
-`Ejemplo 3:
-Quiénes son: Un astronauta jubilado y un repartidor que nunca ha salido de su barrio.
-Dónde están (Surrealista): Caminando por una luna hecha de cristal que se agrieta al hablar.
-Dónde están (Mundana con Giro Cómico/Realista): En una gasolinera donde ambos intentan inflar un flotador gigante.
-Dónde están (Mundana Aburrida): En un banco del parque viendo pasar palomas.`,
+            `Ejemplo 3:
+            Quiénes son: Un astronauta jubilado y un repartidor que nunca ha salido de su barrio.
+            Dónde están (Surrealista): Caminando por una luna hecha de cristal que se agrieta al hablar.
+            Dónde están (Mundana con Giro Cómico/Realista): En una gasolinera donde ambos intentan inflar un flotador gigante.
+            Dónde están (Mundana Aburrida): En un banco del parque viendo pasar palomas.`,
 
-`Ejemplo 4:
-Quiénes son: Una monja gamer y su sobrina programadora que no cree en nada.
-Dónde están (Surrealista): Dentro de una partida de Tetris donde las piezas son sus pecados.
-Dónde están (Mundana con Giro Cómico/Realista): En un taller de meditación donde nadie puede dejar de hablar.
-Dónde están (Mundana Aburrida): En una lavandería autoservicio viendo girar la ropa.`,
-    ];
+            `Ejemplo 4:
+            Quiénes son: Una monja gamer y su sobrina programadora que no cree en nada.
+            Dónde están (Surrealista): Dentro de una partida de Tetris donde las piezas son sus pecados.
+            Dónde están (Mundana con Giro Cómico/Realista): En un taller de meditación donde nadie puede dejar de hablar.
+            Dónde están (Mundana Aburrida): En una lavandería autoservicio viendo girar la ropa.`,
+            ];
 
-    const instruccionFinal = `
-Ahora, genera un **NUEVO ejemplo ORIGINAL**, con personajes, relaciones y lugares **completamente distintos a los ejemplos anteriores**. 
-Evita repetir profesiones, roles familiares comunes o estereotipos. Sé **imaginativo, inesperado, pero siempre claro y jugable** en una escena de improvisación.
-`;
+            const instruccionFinal = `
+            Ahora, genera un **NUEVO ejemplo ORIGINAL**, con personajes, relaciones y lugares **completamente distintos a los ejemplos anteriores**. 
+            Evita repetir profesiones, roles familiares comunes o estereotipos. Sé **imaginativo, inesperado, pero siempre claro y jugable** en una escena de improvisación.
+            `;
 
-    return `${rol}\n${reglas}\n${formato}\n\n**EJEMPLOS DE REFERENCIA:**\n${ejemplos.join('\n\n')}\n\n${instruccionFinal}`;
-}
+            return `${rol}\n${reglas}\n${formato}\n\n**EJEMPLOS DE REFERENCIA:**\n${ejemplos.join('\n\n')}\n\n${instruccionFinal}`;
+        }
 
 
         async function generarImpro() {
             const resultadoDiv = document.getElementById('resultado');
             resultadoDiv.innerHTML = '<span class="cargando">Generando la base de la escena...</span>';
+            
+            // CAMBIO CLAVE: Obtener el valor del slider (#temp-slider)
+            const temperatureString = document.getElementById('temp-slider').value;
+            const selectedTemperature = parseFloat(temperatureString); 
             
             const prompt = construirPrompt();
             
@@ -110,7 +142,7 @@ Evita repetir profesiones, roles familiares comunes o estereotipos. Sé **imagin
                     body: JSON.stringify({
                         contents: [{ role: "user", parts: [{ text: prompt }] }],
                         generationConfig: { 
-                            temperature: 0.9, 
+                            temperature: selectedTemperature, // Usamos la temperatura seleccionada
                             maxOutputTokens: 2048, 
                         }
                     })
@@ -141,7 +173,7 @@ Evita repetir profesiones, roles familiares comunes o estereotipos. Sé **imagin
                 // Usamos expresiones regulares para una extracción más flexible
                 const regexQuienes = /Quiénes son:\s*(.*)/i;
                 const regexSurreal = /Dónde están \(Surrealista\):\s*(.*)/i;
-                const regexMundanaGiro = /Dónde están \(Mundana con Giro Cómico\/Realista\):\s*(.*)/i; // Regex actualizada
+                const regexMundanaGiro = /Dónde están \(Mundana con Giro Cómico\/Realista\):\s*(.*)/i; 
                 const regexMundanaAburrida = /Dónde están \(Mundana Aburrida\):\s*(.*)/i; 
 
                 for (const linea of partes) {
@@ -192,6 +224,20 @@ Evita repetir profesiones, roles familiares comunes o estereotipos. Sé **imagin
                 `;
             }
         }
+
+        // Script para actualizar el valor visible de la temperatura en tiempo real
+        document.addEventListener('DOMContentLoaded', () => {
+            const slider = document.getElementById('temp-slider');
+            const display = document.getElementById('current-temp');
+
+            // Asegurarse de que el valor inicial se muestre correctamente
+            display.textContent = slider.value; 
+
+            // Actualizar el valor cada vez que el slider se mueva
+            slider.addEventListener('input', (event) => {
+                display.textContent = event.target.value;
+            });
+        });
     </script>
 
 <hr style="margin-top: 40px; border-color: #ccc;">
