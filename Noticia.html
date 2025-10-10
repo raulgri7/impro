@@ -59,8 +59,7 @@
             background-color: #fff;
             min-height: 50px;
             border-radius: 5px;
-            /* Estilo para el contenido de markdown */
-            white-space: pre-wrap;
+            white-space: pre-wrap; /* Mantiene el formato básico del texto generado */
         }
         #resultado h3 {
             margin-top: 1em;
@@ -119,19 +118,22 @@
 </div>
 
 <script>
-    // 🛑 ¡ATENCIÓN! DEBES REEMPLAZAR ESTE VALOR POR TU CLAVE API REAL DE GEMINI.
+    // 🛑 ¡ATENCIÓN! ESTA ES UNA CLAVE FICTICIA DE EJEMPLO. 
+    // DEBES REEMPLAZAR ESTE VALOR POR TU CLAVE API REAL DE GEMINI para que funcione.
     const API_KEY = "AIzaSyAtHNHWudk-SUpsNgjSZ7DH5IVc0VVRYIM"; 
     
-    // Este endpoint es correcto para llamar al modelo gemini-2.5-flash
+    // Endpoint para el modelo gemini-2.5-flash
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
     
-    // Extrae el texto del prompt del elemento oculto
+    // Extrae el texto del prompt
     const PROMPT_TEXT = document.getElementById('promptText').textContent.trim();
 
     async function generarContenido() {
-        // Validación básica de la clave
-        if (API_KEY === "INGRESA_AQUÍ_TU_CLAVE_API_REAL") {
-            document.getElementById('resultado').innerHTML = '<div style="color: red;">ERROR: Por favor, reemplaza "INGRESA_AQUÍ_TU_CLAVE_API_REAL" en el código JavaScript con tu clave API de Gemini.</div>';
+        const CLAVE_FICTICIA = "AIzaSyAtHNHWudk-SUpsNgjSZ7DH5IVc0VVRYIM";
+        
+        // Validación para recordar al usuario que debe cambiar la clave
+        if (API_KEY === CLAVE_FICTICIA) {
+            document.getElementById('resultado').innerHTML = '<div style="color: red;">⚠️ **ERROR DE CLAVE:** La clave API que estás usando es **ficticia**. Por favor, reemplázala en el código JavaScript por tu clave API real de Gemini para que el generador funcione.</div>';
             return;
         }
 
@@ -149,11 +151,10 @@
                     contents: [{
                         parts: [{ text: PROMPT_TEXT }]
                     }],
-                    // Configuración para usar la herramienta de búsqueda para la Noticia Real
-                    config: {
-                        tools: [{ googleSearch: {} }],
-                        // Aumentar la temperatura para resultados creativos/locos
-                        temperature: 0.9 
+                    // Corrección: Usamos 'tools' y 'generationConfig' directamente para evitar el error 400.
+                    tools: [{ googleSearch: {} }], // Para activar la búsqueda web
+                    generationConfig: {
+                        temperature: 0.9 // Para aumentar la creatividad
                     }
                 })
             });
@@ -161,19 +162,17 @@
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error('Error de API:', errorData);
-                // Mostrar un mensaje de error más específico si es posible
                 const errorMessage = errorData.error ? errorData.error.message : response.statusText;
-                resultadoDiv.innerHTML = `<div style="color: red;">Error en la llamada a la API (${response.status}): ${errorMessage}. Revisa la clave API y la consola para más detalles.</div>`;
+                resultadoDiv.innerHTML = `<div style="color: red;">Error en la llamada a la API (${response.status}): ${errorMessage}. Por favor, verifica la consola para más detalles.</div>`;
                 return;
             }
 
             const data = await response.json();
             
-            // Extraer y mostrar el texto generado
+            // Extraer el texto generado
             const generatedText = data.candidates[0]?.content?.parts[0]?.text || "No se pudo obtener el texto generado. Inténtalo de nuevo.";
             
             // Usar marked.parse para renderizar el Markdown a HTML
-            // Esto ya es seguro porque 'marked' se cargó en el <head>
             resultadoDiv.innerHTML = marked.parse(generatedText);
             
 
