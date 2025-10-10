@@ -5,72 +5,118 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Generador de Impro - Gemini</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 900px; margin: 20px auto; padding: 20px; }
-    button { padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; background: #f0f0f0; cursor: pointer; margin-right: 10px; }
-    pre { background: #f7f7f7; padding: 12px; border-radius: 6px; border: 1px solid #ddd; white-space: pre-wrap; }
-    .result { margin: 12px 0; }
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 20px auto; padding: 20px; background-color: #f5f5f5; }
+    h1 { color: #1a73e8; }
+    textarea { padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+    button { 
+      padding: 10px 15px; 
+      border-radius: 6px; 
+      border: none; 
+      cursor: pointer; 
+      margin-right: 10px; 
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+    #generate { background: #1a73e8; color: white; }
+    #generate:hover { background: #1558b3; }
+    #clear { background: #e0e0e0; color: #333; }
+    #clear:hover { background: #ccc; }
+    pre { 
+      background: #ffffff; 
+      padding: 15px; 
+      border-radius: 6px; 
+      border: 1px solid #ddd; 
+      white-space: pre-wrap; 
+      overflow-x: auto;
+    }
+    .result { margin: 15px 0; border-left: 5px solid #1a73e8; padding-left: 10px; }
   </style>
 </head>
 <body>
-  <h1>Generador de “Quiénes son / Dónde están” (Gemini API)</h1>
+  <h1>Generador de “Quiénes son / Dónde están” (Gemini API) 🎭</h1>
 
   <textarea id="prompt" style="width:100%;height:120px;">Propón 5 situaciones de improvisación para dos personas.
 Formato:
 - Quiénes son: …
 - Dónde están: …
+Asegúrate de que cada situación esté separada por una línea en blanco.
 Haz que la 1 sea cotidiana y la 5 progresivamente más loca.</textarea>
-  <div style="margin-top:10px;">
+  <div style="margin-top:15px;">
     <button id="generate">Generar 5 propuestas</button>
     <button id="clear">Limpiar</button>
   </div>
 
-  <div id="results"></div>
+  <div id="results" style="margin-top: 20px;"></div>
 
   <script>
-  const GEMINI_KEY = 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU';
+  // ⚠️ ATENCIÓN: DEBES REEMPLAZAR 'TU_CLAVE_GEMINI_AQUI' CON TU CLAVE REAL DE LA GEMINI API
+  const GEMINI_KEY = 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU'; 
 
   async function generate() {
     const prompt = document.getElementById('prompt').value;
     const resultsDiv = document.getElementById('results');
-    resultsDiv.innerHTML = '<em>Generando…</em>';
+    resultsDiv.innerHTML = '<em style="color:#1a73e8;">Generando propuestas, por favor espera...</em>';
+
+    // 1. Configuración de la petición para la Gemini API
+    const API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=' + GEMINI_KEY;
+    
+    // 2. Estructura del cuerpo JSON para la API de Gemini
+    const bodyData = {
+      contents: [{
+        parts: [{
+          text: prompt
+        }]
+      }],
+      config: {
+        temperature: 0.9,
+        // Usamos maxOutputTokens en lugar de max_output_tokens
+        maxOutputTokens: 400 
+      }
+    };
 
     try {
-      const resp = await fetch('https://api.staging.gemini.openai.com/v1/assistant', {
+      const resp = await fetch(API_URL, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + GEMINI_KEY
+          'Content-Type': 'application/json'
+          // La clave se pasa como parámetro de consulta, no como Authorization Bearer
         },
-        body: JSON.stringify({
-          instructions: prompt,
-          input: '',
-          temperature: 0.9,
-          candidate_count: 1,
-          max_output_tokens: 400
-        })
+        body: JSON.stringify(bodyData)
       });
 
       if (!resp.ok) {
-        const txt = await resp.text();
-        throw new Error('Error Gemini API: ' + resp.status + ' -- ' + txt);
+        const errorText = await resp.text();
+        throw new Error('Error en la Gemini API (código ' + resp.status + '): ' + errorText);
       }
 
       const data = await resp.json();
-      const output = data.candidates && data.candidates[0] && data.candidates[0].content;
-      if (!output) throw new Error('No se recibió contenido de Gemini');
+      
+      // 3. Extracción del contenido generado de la respuesta de Gemini
+      const output = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (!output) {
+        // Manejar el caso de una respuesta vacía o de bloqueo de contenido
+        const reason = data.candidates?.[0]?.finishReason || 'Desconocida';
+        throw new Error('No se recibió contenido. Razón de finalización: ' + reason);
+      }
 
-      // Mostrar cada propuesta en su bloque
-      const items = output.split(/\n(?=-\s*Quiénes\s+son)/).filter(Boolean);
+      // 4. Mostrar cada propuesta en su bloque, separando por saltos de línea doble (párrafos)
+      // Esto funciona mejor si se ha pedido al modelo que separe las propuestas con líneas en blanco.
+      const items = output.split(/\n\s*\n/).filter(Boolean); // Separar por uno o más saltos de línea
       resultsDiv.innerHTML = '';
-      for (let i = 0; i < items.length && i < 5; i++) {
+
+      for (let i = 0; i < items.length; i++) {
         const block = document.createElement('div');
         block.className = 'result';
-        block.innerHTML = '<strong>Propuesta ' + (i+1) + ':</strong><pre>' + items[i].trim() + '</pre>';
+        // Limpiamos el texto para asegurar un buen formato
+        const formattedText = items[i].trim(); 
+        block.innerHTML = '<strong>Propuesta ' + (i + 1) + ':</strong><pre>' + formattedText + '</pre>';
         resultsDiv.appendChild(block);
       }
 
     } catch (err) {
-      resultsDiv.innerHTML = '<pre style="color:red">' + err.toString() + '</pre>';
+      console.error(err);
+      resultsDiv.innerHTML = '<pre style="color:red; background-color: #ffebeb; border-color: #ffbaba;">⚠️ ' + err.toString() + '</pre>';
     }
   }
 
