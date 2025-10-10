@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Noticias para Improvisación Teatral</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 5px;
+            margin-top: 20px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #promptText {
+            white-space: pre-wrap;
+            background-color: #eee;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        #resultado {
+            margin-top: 25px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            min-height: 50px;
+            border-radius: 5px;
+        }
+        .loading {
+            text-align: center;
+            font-size: 1.2em;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Generador de Ideas para Improvisación</h1>
+
+    <p>Haz clic en el botón para solicitar a la IA que genere la noticia real, la noticia inventada y las 10 propuestas de improvisación según el prompt definido.</p>
+    
+    <h2>Prompt a Enviar:</h2>
+    <div id="promptText">
+        Prompt para la IA: Noticias para Improvisación Teatral
+
+        Objetivo: Necesito dos noticias insólitas y con potencial cómico para un ejercicio de improvisación teatral: una **real** y otra **inventada** (pero plausiblemente loca). La idea es que la noticia actúe como un catalizador para situaciones teatrales absurdas, inesperadas o de alto contraste, al estilo de un evento real que ocurrió en Murcia donde el "Cumpleaños Feliz" sonó sin parar durante cinco horas en un colegio por la noche.
+
+        ---
+
+        Tarea 1: Búsqueda de Noticia Real y Propuestas de Improv. 🎭
+
+        Instrucción: Busca una **noticia real, reciente (2020-2025) y de ámbito español** que trate sobre un **suceso comunitario, burocrático, tecnológico o vecinal inusual, absurdo o que involucre un error cómico/surrealista**. La noticia debe ser tan extraña que parezca inventada y dé mucho juego para la improvisación.
+
+        Requisitos para la Noticia Real:
+        1. Título y un resumen conciso (máx. 3 párrafos).
+        2. Debe ser un evento **concreto** (no una tendencia general).
+        3. Debe tener un alto potencial para la comedia de situación o el contraste de personajes (ej. drama vs. absurdo, rutina vs. caos).
+
+        Propuestas de Improv. (Noticia Real): A partir de esta noticia real, sugiere **cinco** ideas de improvisación para dos o tres actores, indicando el **conflicto central** o los **personajes** (al estilo de los ejemplos que te he dado: bomberos incrédulos, ex-Parchís saboteadores, etc.).
+
+        ---
+
+        Tarea 2: Invención de Noticia Loca y Propuestas de Improv. 🤯
+
+        Instrucción: Inventa una **noticia** que sea muy **local, específica y completamente absurda**, pero que suene *plausiblemente* como un titular de prensa real. Debe seguir la estructura de un suceso vecinal o un evento que genere un conflicto cómico de larga duración o alto contraste.
+
+        Requisitos para la Noticia Inventada:
+        1. Título y un resumen conciso (máx. 3 párrafos).
+        2. Debe tener un elemento **repetitivo** o **molesto** (como la canción) o un **error de planificación/ejecución** monumental.
+        3. Debe evocar una reacción dramática en los personajes.
+
+        Propuestas de Improv. (Noticia Inventada): A partir de esta noticia inventada, sugiere **cinco** ideas de improvisación para dos o tres actores, indicando el **conflicto central** o los **personajes** (siguiendo la misma estructura que las anteriores).
+    </div>
+
+    <button onclick="generarContenido()">Generar Ideas de Improvisación</button>
+
+    <h2>Resultado de la IA:</h2>
+    <div id="resultado">Esperando generación...</div>
+</div>
+
+<script>
+    // ¡CLAVE API INSERTADA AQUÍ!
+    const API_KEY = "AIzaSyAtHNHWudk-SUpsNgjSZ7DH5IVc0VVRYIM"; 
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+    
+    // El texto del prompt tal como lo definiste
+    const PROMPT_TEXT = document.getElementById('promptText').textContent.trim();
+
+    async function generarContenido() {
+        const resultadoDiv = document.getElementById('resultado');
+        
+        resultadoDiv.innerHTML = '<div class="loading">Generando contenido... Por favor, espera.</div>';
+
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{ text: PROMPT_TEXT }]
+                    }],
+                    // Configuración para que la IA haga lo que pides (como la búsqueda de noticias, etc.)
+                    config: {
+                         // Usar la herramienta de búsqueda para la Tarea 1 (Noticia Real)
+                         tools: [{ googleSearch: {} }],
+                         // Aumentar la temperatura para resultados creativos/locos
+                         temperature: 0.9 
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Error de API:', errorData);
+                resultadoDiv.innerHTML = `<div style="color: red;">Error en la llamada a la API: ${errorData.error ? errorData.error.message : response.statusText}. Asegúrate de que la clave API es correcta y el modelo tiene los permisos necesarios.</div>`;
+                return;
+            }
+
+            const data = await response.json();
+            
+            // Extraer y mostrar el texto generado
+            const generatedText = data.candidates[0]?.content?.parts[0]?.text || "No se pudo obtener el texto generado.";
+            
+            // Mostrar el resultado usando Marked para mejor formato (negritas, listas, etc.)
+            // marked.parse() debe estar disponible si el script se carga correctamente
+            if (typeof marked !== 'undefined') {
+                resultadoDiv.innerHTML = marked.parse(generatedText);
+            } else {
+                resultadoDiv.innerHTML = generatedText;
+            }
+            
+
+        } catch (error) {
+            console.error('Error de red o procesamiento:', error);
+            resultadoDiv.innerHTML = `<div style="color: red;">Error de red o procesamiento: ${error.message}</div>`;
+        }
+    }
+    
+    // Librería 'marked' para renderizar Markdown (mejora la presentación del texto de la IA)
+    const markedScript = document.createElement('script');
+    markedScript.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
+    document.head.appendChild(markedScript);
+</script>
+
+</body>
+</html>
