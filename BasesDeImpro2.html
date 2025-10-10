@@ -50,7 +50,7 @@ Haz que la 1 sea cotidiana y la 5 progresivamente más loca.</textarea>
 
   <script>
   // ⚠️ ATENCIÓN: DEBES REEMPLAZAR 'TU_CLAVE_GEMINI_AQUI' CON TU CLAVE REAL DE LA GEMINI API
-  const GEMINI_KEY = 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU'; 
+  const GEMINI_KEY = 'TU_CLAVE_GEMINI_AQUI'; 
 
   async function generate() {
     const prompt = document.getElementById('prompt').value;
@@ -67,9 +67,9 @@ Haz que la 1 sea cotidiana y la 5 progresivamente más loca.</textarea>
           text: prompt
         }]
       }],
-      config: {
+      // CORRECCIÓN: Usar 'generationConfig' en lugar de 'config'
+      generationConfig: { 
         temperature: 0.9,
-        // Usamos maxOutputTokens en lugar de max_output_tokens
         maxOutputTokens: 400 
       }
     };
@@ -79,7 +79,6 @@ Haz que la 1 sea cotidiana y la 5 progresivamente más loca.</textarea>
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
-          // La clave se pasa como parámetro de consulta, no como Authorization Bearer
         },
         body: JSON.stringify(bodyData)
       });
@@ -95,20 +94,17 @@ Haz que la 1 sea cotidiana y la 5 progresivamente más loca.</textarea>
       const output = data.candidates?.[0]?.content?.parts?.[0]?.text;
       
       if (!output) {
-        // Manejar el caso de una respuesta vacía o de bloqueo de contenido
         const reason = data.candidates?.[0]?.finishReason || 'Desconocida';
         throw new Error('No se recibió contenido. Razón de finalización: ' + reason);
       }
 
       // 4. Mostrar cada propuesta en su bloque, separando por saltos de línea doble (párrafos)
-      // Esto funciona mejor si se ha pedido al modelo que separe las propuestas con líneas en blanco.
-      const items = output.split(/\n\s*\n/).filter(Boolean); // Separar por uno o más saltos de línea
+      const items = output.split(/\n\s*\n/).filter(Boolean); 
       resultsDiv.innerHTML = '';
 
       for (let i = 0; i < items.length; i++) {
         const block = document.createElement('div');
         block.className = 'result';
-        // Limpiamos el texto para asegurar un buen formato
         const formattedText = items[i].trim(); 
         block.innerHTML = '<strong>Propuesta ' + (i + 1) + ':</strong><pre>' + formattedText + '</pre>';
         resultsDiv.appendChild(block);
