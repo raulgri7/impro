@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Generador de Impro - Gemini</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 20px auto; padding: 20px; }
+    button { padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; background: #f0f0f0; cursor: pointer; margin-right: 10px; }
+    pre { background: #f7f7f7; padding: 12px; border-radius: 6px; border: 1px solid #ddd; white-space: pre-wrap; }
+    .result { margin: 12px 0; }
+  </style>
+</head>
+<body>
+  <h1>Generador de “Quiénes son / Dónde están” (Gemini API)</h1>
+
+  <textarea id="prompt" style="width:100%;height:120px;">Propón 5 situaciones de improvisación para dos personas.
+Formato:
+- Quiénes son: …
+- Dónde están: …
+Haz que la 1 sea cotidiana y la 5 progresivamente más loca.</textarea>
+  <div style="margin-top:10px;">
+    <button id="generate">Generar 5 propuestas</button>
+    <button id="clear">Limpiar</button>
+  </div>
+
+  <div id="results"></div>
+
+  <script>
+  const GEMINI_KEY = 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU';
+
+  async function generate() {
+    const prompt = document.getElementById('prompt').value;
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = '<em>Generando…</em>';
+
+    try {
+      const resp = await fetch('https://api.staging.gemini.openai.com/v1/assistant', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + GEMINI_KEY
+        },
+        body: JSON.stringify({
+          instructions: prompt,
+          input: '',
+          temperature: 0.9,
+          candidate_count: 1,
+          max_output_tokens: 400
+        })
+      });
+
+      if (!resp.ok) {
+        const txt = await resp.text();
+        throw new Error('Error Gemini API: ' + resp.status + ' -- ' + txt);
+      }
+
+      const data = await resp.json();
+      const output = data.candidates && data.candidates[0] && data.candidates[0].content;
+      if (!output) throw new Error('No se recibió contenido de Gemini');
+
+      // Mostrar cada propuesta en su bloque
+      const items = output.split(/\n(?=-\s*Quiénes\s+son)/).filter(Boolean);
+      resultsDiv.innerHTML = '';
+      for (let i = 0; i < items.length && i < 5; i++) {
+        const block = document.createElement('div');
+        block.className = 'result';
+        block.innerHTML = '<strong>Propuesta ' + (i+1) + ':</strong><pre>' + items[i].trim() + '</pre>';
+        resultsDiv.appendChild(block);
+      }
+
+    } catch (err) {
+      resultsDiv.innerHTML = '<pre style="color:red">' + err.toString() + '</pre>';
+    }
+  }
+
+  document.getElementById('generate').addEventListener('click', generate);
+  document.getElementById('clear').addEventListener('click', () => {
+    document.getElementById('results').innerHTML = '';
+  });
+  </script>
+</body>
+</html>
