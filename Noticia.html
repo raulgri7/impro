@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generador de Noticias para Improvisación Teatral</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> 
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -45,13 +48,9 @@
         button:hover {
             background-color: #45a049;
         }
+        /* Oculta el texto del prompt, ya que el usuario no quiere verlo */
         #promptText {
-            white-space: pre-wrap;
-            background-color: #eee;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            font-style: italic;
+            display: none; 
         }
         #resultado {
             margin-top: 25px;
@@ -60,6 +59,12 @@
             background-color: #fff;
             min-height: 50px;
             border-radius: 5px;
+            /* Estilo para el contenido de markdown */
+            white-space: pre-wrap;
+        }
+        #resultado h3 {
+            margin-top: 1em;
+            color: #2c3e50;
         }
         .loading {
             text-align: center;
@@ -73,9 +78,8 @@
 <div class="container">
     <h1>Generador de Ideas para Improvisación</h1>
 
-    <p>Haz clic en el botón para solicitar a la IA que genere la noticia real, la noticia inventada y las 10 propuestas de improvisación según el prompt definido.</p>
+    <p>Haz clic en el botón para que la IA busque una **noticia real** y se invente una **noticia loca** que propicien 5 improvisaciones cada una.</p>
     
-    <h2>Prompt a Enviar:</h2>
     <div id="promptText">
         Prompt para la IA: Noticias para Improvisación Teatral
 
@@ -115,17 +119,25 @@
 </div>
 
 <script>
-    // ¡CLAVE API INSERTADA AQUÍ!
+    // 🛑 ¡ATENCIÓN! DEBES REEMPLAZAR ESTE VALOR POR TU CLAVE API REAL DE GEMINI.
     const API_KEY = "AIzaSyAtHNHWudk-SUpsNgjSZ7DH5IVc0VVRYIM"; 
+    
+    // Este endpoint es correcto para llamar al modelo gemini-2.5-flash
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
     
-    // El texto del prompt tal como lo definiste
+    // Extrae el texto del prompt del elemento oculto
     const PROMPT_TEXT = document.getElementById('promptText').textContent.trim();
 
     async function generarContenido() {
+        // Validación básica de la clave
+        if (API_KEY === "INGRESA_AQUÍ_TU_CLAVE_API_REAL") {
+            document.getElementById('resultado').innerHTML = '<div style="color: red;">ERROR: Por favor, reemplaza "INGRESA_AQUÍ_TU_CLAVE_API_REAL" en el código JavaScript con tu clave API de Gemini.</div>';
+            return;
+        }
+
         const resultadoDiv = document.getElementById('resultado');
         
-        resultadoDiv.innerHTML = '<div class="loading">Generando contenido... Por favor, espera.</div>';
+        resultadoDiv.innerHTML = '<div class="loading">Generando contenido... Esto puede tardar unos segundos ya que la IA está buscando una noticia real y creando una inventada.</div>';
 
         try {
             const response = await fetch(endpoint, {
@@ -137,12 +149,11 @@
                     contents: [{
                         parts: [{ text: PROMPT_TEXT }]
                     }],
-                    // Configuración para que la IA haga lo que pides (como la búsqueda de noticias, etc.)
+                    // Configuración para usar la herramienta de búsqueda para la Noticia Real
                     config: {
-                         // Usar la herramienta de búsqueda para la Tarea 1 (Noticia Real)
-                         tools: [{ googleSearch: {} }],
-                         // Aumentar la temperatura para resultados creativos/locos
-                         temperature: 0.9 
+                        tools: [{ googleSearch: {} }],
+                        // Aumentar la temperatura para resultados creativos/locos
+                        temperature: 0.9 
                     }
                 })
             });
@@ -150,22 +161,20 @@
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error('Error de API:', errorData);
-                resultadoDiv.innerHTML = `<div style="color: red;">Error en la llamada a la API: ${errorData.error ? errorData.error.message : response.statusText}. Asegúrate de que la clave API es correcta y el modelo tiene los permisos necesarios.</div>`;
+                // Mostrar un mensaje de error más específico si es posible
+                const errorMessage = errorData.error ? errorData.error.message : response.statusText;
+                resultadoDiv.innerHTML = `<div style="color: red;">Error en la llamada a la API (${response.status}): ${errorMessage}. Revisa la clave API y la consola para más detalles.</div>`;
                 return;
             }
 
             const data = await response.json();
             
             // Extraer y mostrar el texto generado
-            const generatedText = data.candidates[0]?.content?.parts[0]?.text || "No se pudo obtener el texto generado.";
+            const generatedText = data.candidates[0]?.content?.parts[0]?.text || "No se pudo obtener el texto generado. Inténtalo de nuevo.";
             
-            // Mostrar el resultado usando Marked para mejor formato (negritas, listas, etc.)
-            // marked.parse() debe estar disponible si el script se carga correctamente
-            if (typeof marked !== 'undefined') {
-                resultadoDiv.innerHTML = marked.parse(generatedText);
-            } else {
-                resultadoDiv.innerHTML = generatedText;
-            }
+            // Usar marked.parse para renderizar el Markdown a HTML
+            // Esto ya es seguro porque 'marked' se cargó en el <head>
+            resultadoDiv.innerHTML = marked.parse(generatedText);
             
 
         } catch (error) {
@@ -173,11 +182,6 @@
             resultadoDiv.innerHTML = `<div style="color: red;">Error de red o procesamiento: ${error.message}</div>`;
         }
     }
-    
-    // Librería 'marked' para renderizar Markdown (mejora la presentación del texto de la IA)
-    const markedScript = document.createElement('script');
-    markedScript.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
-    document.head.appendChild(markedScript);
 </script>
 
 </body>
