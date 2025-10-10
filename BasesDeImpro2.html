@@ -3,12 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5 Situaciones de Improvisación para Dos Personas</title>
-    
-    <script>
-        const GEMINI_API_KEY = "AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU";
-        // La clave de gemini la metes TÚ aquí.
-    </script>
+    <title>Generador de Situaciones de Improvisación con Gemini</title>
     
     <style>
         body {
@@ -22,98 +17,184 @@
             max-width: 800px;
             margin: auto;
             background: #fff;
-            padding: 20px;
+            padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         }
         h1 {
             color: #0056b3;
             text-align: center;
             border-bottom: 2px solid #0056b3;
             padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        #generarBtn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            color: #fff;
+            background-color: #28a745;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
             margin-bottom: 20px;
         }
-        h2 {
-            color: #333;
-            margin-top: 30px;
-            font-size: 1.4em;
+        #generarBtn:hover {
+            background-color: #218838;
+        }
+        .loading {
+            text-align: center;
+            font-style: italic;
+            color: #6c757d;
+            margin-top: 20px;
         }
         .situacion {
             border: 1px solid #ccc;
             padding: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             border-radius: 5px;
             background-color: #e9e9e9;
-            transition: transform 0.2s;
         }
-        .situacion:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        .situacion h2 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.2em;
         }
-        .quienes, .donde {
-            font-weight: bold;
-            color: #007bff;
+        .quienes, .donde, .locura {
             display: block;
-            margin-bottom: 5px;
+            margin-top: 5px;
         }
-        .quienes::before { content: "🎭 Quiénes son: "; color: #333; font-weight: normal;}
-        .donde::before { content: "📍 Dónde están: "; color: #333; font-weight: normal;}
-        
-        .locura {
-            font-style: italic;
-            color: #dc3545;
-            margin-top: 10px;
-            border-top: 1px dashed #ccc;
-            padding-top: 5px;
-            font-weight: bold;
-        }
+        .quienes { font-weight: bold; color: #007bff; }
+        .donde { font-weight: bold; color: #6c757d; }
+        .locura { font-style: italic; color: #dc3545; border-top: 1px dashed #ccc; padding-top: 5px;}
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>🎭 5 Propuestas de Improvisación para Dos Personas 🚀</h1>
+        <h1>Generador de Ideas de Improvisación 🤖</h1>
 
-        <p>Aquí tienes cinco situaciones, con un nivel de locura que aumenta progresivamente, perfectas para empezar a improvisar en pareja.</p>
+        <button id="generarBtn">Generar 5 Situaciones con la IA</button>
 
-        <div class="situacion">
-            <h2>1. Puesta al día (Nivel: Costumbrista)</h2>
-            <span class="quienes">Dos antiguos compañeros de trabajo que no se ven hace años.</span>
-            <span class="donde">En la cola de la caja de un supermercado abarrotado a última hora del sábado.</span>
-            <p class="locura">Nivel de Locura: 1/5 - Realista y sencillo. Enfócate en la incomodidad de la cola y la necesidad de "ponerse al día".</p>
+        <div id="resultados">
+            <p style="text-align: center; color: #6c757d;">Pulsa el botón para generar las situaciones.</p>
         </div>
-
-        <div class="situacion">
-            <h2>2. La Inspección (Nivel: Presión y Misterio)</h2>
-            <span class="quienes">Un **inspector de salubridad** y el **dueño/chef** del restaurante.</span>
-            <span class="donde">En la cocina del restaurante, justo en el momento en que se pierde el único ingrediente secreto de la receta familiar.</span>
-            <p class="locura">Nivel de Locura: 2/5 - El entorno es normal, pero la presión por la inspección y el ingrediente secreto dan pie a mentiras y grandes reacciones.</p>
-        </div>
-
-        <div class="situacion">
-            <h2>3. La Confesión (Nivel: Fantasía)</h2>
-            <span class="quienes">Dos **guardias de seguridad** que custodian una obra de arte muy valiosa. (Ambos el mismo rol).</span>
-            <span class="donde">En un minúsculo cuarto de vigilancia, a las 3 de la madrugada, cuando uno de ellos le confiesa al otro que, en realidad, *es una ameba gigante que puede cambiar de forma*.</span>
-            <p class="locura">Nivel de Locura: 3/5 - Un entorno rutinario interrumpido por un elemento de ciencia ficción. ¿Cómo reacciona el compañero?</p>
-        </div>
-
-        <div class="situacion">
-            <h2>4. El Reclamo (Nivel: Sinsentido)</h2>
-            <span class="quienes">Una **cazadora de bichos raros** y un **pato parlante con acento francés**.</span>
-            <span class="donde">En la oficina de atención al cliente de una empresa de mudanzas interestelares, intentando reclamar el equipaje que perdieron.</span>
-            <p class="locura">Nivel de Locura: 4/5 - Roles y ubicación absurdos. La clave es aceptar la premisa y centrarse en la frustración del reclamo.</p>
-        </div>
-
-        <div class="situacion">
-            <h2>5. El Ritual (Nivel: Demente Cósmica)</h2>
-            <span class="quienes">Sois dos **calcetines desparejados** (uno deportivo y uno de lana) que han alcanzado la iluminación cósmica.</span>
-            <span class="donde">Sobre el lomo de un *narval* que está levitando sobre el Monte Everest, en el proceso de decidir qué forma adoptará el universo la próxima semana.</span>
-            <p class="locura">Nivel de Locura: 5/5 - Totalmente desconectado de la realidad. Todo el foco debe estar en la relación entre los calcetines y la gravedad de su ridícula misión.</p>
-        </div>
-
     </div>
 
+    <script>
+        // 🚨 ADVERTENCIA DE SEGURIDAD: NO PONER CLAVES SECRETAS EN FRONTEND EN PRODUCCIÓN.
+        // Aquí es donde meterías tu clave de Gemini, pero solo para un prototipo local.
+        const GEMINI_API_KEY = "AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU"; // <-- ¡LA CLAVE VA AQUÍ!
+
+        const resultadosDiv = document.getElementById('resultados');
+        const generarBtn = document.getElementById('generarBtn');
+
+        // Esta es la función que simularía la llamada real a la API de Gemini
+        async function generarSituaciones() {
+            // 1. Mostrar estado de carga y deshabilitar botón
+            resultadosDiv.innerHTML = '<div class="loading">Cargando y contactando con Gemini...</div>';
+            generarBtn.disabled = true;
+
+            // 2. Definición del Prompt para Gemini
+            const promptTexto = `
+                Propón 5 situaciones de improvisación para dos personas. 
+                Sigue este formato para cada una:
+                - ¿Quiénes son? (Máximo 20 palabras)
+                - ¿Dónde están? (Máximo 15 palabras)
+                - Comentario sobre el Nivel de Locura (Desde 1, Normal, hasta 5, Muy Loca).
+
+                Asegúrate de que la primera situación sea normal y la quinta sea muy loca, con aumento progresivo de locura.
+                Genera solo el texto sin etiquetas HTML ni encabezados.
+                Usa saltos de línea doble entre situaciones.
+            `;
+            
+            // 3. SIMULACIÓN DE LLAMADA A LA API (Esto requiere un backend real en producción)
+            // En un entorno real, usarías la fetch API aquí para contactar un servidor
+            // o el SDK de Gemini (si lo usas en un backend).
+            console.log("Simulando llamada a la API de Gemini con la clave:", GEMINI_API_KEY.substring(0, 5) + '...'); 
+
+            // Datos de ejemplo para simular la respuesta
+            const respuestaSimulada = `
+                Quiénes son: Dos vecinos que se encuentran por casualidad después de una gran tormenta.
+                Dónde están: En la escalera del edificio, intentando encender una linterna.
+                Nivel de Locura: 1/5.
+
+                &&&
+
+                Quiénes son: Un cazador de sueños profesional y un fantasma que ha olvidado cómo flotar.
+                Dónde están: Dentro de un reloj de cuco gigante detenido a medianoche.
+                Nivel de Locura: 3/5.
+
+                &&&
+
+                Quiénes son: Dos palomas mensajeras que han decidido jubilarse anticipadamente.
+                Dónde están: En el tejado de la Ópera de Sídney, discutiendo el plan de pensiones.
+                Nivel de Locura: 2/5.
+
+                &&&
+
+                Quiénes son: Un cactus parlanchín y un crítico de cine con pánico a las espinas.
+                Dónde están: En una entrevista de trabajo para ser la planta de la oficina.
+                Nivel de Locura: 4/5.
+                
+                &&&
+
+                Quiénes son: Sois dos moléculas de hidrógeno enamoradas en un viaje interdimensional.
+                Dónde están: Dentro de la oreja izquierda de un perro salchicha que viaja en tren.
+                Nivel de Locura: 5/5.
+            `;
+            
+            // Espera simulada (para que se vea el "Cargando...")
+            await new Promise(resolve => setTimeout(resolve, 2000)); 
+
+            // 4. Procesar la respuesta y renderizar en HTML
+            mostrarResultados(respuestaSimulada);
+            generarBtn.disabled = false; // Habilitar el botón de nuevo
+        }
+
+        function mostrarResultados(textoBruto) {
+            // Separa las situaciones usando un delimitador (&&&)
+            const situacionesArray = textoBruto.trim().split('&&&').map(s => s.trim()).filter(s => s.length > 0);
+            
+            let html = '';
+            situacionesArray.forEach((situacionTexto, index) => {
+                // Divide la situación en sus partes
+                const partes = situacionTexto.split('\n').map(p => p.trim()).filter(p => p.length > 0);
+
+                let quienes = '';
+                let donde = '';
+                let locura = '';
+                
+                partes.forEach(p => {
+                    if (p.startsWith('Quiénes son:')) {
+                        quienes = p.replace('Quiénes son:', '').trim();
+                    } else if (p.startsWith('Dónde están:')) {
+                        donde = p.replace('Dónde están:', '').trim();
+                    } else if (p.startsWith('Nivel de Locura:')) {
+                        locura = p.trim();
+                    }
+                });
+
+                html += `
+                    <div class="situacion">
+                        <h2>${index + 1}. Situación Generada</h2>
+                        <span class="quienes">🎭 ${quienes}</span>
+                        <span class="donde">📍 ${donde}</span>
+                        <p class="locura">${locura}</p>
+                    </div>
+                `;
+            });
+
+            resultadosDiv.innerHTML = html;
+        }
+
+        // Asignar el evento al botón
+        generarBtn.addEventListener('click', generarSituaciones);
+
+        // Generar el primer conjunto al cargar la página (opcional)
+        // generarSituaciones();
+    </script>
 </body>
 </html>
-
-
