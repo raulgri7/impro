@@ -73,14 +73,19 @@
             margin-top: 10px;
         }
 
-        select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 1em;
-        }
+select, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+}
+/* Y añade esto para el tamaño: */
+textarea {
+    min-height: 80px;
+    resize: vertical;
+}
 
         button {
             display: block;
@@ -181,6 +186,9 @@
             
             <label>Alumnos PRESENTES contados:</label>
             <input type="number" id="alumnosPresentesCount" value="14" min="0" max="14" required readonly style="width: 100px; text-align: center; margin: 0 auto 20px auto; display: block;">
+
+<label for="instruccionesAdicionales">➕ Instrucciones Adicionales (Opcional):</label>
+<textarea id="instruccionesAdicionales" placeholder="Ej: 'Foco en ejercicios de escucha', 'No usar juegos con saltos', 'Incluir un descanso a mitad de clase'."></textarea>
 
             <button type="submit">Generar Plan de Clase Personalizado</button>
         </form>
@@ -314,6 +322,7 @@
 
         async function generarClase() {
             const tipoClase = document.getElementById('tipoClase').value;
+            const instruccionesAdicionales = document.getElementById('instruccionesAdicionales').value.trim(); 
             const checks = Array.from(listaAlumnosDiv.querySelectorAll('input[type="checkbox"]'));
             
             // Los presentes son los que NO están marcados (checked) como ausentes
@@ -349,6 +358,9 @@
                     .replace('{alumnos_presentes}', alumnosPresentesCount)
                     .replace('{perfiles_lista}', perfilesLista) // USAMOS LA LISTA FILTRADA
                     .replace('{tipo_clase}', tipoClase); 
+if (instruccionesAdicionales) {
+    prompt += `\n\n--- INSTRUCCIONES ADICIONALES DEL PROFESOR ---\n${instruccionesAdicionales}\n--- FIN INSTRUCCIONES ---`;
+}
                 
                 // 4. Llamar a la API de Gemini
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
