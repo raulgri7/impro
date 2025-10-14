@@ -121,12 +121,12 @@
         // --- CLAVE API Y CONFIGURACIÓN ---
         // ----------------------------------------------------------
         // ¡RECUERDA SUSTITUIR ESTO CON TU CLAVE REAL!
-        const API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; 
+        const API_KEY = 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU'; 
         const MODEL_NAME = 'gemini-2.5-flash';
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
 
         // ----------------------------------------------------------
-        // --- LISTAS OFFLINE (NUEVAS) ---
+        // --- LISTAS OFFLINE ---
         // ----------------------------------------------------------
         const personajesOffline = [
             "Águila", "Alce", "Alien", "Ángel", "Araña", "Ardilla", "Astronauta", "Ballena", "Búfalo", "Búho", "Burro", "Caballo", "Cabra", "Calamar", "Camello", "Canguro", "Castor", "Chef", "Cebra", "Ciempiés", "Cerdito", "Cíclope", "Colibrí", "Coneja", "Conejo", "Cocodrilo", "Cuervo", "Delfín", "Demonio", "Dinosaurio", "Dragón", "Duende", "Elefante", "Enano", "Escarabajo", "Erizo", "Fantasma", "Flamenco", "Gacela", "Gallo", "Garza", "Gato", "Gato Montés", "Gaviota", "Gigante", "Gusano", "Halcón", "Hada", "Hámster", "Hormiga", "Hurón", "Jirafa", "Koala", "León", "León Marino", "Lince", "Llama", "Lobo", "Mago", "Mariquita", "Medusa", "Mono", "Muñeco", "Murciélago", "Ninja", "Nutria", "Oso", "Oso Polar", "Pájaro", "Panda", "Panadero", "Periquito", "Perezoso", "Pez", "Pollo", "Príncipe", "Princesa", "Pulpo", "Puercoespín", "Ratón", "Ratona", "Reno", "Rey", "Robot", "Robo", "Saltamontes", "Serpiente", "Sirena", "Tigre", "Tigresa", "Tiburón", "Topo", "Troll", "Unicornio", "Vampiro", "Vaca", "Zorro"
@@ -136,10 +136,12 @@
             "Aguja", "Alfombra", "Alambre", "Altavoz", "Anillo", "Arena", "Avión", "Balón", "Bandera", "Barco", "Baúl", "Bicicleta", "Bola", "Botella", "Botones", "Bota", "Brújula", "Bufanda", "Burbuja", "Candelabro", "Cámara", "Candado", "Caramelos", "Cartera", "Carrito", "Casa", "Caja", "Cesta", "Cofre", "Cohete", "Columpio", "Cometa", "Computadora", "Concha", "Corona", "Cortina", "Cristal", "Cubo", "Cubierta", "Cuerda", "Cuchara", "Cuchillo", "Diamante", "Dron", "Edificio", "Engranaje", "Esfera", "Espejo", "Esponja", "Estrella", "Estatua", "Farol", "Faro", "Flauta", "Flor", "Fuente", "Gafas", "Galleta", "Guitarra", "Globo", "Globo terráqueo", "Guante", "Helicóptero", "Hoja", "Hilo", "Horno", "Hueso", "Imán", "Jabón", "Jaula", "Lámpara", "Lápiz", "Llave", "Llave inglesa", "Libro", "Linterna", "Luna", "Mapa", "Martillo", "Medalla", "Mesa", "Micrófono", "Microscopio", "Moneda", "Muelle", "Mochila", "Muñeca", "Nevera", "Nieve", "Nube", "Palanca", "Paleta", "Pala", "Patín", "Peine", "Pelota", "Pincel", "Pizarra", "Plato", "Pluma", "Portalápices", "Poción", "Pulsera", "Puente", "Puerta", "Radio", "Raqueta", "Rayo", "Red", "Regla", "Reloj", "Rueda", "Sacapuntas", "Saco", "Satélite", "Serrucho", "Silbato", "Sombrero", "Sombrilla", "Sofá", "Submarino", "Tambor", "Telescopio", "Televisión", "Teléfono", "Tijera", "Tinta", "Toalla", "Torre", "Tren", "Tronco", "Trofeo", "Túnel", "Vaso", "Varita", "Vela", "Ventana"
         ];
         
+        // ----------------------------------------------------------
+        // --- FUNCIONES AUXILIARES ---
+        // ----------------------------------------------------------
+        
         /**
          * Función auxiliar para limpiar el texto.
-         * Se mantiene la limpieza de la versión anterior para procesar las salidas de la IA
-         * y también asegurar que las listas internas se presenten sin adjetivos adicionales.
          */
         function limpiarTexto(texto, esLista = false) {
             if (!texto) return '';
@@ -220,11 +222,10 @@
             const personajesAleatorios = shuffle([...personajesOffline]).slice(0, numElementos);
             const objetosAleatorios = shuffle([...objetosOffline]).slice(0, numElementos);
 
-            // Simular el formato de salida de la IA para usar el mismo código de renderizado (o casi)
-            let resultadoSimulado = '';
-            
+            // Simular el formato de salida de la IA
             const plural = numElementos === 1 ? '' : 's';
             
+            let resultadoSimulado = '';
             resultadoSimulado += `### PERSONAJE${plural.toUpperCase()}\n`;
             resultadoSimulado += personajesAleatorios.join('\n');
             
@@ -233,10 +234,15 @@
             
             return resultadoSimulado;
         }
-        
-        /**
-         * Función principal para llamar a la API o usar las listas offline.
-         */
+
+        // Función auxiliar para un retraso
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ----------------------------------------------------------
+        // --- FUNCIÓN PRINCIPAL (MODIFICADA CON RETRASO OFFLINE) ---
+        // ----------------------------------------------------------
         async function generarContenido(numElementos) {
             const resultadoDiv = document.getElementById('resultado');
             
@@ -277,15 +283,21 @@
 
                     if (!response.ok) {
                         // En caso de error de la IA, intentamos el modo offline como fallback
-                        console.warn(`Error de la API (${response.status}). Cambiando a modo Offline.`);
+                        console.warn(`Error de la API (${response.status}). Cambiando a modo Fallback Offline.`);
                         modo = 'Fallback Offline';
                         textoGenerado = obtenerResultadosOffline(numElementos);
+                        // Añadir un retraso si hemos caído en el fallback para que el usuario vea el mensaje
+                        await sleep(1000); 
                     } else {
                         const data = await response.json();
                         textoGenerado = data.candidates[0]?.content?.parts[0]?.text?.trim() || obtenerResultadosOffline(numElementos);
                     }
                 } else {
                     // --- MODO OFFLINE (NUEVO) ---
+                    
+                    // AÑADIR RETRASO ARTIFICIAL PARA QUE SE VEA EL MENSAJE DE CARGA
+                    await sleep(1000); // Espera 1 segundo
+                    
                     textoGenerado = obtenerResultadosOffline(numElementos);
                 }
                 
@@ -305,8 +317,7 @@
                     const titulo = lineas[0].trim();
                     const items = lineas.slice(1);
                     
-                    // Añadir un identificador interno para depuración (transparente al usuario)
-                    // console.log(`Modo: ${modo}`);
+                    // Nota: 'modo' se puede usar para fines de depuración, pero no afecta al renderizado.
 
                     htmlResultado += `<div class="categoria-titulo">${titulo.replace('S', 's')}</div>`;
 
@@ -358,7 +369,7 @@
                 resultadoDiv.innerHTML = htmlResultado;
 
             } catch (error) {
-                // Manejo de ERRORES CRÍTICOS (que no pudieron ser cubiertos por el fallback offline)
+                // Manejo de ERRORES CRÍTICOS
                 resultadoDiv.innerHTML = `
                     <strong style="color: #c53929;">Error crítico al generar ideas:</strong> ${error.message}.<br><br>
                     <strong>¡Aviso!</strong> El modo IA (API) falló. Si esto persiste, verifica que tu **CLAVE API** en la línea 74 sea válida.
