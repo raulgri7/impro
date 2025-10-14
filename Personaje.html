@@ -79,7 +79,7 @@
         ul { list-style-type: '🎨 '; margin-left: auto; margin-right: auto; padding-left: 0; max-width: 300px; text-align: left;}
         li { margin-bottom: 8px; font-weight: bold; color: #4b0082; font-size: 1.2em;}
 
-        /* ESTILOS DE CARGA */
+        /* ESTILOS NUEVOS PARA LA CARGA VISIBLE */
         .cargando { 
             color: #8a2be2; 
             font-weight: bold; 
@@ -121,7 +121,7 @@
         // --- CLAVE API Y CONFIGURACIÓN ---
         // ----------------------------------------------------------
         // ¡RECUERDA SUSTITUIR ESTO CON TU CLAVE REAL!
-        const API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; 
+        const API_KEY = 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU'; 
         const MODEL_NAME = 'gemini-2.5-flash';
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
 
@@ -150,26 +150,21 @@
             return limpio.trim();
         }
 
-        // FUNCIÓN CLAVE: Prompt dinámico para generar N elementos (ACTUALIZADA)
+        // FUNCIÓN CLAVE: Prompt dinámico para generar N elementos
         function construirPromptHibridos(numElementos) {
             const numeroTexto = numElementos === 1 ? 'UN' : numElementos;
             const plural = numElementos === 1 ? '' : 's';
             
             let instruccionConcisa;
-            let instruccionVariedad;
-
             if (numElementos === 1) {
                 instruccionConcisa = 'una sola palabra o una frase corta sin artículos ni descripciones.';
-                instruccionVariedad = 'Asegúrate de que el personaje y el objeto sean muy diferentes de las últimas propuestas que harías normalmente para aumentar la variedad.';
             } else {
-                instruccionConcisa = 'PREFIERE UNA SOLA PALABRA (sustantivo) y en NINGÚN CASO uses adjetivos, descripciones o más de dos palabras.';
-                instruccionVariedad = 'Asegúrate de que las 5 propuestas sean MUY VARIADAS: incluye animales, personas, objetos grandes (ej: Castillo), objetos pequeños (ej: Cuchara) y de diferentes temas (medieval, futurista, cotidiano). EVITA REPETIR ideas obvias.';
+                instruccionConcisa = 'PREFIERE UNA SOLA PALABRA (sustantivo) y en NINGÚN CASO uses adjetivos, descripciones o más de dos palabras. EVITA las coletillas como "Gato Astronauta" o "Libro Mágico".';
             }
 
             const contexto = `Quiero que generes ${numeroTexto} **personaje${plural} de cuento infantil** (persona o animal) y ${numeroTexto} **objeto${plural}** (cotidiano, máquina o invento) para combinarlos en una actividad de pintura creativa.
             
             **INSTRUCCIÓN CLAVE:** El resultado debe ser EXTREMADAMENTE CONCISO: ${instruccionConcisa}
-            **INSTRUCCIÓN DE VARIEDAD:** ${instruccionVariedad}
             
             **REGLAS DE FORMATO ESTRICTAS:**
             1. Genera exactamente **${numeroTexto} personaje${plural}** y exactamente **${numeroTexto} objeto${plural}**.
@@ -182,7 +177,7 @@
             ### OBJETO${plural.toUpperCase()}
             Ejemplo de salida deseada: Sacapuntas, Nave, Paraguas, COCHE, RELOJ
 
-            Genera los ${numeroTexto} elemento${plural} respetando el formato estricto, priorizando la sencillez (sustantivos) y la máxima variedad.`;
+            Genera los ${numeroTexto} elemento${plural} respetando el formato estricto, priorizando la sencillez (sustantivos).`;
             
             const instruccionFinal = `Genera los ${numeroTexto} elemento${plural}: ${numeroTexto} personaje${plural} y ${numeroTexto} objeto${plural}, siguiendo el formato estricto y la máxima sencillez.`;
 
@@ -193,7 +188,7 @@
         async function generarContenido(numElementos) {
             const resultadoDiv = document.getElementById('resultado');
             
-            // LÓGICA DE CARGA
+            // NUEVA LÓGICA DE CARGA MÁS VISTOSA
             const loadingText = numElementos === 1 
                 ? 'El Molino de la Suerte gira... ¡Gira!' 
                 : 'Recogiendo 5 ideas del Campo de la Imaginación...';
