@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Híbridos Creativos para Pintura</title>
+    <style>
+        body { font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background-color: #f7f7f7; }
+        h1 { color: #8a2be2; border-bottom: 2px solid #8a2be2; padding-bottom: 10px; margin-bottom: 30px; }
+        p.instruccion { color: #5f6368; margin-bottom: 25px; font-style: italic; }
+        
+        .botones-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        button { 
+            padding: 14px 25px; 
+            background-color: #8a2be2; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 18px; 
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.1s; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+        }
+        button:hover { background-color: #6a1ba5; }
+        button:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        .suerte-btn {
+            background-color: #ff9800;
+        }
+        .suerte-btn:hover { background-color: #f57c00; }
+
+        #resultado { 
+            margin-top: 35px; 
+            padding: 25px; 
+            border: 2px solid #8a2be2; 
+            background-color: #f0e6ff;
+            border-radius: 10px; 
+            min-height: 150px;
+            white-space: pre-wrap; 
+            font-size: 1.15em; 
+            line-height: 1.5;
+            text-align: center;
+        }
+        
+        .categoria-titulo { 
+            color: #8a2be2; 
+            font-size: 1.4em; 
+            margin-top: 15px; 
+            margin-bottom: 5px; 
+            border-bottom: 2px dashed #d5baff; 
+            padding-bottom: 5px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .item-generado {
+            font-size: 1.8em;
+            font-weight: bolder;
+            color: #4b0082;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        .instrucciones-hibrido {
+            font-style: normal;
+            font-size: 1.1em;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 5px;
+            border: 1px solid #d5baff;
+            font-weight: 600;
+        }
+        /* Estilos para las listas de 5 elementos */
+        ul { list-style-type: '🎨 '; margin-left: auto; margin-right: auto; padding-left: 0; max-width: 300px; text-align: left;}
+        li { margin-bottom: 8px; font-weight: bold; color: #4b0082; font-size: 1.2em;}
+
+        .cargando { color: #8a2be2; font-weight: bold; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1>✨ Taller de Híbridos Fantásticos</h1>
+    <p class="instruccion">Usa el primer botón para generar listas de 5 opciones a elegir, o el segundo para obtener un único y directo desafío híbrido.</p>
+    
+    <div class="botones-container">
+        <button onclick="generarContenido(5)">Generar 5 Opciones</button>
+        <button class="suerte-btn" onclick="generarContenido(1)">Voy a tener suerte</button>
+    </div>
+    
+    <div id="resultado"></div>
+
+
+    <script>
+        // ----------------------------------------------------------
+        // --- CLAVE API Y CONFIGURACIÓN ---
+        // ----------------------------------------------------------
+        // ¡RECUERDA SUSTITUIR ESTO CON TU CLAVE REAL!
+        const API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; 
+        const MODEL_NAME = 'gemini-2.5-flash';
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+
+        // Función auxiliar para limpiar el texto: ahora es más agresiva.
+        function limpiarTexto(texto, esLista = false) {
+            if (!texto) return '';
+            let limpio = texto.trim();
+            
+            // 1. Eliminar artículos al inicio (un, una, el, la, unos, unas, los, las)
+            limpio = limpio.replace(/^(un|una|el|la|los|las|unos|unas)\s+/i, '');
+            // 2. Eliminar cualquier cosa entre paréntesis
+            limpio = limpio.replace(/\s*\(.*\)\s*/g, '');
+            // 3. Eliminar puntos finales
+            limpio = limpio.replace(/\.$/, '');
+            
+            // 4. LIMPIEZA ADICIONAL PARA LISTAS (para obtener solo el sustantivo principal)
+            if (esLista) {
+                // Si la frase tiene más de una palabra, intenta quedarse solo con la primera o la más relevante.
+                const palabras = limpio.split(/\s+/).filter(p => p.length > 0);
+                
+                if (palabras.length > 1) {
+                    // Criterio: Si la última palabra es un sustantivo común o el nombre, lo deja
+                    // Si el primer intento no es bueno, coger la primera palabra.
+                    limpio = palabras[0]; 
+                }
+            }
+            
+            // Limpieza final de espacios extra
+            return limpio.trim();
+        }
+
+        // FUNCIÓN CLAVE: Prompt dinámico para generar N elementos
+        function construirPromptHibridos(numElementos) {
+            const numeroTexto = numElementos === 1 ? 'UN' : numElementos;
+            const plural = numElementos === 1 ? '' : 's';
+            
+            let instruccionConcisa;
+            if (numElementos === 1) {
+                instruccionConcisa = 'una sola palabra o una frase corta sin artículos ni descripciones.';
+            } else {
+                // INSTRUCCIÓN REFORZADA para la lista de 5:
+                instruccionConcisa = 'PREFIERE UNA SOLA PALABRA (sustantivo) y en NINGÚN CASO uses adjetivos, descripciones o más de dos palabras. EVITA las coletillas como "Gato Astronauta" o "Libro Mágico".';
+            }
+
+            const contexto = `Quiero que generes ${numeroTexto} **personaje${plural} de cuento infantil** (persona o animal) y ${numeroTexto} **objeto${plural}** (cotidiano, máquina o invento) para combinarlos en una actividad de pintura creativa.
+            
+            **INSTRUCCIÓN CLAVE:** El resultado debe ser EXTREMADAMENTE CONCISO: ${instruccionConcisa}
+            
+            **REGLAS DE FORMATO ESTRICTAS:**
+            1. Genera exactamente **${numeroTexto} personaje${plural}** y exactamente **${numeroTexto} objeto${plural}**.
+            2. Separa las categorías con los títulos EXACTOS: **### PERSONAJE${plural.toUpperCase()}** y **### OBJETO${plural.toUpperCase()}**.
+            3. Cada elemento debe ir en una línea separada, sin números ni viñetas. No incluyas introducciones, explicaciones, artículos, adjetivos, ni descripciones.
+            
+            ### PERSONAJE${plural.toUpperCase()}
+            Ejemplo de salida deseada: Dragón, Gato, Princesa, OSO, HADA
+
+            ### OBJETO${plural.toUpperCase()}
+            Ejemplo de salida deseada: Sacapuntas, Nave, Paraguas, COCHE, RELOJ
+
+            Genera los ${numeroTexto} elemento${plural} respetando el formato estricto, priorizando la sencillez (sustantivos).`;
+            
+            const instruccionFinal = `Genera los ${numeroTexto} elemento${plural}: ${numeroTexto} personaje${plural} y ${numeroTexto} objeto${plural}, siguiendo el formato estricto y la máxima sencillez.`;
+
+            return `${contexto}\n\n--- GENERACIÓN ---\n${instruccionFinal}`;
+        }
+
+        // Función principal para llamar a la API
+        async function generarContenido(numElementos) {
+            const resultadoDiv = document.getElementById('resultado');
+            const loadingText = numElementos === 1 ? '¡Invadiendo la suerte!...🚀' : '¡Generando 5 desafíos creativos!...🎨';
+            resultadoDiv.innerHTML = `<span class="cargando">${loadingText}</span>`;
+            
+            const prompt = construirPromptHibridos(numElementos);
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: [{ text: prompt }] }],
+                        generationConfig: { 
+                            temperature: 0.95,
+                            maxOutputTokens: 2048,
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({error: {message: 'Respuesta de error no es JSON'}}));
+                    let errorMessage = errorData.error ? errorData.error.message : response.statusText;
+                    if (response.status === 429) { errorMessage = "Límite de cuota superado (Error 429)."; } 
+                    else if (response.status === 400) { errorMessage = "Error de autenticación o solicitud incorrecta (Error 400). Verifica tu CLAVE API."; }
+                    throw new Error(`Error ${response.status}: ${errorMessage}`);
+                }
+
+                const data = await response.json();
+                let textoGenerado = data.candidates[0]?.content?.parts[0]?.text?.trim() || "No se pudo generar el contenido.";
+                
+                // ----------------------------------------------------
+                // --- MANEJO Y CONVERSIÓN DEL FORMATO DE SALIDA ---
+                // ----------------------------------------------------
+                
+                const partes = textoGenerado.split('###').filter(parte => parte.trim().length > 0);
+                let htmlResultado = '';
+                let personaje = '';
+                let objeto = '';
+
+                partes.forEach(parte => {
+                    const lineas = parte.trim().split('\n').filter(line => line.trim().length > 0);
+                    if (lineas.length === 0) return;
+
+                    const titulo = lineas[0].trim();
+                    const items = lineas.slice(1);
+                    
+                    htmlResultado += `<div class="categoria-titulo">${titulo.replace('S', 's')}</div>`; // 'PERSONAJES' -> 'Personajes'
+
+                    if (numElementos === 1) {
+                        // Modo "Voy a tener suerte" (un solo elemento)
+                        const item = limpiarTexto(items[0] || '', false);
+                        if (item) {
+                            htmlResultado += `<div class="item-generado">${item}</div>`;
+                            if (titulo.toUpperCase().startsWith('PERSONAJE')) personaje = item;
+                            else if (titulo.toUpperCase().startsWith('OBJETO')) objeto = item;
+                        }
+                    } else {
+                        // Modo "Generar 5 Opciones" (lista) - USA esLista=true
+                        htmlResultado += '<ul>';
+                        items.slice(0, 5).forEach(rawItem => {
+                            const item = limpiarTexto(rawItem, true); // <--- APLICAR LIMPIEZA MÁS AGRESIVA
+                            if (item) {
+                                htmlResultado += `<li>${item}</li>`;
+                            }
+                        });
+                        htmlResultado += '</ul>';
+                        
+                        // Para el mensaje final, tomamos el primer elemento de la lista para el ejemplo
+                        if (titulo.toUpperCase().startsWith('PERSONAJE')) personaje = limpiarTexto(items[0] || '', true);
+                        else if (titulo.toUpperCase().startsWith('OBJETO')) objeto = limpiarTexto(items[0] || '', true);
+                    }
+                });
+                
+                // Generar la instrucción del híbrido
+                if (personaje && objeto) {
+                    let mensajeInstruccion = '';
+                    if (numElementos === 1) {
+                        // Mensaje para el modo "Voy a tener suerte"
+                        const hibridoNombre = `${personaje.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')}${objeto.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')}`;
+                         mensajeInstruccion = `⭐ **¡A pintar!** El desafío es crear el **${hibridoNombre.replace(/\s+/g, '')}** 🚀.`;
+                    } else {
+                        // Mensaje para el modo "5 Opciones"
+                        mensajeInstruccion = `⭐ **¡A elegir!** Que cada niño escoja **un personaje** de la primera lista y **un objeto** de la segunda lista para crear su propio híbrido.`;
+                    }
+
+                    htmlResultado += `
+                        <div class="instrucciones-hibrido">
+                            ${mensajeInstruccion}
+                            <br>¡Anímales a inventar cómo se mueve y para qué sirve!
+                        </div>
+                    `;
+                }
+
+                resultadoDiv.innerHTML = htmlResultado;
+
+            } catch (error) {
+                // Manejo de ERRORES CRÍTICOS
+                resultadoDiv.innerHTML = `
+                    <strong style="color: #c53929;">Error crítico al conectar con la API:</strong> ${error.message}.<br><br>
+                    <strong>¡PASO URGENTE!</strong> Debes sustituir la clave 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU' en la línea 66 del código con una **clave API nueva y válida** de Google AI Studio.
+                `;
+            }
+        }
+    </script>
+
+</body>
+</html>
