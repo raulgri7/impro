@@ -79,8 +79,28 @@
         ul { list-style-type: '🎨 '; margin-left: auto; margin-right: auto; padding-left: 0; max-width: 300px; text-align: left;}
         li { margin-bottom: 8px; font-weight: bold; color: #4b0082; font-size: 1.2em;}
 
-        .cargando { color: #8a2be2; font-weight: bold; animation: pulse 1.5s infinite; }
+        /* ESTILOS NUEVOS PARA LA CARGA VISIBLE */
+        .cargando { 
+            color: #8a2be2; 
+            font-weight: bold; 
+            animation: pulse 1.5s infinite; 
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        
+        .windmill-spin {
+            font-size: 2em;
+            display: inline-block;
+            animation: spin 3s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -119,12 +139,9 @@
             
             // 4. LIMPIEZA ADICIONAL PARA LISTAS (para obtener solo el sustantivo principal)
             if (esLista) {
-                // Si la frase tiene más de una palabra, intenta quedarse solo con la primera o la más relevante.
                 const palabras = limpio.split(/\s+/).filter(p => p.length > 0);
                 
                 if (palabras.length > 1) {
-                    // Criterio: Si la última palabra es un sustantivo común o el nombre, lo deja
-                    // Si el primer intento no es bueno, coger la primera palabra.
                     limpio = palabras[0]; 
                 }
             }
@@ -142,7 +159,6 @@
             if (numElementos === 1) {
                 instruccionConcisa = 'una sola palabra o una frase corta sin artículos ni descripciones.';
             } else {
-                // INSTRUCCIÓN REFORZADA para la lista de 5:
                 instruccionConcisa = 'PREFIERE UNA SOLA PALABRA (sustantivo) y en NINGÚN CASO uses adjetivos, descripciones o más de dos palabras. EVITA las coletillas como "Gato Astronauta" o "Libro Mágico".';
             }
 
@@ -171,8 +187,18 @@
         // Función principal para llamar a la API
         async function generarContenido(numElementos) {
             const resultadoDiv = document.getElementById('resultado');
-            const loadingText = numElementos === 1 ? '¡Invadiendo la suerte!...🚀' : '¡Generando 5 desafíos creativos!...🎨';
-            resultadoDiv.innerHTML = `<span class="cargando">${loadingText}</span>`;
+            
+            // NUEVA LÓGICA DE CARGA MÁS VISTOSA
+            const loadingText = numElementos === 1 
+                ? 'El Molino de la Suerte gira... ¡Gira!' 
+                : 'Recogiendo 5 ideas del Campo de la Imaginación...';
+            
+            resultadoDiv.innerHTML = `
+                <span class="cargando">
+                    <span class="windmill-spin">🌬️</span>
+                    ${loadingText}
+                </span>
+            `;
             
             const prompt = construirPromptHibridos(numElementos);
             
@@ -216,7 +242,7 @@
                     const titulo = lineas[0].trim();
                     const items = lineas.slice(1);
                     
-                    htmlResultado += `<div class="categoria-titulo">${titulo.replace('S', 's')}</div>`; // 'PERSONAJES' -> 'Personajes'
+                    htmlResultado += `<div class="categoria-titulo">${titulo.replace('S', 's')}</div>`;
 
                     if (numElementos === 1) {
                         // Modo "Voy a tener suerte" (un solo elemento)
@@ -230,7 +256,7 @@
                         // Modo "Generar 5 Opciones" (lista) - USA esLista=true
                         htmlResultado += '<ul>';
                         items.slice(0, 5).forEach(rawItem => {
-                            const item = limpiarTexto(rawItem, true); // <--- APLICAR LIMPIEZA MÁS AGRESIVA
+                            const item = limpiarTexto(rawItem, true); // <--- LIMPIEZA MÁS AGRESIVA
                             if (item) {
                                 htmlResultado += `<li>${item}</li>`;
                             }
@@ -269,7 +295,7 @@
                 // Manejo de ERRORES CRÍTICOS
                 resultadoDiv.innerHTML = `
                     <strong style="color: #c53929;">Error crítico al conectar con la API:</strong> ${error.message}.<br><br>
-                    <strong>¡PASO URGENTE!</strong> Debes sustituir la clave 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU' en la línea 66 del código con una **clave API nueva y válida** de Google AI Studio.
+                    <strong>¡PASO URGENTE!</strong> Debes sustituir la clave 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU' en la línea 69 del código con una **clave API nueva y válida** de Google AI Studio.
                 `;
             }
         }
