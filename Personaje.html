@@ -177,7 +177,8 @@
             let instruccionVariedad;
 
             if (numElementos === 1) {
-                instruccionConcisa = 'una sola palabra o una frase corta sin artículos ni descripciones.';
+                // MODIFICACIÓN: Hacemos el prompt más estricto para una sola palabra
+                instruccionConcisa = 'una sola palabra (sustantivo) y en NINGÚN CASO uses adjetivos, descripciones o más de dos palabras.';
                 instruccionVariedad = 'Asegúrate de que el personaje y el objeto sean muy diferentes de las últimas propuestas que harías normalmente para aumentar la variedad.';
             } else {
                 instruccionConcisa = 'PREFIERE UNA SOLA PALABRA (sustantivo) y en NINGÚN CASO uses adjetivos, descripciones o más de dos palabras.';
@@ -241,7 +242,7 @@
         }
 
         // ----------------------------------------------------------
-        // --- FUNCIÓN PRINCIPAL (MODIFICADA CON RETRASO OFFLINE) ---
+        // --- FUNCIÓN PRINCIPAL ---
         // ----------------------------------------------------------
         async function generarContenido(numElementos) {
             const resultadoDiv = document.getElementById('resultado');
@@ -286,7 +287,7 @@
                         console.warn(`Error de la API (${response.status}). Cambiando a modo Fallback Offline.`);
                         modo = 'Fallback Offline';
                         textoGenerado = obtenerResultadosOffline(numElementos);
-                        // Añadir un retraso si hemos caído en el fallback para que el usuario vea el mensaje
+                        // Añadir un retraso si hemos caído en el fallback
                         await sleep(1000); 
                     } else {
                         const data = await response.json();
@@ -317,13 +318,12 @@
                     const titulo = lineas[0].trim();
                     const items = lineas.slice(1);
                     
-                    // Nota: 'modo' se puede usar para fines de depuración, pero no afecta al renderizado.
-
                     htmlResultado += `<div class="categoria-titulo">${titulo.replace('S', 's')}</div>`;
 
                     if (numElementos === 1) {
                         // Modo "Voy a tener suerte" (un solo elemento)
-                        const item = limpiarTexto(items[0] || '', false);
+                        // USAMOS LIMPIEZA AGRESIVA (TRUE) PARA GARANTIZAR UNA SOLA PALABRA.
+                        const item = limpiarTexto(items[0] || '', true); // <--- CORRECCIÓN CLAVE
                         if (item) {
                             htmlResultado += `<div class="item-generado">${item}</div>`;
                             if (titulo.toUpperCase().startsWith('PERSONAJE')) personaje = item;
@@ -333,7 +333,7 @@
                         // Modo "Generar 5 Opciones" (lista)
                         htmlResultado += '<ul>';
                         items.slice(0, 5).forEach(rawItem => {
-                            const item = limpiarTexto(rawItem, true); // <--- LIMPIEZA MÁS AGRESIVA
+                            const item = limpiarTexto(rawItem, true); // Limpieza agresiva para listas
                             if (item) {
                                 htmlResultado += `<li>${item}</li>`;
                             }
