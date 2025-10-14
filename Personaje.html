@@ -79,7 +79,7 @@
         ul { list-style-type: '🎨 '; margin-left: auto; margin-right: auto; padding-left: 0; max-width: 300px; text-align: left;}
         li { margin-bottom: 8px; font-weight: bold; color: #4b0082; font-size: 1.2em;}
 
-        /* ESTILOS NUEVOS PARA LA CARGA VISIBLE */
+        /* ESTILOS DE CARGA */
         .cargando { 
             color: #8a2be2; 
             font-weight: bold; 
@@ -121,11 +121,26 @@
         // --- CLAVE API Y CONFIGURACIÓN ---
         // ----------------------------------------------------------
         // ¡RECUERDA SUSTITUIR ESTO CON TU CLAVE REAL!
-        const API_KEY = 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU'; 
+        const API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; 
         const MODEL_NAME = 'gemini-2.5-flash';
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
 
-        // Función auxiliar para limpiar el texto: ahora es más agresiva.
+        // ----------------------------------------------------------
+        // --- LISTAS OFFLINE (NUEVAS) ---
+        // ----------------------------------------------------------
+        const personajesOffline = [
+            "Águila", "Alce", "Alien", "Ángel", "Araña", "Ardilla", "Astronauta", "Ballena", "Búfalo", "Búho", "Burro", "Caballo", "Cabra", "Calamar", "Camello", "Canguro", "Castor", "Chef", "Cebra", "Ciempiés", "Cerdito", "Cíclope", "Colibrí", "Coneja", "Conejo", "Cocodrilo", "Cuervo", "Delfín", "Demonio", "Dinosaurio", "Dragón", "Duende", "Elefante", "Enano", "Escarabajo", "Erizo", "Fantasma", "Flamenco", "Gacela", "Gallo", "Garza", "Gato", "Gato Montés", "Gaviota", "Gigante", "Gusano", "Halcón", "Hada", "Hámster", "Hormiga", "Hurón", "Jirafa", "Koala", "León", "León Marino", "Lince", "Llama", "Lobo", "Mago", "Mariquita", "Medusa", "Mono", "Muñeco", "Murciélago", "Ninja", "Nutria", "Oso", "Oso Polar", "Pájaro", "Panda", "Panadero", "Periquito", "Perezoso", "Pez", "Pollo", "Príncipe", "Princesa", "Pulpo", "Puercoespín", "Ratón", "Ratona", "Reno", "Rey", "Robot", "Robo", "Saltamontes", "Serpiente", "Sirena", "Tigre", "Tigresa", "Tiburón", "Topo", "Troll", "Unicornio", "Vampiro", "Vaca", "Zorro"
+        ];
+        
+        const objetosOffline = [
+            "Aguja", "Alfombra", "Alambre", "Altavoz", "Anillo", "Arena", "Avión", "Balón", "Bandera", "Barco", "Baúl", "Bicicleta", "Bola", "Botella", "Botones", "Bota", "Brújula", "Bufanda", "Burbuja", "Candelabro", "Cámara", "Candado", "Caramelos", "Cartera", "Carrito", "Casa", "Caja", "Cesta", "Cofre", "Cohete", "Columpio", "Cometa", "Computadora", "Concha", "Corona", "Cortina", "Cristal", "Cubo", "Cubierta", "Cuerda", "Cuchara", "Cuchillo", "Diamante", "Dron", "Edificio", "Engranaje", "Esfera", "Espejo", "Esponja", "Estrella", "Estatua", "Farol", "Faro", "Flauta", "Flor", "Fuente", "Gafas", "Galleta", "Guitarra", "Globo", "Globo terráqueo", "Guante", "Helicóptero", "Hoja", "Hilo", "Horno", "Hueso", "Imán", "Jabón", "Jaula", "Lámpara", "Lápiz", "Llave", "Llave inglesa", "Libro", "Linterna", "Luna", "Mapa", "Martillo", "Medalla", "Mesa", "Micrófono", "Microscopio", "Moneda", "Muelle", "Mochila", "Muñeca", "Nevera", "Nieve", "Nube", "Palanca", "Paleta", "Pala", "Patín", "Peine", "Pelota", "Pincel", "Pizarra", "Plato", "Pluma", "Portalápices", "Poción", "Pulsera", "Puente", "Puerta", "Radio", "Raqueta", "Rayo", "Red", "Regla", "Reloj", "Rueda", "Sacapuntas", "Saco", "Satélite", "Serrucho", "Silbato", "Sombrero", "Sombrilla", "Sofá", "Submarino", "Tambor", "Telescopio", "Televisión", "Teléfono", "Tijera", "Tinta", "Toalla", "Torre", "Tren", "Tronco", "Trofeo", "Túnel", "Vaso", "Varita", "Vela", "Ventana"
+        ];
+        
+        /**
+         * Función auxiliar para limpiar el texto.
+         * Se mantiene la limpieza de la versión anterior para procesar las salidas de la IA
+         * y también asegurar que las listas internas se presenten sin adjetivos adicionales.
+         */
         function limpiarTexto(texto, esLista = false) {
             if (!texto) return '';
             let limpio = texto.trim();
@@ -141,7 +156,8 @@
             if (esLista) {
                 const palabras = limpio.split(/\s+/).filter(p => p.length > 0);
                 
-                if (palabras.length > 1) {
+                // Si hay más de 1 palabra, intentar quedarse solo con el sustantivo principal (la primera)
+                if (palabras.length > 1 && !['globo', 'león'].includes(palabras[0].toLowerCase())) {
                     limpio = palabras[0]; 
                 }
             }
@@ -156,15 +172,20 @@
             const plural = numElementos === 1 ? '' : 's';
             
             let instruccionConcisa;
+            let instruccionVariedad;
+
             if (numElementos === 1) {
                 instruccionConcisa = 'una sola palabra o una frase corta sin artículos ni descripciones.';
+                instruccionVariedad = 'Asegúrate de que el personaje y el objeto sean muy diferentes de las últimas propuestas que harías normalmente para aumentar la variedad.';
             } else {
-                instruccionConcisa = 'PREFIERE UNA SOLA PALABRA (sustantivo) y en NINGÚN CASO uses adjetivos, descripciones o más de dos palabras. EVITA las coletillas como "Gato Astronauta" o "Libro Mágico".';
+                instruccionConcisa = 'PREFIERE UNA SOLA PALABRA (sustantivo) y en NINGÚN CASO uses adjetivos, descripciones o más de dos palabras.';
+                instruccionVariedad = 'Asegúrate de que las 5 propuestas sean MUY VARIADAS: incluye animales, personas, objetos grandes (ej: Castillo), objetos pequeños (ej: Cuchara) y de diferentes temas (medieval, futurista, cotidiano). EVITA REPETIR ideas obvias.';
             }
 
             const contexto = `Quiero que generes ${numeroTexto} **personaje${plural} de cuento infantil** (persona o animal) y ${numeroTexto} **objeto${plural}** (cotidiano, máquina o invento) para combinarlos en una actividad de pintura creativa.
             
             **INSTRUCCIÓN CLAVE:** El resultado debe ser EXTREMADAMENTE CONCISO: ${instruccionConcisa}
+            **INSTRUCCIÓN DE VARIEDAD:** ${instruccionVariedad}
             
             **REGLAS DE FORMATO ESTRICTAS:**
             1. Genera exactamente **${numeroTexto} personaje${plural}** y exactamente **${numeroTexto} objeto${plural}**.
@@ -177,18 +198,49 @@
             ### OBJETO${plural.toUpperCase()}
             Ejemplo de salida deseada: Sacapuntas, Nave, Paraguas, COCHE, RELOJ
 
-            Genera los ${numeroTexto} elemento${plural} respetando el formato estricto, priorizando la sencillez (sustantivos).`;
+            Genera los ${numeroTexto} elemento${plural} respetando el formato estricto, priorizando la sencillez (sustantivos) y la máxima variedad.`;
             
             const instruccionFinal = `Genera los ${numeroTexto} elemento${plural}: ${numeroTexto} personaje${plural} y ${numeroTexto} objeto${plural}, siguiendo el formato estricto y la máxima sencillez.`;
 
             return `${contexto}\n\n--- GENERACIÓN ---\n${instruccionFinal}`;
         }
+        
+        /**
+         * Lógica para obtener N elementos de las listas offline.
+         */
+        function obtenerResultadosOffline(numElementos) {
+            const shuffle = (array) => {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            };
 
-        // Función principal para llamar a la API
+            const personajesAleatorios = shuffle([...personajesOffline]).slice(0, numElementos);
+            const objetosAleatorios = shuffle([...objetosOffline]).slice(0, numElementos);
+
+            // Simular el formato de salida de la IA para usar el mismo código de renderizado (o casi)
+            let resultadoSimulado = '';
+            
+            const plural = numElementos === 1 ? '' : 's';
+            
+            resultadoSimulado += `### PERSONAJE${plural.toUpperCase()}\n`;
+            resultadoSimulado += personajesAleatorios.join('\n');
+            
+            resultadoSimulado += `\n\n### OBJETO${plural.toUpperCase()}\n`;
+            resultadoSimulado += objetosAleatorios.join('\n');
+            
+            return resultadoSimulado;
+        }
+        
+        /**
+         * Función principal para llamar a la API o usar las listas offline.
+         */
         async function generarContenido(numElementos) {
             const resultadoDiv = document.getElementById('resultado');
             
-            // NUEVA LÓGICA DE CARGA MÁS VISTOSA
+            // 1. LÓGICA DE CARGA
             const loadingText = numElementos === 1 
                 ? 'El Molino de la Suerte gira... ¡Gira!' 
                 : 'Recogiendo 5 ideas del Campo de la Imaginación...';
@@ -199,37 +251,48 @@
                     ${loadingText}
                 </span>
             `;
-            
-            const prompt = construirPromptHibridos(numElementos);
+
+            // 2. LANZAMIENTO DE MONEDA (50% IA, 50% Offline)
+            const usarIA = Math.random() < 0.5; // True = IA, False = Offline
+
+            let textoGenerado;
+            let modo = usarIA ? 'IA' : 'Offline';
             
             try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ role: "user", parts: [{ text: prompt }] }],
-                        generationConfig: { 
-                            temperature: 0.95,
-                            maxOutputTokens: 2048,
-                        }
-                    })
-                });
+                if (usarIA) {
+                    // --- MODO IA (COMPORTAMIENTO ANTERIOR) ---
+                    const prompt = construirPromptHibridos(numElementos);
+                    
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ role: "user", parts: [{ text: prompt }] }],
+                            generationConfig: { 
+                                temperature: 0.95,
+                                maxOutputTokens: 2048,
+                            }
+                        })
+                    });
 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({error: {message: 'Respuesta de error no es JSON'}}));
-                    let errorMessage = errorData.error ? errorData.error.message : response.statusText;
-                    if (response.status === 429) { errorMessage = "Límite de cuota superado (Error 429)."; } 
-                    else if (response.status === 400) { errorMessage = "Error de autenticación o solicitud incorrecta (Error 400). Verifica tu CLAVE API."; }
-                    throw new Error(`Error ${response.status}: ${errorMessage}`);
+                    if (!response.ok) {
+                        // En caso de error de la IA, intentamos el modo offline como fallback
+                        console.warn(`Error de la API (${response.status}). Cambiando a modo Offline.`);
+                        modo = 'Fallback Offline';
+                        textoGenerado = obtenerResultadosOffline(numElementos);
+                    } else {
+                        const data = await response.json();
+                        textoGenerado = data.candidates[0]?.content?.parts[0]?.text?.trim() || obtenerResultadosOffline(numElementos);
+                    }
+                } else {
+                    // --- MODO OFFLINE (NUEVO) ---
+                    textoGenerado = obtenerResultadosOffline(numElementos);
                 }
-
-                const data = await response.json();
-                let textoGenerado = data.candidates[0]?.content?.parts[0]?.text?.trim() || "No se pudo generar el contenido.";
                 
-                // ----------------------------------------------------
-                // --- MANEJO Y CONVERSIÓN DEL FORMATO DE SALIDA ---
-                // ----------------------------------------------------
+                // Si el texto sigue siendo nulo, forzamos un error
+                if (!textoGenerado) throw new Error("No se pudo generar contenido ni obtener listas de fallback.");
                 
+                // 3. PROCESAMIENTO Y RENDERIZADO DEL RESULTADO (Común para IA y Offline)
                 const partes = textoGenerado.split('###').filter(parte => parte.trim().length > 0);
                 let htmlResultado = '';
                 let personaje = '';
@@ -242,6 +305,9 @@
                     const titulo = lineas[0].trim();
                     const items = lineas.slice(1);
                     
+                    // Añadir un identificador interno para depuración (transparente al usuario)
+                    // console.log(`Modo: ${modo}`);
+
                     htmlResultado += `<div class="categoria-titulo">${titulo.replace('S', 's')}</div>`;
 
                     if (numElementos === 1) {
@@ -253,7 +319,7 @@
                             else if (titulo.toUpperCase().startsWith('OBJETO')) objeto = item;
                         }
                     } else {
-                        // Modo "Generar 5 Opciones" (lista) - USA esLista=true
+                        // Modo "Generar 5 Opciones" (lista)
                         htmlResultado += '<ul>';
                         items.slice(0, 5).forEach(rawItem => {
                             const item = limpiarTexto(rawItem, true); // <--- LIMPIEZA MÁS AGRESIVA
@@ -275,7 +341,7 @@
                     if (numElementos === 1) {
                         // Mensaje para el modo "Voy a tener suerte"
                         const hibridoNombre = `${personaje.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')}${objeto.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')}`;
-                         mensajeInstruccion = `⭐ **¡A pintar!** El desafío es crear el **${hibridoNombre.replace(/\s+/g, '')}** 🚀.`;
+                        mensajeInstruccion = `⭐ **¡A pintar!** El desafío es crear el **${hibridoNombre.replace(/\s+/g, '')}** 🚀.`;
                     } else {
                         // Mensaje para el modo "5 Opciones"
                         mensajeInstruccion = `⭐ **¡A elegir!** Que cada niño escoja **un personaje** de la primera lista y **un objeto** de la segunda lista para crear su propio híbrido.`;
@@ -292,10 +358,10 @@
                 resultadoDiv.innerHTML = htmlResultado;
 
             } catch (error) {
-                // Manejo de ERRORES CRÍTICOS
+                // Manejo de ERRORES CRÍTICOS (que no pudieron ser cubiertos por el fallback offline)
                 resultadoDiv.innerHTML = `
-                    <strong style="color: #c53929;">Error crítico al conectar con la API:</strong> ${error.message}.<br><br>
-                    <strong>¡PASO URGENTE!</strong> Debes sustituir la clave 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU' en la línea 69 del código con una **clave API nueva y válida** de Google AI Studio.
+                    <strong style="color: #c53929;">Error crítico al generar ideas:</strong> ${error.message}.<br><br>
+                    <strong>¡Aviso!</strong> El modo IA (API) falló. Si esto persiste, verifica que tu **CLAVE API** en la línea 74 sea válida.
                 `;
             }
         }
