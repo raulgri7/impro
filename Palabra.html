@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palabra al Aire - Maestro de Improvisación IA</title>
+    <style>
+        /* -------------------------------------------
+            ESTILOS CSS
+            ------------------------------------------- */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            padding: 20px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background-color: #fff8e1; 
+        }
+
+        h1 { 
+            color: #ff6f00; 
+            border-bottom: 2px solid #ff6f00; 
+            padding-bottom: 10px; 
+            margin-bottom: 30px; 
+        }
+
+        p.instruccion { 
+            color: #5f6368; 
+            margin-bottom: 25px; 
+            font-style: italic; 
+        }
+
+        .botones-container {
+            display: flex;
+            justify-content: center; 
+            margin-bottom: 20px;
+        }
+
+        /* Estilos del Botón */
+        button { 
+            padding: 14px 25px; 
+            background-color: #4a148c; /* Púrpura intenso */
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 18px; 
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.1s; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            min-width: 250px; 
+        }
+        button:hover:not(:disabled) { 
+            background-color: #311b92; 
+        }
+        button:active:not(:disabled) { 
+            transform: translateY(2px); 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+        button:disabled {
+            background-color: #9c9c9c;
+            cursor: default;
+        }
+
+        /* Contenedor de Resultado */
+        #resultado { 
+            margin-top: 35px; 
+            padding: 20px; 
+            border: 3px solid #ff6f00; 
+            background-color: #fff9c4;
+            border-radius: 10px; 
+            min-height: 150px;
+            white-space: pre-wrap; 
+            font-size: 1.15em; 
+            line-height: 1.5;
+            text-align: center;
+            position: relative; /* CLAVE para posicionar el loading-overlay */
+        }
+
+        /* Etiqueta de Modo (IA/Offline) - Pegada a la esquina */
+        .modo-tag {
+            position: absolute;
+            bottom: 0px; 
+            right: 0px; 
+            font-size: 0.7em;
+            color: #757575; 
+            background-color: #ffe0b2; 
+            padding: 2px 5px;
+            border-top-left-radius: 5px; 
+            border-bottom-right-radius: 8px; 
+            font-weight: normal;
+            line-height: 1; 
+        }
+        
+        /* Título de Categoría */
+        .categoria-titulo { 
+            color: #ff6f00; 
+            font-size: 1.4em; 
+            margin-top: 5px; 
+            margin-bottom: 5px; 
+            border-bottom: 2px dashed #ffb74d; 
+            padding-bottom: 5px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Palabra Principal */
+        .palabra-principal {
+            font-size: 3em;
+            font-weight: 900;
+            color: #4a148c;
+            margin-top: 5px; 
+            margin-bottom: 0px; 
+            line-height: 1.1; 
+            text-transform: uppercase;
+            animation: bounce 0.5s ease-out;
+        }
+
+        /* Espaciado de Instrucciones Principal */
+        #resultado > p.instruccion:nth-of-type(1) {
+            margin-bottom: 5px; 
+            font-size: 0.9em; 
+            font-style: italic; 
+        }
+
+        /* Palabras de Reserva */
+        .palabras-reserva {
+            margin-top: 5px; 
+            padding-top: 5px; 
+            border-top: 1px solid #ffb74d; 
+            font-size: 0.9em;
+            color: #5f6368;
+        }
+
+        .palabras-reserva p {
+            margin-bottom: 5px; 
+        }
+
+        .palabras-reserva span {
+            font-weight: bold;
+            color: #ff6f00;
+            margin: 0 6px; 
+            padding: 2px 4px; 
+            border: 1px dashed #ffb74d;
+            border-radius: 4px;
+            display: inline-block;
+            line-height: 1.5;
+        }
+
+        /* Espaciado de Instrucción de Reserva */
+        .palabras-reserva + p.instruccion {
+            margin-top: 5px !important; 
+            margin-bottom: 15px; 
+            font-size: 0.85em;
+        }
+
+        /* Animaciones y Carga (Loading Overlay) */
+        .cargando { 
+            color: #ff6f00; 
+            font-weight: bold; 
+            animation: pulse 1.5s infinite; 
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        /* ESTILO AÑADIDO: Overlay flotante de carga */
+        .loading-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 30px;
+            background-color: rgba(255, 255, 255, 0.95); /* Fondo blanco semi-transparente */
+            border: 2px solid #ff6f00;
+            border-radius: 10px;
+            z-index: 100; /* Asegura que está encima del contenido anterior */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .mic-icon {
+            font-size: 2em;
+            display: inline-block;
+            animation: float-mic 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse { 
+            0% { opacity: 1; } 
+            50% { opacity: 0.4; } 
+            100% { opacity: 1; } 
+        }
+
+        @keyframes float-mic {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-5px); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    
+    
+    
+    <div class="botones-container">
+        <button onclick="generarContenido(5)">Generar Nuevo Stock de Palabras</button>
+    </div>
+    
+    <div id="resultado">
+        <p class="instruccion" style="font-style: normal; text-align: center; margin-bottom: 0;">Pulsa el botón para generar las primeras palabras.</p>
+        <div class="modo-tag">[Modo: Espera]</div>
+    </div>
+
+
+    <script>
+        /* -------------------------------------------
+            LÓGICA JAVASCRIPT (Modificada para retener contenido)
+            ------------------------------------------- */
+        
+        // --- CLAVE API Y CONFIGURACIÓN ---
+        // ¡RECUERDA SUSTITUIR ESTO CON TU CLAVE REAL!
+        const API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; 
+        const MODEL_NAME = 'gemini-2.5-flash';
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+        // **BOOL CLAVE: Mantiene la lógica 50/50, o fuerza offline si la clave es la de ejemplo.**
+        const FALLBACK_MODE = API_KEY === 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU'; // Clave de ejemplo
+        const TITULO_PALABRA = 'PALABRAS AL AIRE'; 
+        const NUM_ELEMENTOS = 5; 
+
+        // --- LISTAS OFFLINE ---
+        const palabrasOffline = [
+            "Abismo", "Abeja", "Abrazo", "Abuelo", "Ajedrez", "Algoritmo", "Alfombra", "Almendra", 
+            "Amazon", "Amazonia", "Amapola", "Ancla", "Arena", "Argentina", "Arcoíris", "Atlántico", 
+            "Atlántida", "Átomo", "Aurora", "Bailar", "Bad Bunny", "Balón", "Bambú", "Bandera", "Ballena", 
+            "Beethoven", "Berlina", "Berlín", "Beso", "Bicicleta", "Bill Murray", "Billie Eilish", "Botella", "Bosque", "Brooklyn", 
+            "Brújula", "Buzón", "Café", "Caer", "Cactus", "Cámara", "Canción", "Cangrejo", "Cápsula", 
+            "Caracol", "Caramelo", "Caravana", "Carbón", "Cascada", "Castillo", "Caverna", "Cebolla", 
+            "Ceniza", "Cereza", "Chicharra", "Chiquito", "Chispa", "Cicatriz", "Circo", "Cielo", 
+            "Cleopatra", "Cometa", "Coral", "Corazón", "Corcho", "Crisálida", "Cristal", "Cuchara", "Cuchillo", 
+            "Cuarzo", "Darth Vader", "Despertar", "Desierto", "Deseo", "Desvelo", "Diamante", "Dinosaurio", "Drake", "Duda", 
+            "Dragón", "Duki", "Dwayne Johnson", "Eco", "Eclipse", "Ecuador", "Edipo", "Einstein", "Electricidad", "Elefante", 
+            "Elon Musk", "Espejo", "Espejismo", "Espuma", "Esquí", "Estrella", "Facebook", "Faro", "Fénix", 
+            "Filosofía", "Flamenco", "Flauta", "Flor", "Florencia", "Fósforo", "Fractal", "Fragancia", 
+            "Frambuesa", "Frida Kahlo", "Fresa", "Frontera", "Fuego", "Futuro", "Galaxia", "Gato", "Gaviota", 
+            "Globo", "Google", "Goya", "Gravedad", "Gris", "Guitarra", "Henry Cavill", "Hielo", "Himalaya", "Hoja", "Holograma", 
+            "Horizonte", "Huracán", "Iceberg", "IKEA", "Imán", "Invierno", "Italia", "Japón", "Jardín", "Jason Statham", "Júpiter", 
+            "Jungla", "Justin Bieber", "Kafka", "Laberinto", "Lady Gaga", "Lágrima", "Lámpara", "Lápiz", "Leonardo DiCaprio", "Libertad", 
+            "Limón", "Lisboa", "Lluvia", "Londres", "Luna", "Madrid", "Madonna", "Magma", "Mandarina", "Manta", "Manantial", 
+            "Manzana", "Mariposa", "Marte", "Máquina", "Masa", "Melancolía", "Melodrama", "Melón", 
+            "Memoria", "Mermelada", "Messi", "Michael Jackson", "Micrófono", "Microscopio", "Miel", "Misterio", "Mochila", 
+            "Moneda", "Montaña", "Murciélago", "Murmullo", "Neón", "Neblina", "Netflix", "Nieve", "Nicki Minaj", "Nostalgia", 
+            "Nube", "Nueva York", "Obama", "Océano", "Olvido", "Ópera", "Oprah", "Otoño", "Palabra", 
+            "Palacio", "Pandora", "Pantera", "Papel", "Paraguas", "Paralelo", "París", "Pájaro", 
+            "Pestaña", "Pedro Pascal", "Penélope Cruz", "Perfume", "Piano", "Picasso", "Piedra", "Pirámide", "Pirata", "Pizarra", 
+            "Pizza", "Planeta", "Pluma", "Plutón", "Poesía", "Polvo", "Praga", "Prisma", "Pulmón", 
+            "Rafa Nadal", "Rascacielos", "Rayo", "Relámpago", "Reloj", "Rihanna", "Río", "Robot", "Robert Pattinson", "Robert Redford", "Romero", "Rosalía", "Rubí", "Rueda", 
+            "Rumor", "Samba", "Satélite", "Saturno", "Saltar", "Selva", "Selfie", "Sésamo", 
+            "Shakespeare", "Sherlock Holmes", "Shakira", "Silencio", "Silicona", "Sombra", "Sombrero", "Sopa", "Sol", "Sonrisa", 
+            "Submarino", "Susurro", "Taberna", "Tambor", "Taylor Swift", "Teatro", "Teclado", "Teléfono", "Telescopio", "Tesoro", 
+            "The Weeknd", "Tigre", "TikTok", "Tina Fey", "Tokio", "Tormenta", "Tren", "Trinchera", "Trompeta", "Trump", 
+            "Trueno", "Wos", "Twitter", "Unicornio", "Universo", "Valencia", "Válvula", "Ventana", "Venganza", "Vértigo", "Viaje", 
+            "Viento", "Vinilo", "Vino", "Volcán", "Whisky", "Zafiro", "Zapatilla", "Zapato", "Zepelín", "Zendaya", "Zorro"
+        ];
+
+        // --- FUNCIONES AUXILIARES ---
+        
+        function limpiarTexto(texto) {
+            if (!texto) return '';
+            let limpio = texto.trim();
+            
+            limpio = limpio.replace(/^(un|una|el|la|los|las|unos|unas)\s+/i, '');
+            limpio = limpio.replace(/[.,;:"'?!]/g, '');
+            
+            limpio = limpio.trim();
+
+            let palabras = limpio.split(/\s+/).map(p => {
+                if (p.length > 0) {
+                    return p.charAt(0).toUpperCase() + p.slice(1);
+                }
+                return p;
+            });
+
+            limpio = palabras.join(' ');
+            
+            return limpio.trim();
+        }
+
+        function construirPrompt() {
+            const numeroTexto = 'CINCO';
+            const numEjemplos = 4;
+            
+            const shuffle = (array) => {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            };
+
+            const ejemplos = shuffle([...palabrasOffline]).slice(0, numEjemplos).join('\n');
+
+
+            const instruccionConcisa = `El resultado debe ser de ${numeroTexto} palabras. NO uses viñetas, números, adjetivos, descripciones, frases, o cualquier texto adicional.`;
+
+            const contexto = `Actúa como el maestro de improvisación en un juego llamado “Palabra al aire”. Tu tarea es proporcionar un stock de ${numeroTexto} **palabras al azar** que los actores deberán integrar en la historia. Las palabras deben ser MUY variadas (Objetos, Sentimientos, Nombres Propios, Conceptos Abstractos).
+            
+            **Ejemplos de palabras válidas:**
+            ${ejemplos}
+
+            **INSTRUCCIÓN CLAVE:** El resultado debe ser EXTREMADAMENTE CONCISO: ${instruccionConcisa}
+            
+            **REGLAS DE FORMATO ESTRICTAS:**
+            1. Genera exactamente **${numeroTexto} palabras**.
+            2. Separa las categorías con el título EXACTO: **### ${TITULO_PALABRA}**.
+            3. Cada palabra/nombre debe ir en una línea separada.
+            
+            ### ${TITULO_PALABRA}
+            
+            Genera las ${numeroTexto} palabras respetando el formato estricto.`;
+            
+            return contexto;
+        }
+        
+        function obtenerResultadosOffline() {
+            const shuffle = (array) => {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            };
+
+            if (palabrasOffline.length < NUM_ELEMENTOS) {
+                 return `### ${TITULO_PALABRA}\n¡Lista offline insuficiente!`;
+            }
+
+            const palabrasAleatorias = shuffle([...palabrasOffline]).slice(0, NUM_ELEMENTOS);
+
+            let resultadoSimulado = '';
+            resultadoSimulado += `### ${TITULO_PALABRA}\n`;
+            resultadoSimulado += palabrasAleatorias.join('\n');
+            
+            return resultadoSimulado;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // --- FUNCIÓN PRINCIPAL MODIFICADA ---
+        async function generarContenido(numElementosIgnorado) { 
+            const resultadoDiv = document.getElementById('resultado');
+            const boton = document.querySelector('.botones-container button'); // Obtener el botón
+            
+            const loadingText = '¡El Maestro de Improv. escucha la escena y carga munición!';
+            
+            // Determinar modo (IA 50/50, o siempre Offline si la API_KEY es la de ejemplo)
+            const usarIA = FALLBACK_MODE ? false : Math.random() < 0.5;
+            let modo = usarIA ? 'IA' : 'Offline';
+
+            // 1. INICIO: Mostrar Carga Y Bloquear Botón
+            boton.disabled = true;
+
+            // CREAR EL OVERLAY DE CARGA - Esto no borra el contenido anterior
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.classList.add('cargando', 'loading-overlay');
+            loadingOverlay.innerHTML = `<span class="mic-icon">🎤</span> ${loadingText}`;
+            resultadoDiv.appendChild(loadingOverlay);
+
+            let textoGenerado;
+            
+            try {
+                if (usarIA) {
+                    // MODO IA
+                    const prompt = construirPrompt();
+                    
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ role: "user", parts: [{ text: prompt }] }],
+                            generationConfig: { 
+                                temperature: 1.0, 
+                                maxOutputTokens: 2048,
+                            }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        console.warn(`Error de la API (${response.status}). Cambiando a modo Fallback Offline.`);
+                        modo = 'Fallback Offline';
+                        textoGenerado = obtenerResultadosOffline();
+                        await sleep(1000); // Pequeña pausa para simular el fallo
+                    } else {
+                        const data = await response.json();
+                        textoGenerado = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || obtenerResultadosOffline();
+                    }
+                } else {
+                    // MODO OFFLINE
+                    await sleep(800); 
+                    textoGenerado = obtenerResultadosOffline();
+                }
+                
+                if (!textoGenerado) throw new Error("No se pudo generar contenido.");
+                
+                // 2. PROCESAMIENTO Y RENDERIZADO ESPECIAL
+                const partes = textoGenerado.split('###').filter(parte => parte.trim().length > 0);
+                let htmlResultado = '';
+                
+                partes.forEach(parte => {
+                    const lineas = parte.trim().split('\n').filter(line => line.trim().length > 0);
+                    if (lineas.length === 0) return;
+
+                    const titulo = lineas[0].trim();
+                    // Limpia las palabras y filtra las vacías
+                    const items = lineas.slice(1).map(limpiarTexto).filter(item => item.length > 0); 
+
+                    htmlResultado += `<div class="categoria-titulo">${titulo}</div>`;
+
+                    if (items.length > 0) {
+                        // PALABRA PRINCIPAL (Primera)
+                        const palabraPrincipal = items[0];
+                        htmlResultado += ``;
+                        htmlResultado += `<div class="palabra-principal">${palabraPrincipal}</div>`;
+
+                        // PALABRAS DE RESERVA (Las 4 restantes)
+                        if (items.length > 1) {
+                            const palabrasReserva = items.slice(1, 5); 
+                            let reservaHTML = palabrasReserva.map(p => `<span>${p}</span>`).join('');
+
+                            htmlResultado += `
+                                <div class="palabras-reserva">
+                                    
+                                    ${reservaHTML}
+                                </div>
+                                
+                            `;
+                        } else {
+                            htmlResultado += `<p class="instruccion" style="font-style: normal; margin-top: 15px;">Solo se pudo generar una palabra. ¡Pulsa de nuevo para cargar más!</p>`;
+                        }
+                    }
+                });
+
+                // 3. FINALIZACIÓN: Eliminar Carga, Mostrar Contenido y Habilitar Botón
+                loadingOverlay.remove(); // **Paso clave: Quitar la carga flotante**
+                htmlResultado += `<div class="modo-tag">[Modo: ${modo}]</div>`;
+
+                resultadoDiv.innerHTML = htmlResultado; // **Solo se reemplaza el contenido aquí, al final**
+                boton.disabled = false;
+
+
+            } catch (error) {
+                // Manejo de ERRORES CRÍTICOS
+                loadingOverlay.remove();
+                resultadoDiv.innerHTML = `
+                    <strong style="color: #c53929;">Error crítico:</strong> ${error.message}.<br><br>
+                    <strong>¡Aviso!</strong> Si el modo IA falla, verifica tu **CLAVE API**. Modo actual: ${modo}.
+                    <div class="modo-tag">[Modo: ${modo}]</div>
+                `;
+                boton.disabled = false;
+            }
+        }
+    </script>
+
+</body>
+</html>
