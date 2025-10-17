@@ -73,7 +73,7 @@
             font-size: 1.15em; 
             line-height: 1.5;
             text-align: center;
-            position: relative; /* CLAVE para posicionar el loading-overlay */
+            position: relative; 
         }
 
         /* Etiqueta de Modo (IA/Offline) - Pegada a la esquina */
@@ -154,46 +154,41 @@
         }
 
         /* Animaciones y Carga (Loading Overlay) */
-        .cargando { 
-            color: #ff6f00; 
-            font-weight: bold; 
-            animation: pulse 1.5s infinite; 
-            font-size: 1.2em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
+        /* Eliminamos el estilo de .cargando que tenía texto y micrófono */
         
-        /* ESTILO AÑADIDO: Overlay flotante de carga */
         .loading-overlay {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            padding: 20px 30px;
-            background-color: rgba(255, 255, 255, 0.95); /* Fondo blanco semi-transparente */
-            border: 2px solid #ff6f00;
+            padding: 20px; /* Reducido a 20px */
+            background-color: rgba(255, 255, 255, 0); /* Fondo completamente transparente */
+            border: none; /* Quitamos el borde */
             border-radius: 10px;
-            z-index: 100; /* Asegura que está encima del contenido anterior */
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 100; 
+            box-shadow: none; /* Quitamos la sombra del overlay */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px; /* Tamaño del windmill */
+            height: 60px; /* Tamaño del windmill */
         }
 
-        .mic-icon {
-            font-size: 2em;
-            display: inline-block;
-            animation: float-mic 1.5s ease-in-out infinite alternate;
+        /* Nuevo estilo para el Windmill */
+        .windmill {
+            width: 40px; /* Tamaño base del molino */
+            height: 40px; /* Tamaño base del molino */
+            border: 4px solid #ff6f00; /* Color del molino */
+            border-radius: 50%; /* Para que sea circular */
+            border-top-color: transparent; /* Una parte transparente para simular aspas */
+            border-right-color: transparent;
+            animation: spin 1.5s linear infinite; /* Animación de giro */
+            box-sizing: border-box; /* Asegura que el padding/borde no aumente el tamaño total */
         }
-
-        @keyframes pulse { 
-            0% { opacity: 1; } 
-            50% { opacity: 0.4; } 
-            100% { opacity: 1; } 
-        }
-
-        @keyframes float-mic {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-5px); }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         @keyframes bounce {
@@ -203,11 +198,9 @@
     </style>
 </head>
 <body>
-    
-    
-    
+        
     <div class="botones-container">
-        <button onclick="generarContenido(5)">Generar Nuevo Stock de Palabras</button>
+        <button onclick="generarContenido(5)">Generar Stock de Palabras</button>
     </div>
     
     <div id="resultado">
@@ -218,16 +211,14 @@
 
     <script>
         /* -------------------------------------------
-            LÓGICA JAVASCRIPT (Modificada para retener contenido)
+            LÓGICA JAVASCRIPT
             ------------------------------------------- */
         
         // --- CLAVE API Y CONFIGURACIÓN ---
-        // ¡RECUERDA SUSTITUIR ESTO CON TU CLAVE REAL!
         const API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; 
         const MODEL_NAME = 'gemini-2.5-flash';
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
-        // **BOOL CLAVE: Mantiene la lógica 50/50, o fuerza offline si la clave es la de ejemplo.**
-        const FALLBACK_MODE = API_KEY === 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU'; // Clave de ejemplo
+        const FALLBACK_MODE = API_KEY === 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU'; 
         const TITULO_PALABRA = 'PALABRAS AL AIRE'; 
         const NUM_ELEMENTOS = 5; 
 
@@ -354,24 +345,23 @@
         // --- FUNCIÓN PRINCIPAL MODIFICADA ---
         async function generarContenido(numElementosIgnorado) { 
             const resultadoDiv = document.getElementById('resultado');
-            const boton = document.querySelector('.botones-container button'); // Obtener el botón
+            const boton = document.querySelector('.botones-container button');
             
-            const loadingText = '¡El Maestro de Improv. escucha la escena y carga munición!';
+            // Eliminado: const loadingText = '¡El Maestro de Improv. escucha la escena y carga munición!';
             
-            // Determinar modo (IA 50/50, o siempre Offline si la API_KEY es la de ejemplo)
-            const usarIA = FALLBACK_MODE ? false : Math.random() < 0.5;
-            let modo = usarIA ? 'IA' : 'Offline';
-
             // 1. INICIO: Mostrar Carga Y Bloquear Botón
             boton.disabled = true;
 
-            // CREAR EL OVERLAY DE CARGA - Esto no borra el contenido anterior
+            // CREAR EL OVERLAY DE CARGA (ahora contendrá el windmill)
             const loadingOverlay = document.createElement('div');
-            loadingOverlay.classList.add('cargando', 'loading-overlay');
-            loadingOverlay.innerHTML = `<span class="mic-icon">🎤</span> ${loadingText}`;
+            loadingOverlay.classList.add('loading-overlay'); // Clase existente
+            loadingOverlay.innerHTML = `<div class="windmill"></div>`; // Añadido el div para el windmill
             resultadoDiv.appendChild(loadingOverlay);
 
+            const usarIA = FALLBACK_MODE ? false : Math.random() < 0.5;
+
             let textoGenerado;
+            let modo = usarIA ? 'IA' : 'Offline';
             
             try {
                 if (usarIA) {
@@ -394,7 +384,7 @@
                         console.warn(`Error de la API (${response.status}). Cambiando a modo Fallback Offline.`);
                         modo = 'Fallback Offline';
                         textoGenerado = obtenerResultadosOffline();
-                        await sleep(1000); // Pequeña pausa para simular el fallo
+                        await sleep(1000); 
                     } else {
                         const data = await response.json();
                         textoGenerado = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || obtenerResultadosOffline();
@@ -416,18 +406,15 @@
                     if (lineas.length === 0) return;
 
                     const titulo = lineas[0].trim();
-                    // Limpia las palabras y filtra las vacías
                     const items = lineas.slice(1).map(limpiarTexto).filter(item => item.length > 0); 
 
                     htmlResultado += `<div class="categoria-titulo">${titulo}</div>`;
 
                     if (items.length > 0) {
-                        // PALABRA PRINCIPAL (Primera)
                         const palabraPrincipal = items[0];
                         htmlResultado += ``;
                         htmlResultado += `<div class="palabra-principal">${palabraPrincipal}</div>`;
 
-                        // PALABRAS DE RESERVA (Las 4 restantes)
                         if (items.length > 1) {
                             const palabrasReserva = items.slice(1, 5); 
                             let reservaHTML = palabrasReserva.map(p => `<span>${p}</span>`).join('');
@@ -446,10 +433,11 @@
                 });
 
                 // 3. FINALIZACIÓN: Eliminar Carga, Mostrar Contenido y Habilitar Botón
-                loadingOverlay.remove(); // **Paso clave: Quitar la carga flotante**
+                loadingOverlay.remove();
+                
                 htmlResultado += `<div class="modo-tag">[Modo: ${modo}]</div>`;
 
-                resultadoDiv.innerHTML = htmlResultado; // **Solo se reemplaza el contenido aquí, al final**
+                resultadoDiv.innerHTML = htmlResultado;
                 boton.disabled = false;
 
 
