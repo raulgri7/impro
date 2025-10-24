@@ -100,7 +100,7 @@
         }
 
         /* ------------------------------------------- */
-        /* ESTILO PARA AGRUPAR 3 EN UN SOLO PUNTO (PC) */
+        /* ESTILO PARA AGRUPAR 3 EN UN SOLO PUNTO */
         /* ------------------------------------------- */
         .compact-group {
             display: flex;
@@ -120,7 +120,7 @@
             /* Estilos UNIFICADOS */
             padding: 15px 5px;
             font-size: 1.2em !important;
-            white-space: nowrap; /* Mantiene el texto en una sola línea (causa el problema en móvil) */
+            white-space: nowrap;
             text-overflow: ellipsis;
             overflow: hidden;
 
@@ -146,35 +146,6 @@
         .compact-group li a::before {
             content: '→ ';
         }
-
-        /* ------------------------------------------- */
-        /* CORRECCIÓN CRUCIAL PARA MÓVILES (Media Query) */
-        /* ------------------------------------------- */
-        @media (max-width: 600px) {
-            /* Deshace el flexbox para que vuelvan a ser verticales */
-            .compact-group {
-                display: block; /* Vuelve a un comportamiento de bloque (vertical) */
-                gap: 0; /* Elimina el gap horizontal innecesario */
-                padding: 0; /* Asegura que no haya padding interno */
-            }
-
-            .compact-group li {
-                margin-bottom: 10px; /* Añade un pequeño espacio vertical entre ellos */
-                margin-top: 0;
-                flex-grow: initial; /* Deshace el grow */
-            }
-
-            /* Asegura que los enlaces ocupen todo el ancho y se ajusten a la línea */
-            .compact-group li a {
-                width: 100%;
-                white-space: normal !important; /* PERMITE QUE EL TEXTO SALTE DE LÍNEA */
-                text-overflow: initial;
-                overflow: initial;
-                font-size: 1.1em !important;
-                padding: 10px 15px; /* Ajusta el padding para que no sean tan altos */
-                text-align: center;
-            }
-        }
     </style>
 </head>
 <body>
@@ -195,11 +166,15 @@
                     <li><a href="HistoriaEstresante.html">Estrés</a></li>
                 </ul>
             </li>
+
             <li><a href="Monologos.html">Buscador de monólogos</a></li>
             <li><a href="BuscaObras.html">Buscador de obras de teatro</a></li>
             <li><a href="ClaseImproAvanzada.html">Clase de Improvisación Avanzada</a></li>
             <li><a href="ClaseImpro.html">Clase de Improvisación (Antigua)</a></li>
             <li><a href="Noticia.html">Impro basada en una noticia</a></li>
+            <li><a href="CircunstanciasDadas.html">Imprime 12 tarjetas para impro</a></li>
+            <li><a href="DialogoUnico.html">Diálogo Único</a></li>
+
             </ul>
     </div>
 </body>
