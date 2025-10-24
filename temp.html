@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Situaciones de Improvisación con Gemini</title>
+    
+    <script type="module">
+        // Importa el SDK de Gemini usando un módulo ESM (funciona en navegadores modernos)
+        import { GoogleGenAI } from 'https://esm.run/@google/genai';
+
+        // 🚨 2. ¡TU CLAVE VA AQUÍ! (Usar clave en frontend NO es seguro para producción)
+        const GEMINI_API_KEY = "AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ"; 
+        
+        // Inicializa el cliente de Gemini
+        // La clave API se expone directamente en el código del navegador, ¡CUIDADO!
+        const ai = new GoogleGenAI(GEMINI_API_KEY);
+
+        const resultadosDiv = document.getElementById('resultados');
+        const generarBtn = document.getElementById('generarBtn');
+
+        // --- FUNCIONES DE GENERACIÓN Y RENDERING ---
+        
+        // Función principal que llama a la API de Gemini
+        async function generarSituaciones() {
+            if (GEMINI_API_KEY === "TU_CLAVE_DE_GEMINI_AQUÍ") {
+                resultadosDiv.innerHTML = '<div class="error">❌ Error: Por favor, reemplaza "TU_CLAVE_DE_GEMINI_AQUÍ" en el código JavaScript con tu clave de API real.</div>';
+                return;
+            }
+
+            resultadosDiv.innerHTML = '<div class="loading">Cargando y contactando con Gemini... (Puede tardar unos segundos)</div>';
+            generarBtn.disabled = true;
+
+            const promptTexto = `
+                Propón 5 situaciones de improvisación para dos personas. 
+                Sigue este formato exacto para cada una y asegúrate de que haya un aumento progresivo en la locura:
+                - Quienes son: [Descripción de los personajes]
+                - Donde estan: [Descripción del lugar]
+                - Nivel de Locura: [Un número del 1 al 5 y un comentario]
+
+                Genera solo el texto y separa cada situación con el delimitador: ###
+            `;
+            
+            try {
+                // Llama al modelo de Gemini
+                const response = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: promptTexto,
+                });
+
+                const textoGenerado = response.text;
+                
+                // Muestra el resultado
+                mostrarResultados(textoGenerado);
+
+            } catch (error) {
+                console.error("Error al llamar a la API de Gemini:", error);
+                resultadosDiv.innerHTML = `<div class="error">❌ Error al llamar a la API: ${error.message}. Asegúrate de que la clave es correcta y de que el dominio está permitido si has puesto restricciones.</div>`;
+            } finally {
+                generarBtn.disabled = false;
+            }
+        }
+
+        // Función para procesar y mostrar el texto
+        function mostrarResultados(textoBruto) {
+            // Separa las situaciones usando el delimitador
+            const situacionesArray = textoBruto.trim().split('###').map(s => s.trim()).filter(s => s.length > 0);
+            
+            let html = '';
+            situacionesArray.forEach((situacionTexto, index) => {
+                const partes = situacionTexto.split('\n').map(p => p.trim()).filter(p => p.length > 0);
+
+                let quienes = 'No especificado';
+                let donde = 'No especificado';
+                let locura = 'N/A';
+                
+                partes.forEach(p => {
+                    if (p.startsWith('Quienes son:')) {
+                        quienes = p.replace('Quienes son:', '').trim();
+                    } else if (p.startsWith('Donde estan:')) {
+                        donde = p.replace('Donde estan:', '').trim();
+                    } else if (p.startsWith('Nivel de Locura:')) {
+                        locura = p.trim().replace('Nivel de Locura:', '');
+                    }
+                });
+
+                html += `
+                    <div class="situacion">
+                        <h2>${index + 1}. Situación</h2>
+                        <span class="quienes">🎭 ${quienes}</span>
+                        <span class="donde">📍 ${donde}</span>
+                        <p class="locura">⭐ Nivel de Locura: ${locura}</p>
+                    </div>
+                `;
+            });
+
+            resultadosDiv.innerHTML = html;
+        }
+
+        // Asignar el evento al botón una vez cargado el DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            generarBtn.addEventListener('click', generarSituaciones);
+        });
+
+    </script>
+    
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); }
+        h1 { color: #0056b3; text-align: center; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-bottom: 30px; }
+        .security-warning { background-color: #ffdddd; color: #cc0000; padding: 10px; border: 1px solid #cc0000; border-radius: 5px; margin-bottom: 20px; font-weight: bold; text-align: center; }
+        #generarBtn { display: block; width: 100%; padding: 15px; font-size: 1.2em; color: #fff; background-color: #28a745; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; margin-bottom: 20px; }
+        #generarBtn:hover { background-color: #218838; }
+        #generarBtn:disabled { background-color: #6c757d; cursor: not-allowed; }
+        .loading, .error { text-align: center; font-style: italic; color: #6c757d; margin-top: 20px; padding: 10px; border: 1px dashed #ccc;}
+        .error { color: #dc3545; }
+        .situacion { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px; background-color: #e9e9e9; }
+        .situacion h2 { margin-top: 0; color: #333; font-size: 1.2em; }
+        .quienes, .donde, .locura { display: block; margin-top: 5px; }
+        .quienes { font-weight: bold; color: #007bff; }
+        .donde { font-weight: bold; color: #6c757d; }
+        .locura { font-style: italic; color: #dc3545; border-top: 1px dashed #ccc; padding-top: 5px;}
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Generador de Ideas de Improvisación 🎭 con Gemini</h1>
+        
+        <div class="security-warning">
+            🛑 **ADVERTENCIA DE SEGURIDAD:** La clave de API se expone en el código fuente de esta página. ¡Esto es **solo para prototipado**! Para producción, **siempre** usa un servidor *backend* para ocultar tu clave.
+        </div>
+
+        <button id="generarBtn">Generar 5 Situaciones con la IA</button>
+
+        <div id="resultados">
+            <p style="text-align: center; color: #6c757d;">Pulsa el botón. Recuerda reemplazar el texto "TU_CLAVE_DE_GEMINI_AQUÍ" en el código.</p>
+        </div>
+    </div>
+
+</body>
+</html>
