@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Situaciones al Vuelo - Maestro de Improvisación IA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* -------------------------------------------
+            ESTILOS CSS - LOOK AND FEEL MODERNO
+            ------------------------------------------- */
+        
+        :root {
+            --color-principal: #6a1b9a; /* Púrpura Profundo */
+            --color-secundario: #00bcd4; /* Cian Vibrante */
+            --color-fondo: #212121; /* Gris Oscuro */
+            --color-claro: #f3e5f5; /* Púrpura Muy Claro */
+            --color-texto: #e0e0e0; /* Gris Claro para texto */
+        }
+
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            padding: 20px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            /* Fondo con degradado sutil */
+            background: linear-gradient(135deg, #121212 0%, #212121 100%);
+            color: var(--color-texto);
+            min-height: 100vh;
+        }
+
+        h1 { 
+            color: var(--color-secundario); 
+            text-align: center;
+            border-bottom: 3px solid var(--color-principal); 
+            padding-bottom: 15px; 
+            margin-bottom: 40px; 
+            text-shadow: 0 0 10px rgba(0, 188, 212, 0.5); /* Efecto neón sutil */
+            font-weight: 900;
+        }
+
+        p.instruccion { 
+            color: var(--color-texto); 
+            margin-bottom: 25px; 
+            font-style: italic; 
+            text-align: center;
+        }
+
+        .botones-container {
+            display: flex;
+            justify-content: center; 
+            margin-bottom: 40px;
+        }
+
+        /* Estilos del Botón - Más grande y con sombra dramática */
+        button { 
+            padding: 16px 30px; 
+            background-color: var(--color-principal); 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-size: 20px; 
+            font-weight: 700;
+            transition: all 0.3s ease; 
+            /* Sombra profunda */
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4), 0 0 15px var(--color-secundario); 
+            min-width: 300px; 
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        button:hover:not(:disabled) { 
+            background-color: #7b1fa2; /* Púrpura más claro al pasar el ratón */
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), 0 0 20px var(--color-secundario);
+        }
+        button:active:not(:disabled) { 
+            transform: translateY(0); 
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); 
+        }
+        button:disabled {
+            background-color: #424242;
+            color: #9e9e9e;
+            cursor: default;
+            box-shadow: none;
+        }
+
+        /* Contenedor de Resultado - Diseño de "Tarjeta" flotante */
+        #resultado { 
+            margin-top: 35px; 
+            padding: 30px; 
+            /* Borde neón */
+            border: 3px solid var(--color-secundario); 
+            background-color: #313131; /* Fondo de la tarjeta */
+            border-radius: 15px; 
+            min-height: 200px;
+            font-size: 1.2em; 
+            line-height: 1.6;
+            text-align: center;
+            position: relative; 
+            /* Sombra y elevación */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 5px rgba(255, 255, 255, 0.1); 
+            transition: all 0.5s ease;
+        }
+
+        /* Etiqueta de Modo (IA/Offline) - Pegada a la esquina */
+        .modo-tag {
+            position: absolute;
+            bottom: -15px; /* Fuera del borde para un look 'flotante' */
+            right: 20px; 
+            font-size: 0.8em;
+            color: white; 
+            background-color: var(--color-principal); 
+            padding: 4px 10px;
+            border-radius: 5px; 
+            font-weight: 700;
+            line-height: 1; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Título de Categoría */
+        .categoria-titulo { 
+            color: var(--color-secundario); 
+            font-size: 1.6em; 
+            margin-top: 0px; 
+            margin-bottom: 25px; 
+            border-bottom: 2px dashed var(--color-principal); 
+            padding-bottom: 10px;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        /* Nueva clase para las situaciones */
+        .lista-situaciones {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .lista-situaciones li {
+            background-color: #424242;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 5px solid var(--color-secundario);
+            font-size: 1.1em;
+            font-weight: 400;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+            line-height: 1.4;
+        }
+        .lista-situaciones li:hover {
+            transform: translateX(5px);
+            background-color: #555555;
+        }
+        
+        /* Instrucciones para el actor */
+        .instruccion-final {
+            font-style: normal;
+            margin-top: 30px;
+            margin-bottom: 0;
+            color: var(--color-claro);
+            font-weight: 700;
+            border-top: 1px solid #424242;
+            padding-top: 15px;
+        }
+
+        /* Animaciones y Carga (Loading Overlay) */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(33, 33, 33, 0.8); /* Oscurece el fondo */
+            border-radius: 15px;
+            z-index: 100; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Windmill - Más prominente */
+        .windmill {
+            width: 60px; /* Tamaño base del molino */
+            height: 60px; /* Tamaño base del molino */
+            border: 6px solid var(--color-secundario); /* Color del molino */
+            border-radius: 50%; 
+            border-top-color: transparent; 
+            border-right-color: transparent;
+            animation: spin 1s linear infinite; /* Más rápido */
+            box-sizing: border-box; 
+            filter: drop-shadow(0 0 10px var(--color-secundario)); /* Efecto neón */
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+    </style>
+</head>
+<body>
+    
+
+    
+    <div class="botones-container">
+        <button onclick="generarContenido()">Generar 10 Situaciones</button>
+    </div>
+    
+    <div id="resultado">
+        <p class="instruccion" style="font-style: normal; margin-bottom: 0; color: var(--color-claro);">Pulsa el botón para generar una lista de situaciones de improvisación.</p>
+        <div class="modo-tag">[Modo: Espera]</div>
+    </div>
+
+    <script>
+        /* -------------------------------------------
+            LÓGICA JAVASCRIPT
+            ------------------------------------------- */
+        
+        // --- CLAVE API Y CONFIGURACIÓN ---
+        // ¡ADVERTENCIA! DEBES REEMPLAZAR 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ' con tu clave real de Google AI.
+        // Si no la cambias, el modo IA fallará y usará el modo Offline.
+        const API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; // <-- ¡CÁMBIALA!
+        const MODEL_NAME = 'gemini-2.5-flash';
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+        // Fallback si la clave es la de ejemplo (que no funciona)
+        const FALLBACK_MODE = API_KEY === 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; 
+        const TITULO_SITUACIONES = 'SITUACIONES AL VUELO'; 
+        const NUM_ELEMENTOS = 10; // Ahora generamos 10 situaciones
+
+        // --- LISTAS OFFLINE (Adaptadas a situaciones) ---
+        const situacionesOffline = [
+            "Te encuentras con tu ex en el supermercado.",
+            "Llamas a tu madre desde la cárcel.",
+            "Te confundes de funeral y das el pésame a la persona equivocada.",
+            "Intentas devolver un regalo que ya habías usado.",
+            "Descubres que tu vecino está plantando algo ilegal.",
+            "Intentas convencer a un desconocido de que eres famoso.",
+            "El ascensor se detiene y estás atrapado con tu peor enemigo.",
+            "Recoges un paquete equivocado que contiene algo muy sospechoso.",
+            "Tienes que disimular un gran error en tu primer día de trabajo.",
+            "Intentas pagar una pequeña compra con un billete muy grande.",
+            "Te das cuenta de que has estado usando el cepillo de dientes de otra persona.",
+            "Llegas tarde a una cita importante y tienes una excusa ridícula.",
+            "Recibes un ultimátum de tu casero sobre el ruido que haces.",
+            "Te sientas por error en el coche de alguien más y te das cuenta tarde.",
+            "Un camarero te pide que te vayas porque el restaurante va a cerrar.",
+            "Un desconocido te acusa de haberle robado su idea de negocio.",
+            "Intentas explicar a un policía por qué ibas en pijama por la calle."
+        ];
+
+        // --- FUNCIONES AUXILIARES (Modificadas para situaciones) ---
+        
+        function limpiarTexto(texto) {
+            if (!texto) return '';
+            let limpio = texto.trim();
+            // Capitaliza la primera letra de la frase (o después de un punto)
+            limpio = limpio.charAt(0).toUpperCase() + limpio.slice(1);
+            // Asegura un punto final si no tiene uno o un signo de interrogación/exclamación
+            if (!limpio.match(/[.?!]$/)) {
+                limpio += '.';
+            }
+            return limpio.trim();
+        }
+
+        function construirPrompt() {
+            const numeroTexto = 'DIEZ';
+            const numEjemplos = 4;
+            
+            const shuffle = (array) => {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            };
+
+            const ejemplos = shuffle([...situacionesOffline]).slice(0, numEjemplos).join('\n');
+
+
+            const instruccionConcisa = `El resultado debe ser de ${numeroTexto} frases de situación. NO uses viñetas, números, adjetivos, descripciones, o cualquier texto adicional a la situación.`;
+
+            const contexto = `Actúa como el maestro de improvisación. Tu tarea es proporcionar un stock de ${numeroTexto} **situaciones breves para un ejercicio de improvisación teatral**.
+            
+            Cada situación debe describir un contexto concreto en **una sola frase**, de forma directa y clara.
+            Deben ser realistas, como cosas que podrían pasar en la vida cotidiana.
+            Evita situaciones absurdas, exageradas o sobrenaturales.
+            No incluyas nombres propios ni detalles de género o edad.
+            
+            **Ejemplos de situaciones válidas:**
+            ${ejemplos}
+
+            **INSTRUCCIÓN CLAVE:** El resultado debe ser EXTREMADAMENTE CONCISO: ${instruccionConcisa}
+            
+            **REGLAS DE FORMATO ESTRICTAS:**
+            1. Genera exactamente **${numeroTexto} frases de situación**.
+            2. Separa las categorías con el título EXACTO: **### ${TITULO_SITUACIONES}**.
+            3. Cada frase de situación debe ir en una línea separada.
+            
+            ### ${TITULO_SITUACIONES}
+            
+            Genera las ${numeroTexto} situaciones respetando el formato estricto.`;
+            
+            return contexto;
+        }
+        
+        function obtenerResultadosOffline() {
+            const shuffle = (array) => {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            };
+
+            if (situacionesOffline.length < NUM_ELEMENTOS) {
+                 return `### ${TITULO_SITUACIONES}\n¡Lista offline insuficiente!`;
+            }
+
+            const situacionesAleatorias = shuffle([...situacionesOffline]).slice(0, NUM_ELEMENTOS);
+
+            let resultadoSimulado = '';
+            resultadoSimulado += `### ${TITULO_SITUACIONES}\n`;
+            resultadoSimulado += situacionesAleatorias.join('\n');
+            
+            return resultadoSimulado;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // --- FUNCIÓN PRINCIPAL (MODIFICADA PARA MOSTRAR LA LISTA) ---
+        async function generarContenido() { 
+            const resultadoDiv = document.getElementById('resultado');
+            const boton = document.querySelector('.botones-container button');
+            
+            // 1. INICIO: Mostrar Carga Y Bloquear Botón
+            boton.disabled = true;
+
+            // CREAR EL OVERLAY DE CARGA
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.classList.add('loading-overlay');
+            loadingOverlay.innerHTML = `<div class="windmill"></div>`; 
+            resultadoDiv.appendChild(loadingOverlay);
+
+            const usarIA = FALLBACK_MODE ? false : Math.random() < 0.7; // Mayor probabilidad de IA
+
+            let textoGenerado;
+            let modo = usarIA ? 'IA' : 'Offline';
+            
+            try {
+                if (usarIA) {
+                    // MODO IA
+                    const prompt = construirPrompt();
+                    
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ role: "user", parts: [{ text: prompt }] }],
+                            generationConfig: { 
+                                temperature: 1.0, 
+                                maxOutputTokens: 2048,
+                            }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        console.warn(`Error de la API (${response.status}). Cambiando a modo Fallback Offline.`);
+                        modo = 'Fallback Offline';
+                        textoGenerado = obtenerResultadosOffline();
+                        await sleep(1000); 
+                    } else {
+                        const data = await response.json();
+                        textoGenerado = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || obtenerResultadosOffline();
+                    }
+                } else {
+                    // MODO OFFLINE
+                    await sleep(800); 
+                    textoGenerado = obtenerResultadosOffline();
+                }
+                
+                if (!textoGenerado) throw new Error("No se pudo generar contenido.");
+                
+                // 2. PROCESAMIENTO Y RENDERIZADO ESPECIAL
+                const partes = textoGenerado.split('###').filter(parte => parte.trim().length > 0);
+                let htmlResultado = '';
+                
+                partes.forEach(parte => {
+                    const lineas = parte.trim().split('\n').filter(line => line.trim().length > 0);
+                    if (lineas.length === 0) return;
+
+                    const titulo = lineas[0].trim();
+                    const items = lineas.slice(1).map(limpiarTexto).filter(item => item.length > 0); 
+
+                    htmlResultado += `<div class="categoria-titulo">${titulo}</div>`;
+
+                    if (items.length > 0) {
+                        // Lista de situaciones
+                        let listaHTML = '<ul class="lista-situaciones">';
+                        items.forEach((item, index) => {
+                            // Solo toma los primeros 10 elementos
+                            if (index < NUM_ELEMENTOS) { 
+                                listaHTML += `<li><strong>${index + 1}.</strong> ${item}</li>`;
+                            }
+                        });
+                        listaHTML += '</ul>';
+
+                        htmlResultado += listaHTML;
+                        htmlResultado += `<p class="instruccion instruccion-final"></p>`;
+                    } else {
+                        htmlResultado += `<p class="instruccion" style="font-style: normal; margin-top: 15px;">No se generó ninguna situación. ¡Pulsa de nuevo para cargar!</p>`;
+                    }
+                });
+
+                // 3. FINALIZACIÓN: Eliminar Carga, Mostrar Contenido y Habilitar Botón
+                loadingOverlay.remove();
+                
+                htmlResultado += `<div class="modo-tag">[Modo: ${modo}]</div>`;
+
+                resultadoDiv.innerHTML = htmlResultado;
+                boton.disabled = false;
+
+
+            } catch (error) {
+                // Manejo de ERRORES CRÍTICOS
+                loadingOverlay.remove();
+                resultadoDiv.innerHTML = `
+                    <strong style="color: #ff5252;">Error crítico:</strong> ${error.message}.<br><br>
+                    <strong>¡Aviso!</strong> Si el modo IA falla, verifica tu **CLAVE API**. Modo actual: ${modo}.
+                    <div class="modo-tag">[Modo: ${modo}]</div>
+                `;
+                boton.disabled = false;
+            }
+        }
+    </script>
+<hr style="margin-top: 40px; border-color: #ccc;">
+    <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
+        <a href="index.html" style="
+            text-decoration: none;
+            color: #5f6368;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        ">
+            ← Volver al Menú Principal
+        </a>
+    </div>
+</body>
+</html>
