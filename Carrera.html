@@ -191,8 +191,8 @@ Genera las 6 premisas ahora, sin ninguna introducción o conclusión.`;
                     body: JSON.stringify({
                         contents: [{ role: "user", parts: [{ text: prompt }] }],
                         generationConfig: { 
-                            temperature: 0.9, 
-                            maxOutputTokens: 2048, 
+                            temperature: 0.3, 
+                            maxOutputTokens: 4096, 
                         }
                     })
                 });
