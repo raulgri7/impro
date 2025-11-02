@@ -107,6 +107,16 @@
              border-bottom: 2px dotted #66bb6a;
              padding-bottom: 5px;
         }
+        .error-detalle {
+            background-color: #ffebee; 
+            border: 1px solid #c53929;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
@@ -127,12 +137,13 @@
         // ----------------------------------------------------------
         // --- CLAVE API Y CONFIGURACIÓN ---
         // ----------------------------------------------------------
-        const API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; // ¡RECUERDA SUSTITUIR ESTO POR TU CLAVE REAL!
+        // La clave es la que proporcionaste, asumiendo que es real.
+        const API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; 
         const MODEL_NAME = 'gemini-2.5-flash';
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
 
 
-        // Función para construir el PROMPT detallado (Volvemos a las premisas teatrales)
+        // Función para construir el PROMPT detallado
         function construirPromptCarrera() {
             const contexto = `Actúa como un director de teatro experto especializado en improvisación y dramaturgia. Tu tarea es generar **EXACTAMENTE 6 premisas argumentales** optimizadas para un ejercicio de improvisación llamado "Carrera contra el tiempo".
 
@@ -186,32 +197,59 @@ Genera las 6 premisas ahora, sin ninguna introducción o conclusión.`;
                     })
                 });
 
+                // Si hay un error HTTP (ej. 403, 400, 500)
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({error: {message: 'Respuesta de error no es JSON'}}));
-                    throw new Error(`Error ${response.status}: ${errorData.error ? errorData.error.message : response.statusText}`);
+                    throw new Error(`Error HTTP ${response.status}: ${errorData.error ? errorData.error.message : response.statusText}`);
                 }
 
                 const data = await response.json();
                 
-                let textoGenerado = "No se pudo generar el contenido. Vuelve a intentarlo o revisa el diagnóstico de la API.";
+                let textoGenerado = "";
 
                 try {
+                    // Intenta extraer el texto normal
                     textoGenerado = data.candidates[0].content.parts[0].text.trim();
                 } catch (e) {
-                    // Si falla (por contenido vacío o safety block)
+                    // SI FALLA (ej. por bloqueo de seguridad o respuesta vacía)
+                    
+                    // Mostrar los detalles de la respuesta JSON para el diagnóstico.
+                    let safetyReason = "Motivo desconocido (la respuesta JSON estaba vacía o mal formada).";
+                    if (data.candidates && data.candidates[0].finishReason === 'SAFETY') {
+                        safetyReason = "Bloqueado por política de seguridad (SAFETY BLOCK). Revisa el contenido de tu Prompt.";
+                    } else if (data.promptFeedback) {
+                         safetyReason = JSON.stringify(data.promptFeedback, null, 2);
+                    } else {
+                        safetyReason = JSON.stringify(data, null, 2);
+                    }
+
+                    resultadoDiv.innerHTML = `
+                        <strong style="color: #c53929;">Error: No se pudo generar el contenido útil.</strong><br>
+                        El modelo no devolvió texto o el contenido fue bloqueado.<br>
+                        <strong style="color: #5f6368;">Diagnóstico detallado:</strong>
+                        <div class="error-detalle">
+                            <pre>${safetyReason}</pre>
+                        </div>
+                    `;
+                    boton.disabled = false;
+                    return; // Salir de la función si no hay contenido válido
                 }
 
-                // Muestra el resultado final usando la función de formato
+                // Muestra el resultado final (si la extracción fue exitosa)
                 resultadoDiv.innerHTML = `<pre>${formatearResultado(textoGenerado)}</pre>`;
                 boton.disabled = false;
 
             } catch (error) {
-                // Manejo de ERRORES CRÍTICOS
+                // Manejo de ERRORES CRÍTICOS (CORS, Red, Clave)
+                let posibleCausa = "Clave API incorrecta, expirada o problema de CORS.";
+                if (error.message.includes('Failed to fetch') || error.message.includes('Error HTTP')) {
+                     posibleCausa = '⚠️ El problema es casi seguro de **CORS** (si estás en file:///) o la clave API está restringida.';
+                }
+                
                 resultadoDiv.innerHTML = `
-                    <strong style="color: #c53929;">Error crítico al conectar con la API:</strong> ${error.message}.<br><br>
+                    <strong style="color: #c53929;">Error crítico de Conexión:</strong> ${error.message}.<br><br>
                     <strong>POSIBLES CAUSAS:</strong><br>
-                    - Clave API incorrecta o expirada.<br>
-                    - Falta de créditos o restricción de uso.<br>
+                    - ${posibleCausa}<br>
                     - El modelo no está disponible o el nombre es incorrecto.
                 `;
                 boton.disabled = false;
