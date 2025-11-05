@@ -43,10 +43,13 @@
             width: 100%;
             margin-top: 20px;
             border-top: 5px solid var(--color-lila-principal);
+            display: flex;
+            flex-direction: column;
         }
 
         /* Estilo de la imagen abstracta (Fondo Lila) */
         .header-image {
+            order: 1; 
             width: 100%;
             height: 150px;
             background: linear-gradient(45deg, var(--color-lila-principal), #b2a4ff);
@@ -63,6 +66,7 @@
 
         /* Estilos del Botón de Sorteo */
         #sortear-btn {
+            order: 2; 
             width: 100%;
             padding: 15px;
             background-color: var(--color-lila-principal);
@@ -72,7 +76,8 @@
             cursor: pointer;
             font-size: 1.2em;
             font-weight: bold;
-            margin-top: 20px;
+            margin-top: 5px;
+            margin-bottom: 30px; 
             transition: background-color 0.3s;
         }
 
@@ -85,7 +90,14 @@
             cursor: not-allowed;
         }
         
-        /* Contenedores de Listas */
+        /* Contenedores de Listas (Setup) */
+        .setup-section {
+            order: 4; 
+            border-top: 2px dashed #ddd;
+            padding-top: 20px;
+            margin-top: 10px;
+        }
+
         .setup-list {
             margin-bottom: 25px;
             padding: 0 10px;
@@ -99,21 +111,24 @@
 
         /* Estilos de la lista de resultados */
         #resultados-sorteo {
-            margin-top: 30px;
-            border-top: 2px dashed var(--color-lila-principal);
-            padding-top: 20px;
+            order: 3; 
+            padding-top: 0; 
+            margin-top: 0;
+            margin-bottom: 0;
         }
+
 
         .resultado-grupo {
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;
             transition: all 0.3s ease;
+            cursor: pointer; 
         }
 
         /* Estilo para el resultado más reciente (el de arriba) */
         .resultado-grupo.nuevo {
-            background-color: #ede7f6; /* Lila muy claro */
+            background-color: #ede7f6; 
             border: 2px solid var(--color-lila-principal);
             border-left: 5px solid var(--color-lila-principal);
             font-size: 1.1em;
@@ -152,15 +167,89 @@
             font-size: 0.9em;
         }
         
-        .list-display p {
+        .list-display label {
+            display: flex;
+            align-items: center;
             margin: 2px 0;
+            cursor: pointer;
         }
+        
+        .list-display label.ausente span {
+            text-decoration: line-through;
+            color: #c53929;
+            font-style: italic;
+        }
+        
+        .list-display label.sorteado span {
+            color: #6c6c6c;
+            font-style: italic;
+        }
+        
+        .list-display input[type="checkbox"] {
+            margin-right: 5px;
+            transform: scale(1.1);
+        }
+        
+        /* NUEVO ESTILO: Tachar ejercicios ya usados */
+        .list-display p.ejercicio-usado {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        /* --- CLASE DE AMPLIACIÓN (ZOOM) --- */
+        .resultado-zoom {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9); 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000; 
+            cursor: pointer; 
+        }
+
+        .resultado-zoom .resultado-grupo {
+            max-width: 90%; 
+            width: 800px;
+            padding: 40px;
+            font-size: 2em; 
+            border-radius: 15px;
+            background-color: var(--color-texto-claro); 
+            border: 5px solid var(--color-lila-principal);
+            box-shadow: 0 0 50px rgba(108, 92, 231, 0.8); 
+            transform: scale(1);
+            transition: transform 0.3s ease;
+            text-align: center; 
+        }
+        
+        /* ESTILO ESPECÍFICO PARA EL TÍTULO DENTRO DEL ZOOM */
+        .resultado-zoom .resultado-grupo strong:first-child {
+            font-size: 1.5em !important; 
+            margin-bottom: 15px; 
+            color: var(--color-lila-oscuro); 
+            display: block; 
+        }
+
+        /* ESTILO ESPECÍFICO PARA LOS NOMBRES DENTRO DEL ZOOM */
+        .resultado-zoom .resultado-grupo strong:last-child {
+            font-size: 1.2em !important; 
+            color: var(--color-texto-oscuro); 
+            display: block;
+        }
+        
     </style>
 </head>
 <body>
+    
+    <audio id="ruleta-audio" loop>
+        <source src="ruta/a/tu/audio.mp3" type="audio/mpeg"> 
+        Tu navegador no soporta el elemento de audio.
+    </audio>
 
-    <h1>Sorteador IMPRO LAB 60</h1>
-    <p>Organiza a tu elenco en grupos al azar para los ejercicios.</p>
+    <h1 onclick="if (document.querySelector('.resultado-zoom')) document.querySelector('.resultado-zoom').remove();">Sorteador IMPRO LAB 60</h1>
 
     <div class="container">
         
@@ -168,53 +257,54 @@
             GENERADOR DE ESCENAS IMPROVISADAS 🎭
         </div>
 
-        <h2>⚙️ Configuración del Sorteo</h2>
-        
-        <div class="setup-list">
-            <div>
-                <strong>Ejercicios Disponibles (Nombre; Actores):</strong>
-                <div id="ejercicios-display" class="list-display"></div>
-            </div>
-            <div>
-                <strong>Participantes Iniciales:</strong>
-                <div id="participantes-display" class="list-display"></div>
-            </div>
-        </div>
-
         <button id="sortear-btn" onclick="iniciarSorteo()">INICIAR SORTEO (Asignar Escenas)</button>
 
         <div id="resultados-sorteo">
             <p style="text-align: center; color: #777;" id="mensaje-inicial">Haz clic en el botón para comenzar a sortear ejercicios y asignar participantes.</p>
+        </div>
+        
+        <div class="setup-section">
+            <h2>⚙️ Estado y Configuración</h2>
+            
+            <div class="setup-list">
+                <div>
+                    <strong>Ejercicios Disponibles (Nombre; Actores):</strong>
+                    <div id="ejercicios-display" class="list-display"></div>
+                </div>
+                <div>
+                    <strong>Participantes (Marca a los Ausentes):</strong>
+                    <div id="participantes-display" class="list-display"></div>
+                </div>
+            </div>
         </div>
     </div>
 
 
     <script>
         // ----------------------------------------------------------
-        // --- DATA DE CONFIGURACIÓN (ACTUALIZADA) ---
+        // --- DATA DE CONFIGURACIÓN ---
         // ----------------------------------------------------------
         
-        // El máximo es 4 personas, el mínimo es 2.
         const EJERCICIOS_RAW = [
             "El Interrogatorio de Espejos;2", 
-            "La Pelea de Siluetas;2",
+            "La Pelea de Siluetas;2",         
             "La Congelación;2",
             "Noticias Absurdas;2",
-            "El Espejo Roto;2",         // NUEVO 2P
-            "Cambio de Posición;2",     // NUEVO 2P
+            "El Espejo Roto;2",         
+            "Cambio de Posición;2",     
             
             "Monstruo de Tres Cabezas;3",    
             "Subasta de Sentimientos;3",      
             "Objeto Extraño;3",
             "Carrera de Géneros;3",
             "Máquina del Tiempo;3",
-            "Traducción Simultánea;3",  // NUEVO 3P
-            "El Confesionario Múltiple;3", // NUEVO 3P
+            "Traducción Simultánea;3",  
+            "El Confesionario Múltiple;3", 
             
             "Monólogo a Cuatro;4",
             "El Barco Se Hunde;4",
-            "La Rueda de Emociones;4",  // NUEVO 4P
-            "El Círculo de Historias;4", // NUEVO 4P
+            "La Rueda de Emociones;4",  
+            "El Círculo de Historias;4", 
         ];
 
         const NOMBRES_INICIALES = [
@@ -228,14 +318,27 @@
         // ----------------------------------------------------------
         
         let ejerciciosDisponibles = [];
-        let participantesDisponibles = [];
-        let ejerciciosYaUsados = new Set();
-        let minActoresRequeridos = 0; // Debería ser 2
+        let participantesDisponibles = []; 
+        let participantesIniciales = [];  
+        let participantesAusentes = new Set(); 
+        let participantesSorteados = new Set(); 
+        let ejerciciosSorteados = new Set(); 
+        let minActoresRequeridos = 0;
+        let ruletaIntervalId = null; 
+
+        // Función auxiliar para mezclar un array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
 
 
         /** Inicializa los datos al cargar la página. */
         function inicializarDatos() {
-            participantesDisponibles = [...NOMBRES_INICIALES];
+            participantesIniciales = [...NOMBRES_INICIALES]; 
+            participantesDisponibles = [...participantesIniciales];
             
             ejerciciosDisponibles = EJERCICIOS_RAW.map(e => {
                 const [nombre, actores] = e.split(';');
@@ -249,81 +352,251 @@
             }
 
             mostrarEstadoSetup();
+            document.body.addEventListener('click', manejarZoomResultado);
+            
+            // Listener específico para los checkboxes de ausentes
+            document.getElementById('participantes-display').addEventListener('change', manejarAusencia);
         }
 
-        /** Muestra las listas de participantes y ejercicios en el Setup. */
-        function mostrarEstadoSetup() {
-            const ejerciciosRestantes = ejerciciosDisponibles.filter(e => !ejerciciosYaUsados.has(e.nombre));
-            const ejerciciosHTML = ejerciciosRestantes
-                .map(e => `<p>${e.nombre} (${e.actores} pers.)</p>`)
-                .join('');
-            document.getElementById('ejercicios-display').innerHTML = ejerciciosHTML || '<p style="color:red;">Ninguno disponible</p>';
-
-            const participantesHTML = participantesDisponibles
-                .map(n => `<p>${n}</p>`)
-                .join('');
-            document.getElementById('participantes-display').innerHTML = participantesHTML;
-
-            const btn = document.getElementById('sortear-btn');
-            const participantesRestantes = participantesDisponibles.length;
-
-            if (participantesRestantes < minActoresRequeridos) {
-                 btn.disabled = true;
-                 btn.textContent = `🛑 FIN DEL SORTEO (Solo quedan ${participantesRestantes} pers. - Insuficientes)`;
-            } else if (ejerciciosRestantes.length === 0) {
-                 btn.disabled = true;
-                 btn.textContent = "🛑 FIN DEL SORTEO (No quedan ejercicios disponibles)";
-            } else {
-                 btn.disabled = false;
-                 btn.textContent = `SORTEAR PRÓXIMA ESCENA (Quedan ${participantesRestantes} personas)`;
+        /** Maneja el marcado/desmarcado de un participante como ausente. */
+        function manejarAusencia(event) {
+            if (event.target.type === 'checkbox') {
+                const nombre = event.target.value;
+                
+                if (event.target.checked) {
+                    participantesAusentes.add(nombre);
+                } else {
+                    participantesAusentes.delete(nombre);
+                }
+                
+                reinicializarParticipantesDisponibles();
+                mostrarEstadoSetup();
             }
         }
 
-        /** Realiza el sorteo y asignación de grupo con la nueva lógica estricta. */
-        function iniciarSorteo() {
-            const resultadosDiv = document.getElementById('resultados-sorteo');
+        /** Regenera la lista de participantes disponibles (activos), excluyendo ausentes y sorteados. */
+        function reinicializarParticipantesDisponibles() {
+            participantesDisponibles = participantesIniciales.filter(nombre => 
+                !participantesAusentes.has(nombre) && !participantesSorteados.has(nombre)
+            );
+        }
+
+
+        /** Muestra las listas de participantes y ejercicios en el Setup. */
+        function mostrarEstadoSetup() {
+            // Muestra todos los ejercicios, tachando los que ya fueron sorteados.
+            const ejerciciosHTML = ejerciciosDisponibles
+                .map(e => {
+                    const esUsado = ejerciciosSorteados.has(e.nombre);
+                    const clase = esUsado ? 'ejercicio-usado' : '';
+                    return `<p class="${clase}">${e.nombre} (${e.actores} pers.)</p>`;
+                })
+                .join('');
+            document.getElementById('ejercicios-display').innerHTML = ejerciciosHTML || '<p style="color:red;">Ninguno disponible</p>';
+
+            // Mostrar el listado COMPLETO, pero con el estado correcto (Ausente/Sorteado)
+            const participantesHTML = participantesIniciales
+                .map(nombre => {
+                    const isAusente = participantesAusentes.has(nombre);
+                    const isSorteado = participantesSorteados.has(nombre);
+                    
+                    let estadoClase = '';
+                    let estadoTexto = '';
+                    let isDisabled = false;
+                    let isChecked = false;
+
+                    if (isAusente) {
+                        estadoClase = 'ausente';
+                        estadoTexto = '(Ausente)';
+                        isChecked = true;
+                    } else if (isSorteado) {
+                        estadoClase = 'sorteado';
+                        estadoTexto = '(Sorteado)';
+                        isDisabled = true; 
+                    }
+
+                    return `
+                        <label class="${estadoClase}">
+                            <input type="checkbox" value="${nombre}" ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
+                            <span>${nombre} ${estadoTexto}</span>
+                        </label>
+                    `;
+                })
+                .join('');
+                
+            document.getElementById('participantes-display').innerHTML = participantesHTML;
+
             const btn = document.getElementById('sortear-btn');
+            const participantesPresentesRestantes = participantesDisponibles.length; 
+            const ejerciciosRestantes = ejerciciosDisponibles.filter(e => !ejerciciosSorteados.has(e.nombre));
             
+            // Lógica para el botón principal
+            if (participantesPresentesRestantes < minActoresRequeridos) {
+                 // Si no hay suficientes participantes, cambiamos el botón a "Nueva Ronda"
+                 btn.disabled = false;
+                 btn.textContent = "INICIAR NUEVA RONDA (Resetear Participantes)";
+                 btn.onclick = iniciarNuevaRonda;
+
+            } else if (ejerciciosRestantes.length === 0) {
+                 // Si no quedan ejercicios
+                 btn.disabled = true;
+                 btn.textContent = "🛑 FIN DEL SORTEO (No quedan ejercicios disponibles)";
+                 btn.onclick = iniciarSorteo; 
+
+            } else {
+                 // Sorteo normal
+                 btn.disabled = false;
+                 btn.textContent = `SORTEAR PRÓXIMA ESCENA (Quedan ${participantesPresentesRestantes} personas)`;
+                 btn.onclick = iniciarSorteo;
+            }
+        }
+        
+        /** Resetea la lista de participantes sorteados para iniciar una nueva ronda. */
+        function iniciarNuevaRonda() {
+            participantesSorteados = new Set(); // Vaciamos los sorteados
+            reinicializarParticipantesDisponibles();
+            
+            document.getElementById('resultados-sorteo').insertAdjacentHTML('afterbegin', `
+                <div class="resultado-grupo nuevo" style="background-color: #fce4ec; border-color: #e91e63;">
+                    <strong>¡NUEVA RONDA INICIADA!</strong><br>
+                    <strong>Participantes reseteados. Sorteando con ejercicios restantes.</strong>
+                </div>
+            `);
+
+            mostrarEstadoSetup();
+        }
+
+        /** Lógica de apertura del zoom. Mueve el elemento a la vista de pantalla completa. */
+        function abrirZoomResultado(resultadoElement) {
+            const zoomExistente = document.querySelector('.resultado-zoom');
+            if(zoomExistente) zoomExistente.remove();
+
+            const zoomContainer = document.createElement('div');
+            zoomContainer.classList.add('resultado-zoom');
+            
+            resultadoElement.remove(); 
+            zoomContainer.appendChild(resultadoElement);
+            document.body.appendChild(zoomContainer);
+
+            return resultadoElement;
+        }
+
+        /** Inicia el efecto de ruleta con duración fija y desaceleración. */
+        function iniciarRuleta(elementoResultado, resultadoFinal) {
+            
+            const TAMANO_FIJO_RULETA = 6; 
+            const DURACION_TOTAL = 2500; // 2.5 segundos
+            const INTERVALO_INICIAL = 75; // Rotación rápida inicial (75ms)
+            
+            const actoresDisponiblesRuleta = participantesIniciales.filter(nombre => !participantesAusentes.has(nombre));
+            const ejerciciosDisponiblesRuleta = EJERCICIOS_RAW.map(e => e.split(';')[0]);
+
+            const nombreElemento = elementoResultado.querySelector('strong:first-child');
+            const improvisanElemento = elementoResultado.querySelector('strong:last-child');
+            const ruletaAudio = document.getElementById('ruleta-audio');
+            
+            let tiempoTranscurrido = 0;
+            let currentIntervalo = INTERVALO_INICIAL;
+            
+            elementoResultado.style.cursor = 'wait';
+            
+            // 1. Iniciar Audio
+            ruletaAudio.play().catch(e => console.log('El audio no pudo iniciar, requiere interacción del usuario.'));
+
+
+            // Función que realiza una rotación
+            const rotar = () => {
+                // Rotar Ejercicio
+                const improFalsa = ejerciciosDisponiblesRuleta[Math.floor(Math.random() * ejerciciosDisponiblesRuleta.length)];
+                
+                // Rotar Participantes (generar grupo aleatorio usando el TAMAÑO FIJO)
+                shuffleArray(actoresDisponiblesRuleta);
+                const grupoFalso = actoresDisponiblesRuleta.slice(0, TAMANO_FIJO_RULETA).join(', '); 
+
+                nombreElemento.innerHTML = `${improFalsa}`;
+                improvisanElemento.innerHTML = `${grupoFalso}`;
+            };
+            
+            // Función de control de intervalo y desaceleración
+            const loopRuleta = () => {
+                // Calcular el porcentaje de tiempo transcurrido
+                const porcentaje = Math.min(tiempoTranscurrido / DURACION_TOTAL, 1);
+                
+                // Usamos una función cuadrática para simular desaceleración (más lento al final)
+                // El intervalo se hace más largo a medida que el porcentaje aumenta.
+                const factorDesaceleracion = porcentaje * porcentaje;
+                const maxIntervalo = 500; // Intervalo máximo antes de parar
+                
+                // Calculamos el nuevo intervalo (más largo cuanto más cerca del final)
+                const nuevoIntervalo = INTERVALO_INICIAL + (maxIntervalo - INTERVALO_INICIAL) * factorDesaceleracion;
+                
+                // Rotar
+                rotar();
+
+                tiempoTranscurrido += nuevoIntervalo;
+
+                if (tiempoTranscurrido < DURACION_TOTAL) {
+                    ruletaIntervalId = setTimeout(loopRuleta, nuevoIntervalo);
+                } else {
+                    // 3. Detener la ruleta y mostrar resultado FINAL
+                    clearInterval(ruletaIntervalId);
+                    ruletaIntervalId = null;
+                    
+                    // Detener y resetear el audio
+                    ruletaAudio.pause();
+                    ruletaAudio.currentTime = 0; 
+                    
+                    // Mostrar el resultado FINAL y real
+                    nombreElemento.innerHTML = `${resultadoFinal.impro.nombre}`;
+                    improvisanElemento.innerHTML = `${resultadoFinal.grupo.join(', ')}`;
+                    
+                    elementoResultado.style.cursor = 'pointer';
+                }
+            };
+            
+            // Iniciar el bucle de la ruleta
+            loopRuleta();
+        }
+
+
+        /** Realiza el sorteo y asignación de grupo con la lógica estricta. */
+        function iniciarSorteo() {
+            if (ruletaIntervalId) return;
+            
+            const btn = document.getElementById('sortear-btn');
             btn.disabled = true; 
             
             const mensajeInicial = document.getElementById('mensaje-inicial');
             if (mensajeInicial) mensajeInicial.remove();
             
             
-            const participantesRestantes = participantesDisponibles.length;
-            const ejerciciosRestantes = ejerciciosDisponibles.filter(e => !ejerciciosYaUsados.has(e.nombre));
+            const participantesPresentesRestantes = participantesDisponibles.length; 
+            const ejerciciosRestantes = ejerciciosDisponibles.filter(e => !ejerciciosSorteados.has(e.nombre));
             
-            // 1. Obtener ejercicios posibles que NO se han usado y para los que hay gente.
-            let ejerciciosPosibles = ejerciciosRestantes.filter(e => e.actores <= participantesRestantes);
             
-            // 2. APLICAR REGLAS DE FILTRADO ESTRICTO PARA EVITAR SOLITARIOS AL FINAL
-            switch (participantesRestantes) {
+            // 1. Obtener ejercicios posibles
+            let ejerciciosPosibles = ejerciciosRestantes.filter(e => e.actores <= participantesPresentesRestantes);
+            
+            // 2. APLICAR REGLAS DE FILTRADO ESTRICTO
+            switch (participantesPresentesRestantes) {
                 case 5:
-                    // Si quedan 5, NO se pueden usar ejercicios de 4, porque quedaría 1 persona sola.
                     ejerciciosPosibles = ejerciciosPosibles.filter(e => e.actores !== 4);
                     break;
                 case 4:
-                    // Si quedan 4, SÓLO se pueden usar ejercicios de 4 (se van todos) o de 2 (quedan 2).
-                    // No se permite 3 (quedaría 1).
                     ejerciciosPosibles = ejerciciosPosibles.filter(e => e.actores === 4 || e.actores === 2);
                     break;
                 case 3:
-                    // Si quedan 3, SÓLO se puede usar ejercicio de 3 (se van todos).
-                    // No se permite 2 (quedaría 1).
                     ejerciciosPosibles = ejerciciosPosibles.filter(e => e.actores === 3);
                     break;
                 case 2:
-                    // Si quedan 2, SÓLO se puede usar ejercicio de 2 (se van todos).
                     ejerciciosPosibles = ejerciciosPosibles.filter(e => e.actores === 2);
                     break;
             }
-            // ----------------------------------------------------------------------
 
-            // 3. Verificar si queda algún ejercicio posible tras el filtrado estricto
             if (ejerciciosPosibles.length === 0) {
                  document.getElementById('resultados-sorteo').insertAdjacentHTML('afterbegin', `
                     <p style="color: #c53929; font-weight: bold; margin-bottom: 15px;">
-                        🛑 ¡SORTEO PARADO! Quedan ${participantesRestantes} participantes. Ninguno de los ejercicios restantes cumple con la regla de no dejar a nadie solo. ¡Ajuste manual!
+                        🛑 ¡SORTEO PARADO! Quedan ${participantesPresentesRestantes} participantes presentes. Ningún ejercicio cumple la regla. ¡Ajuste manual!
                     </p>
                 `);
                 mostrarEstadoSetup();
@@ -331,49 +604,99 @@
             }
 
 
-            // 4. Sortear Ejercicio (Usando la lista filtrada)
+            // 4. Sortear Ejercicio y Participantes (usando participantesDisponibles)
             const indiceImpro = Math.floor(Math.random() * ejerciciosPosibles.length);
             const improElegida = ejerciciosPosibles[indiceImpro];
 
-            // 5. Marcar ejercicio como usado
-            ejerciciosYaUsados.add(improElegida.nombre);
+            ejerciciosSorteados.add(improElegida.nombre);
             
-            // 6. Sortear Participantes
             const grupoElegido = [];
-            for (let i = 0; i < improElegida.actores; i++) {
-                const indicePersona = Math.floor(Math.random() * participantesDisponibles.length);
-                grupoElegido.push(participantesDisponibles.splice(indicePersona, 1)[0]);
-            }
-
-            // 7. Mostrar Resultado y actualizar Setup
-            mostrarResultado(improElegida, grupoElegido);
-            mostrarEstadoSetup();
+            const disponiblesParaSorteo = [...participantesDisponibles];
             
-            // Rehabilitar el botón
-            btn.disabled = false;
+            for (let i = 0; i < improElegida.actores; i++) {
+                const indicePersona = Math.floor(Math.random() * disponiblesParaSorteo.length);
+                grupoElegido.push(disponiblesParaSorteo.splice(indicePersona, 1)[0]);
+            }
+            
+            // 5. ACTUALIZAR: Añadir a los sorteados y recalcular disponibles.
+            grupoElegido.forEach(nombre => participantesSorteados.add(nombre));
+            reinicializarParticipantesDisponibles(); 
+
+            // 6. Mostrar Resultado temporal en la lista
+            const resultadoTemporal = { impro: { nombre: '... ROTANDO ...', actores: improElegida.actores }, grupo: [''] }; 
+            const nuevoResultadoElement = mostrarResultado(resultadoTemporal.impro, resultadoTemporal.grupo);
+            
+            // 7. Abrir el zoom
+            const elementoZoom = abrirZoomResultado(nuevoResultadoElement);
+
+            // 8. Iniciar la ruleta (incluye desaceleración y audio)
+            iniciarRuleta(elementoZoom, { impro: improElegida, grupo: grupoElegido, actores: improElegida.actores });
+
+
+            // 9. Actualizar Setup. (Se actualiza después de la duración de la ruleta)
+            setTimeout(() => {
+                mostrarEstadoSetup();
+            }, 3000); // Pequeño margen después de 2.5s para la actualización de la lista
         }
 
-        /** Formatea y añade el resultado a la interfaz (último arriba, grandes y coloridos). */
+        /** Formatea y añade el resultado a la interfaz. Devuelve la referencia al nuevo elemento DIV. */
         function mostrarResultado(impro, grupo) {
             const resultadosDiv = document.getElementById('resultados-sorteo');
             
-            // 1. Desgrisar el resultado más reciente anterior (si existe)
             const resultadoAnterior = resultadosDiv.querySelector('.resultado-grupo.nuevo');
             if (resultadoAnterior) {
                 resultadoAnterior.classList.remove('nuevo');
                 resultadoAnterior.classList.add('antiguo');
             }
 
-            // 2. Crear el nuevo resultado (en formato 'nuevo')
+            const grupoTexto = grupo.join(', ');
+            
             const nuevoResultadoHTML = `
                 <div class="resultado-grupo nuevo">
-                    <strong>🎬 Escena: ${impro.nombre}</strong> (Requiere ${impro.actores} actores)<br>
-                    <strong>👥 Grupo Asignado:</strong> ${grupo.join(', ')}
+                    <strong>${impro.nombre}</strong><br>
+                    <strong>${grupoTexto}</strong>
                 </div>
             `;
             
-            // 3. Añadir el nuevo resultado al inicio (prepend)
             resultadosDiv.insertAdjacentHTML('afterbegin', nuevoResultadoHTML);
+            const nuevoElemento = resultadosDiv.querySelector('.resultado-grupo.nuevo');
+            
+            return nuevoElemento;
+        }
+        
+        /** Maneja la funcionalidad de zoom/pantalla completa. */
+        function manejarZoomResultado(event) {
+            // No permitir el cierre si la ruleta está activa.
+            if (ruletaIntervalId) return; 
+
+            let resultadoGrupo = event.target.closest('.resultado-grupo.nuevo');
+            const resultadosDiv = document.getElementById('resultados-sorteo');
+            const btn = document.getElementById('sortear-btn'); 
+
+            // Lógica de CIERRE:
+            if ((resultadoGrupo && resultadoGrupo.parentNode.classList.contains('resultado-zoom')) || event.target.classList.contains('resultado-zoom')) {
+                
+                const zoomContainer = event.target.classList.contains('resultado-zoom') ? event.target : resultadoGrupo.parentNode;
+                const grupoZoomed = zoomContainer.querySelector('.resultado-grupo.nuevo');
+                
+                if (grupoZoomed) {
+                    resultadosDiv.insertAdjacentElement('afterbegin', grupoZoomed);
+                }
+                zoomContainer.remove(); 
+                
+                // HABILITAMOS EL BOTÓN INMEDIATAMENTE AL CERRAR
+                if (btn.disabled && btn.onclick === iniciarSorteo) { 
+                    btn.disabled = false;
+                    mostrarEstadoSetup(); 
+                }
+                
+                return;
+            }
+            
+            // Lógica de APERTURA MANUAL: 
+            if (resultadoGrupo && !resultadoGrupo.parentNode.classList.contains('resultado-zoom')) {
+                abrirZoomResultado(resultadoGrupo);
+            }
         }
 
         // Ejecutar al cargar la página
