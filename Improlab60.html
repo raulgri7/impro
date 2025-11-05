@@ -105,15 +105,37 @@
         }
 
         .resultado-grupo {
-            background-color: #ede7f6; /* Lila muy claro */
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        /* Estilo para el resultado más reciente (el de arriba) */
+        .resultado-grupo.nuevo {
+            background-color: #ede7f6; /* Lila muy claro */
+            border: 2px solid var(--color-lila-principal);
             border-left: 5px solid var(--color-lila-principal);
+            font-size: 1.1em;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .resultado-grupo.nuevo strong {
+            color: var(--color-lila-oscuro);
+            font-size: 1.2em;
+        }
+        
+        /* Estilo para los resultados antiguos (grises) */
+        .resultado-grupo.antiguo {
+            background-color: #f9f9f9;
+            color: #777;
+            border: 1px solid #ddd;
+            border-left: 3px solid #ddd;
+            font-size: 0.9em;
         }
 
         .resultado-grupo strong {
-            color: var(--color-lila-oscuro);
+            color: inherit;
             font-size: 1.1em;
             display: block;
             margin-bottom: 5px;
@@ -162,33 +184,43 @@
         <button id="sortear-btn" onclick="iniciarSorteo()">INICIAR SORTEO (Asignar Escenas)</button>
 
         <div id="resultados-sorteo">
-            <p style="text-align: center; color: #777;">Haz clic en el botón para comenzar a sortear ejercicios y asignar participantes.</p>
+            <p style="text-align: center; color: #777;" id="mensaje-inicial">Haz clic en el botón para comenzar a sortear ejercicios y asignar participantes.</p>
         </div>
     </div>
 
 
     <script>
         // ----------------------------------------------------------
-        // --- DATA DE CONFIGURACIÓN (TÚ PUEDES EDITAR ESTO) ---
+        // --- DATA DE CONFIGURACIÓN (ACTUALIZADA) ---
         // ----------------------------------------------------------
         
-        // Formato: "Nombre del ejercicio;Número de actores necesarios"
+        // El máximo es 4 personas, el mínimo es 2.
         const EJERCICIOS_RAW = [
+            "El Interrogatorio de Espejos;2", 
+            "La Pelea de Siluetas;2",
             "La Congelación;2",
-            "Monólogo a Cuatro;4",
+            "Noticias Absurdas;2",
+            "El Espejo Roto;2",         // NUEVO 2P
+            "Cambio de Posición;2",     // NUEVO 2P
+            
+            "Monstruo de Tres Cabezas;3",    
+            "Subasta de Sentimientos;3",      
             "Objeto Extraño;3",
-            "Carrera de Géneros;5",
-            "El Juicio del Siglo;8",
-            "El Barco Se Hunde;7",
+            "Carrera de Géneros;3",
             "Máquina del Tiempo;3",
-            "Noticias Absurdas;2" 
+            "Traducción Simultánea;3",  // NUEVO 3P
+            "El Confesionario Múltiple;3", // NUEVO 3P
+            
+            "Monólogo a Cuatro;4",
+            "El Barco Se Hunde;4",
+            "La Rueda de Emociones;4",  // NUEVO 4P
+            "El Círculo de Historias;4", // NUEVO 4P
         ];
 
-        // Lista de todos los nombres (puedes añadir o quitar)
         const NOMBRES_INICIALES = [
-            "Dani", "Raúl", "Álvaro", "Juan", "Pedro", "Ángeles", 
-            "Marta", "Silvia", "Javi", "Carlos", "Elena", "Lucas",
-            "Paco", "Nuria" // Inventando unos cuantos para pruebas
+            "Ángeles", "Aroa", "Bea", "Beloki", "Chuchi", "Elena", "Elenita", "Esther",
+            "Isa", "Isra", "Jesús", "María G", "María M", "Natalia", "Paloma",
+            "Paula", "Pilar", "Raúl", "Rosa", "Virgi", "Yesi"
         ];
 
         // ----------------------------------------------------------
@@ -198,11 +230,11 @@
         let ejerciciosDisponibles = [];
         let participantesDisponibles = [];
         let ejerciciosYaUsados = new Set();
+        let minActoresRequeridos = 0; // Debería ser 2
 
 
-        /** Inicializa los datos, parseando los raw y mostrando en la interfaz. */
+        /** Inicializa los datos al cargar la página. */
         function inicializarDatos() {
-            // Clonar listas para que los arrays originales no se modifiquen
             participantesDisponibles = [...NOMBRES_INICIALES];
             
             ejerciciosDisponibles = EJERCICIOS_RAW.map(e => {
@@ -210,17 +242,22 @@
                 return { nombre, actores: parseInt(actores) };
             });
 
-            // Mostrar el estado inicial en la interfaz
+            if (ejerciciosDisponibles.length > 0) {
+                 minActoresRequeridos = Math.min(...ejerciciosDisponibles.map(e => e.actores));
+            } else {
+                 minActoresRequeridos = 0;
+            }
+
             mostrarEstadoSetup();
-            document.getElementById('resultados-sorteo').innerHTML = '<p style="text-align: center; color: #777;">Haz clic en el botón para comenzar a sortear ejercicios y asignar participantes.</p>';
         }
 
-        /** Muestra las listas iniciales y el estado actual de los participantes. */
+        /** Muestra las listas de participantes y ejercicios en el Setup. */
         function mostrarEstadoSetup() {
-            const ejerciciosHTML = ejerciciosDisponibles
+            const ejerciciosRestantes = ejerciciosDisponibles.filter(e => !ejerciciosYaUsados.has(e.nombre));
+            const ejerciciosHTML = ejerciciosRestantes
                 .map(e => `<p>${e.nombre} (${e.actores} pers.)</p>`)
                 .join('');
-            document.getElementById('ejercicios-display').innerHTML = ejerciciosHTML;
+            document.getElementById('ejercicios-display').innerHTML = ejerciciosHTML || '<p style="color:red;">Ninguno disponible</p>';
 
             const participantesHTML = participantesDisponibles
                 .map(n => `<p>${n}</p>`)
@@ -228,82 +265,115 @@
             document.getElementById('participantes-display').innerHTML = participantesHTML;
 
             const btn = document.getElementById('sortear-btn');
-            if (participantesDisponibles.length === 0 || ejerciciosDisponibles.length === 0) {
+            const participantesRestantes = participantesDisponibles.length;
+
+            if (participantesRestantes < minActoresRequeridos) {
                  btn.disabled = true;
-                 btn.textContent = "FIN DEL SORTEO (No quedan ejercicios o personas)";
+                 btn.textContent = `🛑 FIN DEL SORTEO (Solo quedan ${participantesRestantes} pers. - Insuficientes)`;
+            } else if (ejerciciosRestantes.length === 0) {
+                 btn.disabled = true;
+                 btn.textContent = "🛑 FIN DEL SORTEO (No quedan ejercicios disponibles)";
             } else {
                  btn.disabled = false;
-                 btn.textContent = `INICIAR SORTEO (Quedan ${participantesDisponibles.length} personas)`;
+                 btn.textContent = `SORTEAR PRÓXIMA ESCENA (Quedan ${participantesRestantes} personas)`;
             }
         }
 
-        /**
-         * Realiza la lógica principal: sortea una impro y el número de personas requerido.
-         */
+        /** Realiza el sorteo y asignación de grupo con la nueva lógica estricta. */
         function iniciarSorteo() {
-            if (participantesDisponibles.length === 0 || ejerciciosDisponibles.length === 0) {
-                mostrarEstadoSetup();
-                return;
+            const resultadosDiv = document.getElementById('resultados-sorteo');
+            const btn = document.getElementById('sortear-btn');
+            
+            btn.disabled = true; 
+            
+            const mensajeInicial = document.getElementById('mensaje-inicial');
+            if (mensajeInicial) mensajeInicial.remove();
+            
+            
+            const participantesRestantes = participantesDisponibles.length;
+            const ejerciciosRestantes = ejerciciosDisponibles.filter(e => !ejerciciosYaUsados.has(e.nombre));
+            
+            // 1. Obtener ejercicios posibles que NO se han usado y para los que hay gente.
+            let ejerciciosPosibles = ejerciciosRestantes.filter(e => e.actores <= participantesRestantes);
+            
+            // 2. APLICAR REGLAS DE FILTRADO ESTRICTO PARA EVITAR SOLITARIOS AL FINAL
+            switch (participantesRestantes) {
+                case 5:
+                    // Si quedan 5, NO se pueden usar ejercicios de 4, porque quedaría 1 persona sola.
+                    ejerciciosPosibles = ejerciciosPosibles.filter(e => e.actores !== 4);
+                    break;
+                case 4:
+                    // Si quedan 4, SÓLO se pueden usar ejercicios de 4 (se van todos) o de 2 (quedan 2).
+                    // No se permite 3 (quedaría 1).
+                    ejerciciosPosibles = ejerciciosPosibles.filter(e => e.actores === 4 || e.actores === 2);
+                    break;
+                case 3:
+                    // Si quedan 3, SÓLO se puede usar ejercicio de 3 (se van todos).
+                    // No se permite 2 (quedaría 1).
+                    ejerciciosPosibles = ejerciciosPosibles.filter(e => e.actores === 3);
+                    break;
+                case 2:
+                    // Si quedan 2, SÓLO se puede usar ejercicio de 2 (se van todos).
+                    ejerciciosPosibles = ejerciciosPosibles.filter(e => e.actores === 2);
+                    break;
             }
+            // ----------------------------------------------------------------------
 
-            // 1. Sortear Ejercicio (sin repetir)
-            // Filtramos solo los ejercicios que no se hayan usado y que se puedan hacer con los participantes restantes
-            const ejerciciosPosibles = ejerciciosDisponibles.filter(e => 
-                !ejerciciosYaUsados.has(e.nombre) && e.actores <= participantesDisponibles.length
-            );
-
+            // 3. Verificar si queda algún ejercicio posible tras el filtrado estricto
             if (ejerciciosPosibles.length === 0) {
-                document.getElementById('resultados-sorteo').innerHTML += `
-                    <p style="color: #c53929; font-weight: bold;">
-                        🛑 ¡SORTEO PARADO! No quedan ejercicios que se ajusten al número de personas restantes (${participantesDisponibles.length}).
+                 document.getElementById('resultados-sorteo').insertAdjacentHTML('afterbegin', `
+                    <p style="color: #c53929; font-weight: bold; margin-bottom: 15px;">
+                        🛑 ¡SORTEO PARADO! Quedan ${participantesRestantes} participantes. Ninguno de los ejercicios restantes cumple con la regla de no dejar a nadie solo. ¡Ajuste manual!
                     </p>
-                `;
-                ejerciciosDisponibles = []; // Marcar como acabado
+                `);
                 mostrarEstadoSetup();
                 return;
             }
 
+
+            // 4. Sortear Ejercicio (Usando la lista filtrada)
             const indiceImpro = Math.floor(Math.random() * ejerciciosPosibles.length);
             const improElegida = ejerciciosPosibles[indiceImpro];
 
-            // 2. Marcar ejercicio como usado
+            // 5. Marcar ejercicio como usado
             ejerciciosYaUsados.add(improElegida.nombre);
             
-            // 3. Sortear Participantes
+            // 6. Sortear Participantes
             const grupoElegido = [];
             for (let i = 0; i < improElegida.actores; i++) {
-                // Sortea un índice dentro de los participantes disponibles
                 const indicePersona = Math.floor(Math.random() * participantesDisponibles.length);
-                
-                // Mueve la persona de disponibles al grupo de la impro
                 grupoElegido.push(participantesDisponibles.splice(indicePersona, 1)[0]);
             }
 
-            // 4. Mostrar Resultado
+            // 7. Mostrar Resultado y actualizar Setup
             mostrarResultado(improElegida, grupoElegido);
-
-            // 5. Actualizar interfaz
             mostrarEstadoSetup();
+            
+            // Rehabilitar el botón
+            btn.disabled = false;
         }
 
-        /** Formatea y añade el resultado a la interfaz. */
+        /** Formatea y añade el resultado a la interfaz (último arriba, grandes y coloridos). */
         function mostrarResultado(impro, grupo) {
             const resultadosDiv = document.getElementById('resultados-sorteo');
             
-            // Limpiar mensaje inicial si es el primer sorteo
-            if (resultadosDiv.querySelector('p[style*="center"]')) {
-                resultadosDiv.innerHTML = '<h2>Resultados del Sorteo:</h2>';
+            // 1. Desgrisar el resultado más reciente anterior (si existe)
+            const resultadoAnterior = resultadosDiv.querySelector('.resultado-grupo.nuevo');
+            if (resultadoAnterior) {
+                resultadoAnterior.classList.remove('nuevo');
+                resultadoAnterior.classList.add('antiguo');
             }
 
+            // 2. Crear el nuevo resultado (en formato 'nuevo')
             const nuevoResultadoHTML = `
-                <div class="resultado-grupo">
+                <div class="resultado-grupo nuevo">
                     <strong>🎬 Escena: ${impro.nombre}</strong> (Requiere ${impro.actores} actores)<br>
                     <strong>👥 Grupo Asignado:</strong> ${grupo.join(', ')}
                 </div>
             `;
             
-            // Añadir el nuevo resultado al inicio de la lista
-            resultadosDiv.insertAdjacentHTML('beforeend', nuevoResultadoHTML);
+            // 3. Añadir el nuevo resultado al inicio (prepend)
+            resultadosDiv.insertAdjacentHTML('afterbegin', nuevoResultadoHTML);
         }
 
         // Ejecutar al cargar la página
