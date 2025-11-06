@@ -282,7 +282,7 @@
         <button id="sortear-btn" onclick="iniciarSorteo()">INICIAR SORTEO (Asignar Escenas)</button>
 
         <div id="resultados-sorteo">
-            <p style="text-align: center; color: #777;" id="mensaje-inicial">Haz clic en el botón para comenzar a sortear ejercicios y asignar participantes.</p>
+       
         </div>
         
         <div class="setup-section">
@@ -626,39 +626,81 @@
             
             const participantesPresentesRestantes = participantesDisponibles.length; 
             
-            // Excluir ejercicios "TODOS" (actores[0] > 0) y los ya usados.
+            // 1. Obtener ejercicios numerados posibles (excluyendo 'TODOS' y usados)
             let ejerciciosPosibles = ejerciciosDisponibles
                 .filter(e => e.actores[0] > 0 && !e.usado);
             
             let improElegida = null;
             let actoresReales = 0;
 
-            // 1. Buscar una impro cuyo número de actores se ajuste a los participantes restantes
-            const ejerciciosAjustados = ejerciciosPosibles.filter(e => e.actores[e.actores.length - 1] <= participantesPresentesRestantes);
+
+            // 2. Filtrar ejercicios que puedan ser jugados con los participantes restantes (N)
+            // Criterio: el número MÁS PEQUEÑO de actores que permite el ejercicio debe ser <= N.
+            let ejerciciosAjustados = ejerciciosPosibles.filter(e => 
+                e.actores[e.actores.length - 1] <= participantesPresentesRestantes
+            );
+
+
+            // --- NUEVA LÓGICA DE FORZADO DE CONSUMO ---
             
-            if (ejerciciosAjustados.length === 0) {
-                 // Si no hay ejercicios numerados que quepan, forzamos la opción de fin de ronda (Sortear TODOS si quedan)
-                 return iniciarSorteoTodos();
+            const N = participantesPresentesRestantes;
+
+            // FASE A: Filtrar ejercicios para forzar el consumo total o necesario.
+            if (N === 3 || N === 2 || N === 4) {
+                // Buscamos ejercicios que puedan consumir el número exacto restante (o un número necesario para 'matar' la ronda).
+                
+                let ejerciciosPrioritarios = ejerciciosAjustados.filter(e => 
+                    e.actores.includes(N) || 
+                    (N === 4 && e.actores.includes(2)) ||
+                    (N === 3 && e.actores.includes(2)) ||
+                    (N === 2 && e.actores.includes(2))
+                );
+
+                if (ejerciciosPrioritarios.length > 0) {
+                    ejerciciosAjustados = ejerciciosPrioritarios;
+                } 
+                // Si no hay prioritarios, se sigue con los ajustados (pueden ser ejercicios de N=4 que solo permitan 2 o 3, lo cual es subóptimo pero posible).
             }
 
-            // 2. Elegir un ejercicio ajustado al azar
+            // Si después del filtro estricto no quedan ejercicios, revisamos si se puede sortear TODOS.
+            if (ejerciciosAjustados.length === 0) {
+                return iniciarSorteoTodos();
+            }
+
+            // 3. Elegir un ejercicio ajustado al azar
             const indiceImpro = Math.floor(Math.random() * ejerciciosAjustados.length);
             const improCandidata = ejerciciosAjustados[indiceImpro];
             
             improElegida = improCandidata;
 
-            // 3. Seleccionar el número de actores (el más grande que quepa)
+            // 4. Seleccionar el número de actores (el más grande que quepa, o el forzado)
+            
+            // Si N=4 o N=3 y forzamos a 2, debe cumplirse la regla de seleccionar el más grande que quepa.
             for (const numActores of improElegida.actores) {
-                if (numActores <= participantesPresentesRestantes) {
+                if (numActores <= N) {
                     actoresReales = numActores;
                     break;
                 }
             }
             
+            // VALIDACIÓN POST-SELECCIÓN (Aseguramos que el ejercicio de 2 no se haya sacado con N=3 si había de 3 disponibles)
+            // Esta validación se simplifica si el filtro de la FASE A es bueno. 
+            // Si N=3 y se seleccionó un ejercicio de 2, es porque no había de 3 en los ajustados (o el aleatorio lo escogió mal).
+            
+            // Asegurar que si quedan 3, y el ejercicio elegido permite 3, SE ELIJA 3.
+            if (N === 3 && improElegida.actores.includes(3)) {
+                actoresReales = 3;
+            }
+            // Asegurar que si quedan 2, y el ejercicio elegido permite 2, SE ELIJA 2.
+            else if (N === 2 && improElegida.actores.includes(2)) {
+                actoresReales = 2;
+            }
+
+
             // Marcar el ejercicio como usado
             improElegida.usado = true;
 
-            // 4. Sortear Participantes
+            // 5. Sortear Participantes
             const grupoElegido = [];
             const disponiblesParaSorteo = [...participantesDisponibles];
             
@@ -667,22 +709,22 @@
                 grupoElegido.push(disponiblesParaSorteo.splice(indicePersona, 1)[0]);
             }
             
-            // 5. ACTUALIZAR: Añadir a los sorteados y recalcular disponibles.
+            // 6. ACTUALIZAR: Añadir a los sorteados y recalcular disponibles.
             grupoElegido.forEach(nombre => participantesSorteados.add(nombre));
             reinicializarParticipantesDisponibles(); 
 
-            // 6. Mostrar Resultado temporal en la lista
+            // 7. Mostrar Resultado temporal en la lista
             const resultadoTemporal = { impro: { nombre: '... ROTANDO ...', actores: actoresReales }, grupo: [''] }; 
             const nuevoResultadoElement = mostrarResultado(resultadoTemporal.impro, resultadoTemporal.grupo);
             
-            // 7. Abrir el zoom
+            // 8. Abrir el zoom
             const elementoZoom = abrirZoomResultado(nuevoResultadoElement);
 
-            // 8. Iniciar la ruleta (incluye desaceleración y audio)
+            // 9. Iniciar la ruleta (incluye desaceleración y audio)
             iniciarRuleta(elementoZoom, { impro: improElegida, grupo: grupoElegido, actores: actoresReales });
 
 
-            // 9. Actualizar Setup.
+            // 10. Actualizar Setup.
             setTimeout(() => {
                 mostrarEstadoSetup();
             }, 3000); 
@@ -713,19 +755,17 @@
             // Marcar el ejercicio como usado
             improElegida.usado = true;
 
-            // El grupo real es TODOS los que están presentes, pero para el display final 
-            // en este caso, solo mostramos la palabra "Todos".
-            const grupoElegido = ["Todos"];
+            // El grupo para el DISPLAY es solo "Todos"
+            const grupoElegidoDisplay = ["Todos"];
             
             // Mostrar Resultado temporal
-            // Usamos el texto de ruleta y el número total de participantes para el tamaño
             const resultadoTemporal = { impro: { nombre: '... ROTANDO ...', actores: participantesPresentesTotales.length }, grupo: [''] }; 
             const nuevoResultadoElement = mostrarResultado(resultadoTemporal.impro, resultadoTemporal.grupo);
             
             const elementoZoom = abrirZoomResultado(nuevoResultadoElement);
 
-            // Iniciar la ruleta. Nota: PASAMOS EL ARRAY CON SOLO ["Todos"]
-            iniciarRuleta(elementoZoom, { impro: improElegida, grupo: grupoElegido, actores: participantesPresentesTotales.length });
+            // Iniciar la ruleta.
+            iniciarRuleta(elementoZoom, { impro: improElegida, grupo: grupoElegidoDisplay, actores: participantesPresentesTotales.length });
             
             // Después del sorteo de "TODOS", forzamos el inicio de una nueva ronda.
             setTimeout(() => {
