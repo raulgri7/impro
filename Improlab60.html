@@ -75,7 +75,7 @@
         .header-image img {
             width: 100%; /* La imagen ocupará todo el ancho del contenedor */
             height: 100%; /* La imagen ocupará toda la altura del contenedor */
-            object-fit: contain; /* <-- CAMBIO IMPORTANTE AQUÍ: La imagen se escalará para caber */
+            object-fit: contain; /* La imagen se escalará para caber */
             border-radius: 10px; /* Para que la imagen también tenga los bordes redondeados */
         }
 
@@ -713,17 +713,19 @@
             // Marcar el ejercicio como usado
             improElegida.usado = true;
 
-            // El grupo es TODOS los que están presentes
-            const grupoElegido = participantesPresentesTotales;
+            // El grupo real es TODOS los que están presentes, pero para el display final 
+            // en este caso, solo mostramos la palabra "Todos".
+            const grupoElegido = ["Todos"];
             
             // Mostrar Resultado temporal
-            const resultadoTemporal = { impro: { nombre: '... ROTANDO ...', actores: grupoElegido.length }, grupo: [''] }; 
+            // Usamos el texto de ruleta y el número total de participantes para el tamaño
+            const resultadoTemporal = { impro: { nombre: '... ROTANDO ...', actores: participantesPresentesTotales.length }, grupo: [''] }; 
             const nuevoResultadoElement = mostrarResultado(resultadoTemporal.impro, resultadoTemporal.grupo);
             
             const elementoZoom = abrirZoomResultado(nuevoResultadoElement);
 
-            // Iniciar la ruleta
-            iniciarRuleta(elementoZoom, { impro: improElegida, grupo: grupoElegido, actores: grupoElegido.length });
+            // Iniciar la ruleta. Nota: PASAMOS EL ARRAY CON SOLO ["Todos"]
+            iniciarRuleta(elementoZoom, { impro: improElegida, grupo: grupoElegido, actores: participantesPresentesTotales.length });
             
             // Después del sorteo de "TODOS", forzamos el inicio de una nueva ronda.
             setTimeout(() => {
