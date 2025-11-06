@@ -27,10 +27,20 @@
             min-height: 100vh;
         }
 
-        h1 {
+        h1 { /* El h1 ahora será un contenedor para la imagen */
             color: var(--color-lila-oscuro);
-            font-size: 2.5em;
+            font-size: 2.5em; /* Se mantiene para compatibilidad si hubiera texto */
             margin-bottom: 5px;
+            cursor: pointer; /* Para mantener la interacción de cierre de zoom */
+        }
+
+        /* Estilos específicos para la imagen del logo (en h1) */
+        .logo-img {
+            max-width: 100%; /* Asegura que la imagen no se desborde */
+            height: auto; /* Mantiene la proporción */
+            max-height: 100px; /* Limita la altura máxima del logo */
+            display: block; /* Elimina espacio extra debajo de la imagen */
+            margin: 0 auto; /* Centra la imagen si el h1 es más ancho */
         }
 
         /* Contenedor Principal (Simula la cartelera) */
@@ -47,21 +57,26 @@
             flex-direction: column;
         }
 
-        /* Estilo de la imagen abstracta (Fondo Lila) */
+        /* Estilo de la imagen de encabezado (improlab60.jpg) */
         .header-image {
             order: 1; 
             width: 100%;
-            height: 150px;
-            background: linear-gradient(45deg, var(--color-lila-principal), #b2a4ff);
+            height: 150px; /* Altura fija para el contenedor de la imagen */
             border-radius: 10px;
             margin-bottom: 25px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5em;
-            font-weight: bold;
-            color: var(--color-texto-claro);
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            overflow: hidden; /* Asegura que la imagen no se desborde si es muy grande */
+            background-color: #f0f0f0; /* Color de fondo si hay espacio vacío con 'contain' */
+        }
+        
+        /* Estilos para la imagen dentro del header-image */
+        .header-image img {
+            width: 100%; /* La imagen ocupará todo el ancho del contenedor */
+            height: 100%; /* La imagen ocupará toda la altura del contenedor */
+            object-fit: contain; /* <-- CAMBIO IMPORTANTE AQUÍ: La imagen se escalará para caber */
+            border-radius: 10px; /* Para que la imagen también tenga los bordes redondeados */
         }
 
         /* Estilos del Botón de Sorteo */
@@ -245,16 +260,23 @@
 <body>
     
     <audio id="ruleta-audio" loop>
-        <source src="ruta/a/tu/audio.mp3" type="audio/mpeg"> 
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-casino-roulette-spinning-425.mp3" type="audio/mpeg"> 
         Tu navegador no soporta el elemento de audio.
     </audio>
 
-    <h1 onclick="if (document.querySelector('.resultado-zoom')) document.querySelector('.resultado-zoom').remove();">Sorteador IMPRO LAB 60</h1>
+    <audio id="bing-audio">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-church-bell-ding-1481.mp3" type="audio/mpeg"> 
+        Tu navegador no soporta el elemento de audio.
+    </audio>
+
+    <h1 onclick="if (document.querySelector('.resultado-zoom')) document.querySelector('.resultado-zoom').remove();">
+        <img src="ballena60logo.jpg" alt="Logo Impro LAB 60" class="logo-img">
+    </h1>
 
     <div class="container">
         
         <div class="header-image">
-            GENERADOR DE ESCENAS IMPROVISADAS 🎭
+            <img src="improlab60.jpg" alt="Impro LAB 60 - Generador de Escenas Improvisadas">
         </div>
 
         <button id="sortear-btn" onclick="iniciarSorteo()">INICIAR SORTEO (Asignar Escenas)</button>
@@ -285,26 +307,27 @@
         // --- DATA DE CONFIGURACIÓN ---
         // ----------------------------------------------------------
         
+        // Ejercicios ordenados alfabéticamente y con variantes/TODOS
         const EJERCICIOS_RAW = [
-            "El Interrogatorio de Espejos;2", 
-            "La Pelea de Siluetas;2",         
-            "La Congelación;2",
-            "Noticias Absurdas;2",
-            "El Espejo Roto;2",         
-            "Cambio de Posición;2",     
-            
-            "Monstruo de Tres Cabezas;3",    
-            "Subasta de Sentimientos;3",      
-            "Objeto Extraño;3",
-            "Carrera de Géneros;3",
-            "Máquina del Tiempo;3",
-            "Traducción Simultánea;3",  
-            "El Confesionario Múltiple;3", 
-            
-            "Monólogo a Cuatro;4",
-            "El Barco Se Hunde;4",
-            "La Rueda de Emociones;4",  
-            "El Círculo de Historias;4", 
+            "2min. 1min. 30seg. 15seg;TODOS", 
+            "50 años más tarde;4", 
+            "Detective;2", 
+            "Emociones (escenario en cuatro);4|3", 
+            "Entrevista rara;4|3", 
+            "Estatuas;3|2", 
+            "Excusa para llegar tarde;3", 
+            "Giratoria y esquinas;4", 
+            "Idioma inventado;4", 
+            "La caja que no se abre;TODOS", 
+            "Libro;2", 
+            "Morir;3|2", 
+            "Neutro+ entra y dice (ronda);TODOS", 
+            "Objeto 100%;2", 
+            "Objeto misterioso (empieza cuando adivina);2", 
+            "Objeto sin nombre, sin usar;2", 
+            "Pitonisa;3", 
+            "Títulos distintos + título escena;3|2", 
+            "Votación público;4|3"
         ];
 
         const NOMBRES_INICIALES = [
@@ -317,13 +340,11 @@
         // --- LÓGICA DEL SORTEO ---
         // ----------------------------------------------------------
         
-        let ejerciciosDisponibles = [];
-        let participantesDisponibles = []; 
-        let participantesIniciales = [];  
-        let participantesAusentes = new Set(); 
-        let participantesSorteados = new Set(); 
-        let ejerciciosSorteados = new Set(); 
-        let minActoresRequeridos = 0;
+        let ejerciciosDisponibles = []; // Ejercicios NO usados desde la carga de la página
+        let participantesDisponibles = []; // Participantes presentes Y sin asignar (lista activa)
+        let participantesIniciales = [];  // Lista completa al inicio (para la gestión de ausencias)
+        let participantesAusentes = new Set(); // Nombres de los participantes marcados como ausentes
+        let participantesSorteados = new Set(); // Nombres de los participantes ya asignados en la ronda
         let ruletaIntervalId = null; 
 
         // Función auxiliar para mezclar un array
@@ -334,22 +355,35 @@
             }
         }
 
+        /** Procesa la lista de ejercicios RAW. */
+        function procesarEjercicios(rawList) {
+            return rawList.map(e => {
+                const [nombre, actoresStr] = e.split(';');
+                // Si es 'TODOS', actores es 0, si no, es un array de posibles actores [4, 3, 2]
+                const actores = actoresStr === 'TODOS' 
+                    ? [0] 
+                    : actoresStr.split('|').map(n => parseInt(n)).sort((a, b) => b - a); // Ordenar de mayor a menor
+                
+                return { nombre, actores, usado: false };
+            });
+        }
 
         /** Inicializa los datos al cargar la página. */
         function inicializarDatos() {
             participantesIniciales = [...NOMBRES_INICIALES]; 
             participantesDisponibles = [...participantesIniciales];
             
-            ejerciciosDisponibles = EJERCICIOS_RAW.map(e => {
-                const [nombre, actores] = e.split(';');
-                return { nombre, actores: parseInt(actores) };
-            });
+            // Procesar los ejercicios y establecer el estado de 'usado'
+            ejerciciosDisponibles = procesarEjercicios(EJERCICIOS_RAW);
 
-            if (ejerciciosDisponibles.length > 0) {
-                 minActoresRequeridos = Math.min(...ejerciciosDisponibles.map(e => e.actores));
-            } else {
-                 minActoresRequeridos = 0;
-            }
+            // Obtener el número mínimo de actores requeridos por cualquier ejercicio (excluyendo 'TODOS')
+            const actoresRequeridos = ejerciciosDisponibles
+                .filter(e => e.actores[0] > 0)
+                .flatMap(e => e.actores);
+                
+            minActoresRequeridos = actoresRequeridos.length > 0 
+                ? Math.min(...actoresRequeridos) 
+                : 0;
 
             mostrarEstadoSetup();
             document.body.addEventListener('click', manejarZoomResultado);
@@ -387,9 +421,14 @@
             // Muestra todos los ejercicios, tachando los que ya fueron sorteados.
             const ejerciciosHTML = ejerciciosDisponibles
                 .map(e => {
-                    const esUsado = ejerciciosSorteados.has(e.nombre);
+                    const esUsado = e.usado;
                     const clase = esUsado ? 'ejercicio-usado' : '';
-                    return `<p class="${clase}">${e.nombre} (${e.actores} pers.)</p>`;
+                    
+                    let actoresStr = e.actores[0] === 0 
+                        ? 'TODOS' 
+                        : e.actores.join('|') + ' pers.';
+                        
+                    return `<p class="${clase}">${e.nombre} (${actoresStr})</p>`;
                 })
                 .join('');
             document.getElementById('ejercicios-display').innerHTML = ejerciciosHTML || '<p style="color:red;">Ninguno disponible</p>';
@@ -428,23 +467,38 @@
 
             const btn = document.getElementById('sortear-btn');
             const participantesPresentesRestantes = participantesDisponibles.length; 
-            const ejerciciosRestantes = ejerciciosDisponibles.filter(e => !ejerciciosSorteados.has(e.nombre));
+            
+            const ejerciciosNumeradosRestantes = ejerciciosDisponibles
+                .filter(e => e.actores[0] > 0 && !e.usado);
+            
+            const ejerciciosTodosRestantes = ejerciciosDisponibles
+                .filter(e => e.actores[0] === 0 && !e.usado);
             
             // Lógica para el botón principal
-            if (participantesPresentesRestantes < minActoresRequeridos) {
-                 // Si no hay suficientes participantes, cambiamos el botón a "Nueva Ronda"
-                 btn.disabled = false;
-                 btn.textContent = "INICIAR NUEVA RONDA (Resetear Participantes)";
-                 btn.onclick = iniciarNuevaRonda;
-
-            } else if (ejerciciosRestantes.length === 0) {
-                 // Si no quedan ejercicios
+            
+            // 1. Caso: NO QUEDA NINGÚN EJERCICIO DISPONIBLE (Final total)
+            if (ejerciciosNumeradosRestantes.length === 0 && ejerciciosTodosRestantes.length === 0) {
                  btn.disabled = true;
-                 btn.textContent = "🛑 FIN DEL SORTEO (No quedan ejercicios disponibles)";
-                 btn.onclick = iniciarSorteo; 
+                 btn.textContent = "✅ ¡FIN DEL SORTEO! No quedan más ejercicios.";
+                 btn.onclick = null; // No hace nada
+
+            } else if (participantesPresentesRestantes < minActoresRequeridos) {
+                 // 2. Caso: No hay suficientes participantes para los ejercicios numerados.
+                 if (ejerciciosTodosRestantes.length > 0) {
+                     // Si quedan ejercicios TODOS, sortea TODOS
+                    btn.disabled = false;
+                    btn.textContent = `🛑 ÚLTIMO EJERCICIO DE RONDA (Sortear TODOS)`;
+                    btn.onclick = iniciarSorteoTodos;
+                 } else {
+                     // Si no quedan TODOS, solo queda resetear
+                    btn.disabled = false;
+                    btn.textContent = "INICIAR NUEVA RONDA (Resetear Participantes)";
+                    btn.onclick = iniciarNuevaRonda;
+                 }
+
 
             } else {
-                 // Sorteo normal
+                 // 3. Caso: Sorteo normal
                  btn.disabled = false;
                  btn.textContent = `SORTEAR PRÓXIMA ESCENA (Quedan ${participantesPresentesRestantes} personas)`;
                  btn.onclick = iniciarSorteo;
@@ -494,15 +548,14 @@
             const nombreElemento = elementoResultado.querySelector('strong:first-child');
             const improvisanElemento = elementoResultado.querySelector('strong:last-child');
             const ruletaAudio = document.getElementById('ruleta-audio');
+            const bingAudio = document.getElementById('bing-audio'); 
             
             let tiempoTranscurrido = 0;
-            let currentIntervalo = INTERVALO_INICIAL;
             
             elementoResultado.style.cursor = 'wait';
             
-            // 1. Iniciar Audio
-            ruletaAudio.play().catch(e => console.log('El audio no pudo iniciar, requiere interacción del usuario.'));
-
+            // 1. Iniciar Audio de Ruleta
+            ruletaAudio.play().catch(e => console.log('El audio de ruleta no pudo iniciar.'));
 
             // Función que realiza una rotación
             const rotar = () => {
@@ -523,7 +576,6 @@
                 const porcentaje = Math.min(tiempoTranscurrido / DURACION_TOTAL, 1);
                 
                 // Usamos una función cuadrática para simular desaceleración (más lento al final)
-                // El intervalo se hace más largo a medida que el porcentaje aumenta.
                 const factorDesaceleracion = porcentaje * porcentaje;
                 const maxIntervalo = 500; // Intervalo máximo antes de parar
                 
@@ -539,12 +591,15 @@
                     ruletaIntervalId = setTimeout(loopRuleta, nuevoIntervalo);
                 } else {
                     // 3. Detener la ruleta y mostrar resultado FINAL
-                    clearInterval(ruletaIntervalId);
+                    clearTimeout(ruletaIntervalId);
                     ruletaIntervalId = null;
                     
-                    // Detener y resetear el audio
+                    // Detener y resetear el audio de giro
                     ruletaAudio.pause();
                     ruletaAudio.currentTime = 0; 
+                    
+                    // Reproducir el BING
+                    bingAudio.play().catch(e => console.log('El audio BING no pudo iniciar.'));
                     
                     // Mostrar el resultado FINAL y real
                     nombreElemento.innerHTML = `${resultadoFinal.impro.nombre}`;
@@ -558,8 +613,7 @@
             loopRuleta();
         }
 
-
-        /** Realiza el sorteo y asignación de grupo con la lógica estricta. */
+        /** Lógica para sortear un ejercicio con un número fijo de participantes. */
         function iniciarSorteo() {
             if (ruletaIntervalId) return;
             
@@ -571,49 +625,44 @@
             
             
             const participantesPresentesRestantes = participantesDisponibles.length; 
-            const ejerciciosRestantes = ejerciciosDisponibles.filter(e => !ejerciciosSorteados.has(e.nombre));
             
+            // Excluir ejercicios "TODOS" (actores[0] > 0) y los ya usados.
+            let ejerciciosPosibles = ejerciciosDisponibles
+                .filter(e => e.actores[0] > 0 && !e.usado);
             
-            // 1. Obtener ejercicios posibles
-            let ejerciciosPosibles = ejerciciosRestantes.filter(e => e.actores <= participantesPresentesRestantes);
+            let improElegida = null;
+            let actoresReales = 0;
+
+            // 1. Buscar una impro cuyo número de actores se ajuste a los participantes restantes
+            const ejerciciosAjustados = ejerciciosPosibles.filter(e => e.actores[e.actores.length - 1] <= participantesPresentesRestantes);
             
-            // 2. APLICAR REGLAS DE FILTRADO ESTRICTO
-            switch (participantesPresentesRestantes) {
-                case 5:
-                    ejerciciosPosibles = ejerciciosPosibles.filter(e => e.actores !== 4);
-                    break;
-                case 4:
-                    ejerciciosPosibles = ejerciciosPosibles.filter(e => e.actores === 4 || e.actores === 2);
-                    break;
-                case 3:
-                    ejerciciosPosibles = ejerciciosPosibles.filter(e => e.actores === 3);
-                    break;
-                case 2:
-                    ejerciciosPosibles = ejerciciosPosibles.filter(e => e.actores === 2);
-                    break;
+            if (ejerciciosAjustados.length === 0) {
+                 // Si no hay ejercicios numerados que quepan, forzamos la opción de fin de ronda (Sortear TODOS si quedan)
+                 return iniciarSorteoTodos();
             }
 
-            if (ejerciciosPosibles.length === 0) {
-                 document.getElementById('resultados-sorteo').insertAdjacentHTML('afterbegin', `
-                    <p style="color: #c53929; font-weight: bold; margin-bottom: 15px;">
-                        🛑 ¡SORTEO PARADO! Quedan ${participantesPresentesRestantes} participantes presentes. Ningún ejercicio cumple la regla. ¡Ajuste manual!
-                    </p>
-                `);
-                mostrarEstadoSetup();
-                return;
-            }
-
-
-            // 4. Sortear Ejercicio y Participantes (usando participantesDisponibles)
-            const indiceImpro = Math.floor(Math.random() * ejerciciosPosibles.length);
-            const improElegida = ejerciciosPosibles[indiceImpro];
-
-            ejerciciosSorteados.add(improElegida.nombre);
+            // 2. Elegir un ejercicio ajustado al azar
+            const indiceImpro = Math.floor(Math.random() * ejerciciosAjustados.length);
+            const improCandidata = ejerciciosAjustados[indiceImpro];
             
+            improElegida = improCandidata;
+
+            // 3. Seleccionar el número de actores (el más grande que quepa)
+            for (const numActores of improElegida.actores) {
+                if (numActores <= participantesPresentesRestantes) {
+                    actoresReales = numActores;
+                    break;
+                }
+            }
+            
+            // Marcar el ejercicio como usado
+            improElegida.usado = true;
+
+            // 4. Sortear Participantes
             const grupoElegido = [];
             const disponiblesParaSorteo = [...participantesDisponibles];
             
-            for (let i = 0; i < improElegida.actores; i++) {
+            for (let i = 0; i < actoresReales; i++) {
                 const indicePersona = Math.floor(Math.random() * disponiblesParaSorteo.length);
                 grupoElegido.push(disponiblesParaSorteo.splice(indicePersona, 1)[0]);
             }
@@ -623,21 +672,65 @@
             reinicializarParticipantesDisponibles(); 
 
             // 6. Mostrar Resultado temporal en la lista
-            const resultadoTemporal = { impro: { nombre: '... ROTANDO ...', actores: improElegida.actores }, grupo: [''] }; 
+            const resultadoTemporal = { impro: { nombre: '... ROTANDO ...', actores: actoresReales }, grupo: [''] }; 
             const nuevoResultadoElement = mostrarResultado(resultadoTemporal.impro, resultadoTemporal.grupo);
             
             // 7. Abrir el zoom
             const elementoZoom = abrirZoomResultado(nuevoResultadoElement);
 
             // 8. Iniciar la ruleta (incluye desaceleración y audio)
-            iniciarRuleta(elementoZoom, { impro: improElegida, grupo: grupoElegido, actores: improElegida.actores });
+            iniciarRuleta(elementoZoom, { impro: improElegida, grupo: grupoElegido, actores: actoresReales });
 
 
-            // 9. Actualizar Setup. (Se actualiza después de la duración de la ruleta)
+            // 9. Actualizar Setup.
             setTimeout(() => {
                 mostrarEstadoSetup();
-            }, 3000); // Pequeño margen después de 2.5s para la actualización de la lista
+            }, 3000); 
         }
+
+        /** Lógica para sortear un ejercicio de la lista "TODOS" al final de la ronda. */
+        function iniciarSorteoTodos() {
+            if (ruletaIntervalId) return;
+
+            const btn = document.getElementById('sortear-btn');
+            btn.disabled = true;
+
+            const participantesPresentesTotales = participantesIniciales.filter(nombre => !participantesAusentes.has(nombre));
+            
+            // Obtener ejercicios "TODOS" restantes
+            let ejerciciosTodosPosibles = ejerciciosDisponibles.filter(e => e.actores[0] === 0 && !e.usado);
+
+            // Si no quedan, pasamos a la nueva ronda (o al fin si ya no hay más)
+            if (ejerciciosTodosPosibles.length === 0) {
+                btn.disabled = false;
+                return iniciarNuevaRonda();
+            }
+
+            // Elegir un ejercicio "TODOS" al azar
+            const indiceImpro = Math.floor(Math.random() * ejerciciosTodosPosibles.length);
+            const improElegida = ejerciciosTodosPosibles[indiceImpro];
+
+            // Marcar el ejercicio como usado
+            improElegida.usado = true;
+
+            // El grupo es TODOS los que están presentes
+            const grupoElegido = participantesPresentesTotales;
+            
+            // Mostrar Resultado temporal
+            const resultadoTemporal = { impro: { nombre: '... ROTANDO ...', actores: grupoElegido.length }, grupo: [''] }; 
+            const nuevoResultadoElement = mostrarResultado(resultadoTemporal.impro, resultadoTemporal.grupo);
+            
+            const elementoZoom = abrirZoomResultado(nuevoResultadoElement);
+
+            // Iniciar la ruleta
+            iniciarRuleta(elementoZoom, { impro: improElegida, grupo: grupoElegido, actores: grupoElegido.length });
+            
+            // Después del sorteo de "TODOS", forzamos el inicio de una nueva ronda.
+            setTimeout(() => {
+                iniciarNuevaRonda();
+            }, 3000); 
+        }
+
 
         /** Formatea y añade el resultado a la interfaz. Devuelve la referencia al nuevo elemento DIV. */
         function mostrarResultado(impro, grupo) {
@@ -685,8 +778,7 @@
                 zoomContainer.remove(); 
                 
                 // HABILITAMOS EL BOTÓN INMEDIATAMENTE AL CERRAR
-                if (btn.disabled && btn.onclick === iniciarSorteo) { 
-                    btn.disabled = false;
+                if (btn.disabled) { 
                     mostrarEstadoSetup(); 
                 }
                 
