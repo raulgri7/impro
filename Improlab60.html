@@ -182,6 +182,7 @@
             font-size: 0.9em;
         }
         
+        /* Estilo general para las etiquetas de las listas */
         .list-display label {
             display: flex;
             align-items: center;
@@ -189,6 +190,12 @@
             cursor: pointer;
         }
         
+        .list-display input[type="checkbox"] {
+            margin-right: 5px;
+            transform: scale(1.1);
+        }
+        
+        /* ESTILOS ESPECÍFICOS PARA PARTICIPANTES */
         .list-display label.ausente span {
             text-decoration: line-through;
             color: #c53929;
@@ -200,15 +207,16 @@
             font-style: italic;
         }
         
-        .list-display input[type="checkbox"] {
-            margin-right: 5px;
-            transform: scale(1.1);
-        }
-        
-        /* NUEVO ESTILO: Tachar ejercicios ya usados */
-        .list-display p.ejercicio-usado {
+        /* ESTILOS ESPECÍFICOS PARA EJERCICIOS */
+        .list-display label.ejercicio-excluido span, 
+        .list-display label.ejercicio-usado span {
             text-decoration: line-through;
             color: #999;
+            font-style: italic;
+        }
+        .list-display label.ejercicio-excluido input {
+            /* Checkbox marcado para exclusión */
+            filter: hue-rotate(90deg); 
         }
 
         /* --- CLASE DE AMPLIACIÓN (ZOOM) --- */
@@ -260,7 +268,7 @@
 <body>
     
     <audio id="ruleta-audio" loop>
-        <source src="482663__joao_janz__roulette-wheel-spin-loop-1_1.wav" type="audio/mpeg"> 
+        <source src="482663__joao_janz__roulette-wheel-spin-loop-1.wav" type="audio/mpeg"> 
         Tu navegador no soporta el elemento de audio.
     </audio>
 
@@ -282,15 +290,14 @@
         <button id="sortear-btn" onclick="iniciarSorteo()">INICIAR SORTEO (Asignar Escenas)</button>
 
         <div id="resultados-sorteo">
-       
-        </div>
+            </div>
         
         <div class="setup-section">
             <h2>⚙️ Estado y Configuración</h2>
             
             <div class="setup-list">
                 <div>
-                    <strong>Ejercicios Disponibles (Nombre; Actores):</strong>
+                    <strong>Ejercicios Disponibles (Marca para Excluir):</strong>
                     <div id="ejercicios-display" class="list-display"></div>
                 </div>
                 <div>
@@ -309,26 +316,39 @@
         
         // Ejercicios ordenados alfabéticamente y con variantes/TODOS
         const EJERCICIOS_RAW = [
-            "2min. 1min. 30seg. 15seg;TODOS", 
-            "50 años más tarde;4", 
-            "Detective;2", 
-            "Emociones (escenario en cuatro);4|3", 
-            "Entrevista rara;4|3", 
-            "Estatuas;3|2", 
-            "Excusa para llegar tarde;3", 
-            "Giratoria y esquinas;4", 
-            "Idioma inventado;4", 
-            "La caja que no se abre;TODOS", 
-            "Libro;2", 
-            "Morir;3|2", 
-            "Neutro+ entra y dice (ronda);TODOS", 
-            "Objeto 100%;2", 
-            "Objeto misterioso (empieza cuando adivina);2", 
-            "Objeto sin nombre, sin usar;2", 
-            "Pitonisa;3", 
-            "Títulos distintos + título escena;3|2", 
-            "Votación público;4|3"
-        ];
+            	"2min. 1min. 30seg. 15seg;TODOS",
+            	"50 años más tarde;4",
+            	"Abecedario;TODOS",
+            	"Cambio de estilo;3|2",
+            	"Completar la frase;2",
+            	"Congelados;4",
+            	"Detective;2",
+            	"Emociones (escenario en cuatro);4|3",
+            	"Entrevista rara;4|3",
+            	"Estatuas;3|2",
+            	"Excusa para llegar tarde;3",
+            	"Final alternativo;3|2",
+            	"Giratoria y esquinas;4",
+            	"Idioma inventado;4",
+            	"La caja que no se abre;TODOS",
+            	"Libro;2",
+            	"Marcas;2",
+            	"Morir;3|2",
+            	"Neutro+ entra y dice (ronda);TODOS",
+            	"No me chiles que no te veo;4",
+            	"Objeto 100%;2",
+            	"Objeto misterioso (empieza cuando adivina);2",
+            	"Objeto sin nombre, sin usar;2",
+            	"Palabras que meter;2",
+            	"Pitonisa;3",
+            	"Secreto de dos y otro no sabe;3",
+            	"Sólo preguntas;2",
+            	"Sonidos/Banda sonora;2",
+            	"Tema absurdo, emoción real;2",
+            	"Títulos distintos + título escena;3|2",
+            	"Tostadora;TODOS",
+            	"Votación público;4|3"
+         ];
 
         const NOMBRES_INICIALES = [
             "Ángeles", "Aroa", "Bea", "Beloki", "Chuchi", "Elena", "Elenita", "Esther",
@@ -337,15 +357,18 @@
         ];
 
         // ----------------------------------------------------------
-        // --- LÓGICA DEL SORTEO ---
+        // --- ESTADO GLOBAL ---
         // ----------------------------------------------------------
         
         let ejerciciosDisponibles = []; // Ejercicios NO usados desde la carga de la página
+        let ejerciciosExcluidos = new Set(); // Nombres de ejercicios excluidos manualmente
         let participantesDisponibles = []; // Participantes presentes Y sin asignar (lista activa)
         let participantesIniciales = [];  // Lista completa al inicio (para la gestión de ausencias)
         let participantesAusentes = new Set(); // Nombres de los participantes marcados como ausentes
         let participantesSorteados = new Set(); // Nombres de los participantes ya asignados en la ronda
         let ruletaIntervalId = null; 
+        let minActoresRequeridos = 0;
+        let ultimoEjercicioFueTodos = false; // BANDERA DE CONTROL DE ESTADO
 
         // Función auxiliar para mezclar un array
         function shuffleArray(array) {
@@ -386,10 +409,27 @@
                 : 0;
 
             mostrarEstadoSetup();
-            document.body.addEventListener('click', manejarZoomResultado);
+            // Listener principal para el cierre del zoom
+            document.body.addEventListener('click', manejarZoomResultado); 
             
-            // Listener específico para los checkboxes de ausentes
+            // Listeners específicos para los checkboxes
             document.getElementById('participantes-display').addEventListener('change', manejarAusencia);
+            document.getElementById('ejercicios-display').addEventListener('change', manejarExclusion);
+        }
+
+        /** Maneja el marcado/desmarcado de un ejercicio como excluido. */
+        function manejarExclusion(event) {
+            if (event.target.type === 'checkbox' && event.target.name === 'excluir-ejercicio') {
+                const nombre = event.target.value;
+                
+                if (event.target.checked) {
+                    ejerciciosExcluidos.add(nombre);
+                } else {
+                    ejerciciosExcluidos.delete(nombre);
+                }
+                
+                mostrarEstadoSetup(); // Refresca el estado para actualizar el botón de sorteo
+            }
         }
 
         /** Maneja el marcado/desmarcado de un participante como ausente. */
@@ -418,22 +458,39 @@
 
         /** Muestra las listas de participantes y ejercicios en el Setup. */
         function mostrarEstadoSetup() {
-            // Muestra todos los ejercicios, tachando los que ya fueron sorteados.
+            // Muestra todos los ejercicios, permitiendo excluirlos y tachando usados/excluidos.
             const ejerciciosHTML = ejerciciosDisponibles
                 .map(e => {
                     const esUsado = e.usado;
-                    const clase = esUsado ? 'ejercicio-usado' : '';
+                    const esExcluido = ejerciciosExcluidos.has(e.nombre);
+
+                    let estadoClase = '';
+                    let isDisabled = false;
+                    let isChecked = false;
                     
+                    if (esUsado) {
+                        estadoClase = 'ejercicio-usado';
+                        isDisabled = true;
+                    } else if (esExcluido) {
+                        estadoClase = 'ejercicio-excluido';
+                        isChecked = true;
+                    }
+
                     let actoresStr = e.actores[0] === 0 
                         ? 'TODOS' 
                         : e.actores.join('|') + ' pers.';
                         
-                    return `<p class="${clase}">${e.nombre} (${actoresStr})</p>`;
+                    return `
+                        <label class="${estadoClase}">
+                            <input type="checkbox" name="excluir-ejercicio" value="${e.nombre}" ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
+                            <span>${e.nombre} (${actoresStr})</span>
+                        </label>
+                    `;
                 })
                 .join('');
             document.getElementById('ejercicios-display').innerHTML = ejerciciosHTML || '<p style="color:red;">Ninguno disponible</p>';
 
-            // Mostrar el listado COMPLETO, pero con el estado correcto (Ausente/Sorteado)
+            // Mostrar el listado COMPLETO de participantes
             const participantesHTML = participantesIniciales
                 .map(nombre => {
                     const isAusente = participantesAusentes.has(nombre);
@@ -468,11 +525,13 @@
             const btn = document.getElementById('sortear-btn');
             const participantesPresentesRestantes = participantesDisponibles.length; 
             
+            // Filtrar los ejercicios numerados disponibles (NO USADOS y NO EXCLUIDOS)
             const ejerciciosNumeradosRestantes = ejerciciosDisponibles
-                .filter(e => e.actores[0] > 0 && !e.usado);
+                .filter(e => e.actores[0] > 0 && !e.usado && !ejerciciosExcluidos.has(e.nombre));
             
+            // Filtrar los ejercicios TODOS disponibles (NO USADOS y NO EXCLUIDOS)
             const ejerciciosTodosRestantes = ejerciciosDisponibles
-                .filter(e => e.actores[0] === 0 && !e.usado);
+                .filter(e => e.actores[0] === 0 && !e.usado && !ejerciciosExcluidos.has(e.nombre));
             
             // Lógica para el botón principal
             
@@ -620,46 +679,50 @@
             const btn = document.getElementById('sortear-btn');
             btn.disabled = true; 
             
-            const mensajeInicial = document.getElementById('mensaje-inicial');
-            if (mensajeInicial) mensajeInicial.remove();
-            
-            
             const participantesPresentesRestantes = participantesDisponibles.length; 
+            const N = participantesPresentesRestantes;
             
-            // 1. Obtener ejercicios numerados posibles (excluyendo 'TODOS' y usados)
+            // 1. Obtener ejercicios numerados posibles (excluyendo 'TODOS', usados y EXCLUIDOS)
             let ejerciciosPosibles = ejerciciosDisponibles
-                .filter(e => e.actores[0] > 0 && !e.usado);
+                .filter(e => e.actores[0] > 0 && !e.usado && !ejerciciosExcluidos.has(e.nombre));
             
             let improElegida = null;
             let actoresReales = 0;
 
 
             // 2. Filtrar ejercicios que puedan ser jugados con los participantes restantes (N)
-            // Criterio: el número MÁS PEQUEÑO de actores que permite el ejercicio debe ser <= N.
+            // Criterio inicial: el número MÁS PEQUEÑO de actores que permite el ejercicio debe ser <= N.
             let ejerciciosAjustados = ejerciciosPosibles.filter(e => 
-                e.actores[e.actores.length - 1] <= participantesPresentesRestantes
+                e.actores[e.actores.length - 1] <= N
             );
 
-
-            // --- NUEVA LÓGICA DE FORZADO DE CONSUMO ---
+            // --- LÓGICA DE RESTRICCIÓN: NUNCA DEJAR 1 PERSONA SOLA Y REGLAS ESPECÍFICAS ---
             
-            const N = participantesPresentesRestantes;
-
-            // FASE A: Filtrar ejercicios para forzar el consumo total o necesario.
-            if (N === 3 || N === 2 || N === 4) {
-                // Buscamos ejercicios que puedan consumir el número exacto restante (o un número necesario para 'matar' la ronda).
+            let ejerciciosFiltrados = ejerciciosAjustados.filter(e => {
+                // Obtenemos todos los números de actores que este ejercicio permite Y que caben en N.
+                const opcionesQueCaben = e.actores.filter(a => a <= N);
                 
-                let ejerciciosPrioritarios = ejerciciosAjustados.filter(e => 
-                    e.actores.includes(N) || 
-                    (N === 4 && e.actores.includes(2)) ||
-                    (N === 3 && e.actores.includes(2)) ||
-                    (N === 2 && e.actores.includes(2))
-                );
+                // Regla Anti-Uno: Un ejercicio es válido si tiene AL MENOS una opción de actores 'A'
+                // tal que el resto (N - A) NO sea 1. (N - A) != 1
+                const cumpleAntiUno = opcionesQueCaben.some(a => (N - a) !== 1);
+                
+                if (!cumpleAntiUno) return false;
 
-                if (ejerciciosPrioritarios.length > 0) {
-                    ejerciciosAjustados = ejerciciosPrioritarios;
-                } 
-                // Si no hay prioritarios, se sigue con los ajustados (pueden ser ejercicios de N=4 que solo permitan 2 o 3, lo cual es subóptimo pero posible).
+                // Regla específica N=5: "ya no podía haber ejercicios de 4 personas, debía forzar 2 ó 3"
+                if (N === 5 && e.actores.includes(4)) {
+                    // Si el ejercicio solo permite 4 y no 3 o 2, lo descartamos.
+                    // Si permite 4|3 o 4|2, se mantiene, pero luego forzamos 3 o 2.
+                    if (!e.actores.includes(3) && !e.actores.includes(2)) {
+                        return false; 
+                    }
+                }
+                
+                return true;
+            });
+
+            // Si el filtro estricto deja ejercicios válidos, los usamos. Si no, forzamos la caída a TODOS.
+            if (ejerciciosFiltrados.length > 0) {
+                ejerciciosAjustados = ejerciciosFiltrados;
             }
 
             // Si después del filtro estricto no quedan ejercicios, revisamos si se puede sortear TODOS.
@@ -673,9 +736,9 @@
             
             improElegida = improCandidata;
 
-            // 4. Seleccionar el número de actores (el más grande que quepa, o el forzado)
+            // 4. Seleccionar el número de actores: el más grande que quepa, con las excepciones de forzado.
             
-            // Si N=4 o N=3 y forzamos a 2, debe cumplirse la regla de seleccionar el más grande que quepa.
+            // Por defecto: Elegimos la opción más grande que quepa (porque ya sabemos que no deja 1).
             for (const numActores of improElegida.actores) {
                 if (numActores <= N) {
                     actoresReales = numActores;
@@ -683,15 +746,27 @@
                 }
             }
             
-            // VALIDACIÓN POST-SELECCIÓN (Aseguramos que el ejercicio de 2 no se haya sacado con N=3 si había de 3 disponibles)
-            // Esta validación se simplifica si el filtro de la FASE A es bueno. 
-            // Si N=3 y se seleccionó un ejercicio de 2, es porque no había de 3 en los ajustados (o el aleatorio lo escogió mal).
+            // VALIDACIONES ESPECÍFICAS DE FORZADO:
+
+            // N=5: Regla de "forzar 2 o 3" y evitar 4.
+            if (N === 5) {
+                // Si el ejercicio tiene opción 3 o 2, forzamos esa opción (la más grande de las dos si existen).
+                if (improElegida.actores.includes(3)) {
+                    actoresReales = 3;
+                } else if (improElegida.actores.includes(2)) {
+                    actoresReales = 2;
+                }
+            }
             
-            // Asegurar que si quedan 3, y el ejercicio elegido permite 3, SE ELIJA 3.
-            if (N === 3 && improElegida.actores.includes(3)) {
+            // N=4: Regla de "o de 4 o dos de dos". Si el ejercicio permite 4, lo forzamos. Si no, el más grande.
+            // La elección por defecto ya elige 4 si está disponible.
+            
+            // N=3: Regla de "sólo podía sortear ejercicios de 3". Forzamos 3.
+            else if (N === 3 && improElegida.actores.includes(3)) {
                 actoresReales = 3;
             }
-            // Asegurar que si quedan 2, y el ejercicio elegido permite 2, SE ELIJA 2.
+            
+            // N=2: Regla de "sólo ejercicios de dos". Forzamos 2.
             else if (N === 2 && improElegida.actores.includes(2)) {
                 actoresReales = 2;
             }
@@ -724,10 +799,8 @@
             iniciarRuleta(elementoZoom, { impro: improElegida, grupo: grupoElegido, actores: actoresReales });
 
 
-            // 10. Actualizar Setup.
-            setTimeout(() => {
-                mostrarEstadoSetup();
-            }, 3000); 
+            // 10. NOTA: La reactivación del botón ocurrirá cuando el usuario
+            // cierre manualmente el zoom (manejador manejarZoomResultado)
         }
 
         /** Lógica para sortear un ejercicio de la lista "TODOS" al final de la ronda. */
@@ -736,15 +809,19 @@
 
             const btn = document.getElementById('sortear-btn');
             btn.disabled = true;
+            
+            // 1. Activar bandera de control de estado
+            ultimoEjercicioFueTodos = true; 
 
             const participantesPresentesTotales = participantesIniciales.filter(nombre => !participantesAusentes.has(nombre));
             
-            // Obtener ejercicios "TODOS" restantes
-            let ejerciciosTodosPosibles = ejerciciosDisponibles.filter(e => e.actores[0] === 0 && !e.usado);
+            // Obtener ejercicios "TODOS" restantes (NO USADOS y NO EXCLUIDOS)
+            let ejerciciosTodosPosibles = ejerciciosDisponibles.filter(e => e.actores[0] === 0 && !e.usado && !ejerciciosExcluidos.has(e.nombre));
 
-            // Si no quedan, pasamos a la nueva ronda (o al fin si ya no hay más)
+            // Si no quedan, pasamos a la nueva ronda (esto no debería pasar si el botón está bien seteado)
             if (ejerciciosTodosPosibles.length === 0) {
                 btn.disabled = false;
+                ultimoEjercicioFueTodos = false; // Desactivar bandera si se resuelve inmediatamente
                 return iniciarNuevaRonda();
             }
 
@@ -767,10 +844,7 @@
             // Iniciar la ruleta.
             iniciarRuleta(elementoZoom, { impro: improElegida, grupo: grupoElegidoDisplay, actores: participantesPresentesTotales.length });
             
-            // Después del sorteo de "TODOS", forzamos el inicio de una nueva ronda.
-            setTimeout(() => {
-                iniciarNuevaRonda();
-            }, 3000); 
+            // NOTA: El cierre y la nueva ronda se gestionan ahora en manejarZoomResultado
         }
 
 
@@ -814,12 +888,32 @@
                 const zoomContainer = event.target.classList.contains('resultado-zoom') ? event.target : resultadoGrupo.parentNode;
                 const grupoZoomed = zoomContainer.querySelector('.resultado-grupo.nuevo');
                 
+                // Si la bandera está activa, significa que acabamos de cerrar un ejercicio de TODOS.
+                if (ultimoEjercicioFueTodos) {
+                    // 1. CERRAR ZOOM y mover el resultado al historial (Manual)
+                    if (grupoZoomed) {
+                        resultadosDiv.insertAdjacentElement('afterbegin', grupoZoomed);
+                    }
+                    zoomContainer.remove(); 
+                    
+                    // 2. DESACTIVAR BANDERA
+                    ultimoEjercicioFueTodos = false;
+                    
+                    // 3. FORZAR NUEVA RONDA (Esto llama a mostrarEstadoSetup, que re-habilita el botón)
+                    iniciarNuevaRonda();
+                    
+                    // Salir para evitar que se ejecute la lógica de reactivación normal
+                    return;
+                }
+                
+                // Lógica de cierre para SORTEO NORMAL
                 if (grupoZoomed) {
+                    // Mueve el resultado de vuelta al listado
                     resultadosDiv.insertAdjacentElement('afterbegin', grupoZoomed);
                 }
                 zoomContainer.remove(); 
                 
-                // HABILITAMOS EL BOTÓN INMEDIATAMENTE AL CERRAR
+                // Si el botón está deshabilitado, lo volvemos a habilitar llamando a mostrarEstadoSetup()
                 if (btn.disabled) { 
                     mostrarEstadoSetup(); 
                 }
