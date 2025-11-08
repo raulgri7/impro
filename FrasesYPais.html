@@ -221,8 +221,8 @@ Genera el contenido ahora. **NO generes ninguna otra sección, lista o texto adi
                     body: JSON.stringify({
                         contents: [{ role: "user", parts: [{ text: prompt }] }],
                         generationConfig: {
-                            temperature: 0.6, // Un poco más de creatividad para las frases
-                            maxOutputTokens: 4096,
+                            temperature: 0.9, // Un poco más de creatividad para las frases
+                            maxOutputTokens: 8192,
                         }
                     })
                 });
