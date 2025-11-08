@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 Generador: País, Historia y 6 Frases (Impro)</title>
+    <style>
+        /* ----------------------------------------------------------
+           ESTILOS (LOOK AND FEEL - TEATRO Y DRAMATURGIA)
+           ---------------------------------------------------------- */
+        body { 
+            font-family: 'Roboto', sans-serif; 
+            padding: 20px; 
+            max-width: 900px; 
+            margin: 0 auto; 
+            background-color: #e8f5e9; /* Verde claro suave */
+            color: #333;
+        }
+        h1 { 
+            color: #388e3c; /* Verde esmeralda oscuro */
+            border-bottom: 3px solid #66bb6a; 
+            padding-bottom: 15px; 
+            margin-bottom: 30px; 
+            text-align: center;
+            font-size: 2.2em;
+        }
+        p.instruccion { 
+            color: #555; 
+            margin-bottom: 25px; 
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        /* Contenedor del Botón */
+        .boton-container {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        button { 
+            padding: 16px 30px; 
+            background-color: #388e3c; /* Verde principal */
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 1.2em; 
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.1s; 
+            box-shadow: 0 5px 8px rgba(0, 0, 0, 0.2); 
+            text-transform: uppercase;
+        }
+        button:hover:not(:disabled) { background-color: #2e7d32; }
+        button:active:not(:disabled) { 
+            transform: translateY(3px); 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); 
+        }
+        button:disabled {
+             background-color: #a5d6a7;
+             cursor: not-allowed;
+             box-shadow: none;
+        }
+        
+        #resultado { 
+            margin-top: 35px; 
+            padding: 30px; 
+            border: 3px solid #388e3c; 
+            background-color: #ffffff; /* Fondo blanco para el contenido */
+            border-radius: 15px; 
+            min-height: 250px; 
+            font-size: 1.1em; 
+            line-height: 1.6;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Estilos de la carga */
+        .cargando { 
+            color: #388e3c; 
+            font-weight: bold; 
+            animation: pulse 1.5s infinite; 
+            display: block;
+            text-align: center;
+            font-size: 1.2em;
+            padding: 20px 0;
+        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        
+        /* Estilos específicos para la respuesta generada */
+        pre { 
+            font-family: inherit; 
+            margin: 0; 
+            padding: 0; 
+            white-space: pre-wrap; 
+            line-height: 1.6; 
+            font-weight: normal;
+        }
+        
+        /* Mejorar la legibilidad de la salida */
+        #resultado strong {
+            color: #388e3c;
+            font-weight: bold;
+        }
+        #resultado h3 {
+             color: #1b5e20;
+             margin-top: 25px;
+             margin-bottom: 5px;
+             border-bottom: 2px dotted #66bb6a;
+             padding-bottom: 5px;
+        }
+        #resultado li {
+            margin-bottom: 10px;
+        }
+        .error-detalle {
+            background-color: #ffebee; 
+            border: 1px solid #c53929;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🌎 Generador: País, Historia y Frases</h1>
+    <p class="instruccion">Genera 6 frases, 1 país y 5 hechos históricos con contexto para tu ejercicio de improvisación.</p>
+    
+    <div class="boton-container">
+        <button id="generar-btn" onclick="generarPremisas()">Generar Elementos para Improvisación</button>
+    </div>
+    
+    <div id="resultado">
+        <p style="text-align: center; color: #5f6368;">Pulsa el botón para obtener los tres elementos de improvisación que te pide el público.</p>
+    </div>
+
+
+    <script>
+        // ----------------------------------------------------------
+        // --- CLAVE API Y CONFIGURACIÓN ---
+        // ----------------------------------------------------------
+        // ATENCIÓN: Necesitas tu CLAVE API de Google Gemini para que esto funcione.
+        const API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; 
+        const MODEL_NAME = 'gemini-2.5-flash';
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+
+
+        // Función para construir el PROMPT detallado para el ejercicio de País/Historia/Frases
+        function construirPromptImproHistoria() {
+            const contexto = `Actúa como un generador de premisas para improvisación teatral. Tu tarea es generar TRES secciones de contenido EXCLUSIVAMENTE en formato Markdown, sin introducción ni conclusión.
+
+INSTRUCCIONES CLAVE:
+1.  **6 Frases Aleatorias:** Deben ser frases sueltas y variadas (fragmentos de canciones, refranes, localismos, frases de películas).
+2.  **1 País del Mundo:** Un país conocido internacionalmente.
+3.  **5 Hechos Históricos/Mitos/Leyendas:** Relacionados con el país anterior. CADA HECHO DEBE INCLUIR UNA BREVE EXPLICACIÓN de 2 a 3 líneas sobre su contexto o significado, para que sirva de inspiración a los improvisadores.
+
+REGLAS DE FORMATO ESTRICTO:
+* Usa un encabezado de nivel 3 (###) para el título de cada sección.
+* Usa listas numeradas para las Frases y los Hechos Históricos.
+* Para los Hechos Históricos, usa el formato: "Número. **Hecho/Mito/Leyenda:** Explicación de 2-3 líneas."
+
+Genera el contenido ahora.`;
+
+            return contexto;
+        }
+
+        // Función auxiliar para formatear la salida (se mantiene la estructura simple)
+        function formatearResultado(texto) {
+            // Reemplazar encabezados ### con etiquetas H3 para un mejor estilo
+            let html = texto.replace(/###\s*(.*)/g, '<h3>$1</h3>');
+            return html;
+        }
+
+        // Función principal para llamar a la API
+        async function generarPremisas() {
+            const resultadoDiv = document.getElementById('resultado');
+            const boton = document.getElementById('generar-btn');
+
+            boton.disabled = true;
+            resultadoDiv.innerHTML = '<span class="cargando">Generando elementos: 6 frases, 1 país y 5 hechos históricos...</span>';
+            
+            const prompt = construirPromptImproHistoria();
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: [{ text: prompt }] }],
+                        generationConfig: { 
+                            temperature: 0.6, // Un poco más de creatividad para las frases
+                            maxOutputTokens: 4096, 
+                        }
+                    })
+                });
+
+                // Si hay un error HTTP (ej. 403, 400, 500)
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({error: {message: 'Respuesta de error no es JSON'}}));
+                    throw new Error(`Error HTTP ${response.status}: ${errorData.error ? errorData.error.message : response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                let textoGenerado = "";
+
+                try {
+                    // Intenta extraer el texto normal
+                    textoGenerado = data.candidates[0].content.parts[0].text.trim();
+                } catch (e) {
+                    // SI FALLA (ej. por bloqueo de seguridad o respuesta vacía)
+                    
+                    // Mostrar los detalles de la respuesta JSON para el diagnóstico.
+                    let safetyReason = "Motivo desconocido (la respuesta JSON estaba vacía o mal formada).";
+                    if (data.candidates && data.candidates[0].finishReason === 'SAFETY') {
+                        safetyReason = "Bloqueado por política de seguridad (SAFETY BLOCK). Revisa el contenido de tu Prompt.";
+                    } else if (data.promptFeedback) {
+                           safetyReason = JSON.stringify(data.promptFeedback, null, 2);
+                    } else {
+                        safetyReason = JSON.stringify(data, null, 2);
+                    }
+
+                    resultadoDiv.innerHTML = `
+                        <strong style="color: #c53929;">Error: No se pudo generar el contenido útil.</strong><br>
+                        El modelo no devolvió texto o el contenido fue bloqueado.<br>
+                        <strong style="color: #5f6368;">Diagnóstico detallado:</strong>
+                        <div class="error-detalle">
+                            <pre>${safetyReason}</pre>
+                        </div>
+                    `;
+                    boton.disabled = false;
+                    return; // Salir de la función si no hay contenido válido
+                }
+
+                // Muestra el resultado final (si la extracción fue exitosa)
+                resultadoDiv.innerHTML = `<pre>${formatearResultado(textoGenerado)}</pre>`;
+                boton.disabled = false;
+
+            } catch (error) {
+                // Manejo de ERRORES CRÍTICOS (CORS, Red, Clave)
+                let posibleCausa = "Clave API incorrecta, expirada o problema de CORS.";
+                if (error.message.includes('Failed to fetch') || error.message.includes('Error HTTP')) {
+                     posibleCausa = '⚠️ El problema es casi seguro de **CORS** (si estás en file:///) o la clave API está restringida.';
+                }
+                
+                resultadoDiv.innerHTML = `
+                    <strong style="color: #c53929;">Error crítico de Conexión:</strong> ${error.message}.<br><br>
+                    <strong>POSIBLES CAUSAS:</strong><br>
+                    - ${posibleCausa}<br>
+                    - El modelo no está disponible o el nombre es incorrecto.
+                `;
+                boton.disabled = false;
+            }
+        }
+    </script>
+
+
+<hr style="margin-top: 40px; border-color: #ccc;">
+    <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
+        <a href="index.html" style="
+            text-decoration: none;
+            color: #5f6368;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        ">
+            ← Volver al Menú Principal
+        </a>
+    </div>
+
+</body>
+</html>
