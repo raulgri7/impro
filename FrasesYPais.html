@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎭 Generador: País, Historia y 6 Frases (Impro) - Corregido</title>
+    <title>🎭 Generador: País, Historia y 6 Frases (Impro) - Corregido y Mejorado</title>
     <style>
         /* ----------------------------------------------------------
            ESTILOS (LOOK AND FEEL - TEATRO Y DRAMATURGIA)
@@ -107,6 +107,14 @@
             border-bottom: 2px dotted #66bb6a;
             padding-bottom: 5px;
         }
+        
+        /* === NUEVO ESTILO: Destacar el país en el encabezado === */
+        #resultado h3 em strong {
+            color: #c53929; /* Color rojo oscuro llamativo */
+            font-size: 1.1em; /* Un poco más grande */
+            font-weight: bolder;
+        }
+
         #resultado li {
             margin-bottom: 10px;
         }
@@ -169,11 +177,10 @@
         }
 
         // ----------------------------------------------------------
-        // --- PROMPT CORREGIDO (SOLUCIONA LA REPETICIÓN DE FRASES) ---
+        // --- PROMPT CON PARÁMETROS DE GENERACIÓN ACTUALIZADOS ---
         // ----------------------------------------------------------
 
         // Función para construir el PROMPT detallado para el ejercicio de País/Historia/Frases
-        // Acepta 'pais' como argumento para evitar variables globales
         function construirPromptImproHistoria(pais) {
             const contexto = `Actúa como un generador de premisas para improvisación teatral. Tu tarea es generar **DOS LISTAS** de contenido, separadas por encabezados, EXCLUSIVAMENTE en formato Markdown, sin introducción ni conclusión.
 
@@ -183,7 +190,7 @@ INSTRUCCIONES CLAVE:
 
 REGLAS DE FORMATO ESTRICTO:
 * Usa el encabezado de nivel 3 (###) "### 🗣️ Las 6 Frases Aleatorias" para la Sección 1.
-* Usa el encabezado de nivel 3 (###) "### 🌎 Hechos de ${pais}" para la Sección 2.
+* Usa el encabezado de nivel 3 (###) **"### 🌎 Hechos de ***${pais}***"** para la Sección 2. **ATENCIÓN: Envuelve el nombre del país en negrita y cursiva (***[País]***) en el encabezado.**
 * Usa **listas numeradas** para las Frases.
 * Usa **listas numeradas** para los Hechos Históricos. El formato debe ser: "Número. **Hecho/Mito/Leyenda:** Explicación de 2-3 líneas."
 
@@ -195,7 +202,12 @@ Genera el contenido ahora. **NO generes ninguna otra sección, lista o texto adi
         // Función auxiliar para formatear la salida (se mantiene la estructura simple)
         function formatearResultado(texto) {
             // Reemplazar encabezados ### con etiquetas H3 para un mejor estilo
-            let html = texto.replace(/###\s*(.*)/g, '<h3>$1</h3>');
+            // y permitir que el Markdown dentro del encabezado (***País***) funcione.
+            let html = texto
+                .replace(/###\s*(.*)/g, '<h3>$1</h3>') // Convierte ### a <h3>
+                .replace(/\*\*\*(.*?)\*\*\*/g, '<em><strong>$1</strong></em>') // Convierte ***texto*** a <em><strong>texto</strong></em>
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Convierte **texto** a <strong>texto</strong>
+
             return html;
         }
 
@@ -207,10 +219,8 @@ Genera el contenido ahora. **NO generes ninguna otra sección, lista o texto adi
             boton.disabled = true;
             resultadoDiv.innerHTML = '<span class="cargando">Generando elementos: 6 frases, 1 país y 5 hechos históricos...</span>';
 
-            // CORRECCIÓN: Declarar 'paisSeleccionado' con const (evita variable global implícita)
-            const paisSeleccionado = seleccionarPaisAlAzar(); 
-            // CORRECCIÓN: Pasar 'paisSeleccionado' como argumento
-            const prompt = construirPromptImproHistoria(paisSeleccionado); 
+            const paisSeleccionado = seleccionarPaisAlAzar();
+            const prompt = construirPromptImproHistoria(paisSeleccionado);
 
             try {
                 const response = await fetch(API_URL, {
@@ -221,13 +231,13 @@ Genera el contenido ahora. **NO generes ninguna otra sección, lista o texto adi
                     body: JSON.stringify({
                         contents: [{ role: "user", parts: [{ text: prompt }] }],
                         generationConfig: {
-                            temperature: 0.9, // Un poco más de creatividad para las frases
+                            // Parámetros actualizados: 0.9 de temperatura y 8192 maxOutputTokens
+                            temperature: 0.9,
                             maxOutputTokens: 8192,
                         }
                     })
                 });
 
-                // Si hay un error HTTP (ej. 403, 400, 500)
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({error: {message: 'Respuesta de error no es JSON'}}));
                     throw new Error(`Error HTTP ${response.status}: ${errorData.error ? errorData.error.message : response.statusText}`);
@@ -238,12 +248,8 @@ Genera el contenido ahora. **NO generes ninguna otra sección, lista o texto adi
                 let textoGenerado = "";
 
                 try {
-                    // Intenta extraer el texto normal
                     textoGenerado = data.candidates[0].content.parts[0].text.trim();
                 } catch (e) {
-                    // SI FALLA (ej. por bloqueo de seguridad o respuesta vacía)
-
-                    // Mostrar los detalles de la respuesta JSON para el diagnóstico.
                     let safetyReason = "Motivo desconocido (la respuesta JSON estaba vacía o mal formada).";
                     if (data.candidates && data.candidates[0].finishReason === 'SAFETY') {
                         safetyReason = "Bloqueado por política de seguridad (SAFETY BLOCK). Revisa el contenido de tu Prompt.";
@@ -262,15 +268,13 @@ Genera el contenido ahora. **NO generes ninguna otra sección, lista o texto adi
                         </div>
                     `;
                     boton.disabled = false;
-                    return; // Salir de la función si no hay contenido válido
+                    return;
                 }
 
-                // Muestra el resultado final (si la extracción fue exitosa)
                 resultadoDiv.innerHTML = `<pre>${formatearResultado(textoGenerado)}</pre>`;
                 boton.disabled = false;
 
             } catch (error) {
-                // Manejo de ERRORES CRÍTICOS (CORS, Red, Clave)
                 let posibleCausa = "Clave API incorrecta, expirada o problema de CORS.";
                 if (error.message.includes('Failed to fetch') || error.message.includes('Error HTTP')) {
                      posibleCausa = '⚠️ El problema es casi seguro de **CORS** (si estás en file:///) o la clave API está restringida.';
