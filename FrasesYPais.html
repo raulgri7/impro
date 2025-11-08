@@ -145,6 +145,34 @@
         const MODEL_NAME = 'gemini-2.5-flash';
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
 
+// ----------------------------------------------------------
+        // --- LISTA DE PAÍSES Y FUNCIÓN DE SELECCIÓN (EL CAMBIO) ---
+        // ----------------------------------------------------------
+        const listaPaises = [
+            "Afganistán", "Alemania", "Angola", "Arabia Saudí", "Argelia", "Argentina", "Australia", "Austria",
+            "Bangladesh", "Bélgica", "Bolivia", "Botsuana", "Brasil", "Bulgaria", "Camerún", "Canadá",
+            "Catar", "Chile", "China", "Colombia", "Corea del Norte", "Corea del Sur", "Costa de Marfil", "Costa Rica",
+            "Croacia", "Cuba", "Dinamarca", "Ecuador", "Egipto", "El Salvador", "Emiratos Árabes Unidos", "Eslovaquia",
+            "Eslovenia", "España", "Estados Unidos", "Estonia", "Etiopía", "Filipinas", "Finlandia", "Francia",
+            "Ghana", "Grecia", "Guatemala", "Guinea", "Haití", "Honduras", "Hungría", "India",
+            "Indonesia", "Irak", "Irán", "Irlanda", "Islandia", "Israel", "Italia", "Japón",
+            "Jordania", "Kazajistán", "Kenia", "Kuwait", "Laos", "Letonia", "Líbano", "Liberia",
+            "Libia", "Lituania", "Luxemburgo", "Madagascar", "Marruecos", "México", "Mozambique", "Namibia",
+            "Nepal", "Nicaragua", "Nigeria", "Noruega", "Nueva Zelanda", "Omán", "Países Bajos", "Pakistán",
+            "Panamá", "Paraguay", "Perú", "Polonia", "Portugal", "Reino Unido", "República Centroafricana", "República Checa",
+            "República del Congo", "República Democrática del Congo", "República Dominicana", "Rumanía", "Rusia", "Senegal", "Serbia",
+            "Singapur", "Siria", "Sri Lanka", "Sudáfrica", "Sudán", "Sudán del Sur", "Suecia", "Suiza",
+            "Tailandia", "Tanzania", "Túnez", "Turquía", "Ucrania", "Uganda", "Uruguay", "Uzbekistán",
+            "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabue"
+        ];
+
+        function seleccionarPaisAlAzar() {
+            const indice = Math.floor(Math.random() * listaPaises.length);
+            return listaPaises[indice];
+        }
+        // ----------------------------------------------------------
+        // --- FIN: LISTA DE PAÍSES ---
+        // ----------------------------------------------------------
 
         // Función para construir el PROMPT detallado para el ejercicio de País/Historia/Frases
         function construirPromptImproHistoria() {
@@ -152,7 +180,7 @@
 
 INSTRUCCIONES CLAVE:
 1.  **6 Frases Aleatorias:** Deben ser frases sueltas y variadas (fragmentos de canciones, refranes, localismos, frases de películas).
-2.  **1 País del Mundo:** Un país conocido internacionalmente.
+2.  **El País Seleccionado es:** ${paisSeleccionado}. **NO** generes un país, solo úsalo en el encabezado de la primera sección y en el contexto de los hechos históricos.
 3.  **5 Hechos Históricos/Mitos/Leyendas:** Relacionados con el país anterior. CADA HECHO DEBE INCLUIR UNA BREVE EXPLICACIÓN de 2 a 3 líneas sobre su contexto o significado, para que sirva de inspiración a los improvisadores.
 
 REGLAS DE FORMATO ESTRICTO:
