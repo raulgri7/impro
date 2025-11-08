@@ -99,6 +99,19 @@
             line-height: 1.6;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
+
+        /* ESTILOS AÑADIDOS/MODIFICADOS PARA EL AJUSTE DE PALABRA */
+        #resultado pre {
+             font-family: inherit; 
+             margin: 0; 
+             padding: 0; 
+             white-space: pre-wrap; 
+             line-height: 1.6; 
+             font-weight: normal;
+             /* Propiedades para forzar el ajuste de texto dentro del contenedor */
+             overflow-wrap: break-word; 
+             word-wrap: break-word; 
+        }
         
         /* Estilos de la carga */
         .cargando { 
@@ -234,16 +247,11 @@ Genera los 10 ejercicios nuevos ahora.`;
             html = html.replace(/^\*\s*(.*?):\s*(.*)/gm, '<li><strong>$1:</strong> $2</li>');
             
             // 3. Envolver los bloques de lista en <ul>
-            // Esto es más complejo en un solo paso, así que nos aseguraremos de que el modelo devuelva listas que empiezan justo después del H3.
-            // Para simplificar, si el modelo devuelve listas de Markdown bien formadas, podemos confiar en la conversión de Markdown a HTML que sucede a veces implícitamente, pero forzaremos la estructura de <ul> después de cada <h3>
-            // Dado que el prompt pide un formato *fijo* de Markdown, podemos forzar el <ul>/</ul>
-            
             let bloques = html.split('<h3>');
             let resultadoFinal = bloques[0]; // Texto antes del primer <h3>
             
             for (let i = 1; i < bloques.length; i++) {
                 let bloque = '<h3>' + bloques[i];
-                // Busca el primer <li> y reemplaza todo hasta el final por <ul>...</ul>
                 let inicioLista = bloque.indexOf('<li>');
                 if (inicioLista !== -1) {
                     let listaContent = bloque.substring(inicioLista);
@@ -254,7 +262,8 @@ Genera los 10 ejercicios nuevos ahora.`;
                 }
             }
             
-            return resultadoFinal;
+            // Envolver todo en la etiqueta <pre> con los estilos de ajuste
+            return `<pre>${resultadoFinal}</pre>`;
         }
 
         // ----------------------------------------------------------
@@ -281,8 +290,8 @@ Genera los 10 ejercicios nuevos ahora.`;
                     body: JSON.stringify({
                         contents: [{ role: "user", parts: [{ text: prompt }] }],
                         generationConfig: { 
-                            temperature: 0.8, // Mayor creatividad para nuevos ejercicios
-                            maxOutputTokens: 4096, 
+                            temperature: 0.8, 
+                            maxOutputTokens: 8192, // AUMENTADO A 8192
                         }
                     })
                 });
@@ -317,8 +326,8 @@ Genera los 10 ejercicios nuevos ahora.`;
                     return; 
                 }
 
-                // Muestra el resultado final
-                resultadoDiv.innerHTML = `<pre>${formatearResultado(textoGenerado)}</pre>`;
+                // Muestra el resultado final (La función formatearResultado añade la etiqueta <pre>
+                resultadoDiv.innerHTML = formatearResultado(textoGenerado);
                 boton.disabled = false;
 
             } catch (error) {
