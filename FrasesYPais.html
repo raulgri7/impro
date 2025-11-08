@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎭 Generador: País, Historia y 6 Frases (Impro) - Corregido y Mejorado</title>
+    <title>🎭 Generador: País, Historia y 6 Frases (Impro) - Categorías Finales</title>
     <style>
         /* ----------------------------------------------------------
            ESTILOS (LOOK AND FEEL - TEATRO Y DRAMATURGIA)
@@ -108,7 +108,7 @@
             padding-bottom: 5px;
         }
         
-        /* === NUEVO ESTILO: Destacar el país en el encabezado === */
+        /* === ESTILO: Destacar el país en el encabezado === */
         #resultado h3 em strong {
             color: #c53929; /* Color rojo oscuro llamativo */
             font-size: 1.1em; /* Un poco más grande */
@@ -177,7 +177,7 @@
         }
 
         // ----------------------------------------------------------
-        // --- PROMPT CON PARÁMETROS DE GENERACIÓN ACTUALIZADOS ---
+        // --- PROMPT MODIFICADO (CATEGORÍA DE ESPAÑA) ---
         // ----------------------------------------------------------
 
         // Función para construir el PROMPT detallado para el ejercicio de País/Historia/Frases
@@ -185,7 +185,13 @@
             const contexto = `Actúa como un generador de premisas para improvisación teatral. Tu tarea es generar **DOS LISTAS** de contenido, separadas por encabezados, EXCLUSIVAMENTE en formato Markdown, sin introducción ni conclusión.
 
 INSTRUCCIONES CLAVE:
-1.  **SECCIÓN 1 (Frases):** Genera 6 frases sueltas y variadas (fragmentos de canciones, refranes, localismos, frases de películas).
+1.  **SECCIÓN 1 (Frases - ALTA DIVERSIDAD):** Genera exactamente 6 frases cortas y sueltas. Deben ser radicalmente distintas en tono y origen para maximizar la dificultad y evitar repetición. Genera una de cada una de las siguientes categorías en orden:
+    * 1. Un refrán popular o proverbio.
+    * 2. Un fragmento lírico o verso de una canción famosa.
+    * 3. Una cita de película o serie de televisión icónica.
+    * 4. Un modismo, jerga o frase localista de España.
+    * 5. Una frase de diálogo completamente absurda o surrealista.
+    * 6. Una frase de diálogo cotidiano, simple e inocua.
 2.  **SECCIÓN 2 (País y Hechos):** Genera 5 hechos históricos, mitos o leyendas **relacionados con el país** ${pais}. CADA HECHO DEBE INCLUIR UNA BREVE EXPLICACIÓN de 2 a 3 líneas sobre su contexto o significado.
 
 REGLAS DE FORMATO ESTRICTO:
@@ -199,14 +205,12 @@ Genera el contenido ahora. **NO generes ninguna otra sección, lista o texto adi
             return contexto;
         }
 
-        // Función auxiliar para formatear la salida (se mantiene la estructura simple)
+        // Función auxiliar para formatear la salida
         function formatearResultado(texto) {
-            // Reemplazar encabezados ### con etiquetas H3 para un mejor estilo
-            // y permitir que el Markdown dentro del encabezado (***País***) funcione.
             let html = texto
-                .replace(/###\s*(.*)/g, '<h3>$1</h3>') // Convierte ### a <h3>
-                .replace(/\*\*\*(.*?)\*\*\*/g, '<em><strong>$1</strong></em>') // Convierte ***texto*** a <em><strong>texto</strong></em>
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Convierte **texto** a <strong>texto</strong>
+                .replace(/###\s*(.*)/g, '<h3>$1</h3>')
+                .replace(/\*\*\*(.*?)\*\*\*/g, '<em><strong>$1</strong></em>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
             return html;
         }
@@ -231,7 +235,6 @@ Genera el contenido ahora. **NO generes ninguna otra sección, lista o texto adi
                     body: JSON.stringify({
                         contents: [{ role: "user", parts: [{ text: prompt }] }],
                         generationConfig: {
-                            // Parámetros actualizados: 0.9 de temperatura y 8192 maxOutputTokens
                             temperature: 0.9,
                             maxOutputTokens: 8192,
                         }
