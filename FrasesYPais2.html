@@ -125,7 +125,7 @@
 <body>
 
     <h1>🌎 Generador: País, Historia y Frases</h1>
-    <p class="instruccion">Genera 6 frases, 1 país (aleatorio de una lista local) y 5 hechos históricos con contexto para tu ejercicio de improvisación.</p>
+    <p class="instruccion">Genera 6 frases (aleatorias), 1 país (secreto) y 5 hechos históricos con contexto para tu ejercicio de improvisación.</p>
     
     <div class="boton-container">
         <button id="generar-btn" onclick="generarPremisas()">Generar Elementos para Improvisación</button>
@@ -169,13 +169,13 @@
 
         // Función para construir el PROMPT detallado para el ejercicio de País/Historia/Frases
         function construirPromptImproHistoria(pais) {
-            // Se añaden delimitadores claros para el parsing de las dos secciones
+            // Instrucción clara para aislar las frases del país
             const contexto = `Actúa como un generador de premisas para improvisación teatral. Tu tarea es generar **EXCLUSIVAMENTE** dos secciones de contenido en formato Markdown.
 
-El país seleccionado para el contexto histórico es: **${pais}**.
+El contexto histórico a usar es: **${pais}**.
 
 SECCIÓN 1: FRASES
-Genera **EXACTAMENTE 6 frases aleatorias** (fragmentos de canciones, refranes, localismos, frases de películas).
+Genera **EXACTAMENTE 6 frases aleatorias y totalmente DESCONECTADAS** del país y del contexto histórico. Deben ser frases sueltas y variadas (fragmentos de canciones, refranes, localismos, frases de películas), como si fueran sugeridas por el público.
 Delimita esta sección con [FRASES_START] y [FRASES_END].
 
 SECCIÓN 2: HISTORIA
@@ -198,28 +198,30 @@ REGLAS DE FORMATO ESTRICTO:
             const frasesMatch = textoGenerado.match(/\[FRASES_START\]([\s\S]*?)\[FRASES_END\]/i);
             const historiaMatch = textoGenerado.match(/\[HISTORIA_START\]([\s\S]*?)\[HISTORIA_END\]/i);
 
-            // Contenido por defecto en caso de fallo de extracción
             let frasesMarkdown = frasesMatch ? frasesMatch[1].trim() : "<li>Error al parsear las 6 frases.</li>";
             let historiaMarkdown = historiaMatch ? historiaMatch[1].trim() : "<li>Error al parsear los 5 hechos históricos.</li>";
 
             // 2. Construir el HTML final, inyectando el país
+            
             let outputHTML = '<h3>1. 6 Frases Aleatorias</h3>';
             
-            // Reemplazar * o - con etiquetas LI/UL (suponiendo que la IA usa listas Markdown)
+            // Intento de limpiar el Markdown de listas y convertir a HTML
             outputHTML += frasesMarkdown
                 .replace(/^\d\.\s*/gm, '<li>')
                 .replace(/\n\s*-\s*/g, '<li>') 
                 .replace(/\n\s*\*/g, '<li>')
-                .replace(/\n/g, '') // Eliminar saltos de línea restantes
+                .replace(/\n/g, '') 
                 .trim()
                 ;
             outputHTML = `<ul>${outputHTML}</ul>`;
 
 
+            // Se revela el país en el resultado
             outputHTML += `<h3>2. País</h3><p style="font-size: 1.6em; text-align: center; color: #1b5e20;"><strong>${paisSeleccionado}</strong></p>`;
 
             outputHTML += '<h3>3. 5 Hechos Históricos/Mitos/Leyendas (con Breve Explicación)</h3>';
-            outputHTML += `<pre>${historiaMarkdown}</pre>`; // Dejamos la historia en PRE para respetar el formato Markdown de negritas y saltos de línea.
+            // Se usa <pre> para que Markdown maneje el formato de las explicaciones (saltos de línea y negritas)
+            outputHTML += `<pre>${historiaMarkdown}</pre>`; 
             
             return outputHTML;
         }
@@ -235,7 +237,8 @@ REGLAS DE FORMATO ESTRICTO:
             const indicePais = Math.floor(Math.random() * PAISES.length);
             const paisSeleccionado = PAISES[indicePais];
             
-            resultadoDiv.innerHTML = `<span class="cargando">País seleccionado: **${paisSeleccionado}**. Generando 6 frases y 5 hechos históricos...</span>`;
+            // Mensaje de carga genérico
+            resultadoDiv.innerHTML = '<span class="cargando">Generando elementos de improvisación...</span>';
             
             // 2. Construir el prompt específico para la IA
             const prompt = construirPromptImproHistoria(paisSeleccionado);
@@ -249,7 +252,7 @@ REGLAS DE FORMATO ESTRICTO:
                     body: JSON.stringify({
                         contents: [{ role: "user", parts: [{ text: prompt }] }],
                         generationConfig: { 
-                            temperature: 0.6, 
+                            temperature: 0.7, // Un poco más de creatividad
                             maxOutputTokens: 4096, 
                         }
                     })
