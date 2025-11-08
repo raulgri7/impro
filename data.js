@@ -10,7 +10,7 @@
 window.ALUMNOS_POR_CLASE = {
     "Lunes": [
         "Alba|0", "Andrea|1", "Beatriz|1", "Beatriz Law|1", "Elena|1", 
-        "Estela|1", "Jesús|0", "Lucía|0", "María|0", "Marta|1", 
+        "Estela|1", "Lucía|0", "María|0", "Marta|1", 
         "Patricia|1", "Raquel|0", "Victoria|0", "Yolanda|1"
     ],
     "Martes": [
