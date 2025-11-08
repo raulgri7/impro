@@ -207,7 +207,7 @@ Genera el contenido ahora.`;
 
             boton.disabled = true;
             resultadoDiv.innerHTML = '<span class="cargando">Generando elementos: 6 frases, 1 país y 5 hechos históricos...</span>';
-            
+            paisSeleccionado = seleccionarPaisAlAzar();
             const prompt = construirPromptImproHistoria();
             
             try {
