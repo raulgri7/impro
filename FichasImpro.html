@@ -80,19 +80,27 @@
             text-align: justify; 
         }
 
-        /* Estilos de la Ficha Troquelada (SEPARADA Y AJUSTADA) */
+        /* Estilos de la Ficha Troquelada (ALTURA FIJA Y TROQUELADO ADYACENTE) */
         .ficha-troquelada {
             border: 2px dashed #d84315; 
             padding: 10px; 
-            margin: 5px; /* Margen para SEPARAR las fichas visualmente */
+            height: 110mm; /* Aumentada para la visualización en pantalla, ajustada en impresión */
+            margin: 0; 
+            margin-top: -2px; 
+            margin-left: -2px;
             background-color: #ffffff;
-            border-radius: 8px;
+            border-radius: 0; 
             display: inline-block; 
-            width: 48%; /* Menos del 50% para que quepan dos con margen */
+            width: 50%; 
             vertical-align: top; 
             box-sizing: border-box; 
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
-            min-height: 230px; 
+            float: left; 
+            overflow: hidden; 
+        }
+        .ficha-troquelada:nth-child(2n+1) { 
+             margin-left: 0;
+             clear: left;
         }
 
         /* Ajustes de texto dentro de la ficha */
@@ -137,7 +145,9 @@
         }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        /* Estilos de impresión para DIN A4 (10 fichas por página) */
+        /* ----------------------------------------------------------
+           ESTILOS DE IMPRESIÓN (CLAVE PARA 10 POR PÁGINA)
+           ---------------------------------------------------------- */
         @media print {
             body { 
                 background-color: white !important;
@@ -149,40 +159,43 @@
                 display: none !important;
             }
             #resultado {
-                padding: 5mm; 
+                padding: 0; 
                 box-shadow: none;
                 margin-top: 0;
                 border: none;
                 text-align: justify; 
             }
-            /* Estilo de la ficha impresa */
+            /* Estilo de la ficha impresa - Altura fija para la impresión */
             .ficha-troquelada {
                 border: 1px dashed #333; 
                 background-color: white !important; 
                 box-shadow: none !important;
                 page-break-inside: avoid; 
-                width: 47%; 
-                margin: 1%; /* Mantiene las fichas separadas */
+                width: 50%; 
+                height: 59.4mm; /* Altura fija: 297mm (A4) / 5 filas = 59.4mm */
+                margin: 0; 
                 float: left; 
-                padding: 5mm; 
-                min-height: 0; 
+                padding: 3mm 5mm; 
+                box-sizing: border-box; 
+                margin-top: -1px; 
+                margin-left: -1px;
+                overflow: hidden; 
+            }
+             .ficha-troquelada:nth-child(2n+1) { 
+                 clear: left;
             }
             
-            /* Forzar salto de página después de la décima ficha (Grupo 10) */
+            /* FORZAR SALTO DE PÁGINA DESPUÉS DE LA FICHA 10 */
             .ficha-troquelada:nth-child(10) {
                  page-break-after: always;
-            }
-            /* Limpiar el float después de cada par de fichas para el control vertical (para 5 filas) */
-            .ficha-troquelada:nth-child(2n) {
-                clear: right;
             }
         }
     </style>
 </head>
 <body>
 
-    <h1>✂️ Generador de 20 Fichas de Improvisación Grupal (5 Personas)</h1>
-    <p class="instruccion">Genera 20 escenarios de improvisación en formato de ficha troquelada para recortar, numeradas del **Grupo 1 al Grupo 20**. **Estilo fantasioso (según prompt original) con temperatura muy baja.** Las fichas están separadas y se ajustan a 10 por página DIN A4.</p>
+    <h1>20 Fichas de Impro Grupal (5 Personas)</h1>
+    
     
     <div class="control-container">
         <button id="generar-btn" onclick="generarFichas()">Generar 20 Fichas de Escenario</button>
@@ -190,7 +203,7 @@
     </div>
     
     <div id="resultado">
-        <p style="text-align: center; color: #5f6368;">Pulsa el botón **Generar** para obtener los 20 escenarios. Luego usa el botón **Imprimir**.</p>
+        <p style="text-align: center; color: #5f6368;"></p>
     </div>
 
 
@@ -210,244 +223,402 @@
         }
 
         // ----------------------------------------------------------
-        // --- FUNCIÓN PARA CONSTRUIR EL PROMPT (Original Exacto) ---
+        // --- FUNCIÓN PARA CONSTRUIR EL PROMPT (Exacto y con Cero Fantasía) ---
         // ----------------------------------------------------------
         function construirPromptFichas() {
             
-            // SE USA EL PROMPT ORIGINAL EXACTO
+            // SE USA EL PROMPT ORIGINAL EXACTO PROPORCIONADO POR EL USUARIO
             const prompt = `Quiero que generes 20 fichas para ejercicios de improvisación teatral con el mismo formato, estructura y extensión que los ejemplos que te dejo a continuación.
+
 Cada ficha debe incluir:
-	1.	¿Quiénes son? → (un grupo con una identidad clara y divertida)
-	2.	¿Dónde están? → (lugar concreto)
-	3.	¿Qué situación tienen? → (una misión, objetivo o actividad)
-	4.	¿Cuál es el problema? → (un conflicto que complique la situación)
-	5.	Integrantes (5 personas): → (solo poner la frase, sin nombres)
-
-El estilo debe ser fantasioso, infantil y gracioso, con ideas claras y fáciles de representar en una clase.
-
+¿Quiénes son?
+¿Dónde están?
+¿Qué situación tienen?
+¿Cuál es el problema?
+Integrantes (5 personas):
+El estilo debe ser infantil y gracioso con cero fantasía, con ideas claras y fáciles de representar en una clase.
 Formato de ejemplo (respeta exactamente este estilo):
-
 Grupo 1
+
 ¿Quiénes son?
+
 Un grupo de exploradores
+
 ¿Dónde están?
+
 En una selva misteriosa
+
 ¿Qué situación tienen?
+
 Están buscando un tesoro antiguo
+
 ¿Cuál es el problema?
+
 El mapa se ha roto y no recuerdan por dónde seguir
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 2
+
 ¿Quiénes son?
+
 Un grupo de científicos locos
+
 ¿Dónde están?
+
 En su laboratorio secreto
+
 ¿Qué situación tienen?
+
 Preparan una poción para volverse invisibles
+
 ¿Cuál es el problema?
+
 La poción les cambia la voz y no se entienden entre ellos
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 3
+
 ¿Quiénes son?
+
 Un grupo de payasos
+
 ¿Dónde están?
+
 En un circo
+
 ¿Qué situación tienen?
+
 Van a empezar su espectáculo
+
 ¿Cuál es el problema?
+
 Han perdido las narices rojas
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 4
+
 ¿Quiénes son?
+
 Un grupo de granjeros
+
 ¿Dónde están?
+
 En su granja
+
 ¿Qué situación tienen?
+
 Están cuidando a los animales
+
 ¿Cuál es el problema?
+
 La vaca se ha escapado y nadie la encuentra
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 5
+
 ¿Quiénes son?
+
 Un grupo de piratas
+
 ¿Dónde están?
+
 En su barco
+
 ¿Qué situación tienen?
+
 Buscan una isla del tesoro
+
 ¿Cuál es el problema?
+
 El capitán tiene miedo al agua
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 6
+
 ¿Quiénes son?
+
 Un grupo de cocineros
+
 ¿Dónde están?
+
 En la cocina del cole
+
 ¿Qué situación tienen?
+
 Preparan la comida del día
+
 ¿Cuál es el problema?
+
 Se les ha acabado la sal y el comedor abre en 10 minutos
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 7
+
 ¿Quiénes son?
+
 Un grupo de robots
+
 ¿Dónde están?
+
 En una fábrica
+
 ¿Qué situación tienen?
+
 Quieren aprender a bailar
+
 ¿Cuál es el problema?
+
 Sus baterías están casi vacías
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 8
+
 ¿Quiénes son?
+
 Un grupo de niños detectives
+
 ¿Dónde están?
+
 En el patio del colegio
+
 ¿Qué situación tienen?
+
 Intentan resolver un misterio
+
 ¿Cuál es el problema?
+
 El culpable es uno de ellos y no lo sabe
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 9
+
 ¿Quiénes son?
+
 Un grupo de superhéroes
+
 ¿Dónde están?
+
 En su guarida secreta
+
 ¿Qué situación tienen?
+
 Se preparan para salvar el mundo
+
 ¿Cuál es el problema?
+
 Han perdido sus trajes y deben improvisar otros
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 10
+
 ¿Quiénes son?
+
 Un grupo de actores
+
 ¿Dónde están?
+
 En el escenario
+
 ¿Qué situación tienen?
+
 Van a estrenar una obra
+
 ¿Cuál es el problema?
+
 Han olvidado el texto justo antes de salir
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 11
+
 ¿Quiénes son?
+
 Un grupo de viajeros del tiempo
+
 ¿Dónde están?
+
 En la Edad Media
+
 ¿Qué situación tienen?
+
 Intentan volver al presente
+
 ¿Cuál es el problema?
+
 Su máquina del tiempo se ha convertido en una calabaza
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 12
+
 ¿Quiénes son?
+
 Un grupo de astronautas
+
 ¿Dónde están?
+
 En la luna
+
 ¿Qué situación tienen?
+
 Buscan señales de vida
+
 ¿Cuál es el problema?
+
 Su nave no arranca para volver a casa
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 13
+
 ¿Quiénes son?
+
 Un grupo de músicos
+
 ¿Dónde están?
+
 En un concierto
+
 ¿Qué situación tienen?
+
 Van a tocar su gran canción
+
 ¿Cuál es el problema?
+
 Se han mezclado los instrumentos
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 14
+
 ¿Quiénes son?
+
 Un grupo de pintores
+
 ¿Dónde están?
+
 En un museo
+
 ¿Qué situación tienen?
+
 Están terminando un cuadro gigante
+
 ¿Cuál es el problema?
+
 Alguien ha derramado pintura sobre él
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 15
+
 ¿Quiénes son?
+
 Un grupo de fantasmas
+
 ¿Dónde están?
+
 En un castillo
+
 ¿Qué situación tienen?
+
 Quieren asustar a los visitantes
+
 ¿Cuál es el problema?
+
 Nadie los ve ni los oye
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 16
+
 ¿Quiénes son?
+
 Un grupo de profesores
+
 ¿Dónde están?
+
 En el aula
+
 ¿Qué situación tienen?
+
 Preparan una excursión
+
 ¿Cuál es el problema?
+
 El autobús se ha ido sin ellos
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 17
+
 ¿Quiénes son?
+
 Un grupo de magos
+
 ¿Dónde están?
+
 En una escuela de magia
+
 ¿Qué situación tienen?
+
 Están practicando hechizos
+
 ¿Cuál es el problema?
+
 Uno de ellos convierte a otro en rana por error
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 18
+
 ¿Quiénes son?
+
 Un grupo de deportistas
+
 ¿Dónde están?
+
 En un estadio
+
 ¿Qué situación tienen?
+
 Van a jugar la final
+
 ¿Cuál es el problema?
+
 El balón desaparece justo antes del partido
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 19
+
 ¿Quiénes son?
+
 Un grupo de amigos
+
 ¿Dónde están?
+
 En la playa
+
 ¿Qué situación tienen?
+
 Van a construir el castillo más grande de arena
+
 ¿Cuál es el problema?
+
 Sube la marea y amenaza con destruirlo
-Integrantes (5 personas):
 
+Integrantes (5 personas):
 Grupo 20
-¿Quiénes son?
-Un grupo de inventores
-¿Dónde están?
-En su taller
-¿Qué situación tienen?
-Crean una máquina para hacer deberes
-¿Cuál es el problema?
-La máquina empieza a hablar y se rebela contra ellos
-Integrantes (5 personas):
 
-Ahora genera 20 grupos nuevos siguiendo exactamente este formato empezando por el grupo 1`;
+¿Quiénes son?
+
+Un grupo de inventores
+
+¿Dónde están?
+
+En su taller
+
+¿Qué situación tienen?
+
+Crean una máquina para hacer deberes
+
+¿Cuál es el problema?
+
+La máquina empieza a hablar y se rebela contra ellos
+
+Integrantes (5 personas):
+Ahora genera 20 grupos nuevos siguiendo exactamente este formato empezando la numeración por Grupo 1.`;
 
             return prompt;
         }
@@ -503,8 +674,9 @@ Ahora genera 20 grupos nuevos siguiendo exactamente este formato empezando por e
                 htmlFinal += fichaHTML;
             }
 
-            // 8. Ocultar el botón de generar y mostrar el de imprimir
-            document.getElementById('generar-btn').style.display = 'none';
+            // 8. Mostrar el botón de imprimir y asegurar que el de generar esté activo
+            document.getElementById('generar-btn').disabled = false;
+            document.getElementById('generar-btn').style.display = 'inline-block';
             document.getElementById('imprimir-btn').style.display = 'inline-block';
 
             return htmlFinal;
@@ -518,9 +690,9 @@ Ahora genera 20 grupos nuevos siguiendo exactamente este formato empezando por e
             const boton = document.getElementById('generar-btn');
             const imprimirBoton = document.getElementById('imprimir-btn');
             
-            boton.disabled = true;
-            imprimirBoton.style.display = 'none'; 
-            resultadoDiv.innerHTML = '<span class="cargando">Generando 20 NUEVAS fichas de improvisación (Grupo 1-20)...</span>';
+            boton.disabled = true; // Deshabilita el botón mientras carga
+            imprimirBoton.style.display = 'none'; // Oculta el de imprimir durante la carga
+            resultadoDiv.innerHTML = '<span class="cargando">Generando 20 NUEVAS fichas de improvisación...</span>';
             
             const prompt = construirPromptFichas();
             
@@ -533,7 +705,7 @@ Ahora genera 20 grupos nuevos siguiendo exactamente este formato empezando por e
                     body: JSON.stringify({
                         contents: [{ role: "user", parts: [{ text: prompt }] }],
                         generationConfig: { 
-                            temperature: 0.1, // **Ajuste a 0.1, según la instrucción final del usuario**
+                            temperature: 0.1, 
                             maxOutputTokens: 8192, 
                         }
                     })
@@ -556,18 +728,18 @@ Ahora genera 20 grupos nuevos siguiendo exactamente este formato empezando por e
                     }
 
                     resultadoDiv.innerHTML = `<strong style="color: #c53929;">Error: No se pudo generar el contenido útil.</strong><div class="error-detalle"><pre>${safetyReason}</pre></div>`;
-                    boton.disabled = false;
+                    boton.disabled = false; // Reactiva el botón
                     boton.style.display = 'inline-block';
                     return; 
                 }
 
                 resultadoDiv.innerHTML = formatearResultado(textoGenerado);
-                boton.disabled = false;
+                // Los botones se reactivan dentro de formatearResultado
                 
             } catch (error) {
                 let posibleCausa = "Clave API incorrecta, expirada o problema de CORS.";
                 resultadoDiv.innerHTML = `<strong style="color: #c53929;">Error crítico de Conexión:</strong> ${error.message}.<br><br><strong>POSIBLES CAUSAS:</strong> ${posibleCausa}`;
-                boton.disabled = false;
+                boton.disabled = false; // Reactiva el botón
                 boton.style.display = 'inline-block';
             }
         }
