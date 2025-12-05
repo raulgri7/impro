@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contador Táctil</title>
+    <!-- Carga de Tailwind CSS para un diseño responsive y moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Aplicamos estilos para que la aplicación ocupe toda la pantalla del móvil */
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden; /* Evita el scroll accidental */
+            user-select: none; /* Evita que se seleccione el texto al tocar */
+            -webkit-tap-highlight-color: transparent; /* Elimina el resaltado de toque en móviles */
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Estilo para el área de conteo */
+        #tap-area {
+            cursor: pointer;
+            transition: background-color 0.1s ease-out; /* Animación ligera al tocar */
+        }
+
+        #tap-area:active {
+            /* Cambio de color sutil al hacer clic/tocar */
+            background-color: #2c5282; 
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dark-bg': '#1a202c',
+                        'light-text': '#f7fafc',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-dark-bg text-light-text antialiased">
+
+    <!--
+        Contenedor principal que ocupa toda la pantalla para el toque.
+        Usamos 'flex' para centrar el contador.
+    -->
+    <div id="tap-area" class="w-full h-full flex items-center justify-center">
+
+        <!-- Display del número del contador. Número en GRANDE para móvil. -->
+        <div id="counter-display" class="text-light-text font-extrabold text-9xl sm:text-[15rem] md:text-[20rem] transition-colors duration-200">
+            0
+        </div>
+
+    </div>
+
+    <script>
+        // Inicializamos la variable del contador
+        let count = 0;
+        const display = document.getElementById('counter-display');
+        const tapArea = document.getElementById('tap-area');
+
+        // Función para actualizar el display
+        const updateDisplay = () => {
+            display.textContent = count;
+        };
+
+        // Función principal para incrementar el contador
+        const incrementCounter = () => {
+            count++;
+            updateDisplay();
+            // Efecto visual ligero en el display
+            display.classList.remove('text-light-text');
+            display.classList.add('text-yellow-300');
+            setTimeout(() => {
+                display.classList.remove('text-yellow-300');
+                display.classList.add('text-light-text');
+            }, 100);
+        };
+
+        // ----------------------------------------------------
+        // Event Listener: Toca en cualquier parte de la pantalla
+        // ----------------------------------------------------
+        tapArea.addEventListener('click', incrementCounter);
+
+        // Inicializamos el display al cargar la página (mostrará 0)
+        window.onload = updateDisplay;
+
+    </script>
+</body>
+</html>
+
