@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Escenas: Circunstancias Dadas</title>
+    <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        body { font-family: 'Garamond', serif; padding: 20px; max-width: 900px; margin: 0 auto; background-color: #1a1a1a; color: #e0e0e0; }
+        h1 { color: #b22222; border-bottom: 2px solid #b22222; padding-bottom: 10px; text-align: center; text-transform: uppercase; letter-spacing: 2px; }
+        .instrucciones { color: #aaa; text-align: center; font-style: italic; margin-bottom: 30px; }
+        
+        .controls { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; }
+        button { 
+            padding: 15px 25px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-generate { background-color: #b22222; color: white; }
+        .btn-generate:hover { background-color: #8b0000; }
+        .btn-docx { background-color: #2b5797; color: white; display: none; }
+        .btn-docx:hover { background-color: #1e3e6d; }
+        
+        #resultado { 
+            background-color: #262626; 
+            padding: 40px; 
+            border: 1px solid #444; 
+            border-radius: 8px; 
+            line-height: 1.6; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            min-height: 400px;
+        }
+
+        .seccion-titulo { color: #b22222; font-weight: bold; text-transform: uppercase; margin-top: 25px; border-bottom: 1px solid #444; }
+        .texto-contenido { margin-bottom: 20px; white-space: pre-wrap; }
+        .personaje { font-weight: bold; color: #fff; display: block; margin-top: 10px; }
+
+        .cargando { color: #b22222; text-align: center; display: block; animation: pulse 1.5s infinite; font-size: 1.2em; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h1>🎭 Laboratorio Teatral</h1>
+    <p class="instrucciones">Generador de ejercicios de "Circunstancias Dadas" para actrices.</p>
+    
+    <div class="controls">
+        <button class="btn-generate" onclick="generarEscena()">Generar Nueva Escena</button>
+        <button id="btnDocx" class="btn-docx" onclick="descargarDocx()">Descargar .DOCX</button>
+    </div>
+    
+    <div id="resultado">
+        <div style="text-align: center; color: #666; margin-top: 100px;">
+            Haz clic en el botón para crear una escena lista para ensayar.
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURACIÓN ---
+        const API_KEY = 'TU_API_KEY_AQUI'; 
+        const MODEL_NAME = 'gemini-1.5-flash';
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+
+        let escenaActual = {
+            titulo: "",
+            circunstancias: "",
+            dialogo: ""
+        };
+
+        function construirPrompt() {
+            return `Eres un dramaturgo experto en realismo sucio y suspense. Crea un ejercicio teatral de "circunstancias dadas".
+            
+            ESTRUCTURA OBLIGATORIA:
+            1. Título de la escena.
+            2. Circunstancias dadas (misteriosas, dos mujeres, edades, relación, lugar, pasado inmediato, tensión oculta).
+            3. Diálogo (frases cortas, fáciles de memorizar, subtexto, silencios, tono inquietante/amenazante).
+
+            REGLAS DE FORMATO PARA EL PARSEO:
+            Empieza cada sección con estas etiquetas exactamente:
+            [TITULO]
+            [CIRCUNSTANCIAS]
+            [DIALOGO]
+
+            No añadas acotaciones técnicas largas. No añadas introducciones ni despedidas.`;
+        }
+
+        async function generarEscena() {
+            const resultadoDiv = document.getElementById('resultado');
+            const btnDocx = document.getElementById('btnDocx');
+            
+            resultadoDiv.innerHTML = '<span class="cargando">Escribiendo la escena...</span>';
+            btnDocx.style.display = 'none';
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: [{ text: construirPrompt() }] }],
+                        generationConfig: { temperature: 0.8, maxOutputTokens: 1500 }
+                    })
+                });
+
+                if (!response.ok) throw new Error("Error en la API. Revisa tu Key.");
+
+                const data = await response.json();
+                const texto = data.candidates[0].content.parts[0].text;
+
+                // Parsear el contenido
+                escenaActual.titulo = texto.split('[TITULO]')[1].split('[CIRCUNSTANCIAS]')[0].trim();
+                escenaActual.circunstancias = texto.split('[CIRCUNSTANCIAS]')[1].split('[DIALOGO]')[0].trim();
+                escenaActual.dialogo = texto.split('[DIALOGO]')[1].trim();
+
+                // Mostrar en HTML
+                resultadoDiv.innerHTML = `
+                    <h2 style="color:white; text-align:center">${escenaActual.titulo}</h2>
+                    <div class="seccion-titulo">Circunstancias Dadas</div>
+                    <div class="texto-contenido">${escenaActual.circunstancias}</div>
+                    <div class="seccion-titulo">Diálogo</div>
+                    <div class="texto-contenido" style="font-family: monospace; background: #1a1a1a; padding: 20px; border-radius: 5px; border-left: 3px solid #b22222;">${escenaActual.dialogo}</div>
+                `;
+
+                btnDocx.style.display = 'block';
+
+            } catch (error) {
+                resultadoDiv.innerHTML = `<p style="color: #ff4d4d;">Error: ${error.message}</p>`;
+            }
+        }
+
+        async function descargarDocx() {
+            const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = docx;
+
+            const doc = new Document({
+                sections: [{
+                    properties: {},
+                    children: [
+                        new Paragraph({
+                            text: escenaActual.titulo,
+                            heading: HeadingLevel.HEADING_1,
+                            alignment: AlignmentType.CENTER,
+                            spacing: { after: 400 }
+                        }),
+                        new Paragraph({
+                            text: "CIRCUNSTANCIAS DADAS",
+                            heading: HeadingLevel.HEADING_2,
+                            spacing: { before: 400, after: 200 }
+                        }),
+                        new Paragraph({
+                            children: [new TextRun({ text: escenaActual.circunstancias, size: 24 })],
+                            spacing: { after: 400 }
+                        }),
+                        new Paragraph({
+                            text: "DIÁLOGO",
+                            heading: HeadingLevel.HEADING_2,
+                            spacing: { before: 400, after: 200 }
+                        }),
+                        ...escenaActual.dialogo.split('\n').map(linea => {
+                            return new Paragraph({
+                                children: [
+                                    new TextRun({
+                                        text: linea,
+                                        size: 26,
+                                        font: "Courier New"
+                                    })
+                                ],
+                                spacing: { after: 120 }
+                            });
+                        })
+                    ],
+                }],
+            });
+
+            Packer.toBlob(doc).then(blob => {
+                saveAs(blob, "Escena_Teatro_Ejercicio.docx");
+            });
+        }
+    </script>
+</body>
+</html>
