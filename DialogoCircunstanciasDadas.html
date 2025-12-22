@@ -3,184 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Escenas: Circunstancias Dadas</title>
+    <title>Teatro: Circunstancias Dadas</title>
     <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
-        body { font-family: 'Garamond', serif; padding: 20px; max-width: 900px; margin: 0 auto; background-color: #1a1a1a; color: #e0e0e0; }
-        h1 { color: #b22222; border-bottom: 2px solid #b22222; padding-bottom: 10px; text-align: center; text-transform: uppercase; letter-spacing: 2px; }
-        .instrucciones { color: #aaa; text-align: center; font-style: italic; margin-bottom: 30px; }
-        
-        .controls { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; }
-        button { 
-            padding: 15px 25px; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-size: 16px; 
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        .btn-generate { background-color: #b22222; color: white; }
-        .btn-generate:hover { background-color: #8b0000; }
-        .btn-docx { background-color: #2b5797; color: white; display: none; }
-        .btn-docx:hover { background-color: #1e3e6d; }
-        
-        #resultado { 
-            background-color: #262626; 
-            padding: 40px; 
-            border: 1px solid #444; 
-            border-radius: 8px; 
-            line-height: 1.6; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            min-height: 400px;
-        }
-
-        .seccion-titulo { color: #b22222; font-weight: bold; text-transform: uppercase; margin-top: 25px; border-bottom: 1px solid #444; }
-        .texto-contenido { margin-bottom: 20px; white-space: pre-wrap; }
-        .personaje { font-weight: bold; color: #fff; display: block; margin-top: 10px; }
-
-        .cargando { color: #b22222; text-align: center; display: block; animation: pulse 1.5s infinite; font-size: 1.2em; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background-color: #121212; color: #e0e0e0; }
+        h1 { color: #e53935; border-bottom: 2px solid #e53935; padding-bottom: 10px; text-align: center; }
+        .controls { text-align: center; margin: 20px 0; display: flex; justify-content: center; gap: 10px; }
+        button { padding: 12px 24px; cursor: pointer; border-radius: 5px; border: none; font-weight: bold; transition: 0.3s; }
+        .btn-gen { background-color: #e53935; color: white; }
+        .btn-gen:hover { background-color: #b71c1c; }
+        .btn-docx { background-color: #1976d2; color: white; display: none; }
+        #resultado { background-color: #1e1e1e; padding: 30px; border-radius: 8px; border: 1px solid #333; min-height: 200px; line-height: 1.6; }
+        .label { color: #e53935; font-weight: bold; text-transform: uppercase; font-size: 0.9em; margin-top: 20px; display: block; }
+        .content-box { margin-bottom: 20px; white-space: pre-wrap; }
+        .dialogue-style { font-family: 'Courier New', Courier, monospace; background: #000; padding: 15px; border-radius: 4px; color: #cfcfcf; }
+        .loading { color: #e53935; font-style: italic; text-align: center; display: block; }
     </style>
 </head>
 <body>
 
-    <h1>🎭 Laboratorio Teatral</h1>
-    <p class="instrucciones">Generador de ejercicios de "Circunstancias Dadas" para actrices.</p>
+    <h1>🎭 Ejercicio de Circunstancias Dadas</h1>
     
     <div class="controls">
-        <button class="btn-generate" onclick="generarEscena()">Generar Nueva Escena</button>
+        <button class="btn-gen" onclick="generarEscena()">Generar Escena</button>
         <button id="btnDocx" class="btn-docx" onclick="descargarDocx()">Descargar .DOCX</button>
     </div>
-    
+
     <div id="resultado">
-        <div style="text-align: center; color: #666; margin-top: 100px;">
-            Haz clic en el botón para crear una escena lista para ensayar.
-        </div>
+        <p style="text-align: center; color: #666;">Presiona el botón para crear un ejercicio teatral.</p>
     </div>
 
     <script>
-        // --- CONFIGURACIÓN ---
+        // --- CONFIGURACIÓN PROPORCIONADA ---
         const API_KEY = 'AIzaSyBkw_hSk8yJdruIH-mOPWTvd4v7qVh-EyQ'; 
         const MODEL_NAME = 'gemini-2.5-flash';
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
 
-        let escenaActual = {
-            titulo: "",
-            circunstancias: "",
-            dialogo: ""
-        };
-
-        function construirPrompt() {
-            return `Eres un dramaturgo experto en realismo sucio y suspense. Crea un ejercicio teatral de "circunstancias dadas".
-            
-            ESTRUCTURA OBLIGATORIA:
-            1. Título de la escena.
-            2. Circunstancias dadas (misteriosas, dos mujeres, edades, relación, lugar, pasado inmediato, tensión oculta).
-            3. Diálogo (frases cortas, fáciles de memorizar, subtexto, silencios, tono inquietante/amenazante).
-
-            REGLAS DE FORMATO PARA EL PARSEO:
-            Empieza cada sección con estas etiquetas exactamente:
-            [TITULO]
-            [CIRCUNSTANCIAS]
-            [DIALOGO]
-
-            No añadas acotaciones técnicas largas. No añadas introducciones ni despedidas.`;
-        }
+        let datosEscena = { titulo: "", circunstancias: "", dialogo: "" };
 
         async function generarEscena() {
-            const resultadoDiv = document.getElementById('resultado');
-            const btnDocx = document.getElementById('btnDocx');
+            const resDiv = document.getElementById('resultado');
+            const btnD = document.getElementById('btnDocx');
+            resDiv.innerHTML = '<span class="loading">Escribiendo la escena...</span>';
+            btnD.style.display = 'none';
+
+            const prompt = `Crea un ejercicio teatral de "circunstancias dadas".
+            - Personajes: Dos mujeres.
+            - Tono: Inquietante, misterioso, incómodo.
+            - Requisito: Frases de diálogo no muy largas y fáciles de memorizar.
             
-            resultadoDiv.innerHTML = '<span class="cargando">Escribiendo la escena...</span>';
-            btnDocx.style.display = 'none';
+            FORMATO OBLIGATORIO:
+            TITULO: [Escribe aquí]
+            CIRCUNSTANCIAS: [Escribe aquí quiénes son, edad, relación, lugar y tensión oculta]
+            DIALOGO: [Escribe el diálogo aquí]`;
 
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ role: "user", parts: [{ text: construirPrompt() }] }],
-                        generationConfig: { temperature: 0.8, maxOutputTokens: 1500 }
-                    })
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
 
-                if (!response.ok) throw new Error("Error en la API. Revisa tu Key.");
-
                 const data = await response.json();
-                const texto = data.candidates[0].content.parts[0].text;
+                if (!response.ok) throw new Error(data.error.message);
 
-                // Parsear el contenido
-                escenaActual.titulo = texto.split('[TITULO]')[1].split('[CIRCUNSTANCIAS]')[0].trim();
-                escenaActual.circunstancias = texto.split('[CIRCUNSTANCIAS]')[1].split('[DIALOGO]')[0].trim();
-                escenaActual.dialogo = texto.split('[DIALOGO]')[1].trim();
+                const textoCompleto = data.candidates[0].content.parts[0].text;
 
-                // Mostrar en HTML
-                resultadoDiv.innerHTML = `
-                    <h2 style="color:white; text-align:center">${escenaActual.titulo}</h2>
-                    <div class="seccion-titulo">Circunstancias Dadas</div>
-                    <div class="texto-contenido">${escenaActual.circunstancias}</div>
-                    <div class="seccion-titulo">Diálogo</div>
-                    <div class="texto-contenido" style="font-family: monospace; background: #1a1a1a; padding: 20px; border-radius: 5px; border-left: 3px solid #b22222;">${escenaActual.dialogo}</div>
+                // Sistema de extracción robusto para evitar errores de undefined/trim
+                const extraer = (etiqueta, siguiente) => {
+                    const regex = new RegExp(`${etiqueta}:(.*?)(?=${siguiente}:|$)`, 's');
+                    const match = textoCompleto.match(regex);
+                    return match ? match[1].trim() : "";
+                };
+
+                datosEscena.titulo = extraer("TITULO", "CIRCUNSTANCIAS") || "Escena sin título";
+                datosEscena.circunstancias = extraer("CIRCUNSTANCIAS", "DIALOGO") || "No se generaron circunstancias.";
+                datosEscena.dialogo = extraer("DIALOGO", "FIN") || "No se generó el diálogo.";
+
+                resDiv.innerHTML = `
+                    <h2 style="text-align:center; color:white;">${datosEscena.titulo}</h2>
+                    <span class="label">Circunstancias dadas:</span>
+                    <div class="content-box">${datosEscena.circunstancias}</div>
+                    <span class="label">Diálogo:</span>
+                    <div class="content-box dialogue-style">${datosEscena.dialogo}</div>
                 `;
+                btnD.style.display = 'block';
 
-                btnDocx.style.display = 'block';
-
-            } catch (error) {
-                resultadoDiv.innerHTML = `<p style="color: #ff4d4d;">Error: ${error.message}</p>`;
+            } catch (e) {
+                resDiv.innerHTML = `<b style="color:red;">Error de conexión:</b> ${e.message}<br><br>Verifica que el modelo "${MODEL_NAME}" sea el correcto para tu región.`;
             }
         }
 
-        async function descargarDocx() {
+        function descargarDocx() {
             const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = docx;
 
             const doc = new Document({
                 sections: [{
-                    properties: {},
                     children: [
-                        new Paragraph({
-                            text: escenaActual.titulo,
-                            heading: HeadingLevel.HEADING_1,
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 400 }
-                        }),
-                        new Paragraph({
-                            text: "CIRCUNSTANCIAS DADAS",
-                            heading: HeadingLevel.HEADING_2,
-                            spacing: { before: 400, after: 200 }
-                        }),
-                        new Paragraph({
-                            children: [new TextRun({ text: escenaActual.circunstancias, size: 24 })],
-                            spacing: { after: 400 }
-                        }),
-                        new Paragraph({
-                            text: "DIÁLOGO",
-                            heading: HeadingLevel.HEADING_2,
-                            spacing: { before: 400, after: 200 }
-                        }),
-                        ...escenaActual.dialogo.split('\n').map(linea => {
-                            return new Paragraph({
-                                children: [
-                                    new TextRun({
-                                        text: linea,
-                                        size: 26,
-                                        font: "Courier New"
-                                    })
-                                ],
-                                spacing: { after: 120 }
-                            });
-                        })
-                    ],
-                }],
+                        new Paragraph({ text: datosEscena.titulo, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
+                        new Paragraph({ text: "CIRCUNSTANCIAS DADAS", heading: HeadingLevel.HEADING_2, spacing: { before: 400 } }),
+                        new Paragraph({ children: [new TextRun({ text: datosEscena.circunstancias, size: 24 })] }),
+                        new Paragraph({ text: "DIÁLOGO", heading: HeadingLevel.HEADING_2, spacing: { before: 400 } }),
+                        ...datosEscena.dialogo.split('\n').map(l => new Paragraph({ 
+                            children: [new TextRun({ text: l, size: 24, font: "Courier New" })] 
+                        }))
+                    ]
+                }]
             });
 
-            Packer.toBlob(doc).then(blob => {
-                saveAs(blob, "Escena_Teatro_Ejercicio.docx");
-            });
+            Packer.toBlob(doc).then(blob => saveAs(blob, "Ejercicio_Teatro_Circunstancias.docx"));
         }
     </script>
-
 <hr style="margin-top: 40px; border-color: #ccc;">
     <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
         <a href="index.html" style="
@@ -195,5 +129,6 @@
             ← Volver al Menú Principal
         </a>
     </div>
+
 </body>
 </html>
