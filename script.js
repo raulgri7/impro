@@ -6,7 +6,7 @@
 
 // --- CONFIGURACIÓN DE LA API DE GOOGLE GEMINI ---
 // CLAVE API VÁLIDA INTEGRADA
-const IA_API_KEY = 'AIzaSyCzEdHp8-GzOtexcjxT1I6FSv6YQpVOdVA'; 
+const IA_API_KEY = 'AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM'; 
 const MODEL_NAME = 'gemini-2.5-flash';
 const IA_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${IA_API_KEY}`;
 // -----------------------------------------------------------------------------------
@@ -251,11 +251,11 @@ function generar() {
 
     if (modeSwitch.checked) {
         // En modo Online, verificamos si la clave es de ejemplo
-        if (IA_API_KEY === 'AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU') {
+        if (IA_API_KEY === 'AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM') {
             document.getElementById("resultado").innerHTML = `
                 <p style="color:red; font-weight:bold; text-align: left; padding: 15px; border: 1px solid red; background-color: #ffeaea;">
                     <strong style="font-size: 1.1em;">⚠️ DIAGNÓSTICO CLAVE API:</strong><br>
-                    ¡La clave API de ejemplo está activa! **AIzaSyB5crkbLAoit8e1B_6qb78zLyT3qWPw3RU**<br>
+                    ¡La clave API de ejemplo está activa! **AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM**<br>
                     <strong>EJECUCIÓN DETENIDA.</strong> Por favor, sustituye la clave en la línea 13 de **script.js** y vuelve a subir el código.
                 </p>
             `;
