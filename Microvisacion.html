@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador Impro - DOCX Correcto</title>
+    <title>Generador Microvisación</title>
     <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     
@@ -42,14 +42,14 @@
 <body>
 
     <div class="no-print">
-        <h1>Generador de Papeles para Microteatro Improvisado</h1>
+        <h1>Generar Escenarios para Microteatro Improvisado</h1>
         <p>Opcionalmente introduce un tema com&uacute;n para los personajes y sus circunstancias:</p>
         <textarea id="temaInput" placeholder=""></textarea>
         
         <div class="btn-group">
-            <button class="btn btn-gen" id="btnGenerar">GENERAR PAPELES</button>
+            <button class="btn btn-gen" id="btnGenerar">GENERAR</button>
             <button class="btn btn-print" id="btnPrint" onclick="window.print()">IMPRIMIR (5 HOJAS)</button>
-            <button class="btn btn-save" id="btnSave" onclick="descargarDocx()">GUARDAR .DOCX</button>
+            <button class="btn btn-save" id="btnSave" onclick="descargarDocx()">GUARDAR EN WORD</button>
         </div>
         <div id="status"></div>
         <div id="preview"></div>
