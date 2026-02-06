@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Situaciones de Improvisación con Gemini</title>
+    <title>Generador de Situaciones de Improvisaci&oacute;n</title>
     
     <style>
         body {
@@ -41,175 +40,142 @@
             cursor: pointer;
             transition: background-color 0.3s;
             margin-bottom: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
         }
         #generarBtn:hover {
             background-color: #218838;
+        }
+        #generarBtn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
         .loading {
             text-align: center;
             font-style: italic;
             color: #6c757d;
             margin-top: 20px;
+            animation: pulse 1.5s infinite;
         }
+        @keyframes pulse { 50% { opacity: 0.5; } }
+
         .situacion {
             border: 1px solid #ccc;
             padding: 15px;
             margin-bottom: 15px;
             border-radius: 5px;
             background-color: #e9e9e9;
+            border-left: 5px solid #0056b3;
         }
         .situacion h2 {
             margin-top: 0;
             color: #333;
-            font-size: 1.2em;
+            font-size: 1.1em;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
         }
         .quienes, .donde, .locura {
             display: block;
-            margin-top: 5px;
+            margin-top: 8px;
         }
         .quienes { font-weight: bold; color: #007bff; }
         .donde { font-weight: bold; color: #6c757d; }
-        .locura { font-style: italic; color: #dc3545; border-top: 1px dashed #ccc; padding-top: 5px;}
+        .locura { 
+            font-style: italic; 
+            color: #dc3545; 
+            border-top: 1px dashed #ccc; 
+            padding-top: 8px; 
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Generador de Ideas de Improvisación 🤖</h1>
+        <h1>Generador de Ideas de Improvisaci&oacute;n</h1>
 
-        <button id="generarBtn">Generar 5 Situaciones con la IA</button>
+        <button id="generarBtn" onclick="generarSituaciones()">Generar 5 Situaciones con la IA</button>
 
         <div id="resultados">
-            <p style="text-align: center; color: #6c757d;">Pulsa el botón para generar las situaciones.</p>
+            <p style="text-align: center; color: #6c757d;">Pulsa el bot&oacute;n para generar las situaciones.</p>
         </div>
     </div>
 
     <script>
-        // 🚨 ADVERTENCIA DE SEGURIDAD: NO PONER CLAVES SECRETAS EN FRONTEND EN PRODUCCIÓN.
-        // Aquí es donde meterías tu clave de Gemini, pero solo para un prototipo local.
-        const GEMINI_API_KEY = "AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM"; // <-- ¡LA CLAVE VA AQUÍ!
+        const WORKER_URL = 'https://generador-impro.raul-grigelmo3.workers.dev';
 
-        const resultadosDiv = document.getElementById('resultados');
-        const generarBtn = document.getElementById('generarBtn');
-
-        // Esta es la función que simularía la llamada real a la API de Gemini
         async function generarSituaciones() {
-            // 1. Mostrar estado de carga y deshabilitar botón
-            resultadosDiv.innerHTML = '<div class="loading">Cargando y contactando con Gemini...</div>';
+            const resultadosDiv = document.getElementById('resultados');
+            const generarBtn = document.getElementById('generarBtn');
+
+            resultadosDiv.innerHTML = '<div class="loading">Contactando con la IA y redactando ideas...</div>';
             generarBtn.disabled = true;
 
-            // 2. Definición del Prompt para Gemini
-            const promptTexto = `
-                Propón 5 situaciones de improvisación para dos personas. 
-                Sigue este formato para cada una:
-                - ¿Quiénes son? (Máximo 20 palabras)
-                - ¿Dónde están? (Máximo 15 palabras)
-                - Comentario sobre el Nivel de Locura (Desde 1, Normal, hasta 5, Muy Loca).
+            const promptTexto = "Genera 5 situaciones de improvisacion para dos personas. " +
+                                "Formato para cada una: " +
+                                "QUIENES: [quienes son] / " +
+                                "DONDE: [lugar] / " +
+                                "LOCURA: [nivel 1-5]. " +
+                                "Asegurate de separar cada una de las 5 situaciones con el delimitador exacto &&&";
 
-                Asegúrate de que la primera situación sea normal y la quinta sea muy loca, con aumento progresivo de locura.
-                Genera solo el texto sin etiquetas HTML ni encabezados.
-                Usa saltos de línea doble entre situaciones.
-            `;
-            
-            // 3. SIMULACIÓN DE LLAMADA A LA API (Esto requiere un backend real en producción)
-            // En un entorno real, usarías la fetch API aquí para contactar un servidor
-            // o el SDK de Gemini (si lo usas en un backend).
-            console.log("Simulando llamada a la API de Gemini con la clave:", GEMINI_API_KEY.substring(0, 5) + '...'); 
+            try {
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: [{ text: promptTexto }] }],
+                        generationConfig: { temperature: 0.85 }
+                    })
+                });
 
-            // Datos de ejemplo para simular la respuesta
-            const respuestaSimulada = `
-                Quiénes son: Dos vecinos que se encuentran por casualidad después de una gran tormenta.
-                Dónde están: En la escalera del edificio, intentando encender una linterna.
-                Nivel de Locura: 1/5.
+                const data = await response.json();
+                const textoIA = data.candidates[0].content.parts[0].text;
+                mostrarResultados(textoIA);
 
-                &&&
-
-                Quiénes son: Un cazador de sueños profesional y un fantasma que ha olvidado cómo flotar.
-                Dónde están: Dentro de un reloj de cuco gigante detenido a medianoche.
-                Nivel de Locura: 3/5.
-
-                &&&
-
-                Quiénes son: Dos palomas mensajeras que han decidido jubilarse anticipadamente.
-                Dónde están: En el tejado de la Ópera de Sídney, discutiendo el plan de pensiones.
-                Nivel de Locura: 2/5.
-
-                &&&
-
-                Quiénes son: Un cactus parlanchín y un crítico de cine con pánico a las espinas.
-                Dónde están: En una entrevista de trabajo para ser la planta de la oficina.
-                Nivel de Locura: 4/5.
-                
-                &&&
-
-                Quiénes son: Sois dos moléculas de hidrógeno enamoradas en un viaje interdimensional.
-                Dónde están: Dentro de la oreja izquierda de un perro salchicha que viaja en tren.
-                Nivel de Locura: 5/5.
-            `;
-            
-            // Espera simulada (para que se vea el "Cargando...")
-            await new Promise(resolve => setTimeout(resolve, 2000)); 
-
-            // 4. Procesar la respuesta y renderizar en HTML
-            mostrarResultados(respuestaSimulada);
-            generarBtn.disabled = false; // Habilitar el botón de nuevo
+            } catch (error) {
+                resultadosDiv.innerHTML = '<p style="color:red; text-align:center;">Error al conectar. Intentalo de nuevo.</p>';
+            } finally {
+                generarBtn.disabled = false;
+            }
         }
 
-        function mostrarResultados(textoBruto) {
-            // Separa las situaciones usando un delimitador (&&&)
-            const situacionesArray = textoBruto.trim().split('&&&').map(s => s.trim()).filter(s => s.length > 0);
+        function mostrarResultados(texto) {
+            const resultadosDiv = document.getElementById('resultados');
+            const bloques = texto.split('&&&').filter(b => b.trim().length > 10);
             
             let html = '';
-            situacionesArray.forEach((situacionTexto, index) => {
-                // Divide la situación en sus partes
-                const partes = situacionTexto.split('\n').map(p => p.trim()).filter(p => p.length > 0);
+            bloques.forEach((bloque, index) => {
+                const lineas = bloque.trim().split('\n');
+                let quienes = "No especificado";
+                let donde = "No especificado";
+                let locura = "1/5";
 
-                let quienes = '';
-                let donde = '';
-                let locura = '';
-                
-                partes.forEach(p => {
-                    if (p.startsWith('Quiénes son:')) {
-                        quienes = p.replace('Quiénes son:', '').trim();
-                    } else if (p.startsWith('Dónde están:')) {
-                        donde = p.replace('Dónde están:', '').trim();
-                    } else if (p.startsWith('Nivel de Locura:')) {
-                        locura = p.trim();
-                    }
+                lineas.forEach(l => {
+                    // Limpiamos posibles caracteres de formato Markdown como * o -
+                    let limpia = l.replace(/^[\s*-]+/, ''); 
+                    
+                    if (limpia.toUpperCase().startsWith('QUIENES:')) quienes = limpia.split(':')[1] || quienes;
+                    if (limpia.toUpperCase().startsWith('DONDE:')) donde = limpia.split(':')[1] || donde;
+                    if (limpia.toUpperCase().startsWith('LOCURA:')) locura = limpia.split(':')[1] || locura;
                 });
 
                 html += `
                     <div class="situacion">
-                        <h2>${index + 1}. Situación Generada</h2>
-                        <span class="quienes">🎭 ${quienes}</span>
-                        <span class="donde">📍 ${donde}</span>
-                        <p class="locura">${locura}</p>
+                        <h2>Situaci&oacute;n #${index + 1}</h2>
+                        <span class="quienes">&#127917; ${quienes.trim()}</span>
+                        <span class="donde">&#128205; ${donde.trim()}</span>
+                        <p class="locura">Nivel de Locura: ${locura.trim()}</p>
                     </div>
                 `;
             });
 
-            resultadosDiv.innerHTML = html;
+            resultadosDiv.innerHTML = html || '<p>Error en el formato de respuesta. Prueba otra vez.</p>';
         }
-
-        // Asignar el evento al botón
-        generarBtn.addEventListener('click', generarSituaciones);
-
-        // Generar el primer conjunto al cargar la página (opcional)
-        // generarSituaciones();
     </script>
 
-<hr style="margin-top: 40px; border-color: #ccc;">
     <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
-        <a href="index.html" style="
-            text-decoration: none;
-            color: #5f6368;
-            font-weight: bold;
-            padding: 10px 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        ">
-            ← Volver al Menú Principal
+        <a href="index.html" style="text-decoration: none; color: #5f6368; font-weight: bold; padding: 10px 20px; border: 1px solid #ccc; border-radius: 5px;">
+            &larr; Volver al Men&uacute; Principal
         </a>
     </div>
 

@@ -3,147 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Noticias para Improvisación Teatral</title>
+    <title>Generador de Noticias para Improvisaci&oacute;n Teatral</title>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> 
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            line-height: 1.6;
-            background-color: #f4f4f9;
+        :root {
+            --primary: #2e7d32;
+            --secondary: #455a64;
+            --bg: #f8f9fa;
+            --accent: #d32f2f;
         }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: var(--bg);
+            color: #333;
+        }
+
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: auto;
             background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
         }
+
         h1 {
-            color: #333;
+            color: var(--primary);
             text-align: center;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
         }
+
+        .intro-text {
+            text-align: center;
+            color: var(--secondary);
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
         h2 {
-            color: #555;
-            border-bottom: 2px solid #ccc;
-            padding-bottom: 5px;
-            margin-top: 20px;
+            color: var(--secondary);
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 8px;
+            margin-top: 40px;
+            font-size: 1.5em;
         }
+
         button {
             display: block;
             width: 100%;
-            padding: 15px;
-            background-color: #4CAF50;
+            max-width: 400px;
+            margin: 30px auto;
+            padding: 18px;
+            background-color: var(--primary);
             color: white;
             border: none;
-            border-radius: 5px;
-            font-size: 1.1em;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
             cursor: pointer;
-            margin-top: 30px;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
         }
+
         button:hover {
-            background-color: #45a049;
+            background-color: #1b5e20;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
         }
-        /* Oculta el texto del prompt, ya que el usuario no quiere verlo */
+
+        button:active {
+            transform: translateY(0);
+        }
+
         #promptText {
             display: none; 
         }
+
         #resultado {
             margin-top: 25px;
-            padding: 15px;
-            border: 1px solid #ddd;
+            padding: 25px;
+            border: 1px solid #e0e0e0;
             background-color: #fff;
-            min-height: 50px;
-            border-radius: 5px;
-            white-space: pre-wrap; /* Mantiene el formato básico del texto generado */
+            min-height: 150px;
+            border-radius: 10px;
+            font-size: 1.05em;
         }
-        #resultado h3 {
-            margin-top: 1em;
-            color: #2c3e50;
+
+        /* Estilos para el contenido generado */
+        #resultado h1, #resultado h2, #resultado h3 { color: var(--primary); }
+        #resultado ul, #resultado ol { padding-left: 20px; }
+        #resultado blockquote {
+            border-left: 5px solid var(--primary);
+            margin: 1.5em 10px;
+            padding: 0.5em 10px;
+            color: #666;
+            background: #f9f9f9;
         }
+
         .loading {
             text-align: center;
-            font-size: 1.2em;
-            color: #007bff;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary);
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .volver-link {
+            text-decoration: none;
+            color: var(--secondary);
+            font-weight: bold;
+            padding: 12px 25px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .volver-link:hover {
+            background-color: #eee;
+            border-color: #bbb;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Noticias para Improvisación</h1>
+    <h1>📰 Noticias para Improvisaci&oacute;n</h1>
 
-    <p>Haz clic para que la IA busque una **noticia real** y se invente una **noticia loca** que propicien 5 improvisaciones cada una.</p>
+    <p class="intro-text">Haz clic para que la IA busque una <strong>noticia real</strong> y se invente una <strong>noticia loca</strong> que propicien 5 improvisaciones cada una.</p>
     
     <div id="promptText">
-        Prompt para la IA: Noticias para Improvisación Teatral
-
-        Objetivo: Necesito dos noticias insólitas y con potencial cómico para un ejercicio de improvisación teatral: una **real** y otra **inventada** (pero plausiblemente loca). La idea es que la noticia actúe como un catalizador para situaciones teatrales absurdas, inesperadas o de alto contraste, al estilo de un evento real que ocurrió en Murcia donde el "Cumpleaños Feliz" sonó sin parar durante cinco horas en un colegio por la noche.
+        Objetivo: Necesito dos noticias insólitas y con potencial cómico para un ejercicio de improvisación teatral: una **real** y otra **inventada** (pero plausiblemente loca). 
 
         ---
-
         Tarea 1: Búsqueda de Noticia Real y Propuestas de Improv. 🎭
-
-        Instrucción: Busca una **noticia real, reciente (2020-2025) y de ámbito español** que trate sobre un **suceso comunitario, burocrático, tecnológico o vecinal inusual, absurdo o que involucre un error cómico/surrealista**. La noticia debe ser tan extraña que parezca inventada y dé mucho juego para la improvisación.
-
-        Requisitos para la Noticia Real:
-        1. Título y un resumen conciso (máx. 3 párrafos).
-        2. Debe ser un evento **concreto** (no una tendencia general).
-        3. Debe tener un alto potencial para la comedia de situación o el contraste de personajes (ej. drama vs. absurdo, rutina vs. caos).
-
-        Propuestas de Improv. (Noticia Real): A partir de esta noticia real, sugiere **cinco** ideas de improvisación para dos o tres actores, indicando el **conflicto central** o los **personajes** (al estilo de los ejemplos que te he dado: bomberos incrédulos, ex-Parchís saboteadores, etc.).
+        Instrucción: Busca una noticia real, reciente (2020-2025) y de ámbito español que trate sobre un suceso comunitario, burocrático, tecnológico o vecinal inusual o absurdo.
+        Requisitos: Título, resumen (3 párrafos) y 5 propuestas de improvisación (indicando conflicto y personajes).
 
         ---
-
         Tarea 2: Invención de Noticia Loca y Propuestas de Improv. 🤯
-
-        Instrucción: Inventa una **noticia** que sea muy **local, específica y completamente absurda**, pero que suene *plausiblemente* como un titular de prensa real. Debe seguir la estructura de un suceso vecinal o un evento que genere un conflicto cómico de larga duración o alto contraste.
-
-        Requisitos para la Noticia Inventada:
-        1. Título y un resumen conciso (máx. 3 párrafos).
-        2. Debe tener un elemento **repetitivo** o **molesto** (como la canción) o un **error de planificación/ejecución** monumental.
-        3. Debe evocar una reacción dramática en los personajes.
-
-        Propuestas de Improv. (Noticia Inventada): A partir de esta noticia inventada, sugiere **cinco** ideas de improvisación para dos o tres actores, indicando el **conflicto central** o los **personajes** (siguiendo la misma estructura que las anteriores).
+        Instrucción: Inventa una noticia local, específica y absurda pero con estructura de prensa real.
+        Requisitos: Título, resumen y 5 propuestas de improvisación.
     </div>
 
-    <button onclick="generarContenido()">Generar Ideas de Improvisación</button>
+    <button id="btnGenerar" onclick="generarContenido()">Generar Ideas de Improvisaci&oacute;n</button>
 
-    <h2>Resultado de la IA:</h2>
-    <div id="resultado">Esperando generación...</div>
+    <h2>Resultado de la Redacci&oacute;n:</h2>
+    <div id="resultado">Esperando generaci&oacute;n...</div>
 </div>
 
 <script>
-    // 🛑 ¡ATENCIÓN! ESTA ES UNA CLAVE FICTICIA DE EJEMPLO. 
-    // DEBES REEMPLAZAR ESTE VALOR POR TU CLAVE API REAL DE GEMINI para que funcione.
-    const API_KEY = "AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM"; 
-               
+    // URL del Worker de Cloudflare
+    const WORKER_URL = "https://generador-impro.raul-grigelmo3.workers.dev";
     
-    // Endpoint para el modelo gemini-2.5-flash
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
-    
-    // Extrae el texto del prompt
     const PROMPT_TEXT = document.getElementById('promptText').textContent.trim();
 
     async function generarContenido() {
-        const CLAVE_FICTICIA = "AIzaS-SUpsNgjSZ7DH5IVc0VVRYIM";
-        
-        // Validación para recordar al usuario que debe cambiar la clave
-        if (API_KEY === CLAVE_FICTICIA) {
-            document.getElementById('resultado').innerHTML = '<div style="color: red;">⚠️ **ERROR DE CLAVE:** La clave API que estás usando es **ficticia**. Por favor, reemplázala en el código JavaScript por tu clave API real de Gemini para que el generador funcione.</div>';
-            return;
-        }
-
         const resultadoDiv = document.getElementById('resultado');
+        const btn = document.getElementById('btnGenerar');
         
-        resultadoDiv.innerHTML = '<div class="loading">Generando contenido... Esto puede tardar unos segundos ya que la IA está buscando una noticia real y creando una inventada.</div>';
+        // Bloquear bot&oacute;n y mostrar carga
+        btn.disabled = true;
+        resultadoDiv.innerHTML = `
+            <div class="loading">
+                <div class="spinner"></div>
+                <span>Consultando las rotativas de la IA...</span>
+            </div>`;
 
         try {
-            const response = await fetch(endpoint, {
+            const response = await fetch(WORKER_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -151,53 +202,42 @@
                 body: JSON.stringify({
                     contents: [{
                         parts: [{ text: PROMPT_TEXT }]
-                    }],
-                    // Corrección: Usamos 'tools' y 'generationConfig' directamente para evitar el error 400.
-                    tools: [{ googleSearch: {} }], // Para activar la búsqueda web
-                    generationConfig: {
-                        temperature: 0.9 // Para aumentar la creatividad
-                    }
+                    }]
                 })
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                console.error('Error de API:', errorData);
-                const errorMessage = errorData.error ? errorData.error.message : response.statusText;
-                resultadoDiv.innerHTML = `<div style="color: red;">Error en la llamada a la API (${response.status}): ${errorMessage}. Por favor, verifica la consola para más detalles.</div>`;
-                return;
+                throw new Error(`Error en el servidor (${response.status})`);
             }
 
             const data = await response.json();
             
-            // Extraer el texto generado
-            const generatedText = data.candidates[0]?.content?.parts[0]?.text || "No se pudo obtener el texto generado. Inténtalo de nuevo.";
+            // Extraer texto seg&uacute;n estructura de la respuesta del Worker
+            const generatedText = data.candidates[0]?.content?.parts[0]?.text || "No se pudo obtener el texto.";
             
-            // Usar marked.parse para renderizar el Markdown a HTML
+            // Renderizar Markdown a HTML
             resultadoDiv.innerHTML = marked.parse(generatedText);
-            
 
         } catch (error) {
-            console.error('Error de red o procesamiento:', error);
-            resultadoDiv.innerHTML = `<div style="color: red;">Error de red o procesamiento: ${error.message}</div>`;
+            console.error('Error:', error);
+            resultadoDiv.innerHTML = `
+                <div style="color: #d32f2f; padding: 20px; border: 1px solid #d32f2f; border-radius: 8px;">
+                    <strong>&iexcl;Error!</strong> No se pudo conectar con el generador: ${error.message}<br>
+                    Por favor, comprueba que el Worker est&eacute; activo.
+                </div>`;
+        } finally {
+            btn.disabled = false;
         }
     }
 </script>
 
-<hr style="margin-top: 40px; border-color: #ccc;">
-    <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
-        <a href="index.html" style="
-            text-decoration: none;
-            color: #5f6368;
-            font-weight: bold;
-            padding: 10px 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        ">
-            ← Volver al Menú Principal
-        </a>
-    </div>
+<hr style="margin-top: 50px; border: 0; border-top: 1px solid #eee;">
+
+<div style="text-align: center; margin-top: 20px; padding-bottom: 40px;">
+    <a href="index.html" class="volver-link">
+        &larr; Volver al Men&uacute; Principal
+    </a>
+</div>
 
 </body>
 </html>

@@ -5,172 +5,222 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generador de Narraciones de Movimiento</title>
     <style>
-        body { font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background-color: #f0f8ff; }
-        h1 { color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 30px; }
-        p.instruccion { color: #5f6368; margin-bottom: 25px; font-style: italic; }
+        :root {
+            --primary: #2563eb;
+            --accent: #d946ef;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f1f5f9;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            padding: 20px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background-color: var(--bg); 
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        h1 { 
+            color: var(--text); 
+            text-align: center;
+            border-bottom: 3px solid var(--primary); 
+            padding-bottom: 15px; 
+            margin-bottom: 20px;
+            font-size: 2.2rem;
+            letter-spacing: -1px;
+        }
+
+        .instruccion { 
+            color: #94a3b8; 
+            margin-bottom: 30px; 
+            font-style: italic; 
+            text-align: center;
+            font-size: 1.1rem;
+        }
         
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
         button { 
-            padding: 14px 25px; 
-            background-color: #007bff; 
+            padding: 16px 35px; 
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             color: white; 
             border: none; 
-            border-radius: 8px; 
+            border-radius: 50px; 
             cursor: pointer; 
             font-size: 18px; 
             font-weight: bold;
-            transition: background-color 0.3s, transform 0.1s; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3); 
         }
-        button:hover { background-color: #0056b3; }
-        button:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        button:hover { 
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 25px rgba(37, 99, 235, 0.4);
+        }
+
+        button:active { transform: translateY(1px); }
         
         #resultado { 
-            margin-top: 35px; 
-            padding: 25px; 
-            border: 2px solid #007bff; 
-            background-color: #e6f2ff;
-            border-radius: 10px; 
-            min-height: 250px; 
-            white-space: pre-wrap; 
-            font-size: 1.1em; 
-            line-height: 1.8;
+            margin-top: 20px; 
+            padding: 30px; 
+            background-color: var(--card-bg);
+            border-radius: 20px; 
+            min-height: 300px; 
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+            border: 1px solid #334155;
         }
+
         pre { 
-            font-family: inherit; 
+            font-family: 'Georgia', serif; 
             margin: 0; 
             padding: 0; 
             white-space: pre-wrap; 
-            line-height: inherit; 
-            font-weight: 500;
+            font-size: 1.25rem; 
+            line-height: 1.9;
+            color: #e2e8f0;
             text-align: justify;
         }
-        .cargando { color: #007bff; font-weight: bold; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        .cargando { 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: var(--primary); 
+            font-weight: bold; 
+            font-size: 1.2rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #334155;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .error-msg {
+            color: #ef4444;
+            background: #450a0a;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #ef4444;
+        }
+
+        .nav-footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-bottom: 30px;
+        }
+
+        .nav-footer a {
+            text-decoration: none;
+            color: #64748b;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .nav-footer a:hover {
+            background: #1e293b;
+            color: var(--primary);
+            border-color: var(--primary);
+        }
     </style>
 </head>
 <body>
 
-    <h1>📖 Guion de Viaje Estresante e Inmóvil</h1>
-    <p class="instruccion">Viaje imaginario frenético para realizar con los ojos cerrados y el cuerpo inmóvil. Enfoque en la percepción interna (estrés, velocidad, presión).</p>
+    <h1>&#128217; Guion de Viaje Estresante e Inm&oacute;vil</h1>
+    <p class="instruccion">Viaje imaginario fren&eacute;tico para realizar con los ojos cerrados y el cuerpo inm&oacute;vil. Enfoque en la percepci&oacute;n interna.</p>
     
-    <button onclick="generarContenido()">Generar Narración</button>
+    <div class="controls">
+        <button onclick="generarContenido()">Generar Narraci&oacute;n</button>
+    </div>
     
-    <div id="resultado"></div>
+    <div id="resultado">
+        <div style="text-align: center; color: #475569; padding-top: 100px;">
+            El guion aparecer&aacute; aqu&iacute;...
+        </div>
+    </div>
 
+    <div class="nav-footer">
+        <a href="index.html">&larr; Volver al Men&uacute; Principal</a>
+    </div>
 
     <script>
-        // ----------------------------------------------------------
-        // --- CLAVE API Y CONFIGURACIÓN ---
-        // ----------------------------------------------------------
-        const API_KEY = 'AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM'; // ¡RECUERDA SUSTITUIR ESTO CON TU CLAVE REAL!
-        const MODEL_NAME = 'gemini-2.5-flash';
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+        // URL de tu Cloudflare Worker
+        const WORKER_URL = 'https://generador-impro.raul-grigelmo3.workers.dev';
 
-
-        // FUNCIÓN CLAVE: Prompt para la Narración Guiada (Estresante, ojos cerrados)
         function construirPromptNarracion() {
-            const contexto = `**INSTRUCCIÓN ESTRICTA:** Genera ÚNICAMENTE el texto narrativo completo. No añadas introducciones, explicaciones de rol, títulos, indicaciones al lector ('Pausa', 'Voz urgente') ni frases de meditación tranquila. El texto debe ser continuo y empezar directamente con la primera frase de la historia.
-
-**OBJETIVO:** Crea un viaje imaginario de **3 a 5 minutos** diseñado para provocar una sensación de **frenesí, estrés, urgencia y claustrofobia** en el oyente, que tiene los **ojos cerrados** y está completamente **tumbado e inmóvil**. La narración debe compensar la inmovilidad del cuerpo con una gran actividad mental y sensorial.
-
-**CRITERIOS OBLIGATORIOS:**
-1.  **Segunda persona del singular (tuteo):** Usar 'sientes', 'debes', 'oído', 'cabeza', etc.
-2.  **Ritmo Acelerado:** Frases muy cortas, con sensación de peligro inminente y velocidad.
-3.  **Foco Sensorial Interno/Táctil:** Enfatizar la respiración, el pulso, la presión, el calor, el equilibrio forzado, el zumbido o sonidos internos.
-4.  **Instrucciones de "Movimiento" Mental:** Pedir al oyente que **imagine y fuerce** la sensación de rotación, caída, subida, o ser presionado, aunque el cuerpo esté quieto.
-5.  **Progresión Narrativa:**
-    * Inicio: Presión y confinamiento inmediato.
-    * Desarrollo: Aceleración descontrolada, sensación de caída o persecución.
-    * Clímax: Sobrecarga sensorial o punto de no retorno.
-    * Cierre: El movimiento se detiene abruptamente y se pasa a una calma forzada/inestable.
-6.  **Espacios Imaginarios:** No usar paisajes naturales abiertos. Usar túneles, laberintos oscuros, espacios que giran, pasillos industriales estrechos o caída libre sin referencia visual.
-
-**EJEMPLO DE GUÍA:** "El aire es denso. Siente la falta de oxígeno en tu pecho. El suelo tiembla. Cierra los puños, la vibración te atraviesa."
-
-La narración debe ser estresante y agotadora, usando un lenguaje que fuerce la concentración en las sensaciones físicas internas.
-`;
-            
-            const instruccionFinal = "Genera el texto narrativo completo basado en los criterios, enfocándote en un espacio de confinamiento y movimiento mecánico/incontrolable. Añade al inicio el tiempo aproximado (ej: Duración aproximada: 3�? minutos).";
-
-            return `${contexto}\n\n--- GENERACIÓN ---\n${instruccionFinal}`;
+            return `**INSTRUCCI&Oacute;N ESTRICTA:** Genera &Uacute;NICAMENTE el texto narrativo completo en espa&ntilde;ol. No a&ntilde;adas introducciones ni t&iacute;tulos.
+            **OBJETIVO:** Viaje imaginario de 3 a 5 minutos para provocar frenes&iacute;, estr&eacute;s y claustrofobia. El oyente tiene los ojos cerrados y est&aacute; inm&oacute;vil.
+            **CRITERIOS:**
+            1. Segunda persona (tuteo).
+            2. Ritmo acelerado, frases cortas, peligro inminente.
+            3. Foco sensorial interno: pulso, respiraci&oacute;n, calor, presi&oacute;n.
+            4. Movimiento mental forzado (ca&iacute;da, rotaci&oacute;n, aceleraci&oacute;n).
+            5. Espacios cerrados: t&uacute;neles, maquinaria, pasillos industriales.
+            6. Inicia indicando la Duraci&oacute;n aproximada al principio.`;
         }
 
-        // Función principal para llamar a la API
         async function generarContenido() {
             const resultadoDiv = document.getElementById('resultado');
-            resultadoDiv.innerHTML = '<span class="cargando">Creando el guion para el viaje...</span>';
+            resultadoDiv.innerHTML = `
+                <div class="cargando">
+                    <div class="spinner"></div>
+                    <span>Invocando sensaciones...</span>
+                </div>`;
             
             const prompt = construirPromptNarracion();
             
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(WORKER_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        contents: [{ role: "user", parts: [{ text: prompt }] }],
-                        generationConfig: { 
-                            temperature: 0.9, 
-                            maxOutputTokens: 4096,
-                        }
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        prompt: prompt,
+                        temp: 0.9 
                     })
                 });
 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({error: {message: 'Respuesta de error no es JSON'}}));
-                    
-                    let errorMessage = errorData.error ? errorData.error.message : response.statusText;
-                    
-                    if (response.status === 429) {
-                         errorMessage = "Límite de cuota superado (Error 429). ¡Necesitas esperar o revisar tus créditos de API!";
-                    } else if (response.status === 400) {
-                        errorMessage = "Error de autenticación o solicitud incorrecta (Error 400). Verifica que tu CLAVE API sea correcta y no haya expirado.";
-                    }
-
-                    throw new Error(`Error ${response.status}: ${errorMessage}`);
-                }
+                if (!response.ok) throw new Error('Error al conectar con el servidor.');
 
                 const data = await response.json();
                 
-                let textoGenerado = "No se pudo generar el contenido. Vuelve a intentarlo o revisa el diagnóstico de la API.";
-
-                try {
+                // Asumiendo que el Worker devuelve la estructura de Gemini o un campo 'text'
+                let textoGenerado = "";
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
                     textoGenerado = data.candidates[0].content.parts[0].text.trim();
-                } catch (e) {
-                    // Si falla (por contenido vacío o safety block)
+                } else if (data.text) {
+                    textoGenerado = data.text;
+                } else {
+                    throw new Error('Estructura de respuesta inesperada.');
                 }
 
-                // Muestra el resultado final
-                resultadoDiv.innerHTML = `
-                    <pre>${textoGenerado}</pre>
-                `;
+                resultadoDiv.innerHTML = `<pre>${textoGenerado}</pre>`;
 
             } catch (error) {
-                // Manejo de ERRORES CRÍTICOS
                 resultadoDiv.innerHTML = `
-                    <strong style="color: #c53929;">Error crítico al conectar con la API:</strong> ${error.message}.<br><br>
-                    <strong>¡PASO URGENTE!</strong> Debes sustituir la clave 'AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM' en la línea 58 del código con una **clave API nueva y válida** de Google AI Studio.
-                `;
+                    <div class="error-msg">
+                        <strong>&#9888; Error Cr&iacute;tico:</strong> ${error.message}<br><br>
+                        Verifica que el Worker est&eacute; activo y configurado correctamente.
+                    </div>`;
             }
         }
     </script>
-
-<hr style="margin-top: 40px; border-color: #ccc;">
-    <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
-        <a href="index.html" style="
-            text-decoration: none;
-            color: #5f6368;
-            font-weight: bold;
-            padding: 10px 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        ">
-            �?Volver al Menú Principal
-        </a>
-    </div>
-
-
 </body>
 </html>

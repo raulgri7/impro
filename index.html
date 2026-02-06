@@ -5,188 +5,203 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Impro Tools - Menú Principal</title>
     <style>
-        /* APLICACIÓN CRUCIAL: Asegura que el padding y el borde se incluyan en el ancho del elemento */
-        * {
-            box-sizing: border-box;
+        * { box-sizing: border-box; }
+
+        :root {
+            --primary: #1a73e8;
+            --primary-dark: #1557b0;
+            --bg-light: #eaf3ff;
+            --text-main: #202124;
+            --text-sub: #5f6368;
+            --white: #ffffff;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: var(--text-main);
             margin: 0;
-            padding: 0;
+            padding: 20px;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
         }
 
         .container {
-            background-color: #ffffff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 650px;
+        }
+
+        header {
             text-align: center;
-            width: 90%;
-            max-width: 600px;
+            margin-bottom: 30px;
         }
 
         h1 {
-            color: #4285f4;
-            font-size: 2.2em;
-            margin-bottom: 10px;
-            border-bottom: 2px solid #4285f4;
-            padding-bottom: 10px;
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin: 0 0 10px 0;
         }
 
-        p {
-            color: #5f6368;
-            margin-bottom: 30px;
-            font-size: 1.1em;
+        .subtitle {
+            color: var(--text-sub);
+            font-size: 1rem;
+        }
+
+        /* SECCIONES */
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-sub);
+            margin: 25px 0 15px 5px;
+        }
+
+        .section-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #eee;
+            margin-left: 15px;
         }
 
         .menu-list {
             list-style: none;
             padding: 0;
+            margin: 0;
         }
 
         .menu-list li {
-            margin: 15px 0;
-            position: relative;
+            margin-bottom: 12px;
         }
 
-        /* Estilo base para todos los enlaces principales */
+        /* ENLACES */
         .menu-list a {
-            display: block;
-            padding: 15px 20px;
-            background-color: #eaf3ff; /* Fondo claro */
-            color: #1a73e8; /* Azul Google (Color del texto) */
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            background-color: var(--bg-light);
+            color: var(--primary);
             text-decoration: none;
-            border-radius: 8px;
-            font-size: 1.2em;
-            font-weight: bold;
-            transition: background-color 0.2s, color 0.2s, transform 0.1s;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-
-            /* APLICACIÓN UNIVERSAL DEL BORDE AZUL FINO (1px) */
-            border: 1px solid #4285f4;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: 1px solid rgba(26, 115, 232, 0.2);
+            transition: all 0.2s ease;
         }
 
         .menu-list a:hover {
-            background-color: #4285f4;
-            color: white;
+            background-color: var(--primary);
+            color: var(--white);
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2);
         }
 
-        /* Estilo para el primer enlace destacado (sobrescribe el borde universal) */
-        .menu-list li:first-child a {
-            background-color: #4285f4;
-            color: white;
-            font-size: 1.3em;
-            border: 2px solid #1a73e8; /* Borde más grueso y oscuro */
-            transform: none;
+        /* DESTACADO */
+        .btn-featured a {
+            background-color: var(--primary);
+            color: var(--white);
+            border: 2px solid var(--primary-dark);
+            font-size: 1.3rem;
+            justify-content: center;
+            padding: 20px;
         }
 
-        .menu-list li:first-child a:hover {
-            background-color: #1a73e8;
+        .btn-featured a:hover {
+            background-color: var(--primary-dark);
         }
 
-        /* Iconos ligeros para un toque visual (la flecha) */
-        .menu-list a::before {
-            content: '→ ';
-            font-weight: normal;
-        }
-
-        /* ------------------------------------------- */
-        /* ESTILO PARA AGRUPAR 3 EN UN SOLO PUNTO */
-        /* ------------------------------------------- */
+        /* GRUPO COMPACTO (EMOCIONES/ESTRÉS) */
         .compact-group {
-            display: flex;
-            justify-content: space-between;
-            gap: 5px;
-            padding: 0;
-            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 5px;
         }
 
-        .compact-group li {
-            margin: 0;
-            flex-grow: 1;
-            list-style: none;
+        .compact-group a {
+            font-size: 0.9rem !important;
+            padding: 12px 5px;
+            justify-content: center;
+            text-align: center;
         }
 
-        .compact-group li a {
-            /* Estilos UNIFICADOS */
-            padding: 15px 5px;
-            font-size: 1.2em !important;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            overflow: hidden;
-
-            background-color: #eaf3ff !important;
-            color: #1a73e8 !important;
-            border-radius: 8px;
-            font-weight: bold;
-            display: block;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-
-            /* CORRECCIÓN FINAL: Borde más estrecho solo para los compactos */
-            border: 0.5px solid #4285f4 !important;
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            h1 { font-size: 1.5rem; }
+            .compact-group {
+                grid-template-columns: 1fr; /* Se apilan en móvil para no fallar el clic */
+            }
+            .menu-list a {
+                font-size: 1rem;
+                padding: 14px 16px;
+            }
         }
 
-        .compact-group li a:hover {
-            background-color: #4285f4 !important;
-            color: white !important;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Vuelve a poner la flecha en los enlaces compactos */
-        .compact-group li a::before {
-            content: '→ ';
+        .emoji {
+            margin-right: 12px;
+            font-style: normal;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🛠️ Herramientas de Improvisación</h1>
-        <p>Selecciona la herramienta de improvisación que deseas utilizar:</p>
+        <header>
+            <h1>🛠️ Impro Tools</h1>
+            <p class="subtitle">Recursos para actores y docentes</p>
+        </header>
 
         <ul class="menu-list">
-            <li><a href="ImproLunes.html">¡Improvisemos!</a></li>
-            <li><a href="BasesDeImpro.html">¿Quiénes son? ¿dónde están?</a></li>
-            <li><a href="BasesDeImpro2.html">¿Quiénes son? ¿dónde están? v2</a></li>
-			<li><a href="10ejercicios.html">10 ejercicicios de impro</a></li>
-            <li><a href="Excusas.html">Llego tarde, pero tengo excusa</a></li>
-            <li><a href="Pitonisa.html">Pitonisa</a></li>
-            <li><a href="SurrealismoParaDos.html">Surrealismo con emociones reales</a></li>
-            <li>
-                <ul class="compact-group">
-                    <li><a href="HistoriaCalmada.html">Calma</a></li>
-                    <li><a href="EstresInmovil.html">Estrés Inmóvil</a></li>
-                    <li><a href="HistoriaEstresante.html">Estrés</a></li>
-                </ul>
+            <li class="btn-featured">
+                <a href="ImproLunes.html"><i class="emoji">🚀</i>¡Improvisemos!</a>
             </li>
 
-            <li><a href="Monologos.html">Buscador de monólogos</a></li>
-            <li><a href="BuscaObras.html">Buscador de obras de teatro</a></li>
-            <li><a href="ClaseImproAvanzada.html">Clase de Improvisación Avanzada</a></li>
-            <li><a href="ClaseImpro.html">Clase de Improvisación (Antigua)</a></li>
-            <li><a href="Noticia.html">Impro basada en una noticia</a></li>
-            <li><a href="CircunstanciasDadas.html">Imprime 12 tarjetas para impro</a></li>
-            <li><a href="DialogoUnico.html">Diálogo Único</a></li>            <li><a href="Palabra.html">Palabras al Azar</a></li>   
-<li><a href="Situaciones.html">Situaciones</a></li>
-<li><a href="Carrera.html">2 min. 1 min. 30 seg. 15 seg.</a></li>
-<li><a href="FrasesYPais.html">6 frases, 1 país y 5 hechos</a></li>
-<li><a href="FichasImpro.html">Fichas Impro Coles</a></li>
-<li><a href="Improlab60.html">ImproLab60</a></li>
-<li><a href="DialogoCircunstanciasDadas.html">Diálogo Circunstancias Dadas</a></li>
+            <div class="section-title">Generadores de Escena</div>
+            <li><a href="Microvisacion.html"><i class="emoji">🌍</i>Microvisación</a></li>
+			<li><a href="BasesDeImpro.html"><i class="emoji">🎭</i>Bases de Escena (v1)</a></li>
+            <li><a href="BasesDeImpro2.html"><i class="emoji">🎬</i>Bases de Escena (v2)</a></li>
+            <li><a href="Situaciones.html"><i class="emoji">📍</i>Situaciones Azar</a></li>
+            <li><a href="DialogoUnico.html"><i class="emoji">💬</i>Diálogo Único</a></li>
+            <li><a href="DialogoCircunstanciasDadas.html"><i class="emoji">📝</i>Diálogo Circunstancias</a></li>
 
+            <div class="section-title">Dinámicas y Juegos</div>
+            <li><a href="10ejercicios.html"><i class="emoji">📚</i>10 Ejercicios de Impro</a></li>
+            <li><a href="Excusas.html"><i class="emoji">🏃</i>Llego tarde: Excusas</a></li>
+            <li><a href="Pitonisa.html"><i class="emoji">🔮</i>La Pitonisa</a></li>
+            <li><a href="SurrealismoParaDos.html"><i class="emoji">🌈</i>Surrealismo Emocional</a></li>
+            
+            <li>
+                <div class="compact-group">
+                    <a href="HistoriaCalmada.html">Calma 🧘</a>
+                    <a href="EstresInmovil.html">Inmóvil 🧊</a>
+                    <a href="HistoriaEstresante.html">Estrés 🔥</a>
+                </div>
+            </li>
 
+            <li><a href="Carrera.html"><i class="emoji">⏱️</i>Carrera: 2m > 1m > 30s > 15s</a></li>
+            <li><a href="FrasesYPais.html"><i class="emoji">🌍</i>6 Frases, 1 País, 5 Hechos</a></li>
 
+            <div class="section-title">Docencia y Formación</div>
+            <li><a href="FichasImpro.html"><i class="emoji">📎</i>Fichas Impro Coles (Imprimir)</a></li>
+            <li><a href="CircunstanciasDadas.html"><i class="emoji">🎴</i>12 Tarjetas de Impro</a></li>
+            <li><a href="ClaseImproAvanzada.html"><i class="emoji">🎓</i>Clase Impro Avanzada</a></li>
+            <li><a href="ClaseImpro.html"><i class="emoji">🏫</i>Clase Impro (Básica)</a></li>
+            <li><a href="Improlab60.html"><i class="emoji">🧪</i>ImproLab60</a></li>
 
-            </ul>
+            <div class="section-title">Herramientas y Búsqueda</div>
+            <li><a href="Noticia.html"><i class="emoji">📰</i>Impro basada en Noticia</a></li>
+            <li><a href="Monologos.html"><i class="emoji">👤</i>Buscador de Monólogos</a></li>
+            <li><a href="BuscaObras.html"><i class="emoji">📖</i>Buscador de Obras</a></li>
+            <li><a href="Palabra.html"><i class="emoji">🔡</i>Palabras al Azar</a></li>
+            <li><a href="ContadorNew.html"><i class="emoji">🔢</i>Contador de Público</a></li>
+        </ul>
     </div>
 </body>
 </html>

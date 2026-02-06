@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impro Tools - Menú Principal</title>
+    <style>
+        /* APLICACIÓN CRUCIAL: Asegura que el padding y el borde se incluyan en el ancho del elemento */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        h1 {
+            color: #4285f4;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #4285f4;
+            padding-bottom: 10px;
+        }
+
+        p {
+            color: #5f6368;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .menu-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .menu-list li {
+            margin: 15px 0;
+            position: relative;
+        }
+
+        /* Estilo base para todos los enlaces principales */
+        .menu-list a {
+            display: block;
+            padding: 15px 20px;
+            background-color: #eaf3ff; /* Fondo claro */
+            color: #1a73e8; /* Azul Google (Color del texto) */
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: background-color 0.2s, color 0.2s, transform 0.1s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+            /* APLICACIÓN UNIVERSAL DEL BORDE AZUL FINO (1px) */
+            border: 1px solid #4285f4;
+        }
+
+        .menu-list a:hover {
+            background-color: #4285f4;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Estilo para el primer enlace destacado (sobrescribe el borde universal) */
+        .menu-list li:first-child a {
+            background-color: #4285f4;
+            color: white;
+            font-size: 1.3em;
+            border: 2px solid #1a73e8; /* Borde más grueso y oscuro */
+            transform: none;
+        }
+
+        .menu-list li:first-child a:hover {
+            background-color: #1a73e8;
+        }
+
+        /* Iconos ligeros para un toque visual (la flecha) */
+        .menu-list a::before {
+            content: '→ ';
+            font-weight: normal;
+        }
+
+        /* ------------------------------------------- */
+        /* ESTILO PARA AGRUPAR 3 EN UN SOLO PUNTO */
+        /* ------------------------------------------- */
+        .compact-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 5px;
+            padding: 0;
+            margin: 0;
+        }
+
+        .compact-group li {
+            margin: 0;
+            flex-grow: 1;
+            list-style: none;
+        }
+
+        .compact-group li a {
+            /* Estilos UNIFICADOS */
+            padding: 15px 5px;
+            font-size: 1.2em !important;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+
+            background-color: #eaf3ff !important;
+            color: #1a73e8 !important;
+            border-radius: 8px;
+            font-weight: bold;
+            display: block;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+            /* CORRECCIÓN FINAL: Borde más estrecho solo para los compactos */
+            border: 0.5px solid #4285f4 !important;
+        }
+
+        .compact-group li a:hover {
+            background-color: #4285f4 !important;
+            color: white !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Vuelve a poner la flecha en los enlaces compactos */
+        .compact-group li a::before {
+            content: '→ ';
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ Herramientas de Improvisación</h1>
+        <p>Selecciona la herramienta de improvisación que deseas utilizar:</p>
+
+        <ul class="menu-list">
+            <li><a href="ImproLunes.html">¡Improvisemos!</a></li>
+            <li><a href="BasesDeImpro.html">¿Quiénes son? ¿dónde están?</a></li>
+            <li><a href="BasesDeImpro2.html">¿Quiénes son? ¿dónde están? v2</a></li>
+			<li><a href="10ejercicios.html">10 ejercicicios de impro</a></li>
+            <li><a href="Excusas.html">Llego tarde, pero tengo excusa</a></li>
+            <li><a href="Pitonisa.html">Pitonisa</a></li>
+            <li><a href="SurrealismoParaDos.html">Surrealismo con emociones reales</a></li>
+            <li>
+                <ul class="compact-group">
+                    <li><a href="HistoriaCalmada.html">Calma</a></li>
+                    <li><a href="EstresInmovil.html">Estrés Inmóvil</a></li>
+                    <li><a href="HistoriaEstresante.html">Estrés</a></li>
+                </ul>
+            </li>
+
+            <li><a href="Monologos.html">Buscador de monólogos</a></li>
+            <li><a href="BuscaObras.html">Buscador de obras de teatro</a></li>
+            <li><a href="ClaseImproAvanzada.html">Clase de Improvisación Avanzada</a></li>
+            <li><a href="ClaseImpro.html">Clase de Improvisación (Antigua)</a></li>
+            <li><a href="Noticia.html">Impro basada en una noticia</a></li>
+            <li><a href="CircunstanciasDadas.html">Imprime 12 tarjetas para impro</a></li>
+            <li><a href="DialogoUnico.html">Diálogo Único</a></li>            <li><a href="Palabra.html">Palabras al Azar</a></li>   
+<li><a href="Situaciones.html">Situaciones</a></li>
+<li><a href="Carrera.html">2 min. 1 min. 30 seg. 15 seg.</a></li>
+<li><a href="FrasesYPais.html">6 frases, 1 país y 5 hechos</a></li>
+<li><a href="FichasImpro.html">Fichas Impro Coles</a></li>
+<li><a href="Improlab60.html">ImproLab60</a></li>
+<li><a href="DialogoCircunstanciasDadas.html">Diálogo Circunstancias Dadas</a></li>
+<li><a href="ContadorNew.html">Contador de Público</a></li>
+
+
+
+
+            </ul>
+    </div>
+</body>
+</html>

@@ -1,493 +1,139 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maestro de Improvisación IA 🎭</title>
+    <title>Impro IA - Set de 6 🎭</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        /* -------------------------------------------
-            ESTILOS CSS - Diseño Final (12 Tarjetas, Troquelado Unido, Esquinas Cuadradas)
-            ------------------------------------------- */
-        :root {
-            --color-main: #34495e; /* Azul oscuro/Gris Pizarra */
-            --color-accent: #2ecc71; /* Verde esmeralda (Accent) */
-            --color-highlight: #3498db; /* Azul claro para elementos clave */
-            --color-bg: #ecf0f1; /* Fondo gris claro */
-            --color-card-bg: #ffffff; /* Fondo tarjeta BLANCO PURO */
-            --shadow-hover: 0 4px 10px rgba(0, 0, 0, 0.1); 
-            --shadow-button: 0 4px 0 #27ae60;
-            --color-print-button: #e74c3c; /* Rojo para imprimir */
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body { 
-            font-family: 'Roboto', sans-serif; 
-            padding: 20px; 
-            max-width: 1200px;
-            margin: 0 auto; 
-            background-color: var(--color-bg); 
-            color: var(--color-main);
-            line-height: 1.5;
-        }
-
-        /* Encabezado y títulos */
-        h1 { 
-            color: var(--color-main); 
-            padding-bottom: 12px; 
-            margin-bottom: 25px; 
-            text-align: center;
-            font-size: 2.2em;
-            font-weight: 900;
-        }
-
-        p.instruccion { 
-            color: var(--color-main); 
-            margin-bottom: 30px; 
-            font-style: italic; 
-            text-align: center;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-            font-size: 1.05em;
-        }
-
-        .botones-container {
-            display: flex;
-            justify-content: center; 
-            gap: 20px; /* Espacio entre botones */
-            margin-bottom: 40px;
-        }
-
-        /* Estilos del Botón de Generar */
+        :root { --main: #34495e; --acc: #2ecc71; --hi: #3498db; --bg: #f4f7f6; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background: var(--bg); padding: 20px; color: var(--main); }
+        
+        /* Estilos de la cabecera y botones */
+        .no-print { text-align: center; margin-bottom: 20px; }
+        h1 { font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+        
+        .botones-wrap { display: flex; justify-content: center; gap: 10px; }
+        
         button { 
-            padding: 16px 30px; 
-            background-color: var(--color-accent); 
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-size: 1.1em;
-            font-weight: 700;
-            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease; 
-            box-shadow: var(--shadow-button); 
-            min-width: 250px;
-            text-transform: uppercase;
-        }
-        button:hover:not(:disabled) { background-color: #27ae60; }
-        button:active:not(:disabled) { 
-            transform: translateY(4px); 
-            box-shadow: 0 0 0 #27ae60;
-        }
-        button:disabled {
-            background-color: #bdc3c7;
-            box-shadow: 0 4px 0 #95a5a6;
-            cursor: not-allowed;
+            padding: 15px 25px; font-weight: bold; cursor: pointer; 
+            color: white; border: none; border-radius: 8px; 
+            text-transform: uppercase; transition: all 0.1s;
         }
         
-        /* Estilos del Botón de Imprimir */
-        #boton-imprimir {
-            background-color: var(--color-print-button);
-            box-shadow: 0 4px 0 #c0392b;
-            display: none; /* Ocultar por defecto */
-        }
-        #boton-imprimir:hover {
-            background-color: #c0392b;
-        }
-        #boton-imprimir:active {
-            transform: translateY(4px); 
-            box-shadow: 0 0 0 #c0392b;
-        }
-
-
-        /* Contenedor de Resultado: BORDES CUADRADOS Y SIN ESPACIOS */
+        #btn-generar { background: var(--acc); box-shadow: 0 4px 0 #27ae60; }
+        #btn-imprimir { background: #e74c3c; box-shadow: 0 4px 0 #c0392b; }
+        
+        button:active { transform: translateY(3px); box-shadow: none; }
+        button:disabled { background: #ccc; box-shadow: none; opacity: 0.8; cursor: not-allowed; }
+        
+        /* Estilos del Grid de resultados */
         #resultado { 
-            padding: 0; 
-            border: 1px solid #bdc3c7;
-            background-color: var(--color-card-bg);
-            border-radius: 0; 
-            min-height: 280px;
-            display: grid;
-            /* Intentar 4 columnas para desktop */
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-            gap: 0; 
-            position: relative; 
-            box-shadow: none; 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+            background: white; border: 1px solid #ccc; max-width: 1000px; margin: 0 auto; 
         }
         
-        /* Placeholder inicial */
-        #resultado:has(> .instruccion:first-child) {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 280px;
-            padding: 30px 15px; 
-        }
-
-        /* Overlay de Carga (ajuste de border-radius) */
-        .loading-overlay {
-            /* ... (estilos de carga) ... */
-            border-radius: 0; /* Esquinas cuadradas */
-        }
-
-        /* Estilos para las Tarjetas Generadas - TROQUELADO UNIDO */
-        .tarjeta-impro {
-            padding: 25px 20px;
-            background-color: var(--color-card-bg);
-            border-radius: 0; 
-            box-shadow: none; 
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-            
-            /* Borde punteado para el troquelado: solo abajo y derecha */
-            border: 0;
-            border-right: 3px dashed #95a5a6; 
-            border-bottom: 3px dashed #95a5a6; 
-            overflow: hidden; 
-        }
-        .tarjeta-impro:hover {
-            transform: none; 
-            box-shadow: var(--shadow-hover);
-            z-index: 1; 
+        .tarjeta { 
+            padding: 25px; border-right: 1px dashed #ccc; border-bottom: 1px dashed #ccc; 
+            min-height: 280px; background: #fff; 
         }
         
-        /* Reglas de borde para la cuadrícula 4x3 (Desktop) */
-        #resultado .tarjeta-impro:nth-child(4n) {
-            border-right: none;
-        }
-        #resultado .tarjeta-impro:nth-last-child(-n + 4) {
-             border-bottom: none;
-        }
+        .t-num { color: var(--hi); font-weight: 900; font-size: 1.1em; border-bottom: 2px solid var(--acc); display: inline-block; margin-bottom: 15px; }
         
-        /* Estilos de Contenido de Tarjeta (Sin Cambios) */
-        .tarjeta-titulo { /* ... */ }
-        .separador { /* ... */ }
-        .tarjeta-item { /* ... */ }
-        .tarjeta-item strong { /* ... */ }
-        .tarjeta-item span { /* ... */ }
-        .modo-tag { /* ... */ }
+        .item { margin-bottom: 12px; }
+        .item b { display: block; font-size: 0.75em; color: #95a5a6; text-transform: uppercase; margin-bottom: 2px; }
+        .item span { font-size: 1.05em; font-weight: 500; color: #2c3e50; display: block; line-height: 1.2; }
 
-
-        /* -------------------------------------------
-            REGLAS DE IMPRESIÓN - OPTIMIZACIÓN A4 (6 tarjetas por página)
-            ------------------------------------------- */
-        @media print {
-            @page {
-                size: A4 portrait; /* Intentaremos 3x4 en vertical */
-                margin: 0.5cm !important; /* Márgenes muy reducidos */
-            }
-
-            body { 
-                background-color: white !important; 
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            /* Ocultar elementos de UI */
-            h1, p.instruccion, .botones-container, .modo-tag, .noprint { 
-                display: none; 
-            }
-            
-            #resultado {
-                box-shadow: none;
-                border: none;
-                padding: 0;
-                background-color: white;
-                /* Cuadrícula de 3 columnas para que entren 4 filas (total 12)*/
-                grid-template-columns: repeat(3, 1fr); 
-                gap: 0; 
-                margin: 0;
-            }
-            
-            .tarjeta-impro {
-                /* Usar borde en todos los lados para que se vean bien las líneas de corte */
-                border: 1.5px dashed #555; 
-                box-shadow: none;
-                transform: none;
-                background-color: white; 
-                padding: 15px; /* Ajuste de padding para texto */
-                margin: 0;
-                break-inside: avoid; /* Evitar que una tarjeta se divida */
-            }
-            
-            /* Insertar un salto de página después de la sexta tarjeta (fila 2, columna 3) */
-            #resultado .tarjeta-impro:nth-child(6) {
-                break-after: page;
-            }
-            
-            /* Ajuste de colores de texto */
-            .tarjeta-titulo, .tarjeta-item span {
-                color: #222 !important; 
-            }
-            .tarjeta-item strong {
-                 color: #555 !important;
-                 font-size: 0.8em;
-            }
-        }
-        
-        /* Responsive (Mantenemos la regla de una columna para móviles) */
-        @media (max-width: 768px) {
-            #resultado {
-                grid-template-columns: 1fr;
-            }
-            #resultado .tarjeta-impro {
-                border-right: none !important;
-            }
+        /* Configuración de Impresión */
+        @media print { 
+            .no-print { display: none !important; } 
+            body { background: white; padding: 0; }
+            #resultado { 
+                grid-template-columns: repeat(2, 1fr) !important; 
+                border: none !important; 
+                width: 100%;
+            } 
+            .tarjeta { 
+                border: 1px dashed black !important; 
+                break-inside: avoid; 
+                min-height: 300px;
+            } 
         }
     </style>
 </head>
 <body>
-    <h1>Circunstancias dadas 🎭</h1>
-    <p class="instruccion"></p>
-    
-    <div class="botones-container">
-        <button id="boton-generar" onclick="generarContenido()">Generar 12 Tarjetas de Impro</button>
-        <button id="boton-imprimir" style="display: none;" onclick="window.print()">Imprimir</button>
-    </div>
-    
-    <div id="resultado">
-        <p class="instruccion" style="font-style: normal; text-align: center; margin-bottom: 0;">Pulsa el botón para generar tu set de tarjetas.</p>
+
+    <div class="no-print">
+        <h1>Circunstancias Dadas 🎭</h1>
+        <div class="botones-wrap">
+            <button id="btn-generar" onclick="generar()">Generar 6 Tarjetas</button>
+            <button id="btn-imprimir" onclick="window.print()" style="display: none;">Imprimir Set</button>
+        </div>
     </div>
 
+    <div id="resultado">
+        <p style="padding: 60px; text-align: center; grid-column: 1/-1; color: #7f8c8d;">Presiona el botón para generar las 6 escenas.</p>
+    </div>
 
     <script>
-        /* -------------------------------------------
-            LÓGICA JAVASCRIPT (Funcionalidad de 12 Tarjetas)
-            ------------------------------------------- */
-        
-        // --- CLAVE API Y CONFIGURACIÓN ---
-        const API_KEY = 'AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM'; 
-        const MODEL_NAME = 'gemini-2.5-flash';
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
-        const TITULO_SECCION = 'TARJETA'; 
-        const NUM_TARJETAS = 12; // ¡Cambiado a 12!
-        
-        // --- Lógica de Fallback Offline (12 tarjetas) ---
-        const tarjetasOffline = [
-            {lugar: "Cajero Automático", momento: "Noche", detonante: "Han visto a alguien sospechoso.", relacion: "Compañeros de piso", emocion: "Miedo"},
-            {lugar: "Cocina de Oficina", momento: "Mañana", detonante: "Alguien se bebió su leche.", relacion: "Jefe y Empleado", emocion: "Enojo"},
-            {lugar: "Parque de Juegos", momento: "Tarde", detonante: "Intercambiaron accidentalmente las mochilas.", relacion: "Desconocidos", emocion: "Sorpresa"},
-            {lugar: "Ascensor", momento: "Atardecer", detonante: "El ascensor se ha parado.", relacion: "Vecinos", emocion: "Ansiedad"},
-            {lugar: "Probador de Ropa", momento: "Tarde", detonante: "Llevan comprando 4 horas sin decidirse.", relacion: "Pareja", emocion: "Confusión"},
-            {lugar: "Autobús Vacío", momento: "Noche", detonante: "Están regresando de un viaje importante.", relacion: "Abuelo y Nieto", emocion: "Melancolía"},
-            {lugar: "Gimnasio", momento: "Mañana", detonante: "Compiten por la última máquina libre.", relacion: "Rivales", emocion: "Determinación"},
-            {lugar: "Sala de Espera", momento: "Mañana", detonante: "Llevan esperando una hora al dentista.", relacion: "Hermanos", emocion: "Aburrimiento"},
-            {lugar: "Terraza de Café", momento: "Tarde", detonante: "Se encuentran por primera vez desde que rompieron.", relacion: "Ex-pareja", emocion: "Tensión"},
-            {lugar: "Pasillo de Hotel", momento: "Noche", detonante: "Acaban de conseguir un gran contrato.", relacion: "Colegas de trabajo", emocion: "Euforia"},
-            {lugar: "Biblioteca Antigua", momento: "Tarde", detonante: "Descubren un pasadizo secreto.", relacion: "Detectives", emocion: "Intriga"},
-            {lugar: "Vestuario Deportivo", momento: "Noche", detonante: "El equipo ha perdido la final.", relacion: "Entrenador y Jugador", emocion: "Decepción"},
-        ];
+        const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
 
-
-        // --- FUNCIONES AUXILIARES ---
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
-
-        function construirPrompt() {
-            // ... (el prompt se mantiene con el orden actualizado y el conteo a 12) ...
-            const contexto = `Genera ${NUM_TARJETAS} tarjetas de improvisación teatral con un formato extremadamente simple y conciso, listas para que un alumno las lea rápidamente y actúe.
-
-Cada tarjeta debe incluir 5 categorías exactas, con respuestas breves y directas. El tono debe ser creativo pero directo.
-
-Las categorías y el formato requerido son:
-
-1.  **Lugar:** (Un único lugar físico y común)
-2.  **Cuándo:** (Mañana, Tarde, Noche o Atardecer)
-3.  **Algo que pasó antes:** (Una acción o suceso muy breve que detona la escena, sin subtramas complejas)
-4.  **Relación:** (Amigos, Hermanos, Pareja, Desconocidos, Colegas, etc.)
-5.  **Emoción:** (Una sola emoción fuerte: Feliz, Enojado, Asustado, Nervioso, etc.)
-
-Asegúrate de que cada tarjeta sea completamente única y esté separada y numerada claramente del 1 al ${NUM_TARJETAS} en el texto final, lista para imprimir.
-
-**REGLA DE FORMATO ESTRICTA:** Delimita cada tarjeta con el título EXACTO: **### ${TITULO_SECCION} [NÚMERO]**
-
-Ejemplo de formato de respuesta:
-### ${TITULO_SECCION} 1
-Lugar: Cocina
-Cuándo: Mañana
-Algo que pasó antes: El niño no ha vuelto a casa.
-Relación: Padres
-Emoción: Preocupación
-
-Genera las ${NUM_TARJETAS} tarjetas respetando el formato estricto y las categorías.`;
+        async function generar() {
+            const btnGen = document.getElementById('btn-generar');
+            const btnImp = document.getElementById('btn-imprimir');
+            const resDiv = document.getElementById('resultado');
             
-            return contexto;
-        }
-        
-        function obtenerResultadosOffline() {
-            const tarjetas = shuffle([...tarjetasOffline]).slice(0, NUM_TARJETAS);
+            btnGen.disabled = true;
+            btnImp.style.display = 'none';
+            resDiv.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:60px;">Generando 6 escenas rápidas...</p>';
 
-            let resultadoSimulado = '';
-            tarjetas.forEach((t, index) => {
-                resultadoSimulado += `### ${TITULO_SECCION} ${index + 1}\n`;
-                resultadoSimulado += `Lugar: ${t.lugar}\n`;
-                resultadoSimulado += `Cuándo: ${t.momento}\n`; 
-                resultadoSimulado += `Algo que pasó antes: ${t.detonante}\n`; 
-                resultadoSimulado += `Relación: ${t.relacion}\n`; 
-                resultadoSimulado += `Emoción: ${t.emocion}\n`; 
-            });
-            
-            return resultadoSimulado.trim();
-        }
-
-        // --- FUNCIÓN PRINCIPAL CON CONTROL DE BOTÓN DE IMPRIMIR ---
-        async function generarContenido() { 
-            const resultadoDiv = document.getElementById('resultado');
-            const botonGenerar = document.getElementById('boton-generar');
-            const botonImprimir = document.getElementById('boton-imprimir');
-            
-            // 1. INICIO: Mostrar Carga Y Bloquear Botón
-            botonGenerar.disabled = true;
-            botonImprimir.style.display = 'none'; // Ocultar Imprimir mientras carga
-
-            const loadingOverlay = document.createElement('div');
-            loadingOverlay.classList.add('loading-overlay'); 
-            loadingOverlay.innerHTML = `
-                <div class="windmill"></div>
-                <span class="loading-text">Generando ${NUM_TARJETAS} escenarios...</span>
-            `;
-            resultadoDiv.innerHTML = ''; 
-            resultadoDiv.appendChild(loadingOverlay);
-
-            const usarIA = API_KEY && API_KEY !== 'TU_CLAVE_AQUÍ' && API_KEY.startsWith('AIzaSy'); 
-            let textoGenerado;
-            let modo = usarIA ? 'IA' : 'Offline (Falta Clave API)';
-            
             try {
-                // Lógica de generación (IA o Fallback)
-                if (usarIA) {
-                    const prompt = construirPrompt();
-                    
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ role: "user", parts: [{ text: prompt }] }],
-                            generationConfig: { 
-                                temperature: 0.9, 
-                                maxOutputTokens: 2048,
-                            }
-                        })
-                    });
-
-                    if (!response.ok) {
-                        modo = 'Fallback Offline';
-                        textoGenerado = obtenerResultadosOffline();
-                        await sleep(1000); 
-                    } else {
-                        const data = await response.json();
-                        textoGenerado = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || obtenerResultadosOffline();
-                        if (!data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()) {
-                            modo = 'Fallback Offline (Respuesta vacía)';
-                        }
-                    }
-                } else {
-                    await sleep(800); 
-                    textoGenerado = obtenerResultadosOffline();
-                }
-                
-                if (!textoGenerado) throw new Error("No se pudo generar contenido.");
-
-                // 2. PROCESAMIENTO Y RENDERIZADO
-                const partes = textoGenerado.split('###').filter(parte => parte.trim().startsWith(TITULO_SECCION));
-                let htmlResultado = '';
-                
-                const ordenCategorias = [
-                    'Lugar', 
-                    'Cuándo', 
-                    'Algo que pasó antes', 
-                    'Relación', 
-                    'Emoción'
-                ];
-                
-                partes.forEach((parte) => {
-                    const lineas = parte.trim().split('\n').filter(line => line.trim().length > 0);
-                    if (lineas.length < 6) return; 
-
-                    const titulo = lineas[0].trim().replace(new RegExp(TITULO_SECCION + '\\s*', 'i'), 'Tarjeta ');
-                    
-                    const valoresMapa = {};
-                    lineas.slice(1).forEach(linea => {
-                        const [categoria, ...valorParts] = linea.split(':');
-                        const valor = valorParts.join(':').trim();
-                        let categoriaLimpia = categoria.trim().replace(/\d\.\s*\*\*(.*)\*\*/, '$1').trim();
-                        
-                        // Normalizar categorías al formato corto
-                        if (categoriaLimpia.startsWith('Momento del día')) categoriaLimpia = 'Cuándo';
-                        else if (categoriaLimpia.startsWith('Relación entre los personajes')) categoriaLimpia = 'Relación';
-                        else if (categoriaLimpia.startsWith('Emoción al comenzar')) categoriaLimpia = 'Emoción';
-                        
-                        valoresMapa[categoriaLimpia.split(':')[0].trim()] = valor; 
-                    });
-
-                    let tarjetaHTML = `<div class="tarjeta-impro">`;
-                    tarjetaHTML += `<div class="tarjeta-titulo">${titulo}</div>`;
-                    tarjetaHTML += `<div class="separador"></div>`; 
-                    
-                    ordenCategorias.forEach(cat => {
-                        const valor = valoresMapa[cat];
-                        if (valor) {
-                            tarjetaHTML += `
-                                <div class="tarjeta-item">
-                                    <strong>${cat}</strong>
-                                    <span>${valor}</span>
-                                </div>
-                            `;
-                        }
-                    });
-
-                    tarjetaHTML += `</div>`;
-                    htmlResultado += tarjetaHTML;
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: "Genera exactamente 6 tarjetas de improvisación teatral. Para cada tarjeta escribe: Lugar:, Cuándo:, Antes:, Relación:, Emoción:. Sé breve y directo. No uses asteriscos." }] }]
+                    })
                 });
 
+                const data = await response.json();
+                const texto = data.candidates[0].content.parts[0].text.replace(/\*/g, '');
+                
+                const etiquetas = ["Lugar", "Cuándo", "Antes", "Relación", "Emoción"];
+                const regex = new RegExp(`(${etiquetas.join('|')}):?\\s*([^\\n]+)`, 'gi');
+                
+                let hallazgos = [];
+                let match;
+                while ((match = regex.exec(texto)) !== null) {
+                    hallazgos.push({ etiqueta: match[1].toUpperCase(), valor: match[2].trim() });
+                }
 
-                // 3. FINALIZACIÓN: Mostrar Contenido y Botones
-                loadingOverlay.remove();
+                if (hallazgos.length === 0) throw new Error("Formato no reconocido");
+
+                let html = '';
+                let tNum = 1;
                 
-                resultadoDiv.innerHTML = htmlResultado;
-                resultadoDiv.innerHTML += `<div class="modo-tag">[Modo: ${modo}]</div>`;
-                botonGenerar.disabled = false;
-                botonImprimir.style.display = 'inline-block'; // Mostrar Imprimir
-                
-            } catch (error) {
-                // Manejo de ERRORES CRÍTICOS
-                loadingOverlay.remove();
-                resultadoDiv.innerHTML = `
-                    <strong style="color: #c0392b;">Error crítico:</strong> ${error.message}.<br><br>
-                    <strong>¡AVISO!</strong> El modo IA falló. Si estás usando 'TU_CLAVE_AQUÍ', por favor, reemplázala con tu **CLAVE API** real para usar la IA.<br>
-                    <div class="modo-tag">[Modo: ${modo}]</div>
-                `;
-                botonGenerar.disabled = false;
-                botonImprimir.style.display = 'none'; // Asegurar que no se muestre
+                for (let i = 0; i < hallazgos.length; i += 5) {
+                    html += `<div class="tarjeta"><span class="t-num">TARJETA ${tNum++}</span>`;
+                    for (let j = 0; j < 5; j++) {
+                        if (hallazgos[i+j]) {
+                            html += `<div class="item"><b>${hallazgos[i+j].etiqueta}</b><span>${hallazgos[i+j].valor}</span></div>`;
+                        }
+                    }
+                    html += `</div>`;
+                }
+
+                resDiv.innerHTML = html;
+                btnImp.style.display = 'inline-block'; // Mostramos el botón tras generar con éxito
+
+            } catch (e) {
+                resDiv.innerHTML = `<p style="grid-column:1/-1; text-align:center; padding:60px; color:red;">Error: ${e.message}. Reintenta.</p>`;
+            } finally {
+                btnGen.disabled = false;
             }
         }
     </script>
-
-<hr class="noprint" style="margin-top: 40px; border-color: #ccc;">
-    <div class="noprint" style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
-        <a href="index.html" style="
-            text-decoration: none;
-            color: #5f6368;
-            font-weight: bold;
-            padding: 10px 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        ">
-            �?Volver al Menú Principal
-        </a>
-    </div>
-
 </body>
 </html>

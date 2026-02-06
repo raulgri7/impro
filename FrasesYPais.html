@@ -3,74 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎭 Generador: País, Historia y 6 Frases (Impro) - Categorías Finales</title>
+    <title>🎭 Generador: Pa&iacute;s, Historia y 6 Frases (Impro)</title>
     <style>
         /* ----------------------------------------------------------
            ESTILOS (LOOK AND FEEL - TEATRO Y DRAMATURGIA)
            ---------------------------------------------------------- */
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 20px;
-            max-width: 900px;
+            max-width: 850px;
             margin: 0 auto;
-            background-color: #e8f5e9; /* Verde claro suave */
-            color: #333;
-        }
-        h1 {
-            color: #388e3c; /* Verde esmeralda oscuro */
-            border-bottom: 3px solid #66bb6a;
-            padding-bottom: 15px;
-            margin-bottom: 30px;
-            text-align: center;
-            font-size: 2.2em;
-        }
-        p.instruccion {
-            color: #555;
-            margin-bottom: 25px;
-            text-align: center;
-            font-size: 1.1em;
+            background-color: #f1f8e9; /* Verde muy claro */
+            color: #263238;
+            line-height: 1.6;
         }
 
-        /* Contenedor del Botón */
+        h1 {
+            color: #2e7d32; /* Verde bosque */
+            border-bottom: 4px solid #81c784;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 2.4em;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        p.instruccion {
+            color: #546e7a;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.15em;
+            font-style: italic;
+        }
+
+        /* Contenedor del Bot&oacute;n */
         .boton-container {
             text-align: center;
             margin-bottom: 40px;
         }
 
         button {
-            padding: 16px 30px;
-            background-color: #388e3c; /* Verde principal */
+            padding: 18px 35px;
+            background: linear-gradient(145deg, #43a047, #2e7d32);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 50px;
             cursor: pointer;
-            font-size: 1.2em;
+            font-size: 1.1em;
             font-weight: bold;
-            transition: background-color 0.3s, transform 0.1s;
-            box-shadow: 0 5px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        button:hover:not(:disabled) { background-color: #2e7d32; }
+
+        button:hover:not(:disabled) {
+            background: linear-gradient(145deg, #4caf50, #388e3c);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
         button:active:not(:disabled) {
-            transform: translateY(3px);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transform: translateY(1px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
         }
+
         button:disabled {
-            background-color: #a5d6a7;
+            background: #b0bec5;
             cursor: not-allowed;
             box-shadow: none;
         }
 
         #resultado {
-            margin-top: 35px;
-            padding: 30px;
-            border: 3px solid #388e3c;
-            background-color: #ffffff; /* Fondo blanco para el contenido */
-            border-radius: 15px;
-            min-height: 250px;
-            font-size: 1.1em;
-            line-height: 1.6;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            padding: 35px;
+            border-left: 8px solid #2e7d32;
+            background-color: #ffffff;
+            border-radius: 12px;
+            min-height: 200px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
         }
 
         /* Estilos de la carga */
@@ -80,94 +91,90 @@
             animation: pulse 1.5s infinite;
             display: block;
             text-align: center;
-            font-size: 1.2em;
-            padding: 20px 0;
-        }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-
-        /* Estilos específicos para la respuesta generada */
-        pre {
-            font-family: inherit;
-            margin: 0;
-            padding: 0;
-            white-space: pre-wrap;
-            line-height: 1.6;
-            font-weight: normal;
+            font-size: 1.3em;
         }
 
-        /* Mejorar la legibilidad de la salida */
-        #resultado strong {
-            color: #388e3c;
-            font-weight: bold;
-        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        /* Estilos espec&iacute;ficos para la respuesta generada */
         #resultado h3 {
             color: #1b5e20;
-            margin-top: 25px;
-            margin-bottom: 5px;
-            border-bottom: 2px dotted #66bb6a;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 2px dashed #a5d6a7;
+            display: inline-block;
             padding-bottom: 5px;
         }
-        
-        /* === ESTILO: Destacar el país en el encabezado === */
-        #resultado h3 em strong {
-            color: #c53929; /* Color rojo oscuro llamativo */
-            font-size: 1.1em; /* Un poco más grande */
-            font-weight: bolder;
+
+        #resultado strong {
+            color: #2e7d32;
         }
 
-        #resultado li {
-            margin-bottom: 10px;
+        #resultado em strong {
+            color: #d32f2f; /* Rojo para el pa&iacute;s */
+            font-size: 1.2em;
+            text-decoration: underline;
         }
+
         .error-detalle {
             background-color: #ffebee;
-            border: 1px solid #c53929;
-            padding: 10px;
-            margin-top: 15px;
-            border-radius: 5px;
-            font-size: 0.9em;
-            white-space: pre-wrap;
-            word-break: break-all;
+            border: 1px solid #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            color: #c62828;
+            font-family: monospace;
+            margin-top: 20px;
+        }
+
+        a.volver {
+            text-decoration: none;
+            color: #455a64;
+            font-weight: bold;
+            padding: 12px 25px;
+            border: 2px solid #cfd8dc;
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        a.volver:hover {
+            background-color: #cfd8dc;
+            color: #000;
         }
     </style>
 </head>
 <body>
-    <h1>🌎 Generador: País, Historia y Frases</h1>
-    <p class="instruccion">Genera 6 frases, 1 país y 5 hechos históricos con contexto para tu ejercicio de improvisación.</p>
+    <h1>🌎 Generador: Pa&iacute;s, Historia y Frases</h1>
+    <p class="instruccion">Genera 6 frases, 1 pa&iacute;s y 5 hechos hist&oacute;ricos con contexto para tu ejercicio de improvisaci&oacute;n.</p>
 
     <div class="boton-container">
-        <button id="generar-btn" onclick="generarPremisas()">Generar Elementos para Improvisación</button>
+        <button id="generar-btn" onclick="generarPremisas()">Generar Elementos para Improvisaci&oacute;n</button>
     </div>
 
     <div id="resultado">
-        <p style="text-align: center; color: #5f6368;">Pulsa el botón para obtener los tres elementos de improvisación que te pide el público.</p>
+        <p style="text-align: center; color: #78909c;">Pulsa el bot&oacute;n para obtener los elementos dram&aacute;ticos que el destino ha preparado.</p>
     </div>
 
     <script>
-        // ----------------------------------------------------------
-        // --- CLAVE API Y CONFIGURACIÓN (NO TOCAR) ---
-        // ----------------------------------------------------------
-        const API_KEY = 'AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM'; // Usar tu clave real aquí
-        const MODEL_NAME = 'gemini-2.5-flash';
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+        // --- CONFIGURACI&Oacute;N DEL WORKER ---
+        const WORKER_URL = 'https://generador-impro.raul-grigelmo3.workers.dev';
 
-        // ----------------------------------------------------------
-        // --- LISTA DE PAÍSES Y FUNCIÓN DE SELECCIÓN ---
-        // ----------------------------------------------------------
         const listaPaises = [
-            "Afganistán", "Alemania", "Angola", "Arabia Saudí", "Argelia", "Argentina", "Australia", "Austria",
-            "Bangladesh", "Bélgica", "Bolivia", "Botsuana", "Brasil", "Bulgaria", "Camerún", "Canadá",
+            "Afganist&aacute;n", "Alemania", "Angola", "Arabia Saud&iacute;", "Argelia", "Argentina", "Australia", "Austria",
+            "Bangladesh", "B&eacute;lgica", "Bolivia", "Botsuana", "Brasil", "Bulgaria", "Camer&uacute;n", "Canad&aacute;",
             "Catar", "Chile", "China", "Colombia", "Corea del Norte", "Corea del Sur", "Costa de Marfil", "Costa Rica",
-            "Croacia", "Cuba", "Dinamarca", "Ecuador", "Egipto", "El Salvador", "Emiratos Árabes Unidos", "Eslovaquia",
-            "Eslovenia", "España", "Estados Unidos", "Estonia", "Etiopía", "Filipinas", "Finlandia", "Francia",
-            "Ghana", "Grecia", "Guatemala", "Guinea", "Haití", "Honduras", "Hungría", "India",
-            "Indonesia", "Irak", "Irán", "Irlanda", "Islandia", "Israel", "Italia", "Japón",
-            "Jordania", "Kazajistán", "Kenia", "Kuwait", "Laos", "Letonia", "Líbano", "Liberia",
-            "Libia", "Lituania", "Luxemburgo", "Madagascar", "Marruecos", "México", "Mozambique", "Namibia",
-            "Nepal", "Nicaragua", "Nigeria", "Noruega", "Nueva Zelanda", "Omán", "Países Bajos", "Pakistán",
-            "Panamá", "Paraguay", "Perú", "Polonia", "Portugal", "Reino Unido", "República Centroafricana", "República Checa",
-            "República del Congo", "República Democrática del Congo", "República Dominicana", "Rumanía", "Rusia", "Senegal", "Serbia",
-            "Singapur", "Siria", "Sri Lanka", "Sudáfrica", "Sudán", "Sudán del Sur", "Suecia", "Suiza",
-            "Tailandia", "Tanzania", "Túnez", "Turquía", "Ucrania", "Uganda", "Uruguay", "Uzbekistán",
+            "Croacia", "Cuba", "Dinamarca", "Ecuador", "Egipto", "El Salvador", "Emiratos &Aacute;rabes Unidos", "Eslovaquia",
+            "Eslovenia", "Espa&ntilde;a", "Estados Unidos", "Estonia", "Etiop&iacute;a", "Filipinas", "Finlandia", "Francia",
+            "Ghana", "Grecia", "Guatemala", "Guinea", "Hait&iacute;", "Honduras", "Hungr&iacute;a", "India",
+            "Indonesia", "Irak", "Ir&aacute;n", "Irlanda", "Islandia", "Israel", "Italia", "Jap&oacute;n",
+            "Jordania", "Kazajist&aacute;n", "Kenia", "Kuwait", "Laos", "Letonia", "L&iacute;bano", "Liberia",
+            "Libia", "Lituania", "Luxemburgo", "Madagascar", "Marruecos", "M&eacute;xico", "Mozambique", "Namibia",
+            "Nepal", "Nicaragua", "Nigeria", "Noruega", "Nueva Zelanda", "Om&aacute;n", "Pa&iacute;ses Bajos", "Pakist&aacute;n",
+            "Panam&aacute;", "Paraguay", "Per&uacute;", "Polonia", "Portugal", "Reino Unido", "Rep&uacute;blica Centroafricana", "Rep&uacute;blica Checa",
+            "Rep&uacute;blica del Congo", "Rep&uacute;blica Democr&aacute;tica del Congo", "Rep&uacute;blica Dominicana", "Ruman&iacute;a", "Rusia", "Senegal", "Serbia",
+            "Singapur", "Siria", "Sri Lanka", "Sud&aacute;frica", "Sud&aacute;n", "Sud&aacute;n del Sur", "Suecia", "Suiza",
+            "Tailandia", "Tanzania", "T&uacute;nez", "Turqu&iacute;a", "Ucrania", "Uganda", "Uruguay", "Uzbekist&aacute;n",
             "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabue"
         ];
 
@@ -176,137 +183,74 @@
             return listaPaises[indice];
         }
 
-        // ----------------------------------------------------------
-        // --- PROMPT MODIFICADO (CATEGORÍA DE ESPAÑA) ---
-        // ----------------------------------------------------------
-
-        // Función para construir el PROMPT detallado para el ejercicio de País/Historia/Frases
         function construirPromptImproHistoria(pais) {
-            const contexto = `Actúa como un generador de premisas para improvisación teatral. Tu tarea es generar **DOS LISTAS** de contenido, separadas por encabezados, EXCLUSIVAMENTE en formato Markdown, sin introducción ni conclusión.
+            // Decodificamos entidades para el prompt de la IA
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = pais;
+            const paisDecodificado = tempDiv.textContent;
 
-INSTRUCCIONES CLAVE:
-1.  **SECCIÓN 1 (Frases - ALTA DIVERSIDAD):** Genera exactamente 6 frases cortas y sueltas. Deben ser radicalmente distintas en tono y origen para maximizar la dificultad y evitar repetición. Genera una de cada una de las siguientes categorías en orden:
-    * 1. Un refrán popular o proverbio.
-    * 2. Un fragmento lírico o verso de una canción famosa.
-    * 3. Una cita de película o serie de televisión icónica.
-    * 4. Un modismo, jerga o frase localista de España.
-    * 5. Una frase de diálogo completamente absurda o surrealista.
-    * 6. Una frase de diálogo cotidiano, simple e inocua.
-2.  **SECCIÓN 2 (País y Hechos):** Genera 5 hechos históricos, mitos o leyendas **relacionados con el país** ${pais}. CADA HECHO DEBE INCLUIR UNA BREVE EXPLICACIÓN de 2 a 3 líneas sobre su contexto o significado.
+            return `Act&uacute;a como un generador de premisas para improvisaci&oacute;n teatral. Tu tarea es generar **DOS LISTAS** separadas por encabezados Markdown, sin introducciones.
 
-REGLAS DE FORMATO ESTRICTO:
-* Usa el encabezado de nivel 3 (###) "### 🗣️ Las 6 Frases Aleatorias" para la Sección 1.
-* Usa el encabezado de nivel 3 (###) **"### 🌎 Hechos de ***${pais}***"** para la Sección 2. **ATENCIÓN: Envuelve el nombre del país en negrita y cursiva (***[País]***) en el encabezado.**
-* Usa **listas numeradas** para las Frases.
-* Usa **listas numeradas** para los Hechos Históricos. El formato debe ser: "Número. **Hecho/Mito/Leyenda:** Explicación de 2-3 líneas."
+INSTRUCCIONES:
+1. **SECCI&Oacute;N 1 (6 Frases):** Una de cada tipo: refr&aacute;n, canci&oacute;n famosa, cita de cine, jerga de Espa&ntilde;a, frase absurda y frase cotidiana.
+2. **SECCI&Oacute;N 2 (Hechos de ${paisDecodificado}):** 5 hechos hist&oacute;ricos o mitos reales de este pa&iacute;s con una explicaci&oacute;n de 2-3 l&iacute;neas cada uno.
 
-Genera el contenido ahora. **NO generes ninguna otra sección, lista o texto adicional.**`;
-
-            return contexto;
+FORMATO:
+* Usa "### 🗣️ Las 6 Frases Aleatorias"
+* Usa "### 🌎 Hechos de ***${paisDecodificado}***" (negrita cursiva para el pa&iacute;s).
+* Usa listas numeradas.`;
         }
 
-        // Función auxiliar para formatear la salida
         function formatearResultado(texto) {
-            let html = texto
+            return texto
                 .replace(/###\s*(.*)/g, '<h3>$1</h3>')
                 .replace(/\*\*\*(.*?)\*\*\*/g, '<em><strong>$1</strong></em>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-            return html;
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
         }
 
-        // Función principal para llamar a la API
         async function generarPremisas() {
             const resultadoDiv = document.getElementById('resultado');
             const boton = document.getElementById('generar-btn');
 
             boton.disabled = true;
-            resultadoDiv.innerHTML = '<span class="cargando">Generando elementos: 6 frases, 1 país y 5 hechos históricos...</span>';
+            resultadoDiv.innerHTML = '<span class="cargando">Invocando a las musas del teatro...</span>';
 
             const paisSeleccionado = seleccionarPaisAlAzar();
-            const prompt = construirPromptImproHistoria(paisSeleccionado);
+            const promptFinal = construirPromptImproHistoria(paisSeleccionado);
 
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(WORKER_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ role: "user", parts: [{ text: prompt }] }],
-                        generationConfig: {
-                            temperature: 0.9,
-                            maxOutputTokens: 8192,
-                        }
+                        contents: [{ parts: [{ text: promptFinal }] }]
                     })
                 });
 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({error: {message: 'Respuesta de error no es JSON'}}));
-                    throw new Error(`Error HTTP ${response.status}: ${errorData.error ? errorData.error.message : response.statusText}`);
-                }
+                if (!response.ok) throw new Error('El servidor no responde correctamente.');
 
                 const data = await response.json();
+                const textoGenerado = data.candidates[0].content.parts[0].text.trim();
 
-                let textoGenerado = "";
-
-                try {
-                    textoGenerado = data.candidates[0].content.parts[0].text.trim();
-                } catch (e) {
-                    let safetyReason = "Motivo desconocido (la respuesta JSON estaba vacía o mal formada).";
-                    if (data.candidates && data.candidates[0].finishReason === 'SAFETY') {
-                        safetyReason = "Bloqueado por política de seguridad (SAFETY BLOCK). Revisa el contenido de tu Prompt.";
-                    } else if (data.promptFeedback) {
-                           safetyReason = JSON.stringify(data.promptFeedback, null, 2);
-                    } else {
-                        safetyReason = JSON.stringify(data, null, 2);
-                    }
-
-                    resultadoDiv.innerHTML = `
-                        <strong style="color: #c53929;">Error: No se pudo generar el contenido útil.</strong><br>
-                        El modelo no devolvió texto o el contenido fue bloqueado.<br>
-                        <strong style="color: #5f6368;">Diagnóstico detallado:</strong>
-                        <div class="error-detalle">
-                            <pre>${safetyReason}</pre>
-                        </div>
-                    `;
-                    boton.disabled = false;
-                    return;
-                }
-
-                resultadoDiv.innerHTML = `<pre>${formatearResultado(textoGenerado)}</pre>`;
+                resultadoDiv.innerHTML = formatearResultado(textoGenerado);
                 boton.disabled = false;
 
             } catch (error) {
-                let posibleCausa = "Clave API incorrecta, expirada o problema de CORS.";
-                if (error.message.includes('Failed to fetch') || error.message.includes('Error HTTP')) {
-                     posibleCausa = '⚠️ El problema es casi seguro de **CORS** (si estás en file:///) o la clave API está restringida.';
-                }
-
                 resultadoDiv.innerHTML = `
-                    <strong style="color: #c53929;">Error crítico de Conexión:</strong> ${error.message}.<br><br>
-                    <strong>POSIBLES CAUSAS:</strong><br>
-                    - ${posibleCausa}<br>
-                    - El modelo no está disponible o el nombre es incorrecto.
+                    <div class="error-detalle">
+                        <strong>Error de Conexi&oacute;n:</strong> No se pudo contactar con el generador.<br>
+                        <em>Detalle: ${error.message}</em>
+                    </div>
                 `;
                 boton.disabled = false;
             }
         }
     </script>
 
-<hr style="margin-top: 40px; border-color: #ccc;">
-    <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
-        <a href="index.html" style="
-            text-decoration: none;
-            color: #5f6368;
-            font-weight: bold;
-            padding: 10px 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        ">
-            ← Volver al Menú Principal
-        </a>
+    <hr style="margin-top: 50px; border: 0; border-top: 1px solid #cfd8dc;">
+    <div style="text-align: center; margin-top: 20px; padding-bottom: 40px;">
+        <a href="index.html" class="volver">&larr; Volver al Men&uacute; Principal</a>
     </div>
 </body>
 </html>

@@ -49,122 +49,86 @@
 <body>
 
     <h1>🔮 La Pitonisa y el Mimo</h1>
-    <p class="instruccion"></p>
+    <p class="instruccion">El Mimo representará tu destino. ¡Adivina qué te depara el futuro!</p>
     
-    <button onclick="generarPredicciones()">¡ Predicción !</button>
+    <button id="btn-prediccion" onclick="generarPredicciones()">¡ Predicción !</button>
     
     <div id="resultado"></div>
 
 
     <script>
-        // ----------------------------------------------------------
-        // --- CLAVE API Y CONFIGURACIÓN ---
-        // ----------------------------------------------------------
-        const API_KEY = 'AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM'; // ¡RECUERDA SUSTITUIR ESTO!
-        const MODEL_NAME = 'gemini-2.5-flash';
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
-
-
-        // Función para construir el PROMPT detallado y mejorado
         function construirPromptPitonisa() {
-            const contexto = `Eres un experto en teatro de improvisación y generas ideas para un juego de Pitonisa (adivina) y Mimo (asistente). Debes generar EXACTAMENTE SEIS pares de preguntas y respuestas.
-
-REQUISITOS CLAVE:
-1. La PREGUNTA debe ser simple, común y cotidiana (ej: "¿Cuál es mi destino?").
-2. La RESPUESTA debe ser una **única imagen o acción absurda**, enrevesada y contener **elementos físicos muy simples y claramente representables con mímica**. Está totalmente prohibido usar frases que concatenen acciones o condiciones (ej: NO USAR "mientras haces X", "y luego Y", "después de Z").
-3. El formato de la respuesta debe ser: "Pregunta: [Pregunta Simple]\nRespuesta: [Predicción Absurda/Mimeable]".
-
-No añadas NINGÚN otro texto, explicaciones, introducciones, encabezados, despedidas o comentarios. Solo las TRES parejas formateadas.`;
-
-            // Ejemplos finales con la estructura simple deseada
-            const ejemplos = [
-                "Pregunta: ¿De qué me moriré?\nRespuesta: Te pillará un tren lleno de cerdos en Tailandia.",
-                
-                "Pregunta: ¿Con quién me casaré?\nRespuesta: Con el Inspector Gadget.",
-                
-                "Pregunta: ¿Cuál es la clave para la felicidad?\nRespuesta: Tienes que hacer mermelada de ruedas de coche.",
-                
-                "Pregunta: ¿Cuál será mi próxima gran compra?\nRespuesta: Un plátano gigante.",
-                
-                "Pregunta: ¿Cómo conseguiré un ascenso?\nRespuesta: Debes sobornar a tu jefe con un peine de oro.",
-                
-                "Pregunta: ¿Qué me depara el futuro?\nRespuesta: Te encontrarás un bebé escondido dentro de una sandwichera."
-            ];
-
-            const instruccionFinal = "Genera TRES NUEVOS pares originales de Pregunta y Respuesta que sigan este formato estricto y simple.";
-
-            return `${contexto}\n\n--- EJEMPLOS ---\n${ejemplos.join('\n\n')}\n\n--- GENERACIÓN ---\n${instruccionFinal}`;
+            return `Eres un experto en el juego de impro "La Pitonisa y el Mimo". 
+            Debes generar 3 pares de Pregunta y Respuesta.
+            
+            CONTEXTO DEL JUEGO:
+            Un cliente pregunta por su futuro. Una Pitonisa le responde algo absurdo. Un Mimo debe representar esa respuesta para que el Cliente (que no la ha oído) la adivine.
+            
+            REGLAS DEL PROMPT:
+            1. La PREGUNTA debe ser una duda vital común (Amor, Dinero, Salud, Trabajo, Viajes).
+            2. La RESPUESTA debe estar RELACIONADA temáticamente con la pregunta pero ser una acción física bizarra pero no muy larga, no hagas respuestas con frases copulativas ni subordinadas.
+            3. La respuesta debe ser una ESCENA CONCRETA Y VISUAL que un mimo pueda actuar fácilmente, así que tiene que ser una acción a lo sumo dos.
+            
+            EJEMPLOS CON CONEXIÓN:
+            Pregunta: ¿Cómo será mi vida amorosa?
+            Respuesta: Te casarás con un maniquí y le darás de comer espaguetis.
+            
+            Pregunta: ¿Cómo me irá en el amor el próximo año?
+            Respuesta: Te casarás con una maceta.
+            
+            Pregunta: ¿A dónde viajaré próximamente?
+            Respuesta: Irás a la Luna montado en una escoba mecánica.
+			
+			Pregunta: ¿Encontraré pronto el amor de mi vida?
+			Respuesta: Un pingüino te declarará su amor.
+			
+			Pregunta: ¿Encontraré el amor verdadero?
+			Respuesta: Te enamorarás de un paraguas.
+			
+            Genera 3 pares nuevos. Sin asteriscos, sin introducciones. Formato:
+            Pregunta: [Frase]
+            Respuesta: [Acción visual conectada]`;
         }
 
-        // Función principal para llamar a la API
         async function generarPredicciones() {
             const resultadoDiv = document.getElementById('resultado');
-            resultadoDiv.innerHTML = '<span class="cargando">Adivinando el futuro absurdo...</span>';
+            const btn = document.getElementById('btn-prediccion');
             
-            const prompt = construirPromptPitonisa();
+            btn.disabled = true;
+            resultadoDiv.innerHTML = '<span class="cargando">Consultando el oráculo...</span>';
             
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch('https://generador-impro.raul-grigelmo3.workers.dev', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ role: "user", parts: [{ text: prompt }] }],
-                        generationConfig: { 
-                            temperature: 0.9, 
-                            maxOutputTokens: 2048, 
-                        }
+                        prompt: construirPromptPitonisa(),
+                        temp: 0.1 // Forzamos la estabilidad que ahora el Worker sí entiende
                     })
                 });
 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({error: {message: 'Respuesta de error no es JSON'}}));
-                    throw new Error(`Error ${response.status}: ${errorData.error ? errorData.error.message : response.statusText}`);
-                }
+                if (!response.ok) throw new Error(`Error ${response.status}`);
 
                 const data = await response.json();
-                
-                // --- EXTRACCIÓN Y LIMPIEZA DEL TEXTO ---
-                let textoGenerado = "No se pudo generar el contenido. Vuelve a intentarlo o revisa el diagnóstico de la API.";
+                let texto = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-                try {
-                    textoGenerado = data.candidates[0].content.parts[0].text.trim();
-                } catch (e) {
-                    // Si falla (por contenido vacío o safety block)
-                }
-                // ----------------------------------------------------
+                texto = texto.replace(/\*/g, '').trim();
+                const match = texto.match(/Pregunta:/i);
+                if (match) texto = texto.substring(match.index);
 
-                // Muestra el resultado final
-                resultadoDiv.innerHTML = `
-                    <pre>${textoGenerado}</pre>
-                `;
+                resultadoDiv.innerHTML = `<pre>${texto}</pre>`;
 
             } catch (error) {
-                // Manejo de ERRORES CRÍTICOS
-                resultadoDiv.innerHTML = `
-                    <strong style="color: #c53929;">Error crítico al conectar con la API:</strong> ${error.message}.<br><br>
-                    <strong>POSIBLES CAUSAS:</strong><br>
-                    - Clave API incorrecta o expirada.<br>
-                    - Falta de créditos o restricción de uso.<br>
-                    - El modelo no está disponible o el nombre es incorrecto.
-                `;
+                resultadoDiv.innerHTML = `<strong style="color: #c53929;">Error:</strong> No hay conexión con el más allá.`;
+            } finally {
+                btn.disabled = false;
             }
         }
     </script>
 
-
-<hr style="margin-top: 40px; border-color: #ccc;">
+    <hr style="margin-top: 40px; border-color: #ccc;">
     <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
-        <a href="index.html" style="
-            text-decoration: none;
-            color: #5f6368;
-            font-weight: bold;
-            padding: 10px 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        ">
+        <a href="index.html" style="text-decoration: none; color: #5f6368; font-weight: bold; padding: 10px 20px; border: 1px solid #ccc; border-radius: 5px;">
             ← Volver al Menú Principal
         </a>
     </div>

@@ -5,21 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planificador de Clase de Improvisación</title>
     <style>
-        /* Estilos base */
+        :root {
+            --primary: #4285f4;
+            --primary-dark: #1a73e8;
+            --secondary: #4CAF50;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text: #333;
+            --border: #e0e0e0;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
+            background-color: var(--bg);
+            color: var(--text);
             margin: 0;
             padding: 20px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
             min-height: 100vh;
         }
+
         .container {
-            background-color: #ffffff;
+            background-color: var(--card-bg);
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
@@ -29,402 +38,267 @@
         }
 
         h1 {
-            color: #4285f4;
+            color: var(--primary);
             font-size: 2em;
             margin-bottom: 10px;
-            border-bottom: 2px solid #4285f4;
+            border-bottom: 2px solid var(--primary);
             padding-bottom: 10px;
             text-align: center;
         }
 
-        /* Controles y Formularios */
+        p.instruccion {
+            color: #666;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        /* Grid de Asistencia */
         .asistencia-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
             margin-bottom: 25px;
             padding: 15px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid var(--border);
             border-radius: 8px;
+            background: #fafafa;
         }
 
         .checkbox-item {
             display: flex;
             align-items: center;
             cursor: pointer;
-            padding: 5px;
-            border-radius: 4px;
-            transition: background-color 0.2s;
+            padding: 8px;
+            border-radius: 6px;
+            background: white;
+            border: 1px solid #eee;
+            transition: all 0.2s;
+            font-size: 0.9em;
         }
+
         .checkbox-item:hover {
-            background-color: #f0f0ff;
+            background-color: #f0f7ff;
+            border-color: var(--primary);
         }
 
         .checkbox-item input[type="checkbox"] {
-            margin-right: 8px;
-            transform: scale(1.1);
+            margin-right: 10px;
+            accent-color: #d93025; /* Color rojo para marcar ausencia */
         }
 
-        label {
+        label.seccion-label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: bold;
-            color: #1a73e8;
-            margin-top: 10px;
+            color: var(--primary-dark);
+            margin-top: 20px;
         }
 
-select, textarea {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1em;
-}
-/* Y añade esto para el tamaño: */
-textarea {
-    min-height: 80px;
-    resize: vertical;
-}
+        select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
 
         button {
             display: block;
             width: 100%;
-            padding: 15px;
-            background-color: #4CAF50; /* Verde */
+            padding: 16px;
+            background-color: var(--secondary);
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 1.1em;
+            font-size: 1.2em;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        button:hover {
-            background-color: #45a049;
+            transition: filter 0.2s, transform 0.1s;
         }
 
-        /* Área de Resultados */
+        button:hover { filter: brightness(1.1); }
+        button:active { transform: scale(0.98); }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        /* Resultados */
         #resultado {
-            margin-top: 25px;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #f9f9f9;
+            margin-top: 30px;
+            padding: 30px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background-color: #fff;
             text-align: left;
-            min-height: 150px;
-            font-size: 1em;
+            min-height: 200px;
+            line-height: 1.7;
         }
 
-        /* Estilos para el Contenido Generado (Markdown simulado) */
-        .result-subtitle {
-            color: #1a73e8; /* Azul Fuerte */
-            font-size: 1.6em;
-            margin-top: 25px;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 5px;
-        }
-
-        .result-subtitle-minor {
-            color: #4285f4; /* Azul Google */
-            font-size: 1.2em;
-            margin-top: 15px;
-            margin-bottom: 10px;
-        }
-
-        #resultado hr {
-            border: 0;
-            border-top: 1px dashed #ccc;
-            margin: 20px 0;
-        }
+        .result-subtitle { color: var(--primary-dark); border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 25px; }
+        .loading { text-align: center; color: var(--primary); font-weight: bold; animation: pulse 1.5s infinite; }
         
-        #resultado ul, #resultado ol {
-            padding-left: 25px;
-            margin-bottom: 1em;
-            color: #333;
-        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        .loading {
-            text-align: center;
-            color: #4285f4;
-            font-size: 1.2em;
-        }
-
-        /* Responsividad básica */
-        @media (max-width: 600px) {
-            body { padding: 10px; }
-            .container { padding: 20px 15px; }
-            .asistencia-grid { grid-template-columns: repeat(2, 1fr); }
-            h1 { font-size: 1.5em; }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <h1>🧠 Planificación de Clase de Improvisación (Lunes)</h1>
-        <p>Marca a los alumnos que están **AUSENTES** hoy. El plan se adaptará a los alumnos **PRESENTES**.</p>
-
-        <form id="claseForm">
-            <label>✔️ Alumnos Presentes (Desmarca los Ausentes):</label>
-            <div id="listaAlumnosPresentes" class="asistencia-grid">
-                </div>
-
-            <label for="tipoClase">Tipo de Clase/Bloque a Trabajar:</label>
-            <select id="tipoClase" required>
-                <option value="Bloque 1: ejercicios en círculo de conocerse el primer día">Bloque 1: Calentamiento Día 1</option>
-                <option value="Bloque 2: ejercicios en círculo">Bloque 2: Foco y Grupo (Círculo)</option>
-                <option value="Bloque 3: ejercicios moviéndose por el espacio">Bloque 3: Movimiento y Espacio</option>
-                <option value="Bloque 4: juegos de improvisación para hacer en pareja">Bloque 4: Juegos de Impro (Parejas)</option>
-                <option value="Bloque 5: juegos de improvisación para hacer en tríos">Bloque 5: Juegos de Impro (Tríos)</option>
-                <option value="Bloque 6: juegos de improvisación para hacer en cuartetos">Bloque 6: Juegos de Impro (Cuartetos)</option>
-                <option value="Bloque 7: juegos de improvisación para hacer en dos grupos">Bloque 7: Juegos de Impro (Dos Grupos)</option>
-                <option value="Bloque 8: juegos de improvisación para hacer con el grupo entero">Bloque 8: Juegos de Impro (Grupo Entero)</option>
-                <option value="Clase completa con un hilo conductor" selected>Clase Completa (120 min) con Hilo Conductor</option>
-            </select>
-            
-            <label>Alumnos PRESENTES contados:</label>
-            <input type="number" id="alumnosPresentesCount" value="14" min="0" max="14" required readonly style="width: 100px; text-align: center; margin: 0 auto 20px auto; display: block;">
-
-<label for="instruccionesAdicionales">➕ Instrucciones Adicionales (Opcional):</label>
-<textarea id="instruccionesAdicionales" placeholder="Ej: 'Foco en ejercicios de escucha', 'No usar juegos con saltos', 'Incluir un descanso a mitad de clase'."></textarea>
-
-            <button type="submit">Generar Plan de Clase Personalizado</button>
-        </form>
-
-        <div id="resultado">
-            <h2>El Plan de Clase aparecerá aquí.</h2>
-            <p style="text-align: center; color: #5f6368;">(La IA usará los perfiles de los alumnos presentes para adaptar los ejercicios).</p>
-        </div>
-    </div>
-
-    <script>
-        // 🔑 CLAVE DE API DE GEMINI - REEMPLAZA ESTA CLAVE CON LA TUYA
-        const API_KEY = 'AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM'; 
-        const PROMPT_FILE = 'prompt_impro_coach.json'; 
-
-        // ====================================================================================
-        // 1. DATOS DE ALUMNOS Y PERFILES
-        // Mapeo corregido y completo para el grupo de los Lunes.
-        // ====================================================================================
-        const ALUMNOS_LUNES = [
-            // { nombre: "Nombre Completo", inicial: "Inicial Usada en el JSON", caracteristicas: "Descripción" }
-            { nombre: "Alba", inicial: "Al", caracteristicas: "Muy seca, novata, no suma, le cuesta soltarse. Necesita enfoque en la base." },
-            { nombre: "Andrea", inicial: "An", caracteristicas: "Mucho morro, buena dicción, echada para alante. Debe empoderar a los tímidos." },
-            { nombre: "Beatriz Law", inicial: "BeL", caracteristicas: "Tímida, va a remolque, se pone de espaldas, necesita empoderamiento." },
-            { nombre: "Beatriz", inicial: "Be", caracteristicas: "Un poco más de brío, falta rodaje. Se enfoca en lo visual." },
-            { nombre: "Elena", inicial: "El", caracteristicas: "Muy buena, disfruta y propone, debe creer más en sí misma. Evita ser el centro." },
-            { nombre: "Estela", inicial: "Es", caracteristicas: "Hipertímida, siempre saliéndose del personaje, a remolque, no propone. Necesita mucha estructura." },
-            { nombre: "Jesús", inicial: "Je", caracteristicas: "Nunca ha venido, potencial desconocido (tratar como novato tímido)." },
-            { nombre: "Lucía", inicial: "Lu", caracteristicas: "Tímida, lo pillará, se mira mucho de momento. Necesita foco en la escucha y el cuerpo." },
-            { nombre: "Marta", inicial: "Ma", caracteristicas: "Buenísima, propone, buenas ideas, suma. Debe ayudar a los menos experimentados." },
-            { nombre: "María", inicial: "MaC", caracteristicas: "Extraña, más morro pero es extraña, no vocaliza bien, baila mucho. Necesita enfoque y claridad." },
-            { nombre: "Patricia", inicial: "Pa", caracteristicas: "Poco a poco va a más. No será la más brillante pero será cola de León. Necesita continuidad." },
-            { nombre: "Raquel", inicial: "Ra", caracteristicas: "Morro y buenas ideas. Tiende a liderar demasiado. Debe sumar." },
-            { nombre: "Victoria", inicial: "Vi", caracteristicas: "Disfruta y con buenas ideas. Debe atreverse a fallar más y proponer más." },
-            { nombre: "Yolanda", inicial: "Yo", caracteristicas: "Suma con una vis cómica genial. Debe usar su energía para centrarse en el conflicto." }
-        ];
-
-        // Mapeo inverso de iniciales para generar el prompt (lo que espera la IA)
-        const perfilMap = ALUMNOS_LUNES.reduce((acc, alumno) => {
-            acc[alumno.nombre] = `${alumno.inicial}: ${alumno.caracteristicas}`;
-            return acc;
-        }, {});
-
-        // ====================================================================================
-        // 2. INICIALIZACIÓN Y MANEJO DE ASISTENCIA
-        // ====================================================================================
-
-        const form = document.getElementById('claseForm');
-        const resultadoDiv = document.getElementById('resultado');
-        const listaAlumnosDiv = document.getElementById('listaAlumnosPresentes');
-        const alumnosCountInput = document.getElementById('alumnosPresentesCount');
-
-        // Función para generar la lista de checkboxes de asistencia
-        function generarListaAsistencia() {
-            listaAlumnosDiv.innerHTML = '';
-            ALUMNOS_LUNES.forEach(alumno => {
-                const label = document.createElement('label');
-                label.className = 'checkbox-item';
-                
-                const cb = document.createElement('input');
-                cb.type = 'checkbox';
-                cb.value = alumno.nombre;
-                // Al marcar el checkbox, el alumno estará AUSENTE.
-                cb.id = `cb_${alumno.nombre.replace(/\s/g, '')}`;
-                cb.checked = false; // Inicialmente todos presentes
-                
-                cb.addEventListener('change', actualizarConteoPresentes);
-
-                label.appendChild(cb);
-                label.appendChild(document.createTextNode(alumno.nombre));
-                listaAlumnosDiv.appendChild(label);
-            });
-            actualizarConteoPresentes(); // Contar al inicio
-        }
-
-        // Función para actualizar el contador de alumnos presentes
-        function actualizarConteoPresentes() {
-            const checks = Array.from(listaAlumnosDiv.querySelectorAll('input[type="checkbox"]'));
-            // Los presentes son los que NO están marcados (checked) como ausentes
-            const presentes = checks.filter(c => !c.checked).length; 
-            alumnosCountInput.value = presentes;
-        }
-
-        // ====================================================================================
-        // 3. LÓGICA DE LA IA Y CONVERSIÓN DE MARKDOWN
-        // ====================================================================================
-
-        // Función para convertir Markdown simple a HTML para el contenedor
-        function markdownToHtml(markdown) {
-            let html = markdown;
-
-            // 1. Reemplazar Títulos de Markdown (H2, H3) por etiquetas HTML estilizadas
-            html = html.replace(/^##\s*(.*)$/gm, '<h2 class="result-subtitle">$1</h2>');
-            html = html.replace(/^###\s*(.*)$/gm, '<h3 class="result-subtitle-minor">$1</h3>');
-            
-            // 2. Reemplazar líneas horizontales
-            html = html.replace(/^-{3,}$/gm, '<hr>');
-
-            // 3. Reemplazar negritas y cursivas
-            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-            
-            // 4. Asegurar saltos de línea y párrafos correctos
-            
-            // Convertir listas simples (se asume que la IA genera listas con * o - o 1.)
-            html = html.replace(/^[*-]\s+(.*)$/gm, '<li>$1</li>');
-            html = html.replace(/<li>.*<\/li>(\s*<li>.*<\/li>)*?/gs, '<ul>$&</ul>');
-            
-            // Convertir listas numeradas
-            html = html.replace(/^[0-9]+\.\s+(.*)$/gm, '<li>$1</li>');
-            html = html.replace(/<li>.*<\/li>(\s*<li>.*<\/li>)*?/gs, '<ol>$&</ol>');
-            
-            // Eliminar ul/ol anidados incorrectamente por la conversión
-            html = html.replace(/<\/ul>\s*<ul>/g, '').replace(/<\/ol>\s*<ol>/g, '');
-
-            // Convertir saltos de línea restantes en <br> dentro de bloques de texto (simulando párrafos simples)
-            html = html.split('\n\n').map(p => {
-                // Si la línea contiene una lista o título, no la envuelve en <p>
-                if (p.match(/^<[uo]l>|<h[23]>/)) {
-                    return p;
-                }
-                // Si la línea es solo texto, lo envuelve y convierte saltos simples a <br>
-                return `<p>${p.replace(/\n/g, '<br>')}</p>`;
-            }).join('');
-            
-            // Finalmente, eliminar cualquier tag <br> que quede inmediatamente antes de un elemento de bloque
-            html = html.replace(/<br>(?=<h[23]>|<hr>|<[uo]l>)/g, '');
-            
-            return html;
-        }
-
-        async function generarClase() {
-            const tipoClase = document.getElementById('tipoClase').value;
-            const instruccionesAdicionales = document.getElementById('instruccionesAdicionales').value.trim(); 
-            const checks = Array.from(listaAlumnosDiv.querySelectorAll('input[type="checkbox"]'));
-            
-            // Los presentes son los que NO están marcados (checked) como ausentes
-            const alumnosPresentesChecks = checks.filter(c => !c.checked);
-            const alumnosPresentesNombres = alumnosPresentesChecks.map(c => c.value);
-            const alumnosPresentesCount = alumnosPresentesNombres.length;
-
-            if (alumnosPresentesCount === 0) {
-                 resultadoDiv.innerHTML = `<h2>⚠️ Sin Alumnos</h2><p style="color:red; text-align:center;">Debes desmarcar al menos un alumno para generar el plan.</p>`;
-                 return;
-            }
-
-            // 1. Generar la lista de perfiles SÓLO para los presentes
-            const perfilesLista = alumnosPresentesNombres.map(nombre => perfilMap[nombre]).join('\n');
-            
-            // Actualizar el contador final
-            alumnosCountInput.value = alumnosPresentesCount;
-
-            resultadoDiv.innerHTML = '<div class="loading">Cargando... 💡 La IA está analizando los perfiles y diseñando tu plan.</div>';
-
-            try {
-                // 2. Cargar el prompt base (se asume que es el mismo prompt_impro_coach.json)
-                const promptResponse = await fetch(PROMPT_FILE);
-                if (!promptResponse.ok) {
-                    throw new Error(`No se pudo cargar el archivo de prompt: ${PROMPT_FILE}`);
-                }
-                
-                const promptData = await promptResponse.json(); 
-                let prompt = promptData.prompt_template;
-                
-                // 3. Reemplazar los marcadores de posición con los datos filtrados
-                prompt = prompt
-                    .replace('{alumnos_presentes}', alumnosPresentesCount)
-                    .replace('{perfiles_lista}', perfilesLista) // USAMOS LA LISTA FILTRADA
-                    .replace('{tipo_clase}', tipoClase); 
-if (instruccionesAdicionales) {
-    prompt += `\n\n--- INSTRUCCIONES ADICIONALES DEL PROFESOR ---\n${instruccionesAdicionales}\n--- FIN INSTRUCCIONES ---`;
-}
-                
-                // 4. Llamar a la API de Gemini
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
-                
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ role: "user", parts: [{ text: prompt }] }],
-                    }),
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`Error en la API: ${response.status}. Detalle: ${JSON.stringify(errorData)}`);
-                }
-
-                const data = await response.json();
-                
-                const contenido = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No se pudo generar el plan de clase. Intenta nuevamente.';
-
-                // 5. Mostrar el resultado: APLICA LA CONVERSIÓN DE MARKDOWN A HTML
-                const contenidoHTML = markdownToHtml(contenido);
-                resultadoDiv.innerHTML = contenidoHTML;
-
-            } catch (error) {
-                console.error('Error durante la generación de la clase:', error);
-                
-                let errorMessage = `Error: ${error.message}`;
-                if (error.message.includes("404") || error.message.includes("No se pudo cargar")) {
-                    errorMessage = `Error: No se encuentra el archivo de configuración 'prompt_impro_coach.json'. Asegúrate de que está en el mismo directorio.`;
-                } else if (error.message.includes("API")) {
-                     errorMessage = `Error de API. Revisa la clave o el límite de uso.`;
-                }
-
-                resultadoDiv.innerHTML = `<h2>⚠️ Error al generar la clase</h2><p style="color:red; text-align:center;">${errorMessage}</p>`;
-            }
-        }
-        
-        // Inicialización
-        document.addEventListener('DOMContentLoaded', () => {
-            generarListaAsistencia();
-            form.addEventListener('submit', function(event) {
-                event.preventDefault();
-                generarClase();
-            });
-        });
-
-    </script>
-
-<hr style="margin-top: 40px; border-color: #ccc;">
-    <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
-        <a href="index.html" style="
+        .btn-volver {
             text-decoration: none;
             color: #5f6368;
             font-weight: bold;
             padding: 10px 20px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            transition: background-color 0.3s;
-        ">
-            ← Volver al Menú Principal
-        </a>
+            transition: background 0.3s;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .btn-volver:hover { background-color: #eee; }
+
+        @media (max-width: 600px) {
+            .asistencia-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🧠 Plan de Clase Personalizado</h1>
+        <p class="instruccion">Marca a los alumnos que están <strong>AUSENTES</strong>. El plan se adaptará a los presentes.</p>
+
+        <form id="claseForm">
+            <label class="seccion-label">❌ Marcar Ausentes:</label>
+            <div id="listaAlumnosPresentes" class="asistencia-grid"></div>
+
+            <label class="seccion-label" for="tipoClase">Tipo de Clase / Bloque:</label>
+            <select id="tipoClase" required>
+                <option value="Bloque 1: Calentamiento primer día">Bloque 1: Calentamiento Día 1</option>
+                <option value="Bloque 2: Foco y Grupo (Círculo)">Bloque 2: Foco y Grupo (Círculo)</option>
+                <option value="Bloque 3: Movimiento y Espacio">Bloque 3: Movimiento y Espacio</option>
+                <option value="Bloque 4: Juegos en Pareja">Bloque 4: Juegos de Impro (Parejas)</option>
+                <option value="Bloque 5: Juegos en Tríos">Bloque 5: Juegos de Impro (Tríos)</option>
+                <option value="Bloque 8: Grupo entero">Bloque 8: Juegos de Impro (Grupo Entero)</option>
+                <option value="Clase completa (120 min) con Hilo Conductor" selected>Clase Completa (120 min) con Hilo Conductor</option>
+            </select>
+            
+            <label class="seccion-label">Conteo de alumnos PRESENTES:</label>
+            <input type="number" id="alumnosPresentesCount" value="0" readonly style="width: 80px; text-align: center; margin-bottom: 20px; border: none; background: transparent; font-size: 1.2em; font-weight: bold; color: var(--secondary);">
+
+            <label class="seccion-label" for="instruccionesAdicionales">➕ Instrucciones Adicionales (Opcional):</label>
+            <textarea id="instruccionesAdicionales" placeholder="Ej: 'Foco en escucha activa', 'Evitar contacto físico', 'Mucha energía'."></textarea>
+
+            <button type="submit" id="btnGenerar">Generar Plan de Clase con IA</button>
+        </form>
+
+        <div id="resultado">
+            <p style="text-align: center; color: #999;">El plan aparecerá aquí después de analizar los perfiles de los asistentes.</p>
+        </div>
     </div>
 
+    <a href="index.html" class="btn-volver">← Volver al Menú Principal</a>
+
+    <script>
+        const ALUMNOS_LUNES = [
+            { nombre: "Alba", inicial: "Al", caracteristicas: "Muy seca, novata, no suma, le cuesta soltarse." },
+            { nombre: "Andrea", inicial: "An", caracteristicas: "Mucho morro, buena dicción, echada para alante." },
+            { nombre: "Beatriz Law", inicial: "BeL", caracteristicas: "Tímida, va a remolque, necesita empoderamiento." },
+            { nombre: "Beatriz", inicial: "Be", caracteristicas: "Falta rodaje, enfoque visual." },
+            { nombre: "Elena", inicial: "El", caracteristicas: "Muy buena, disfruta y propone, debe creer más en sí misma." },
+            { nombre: "Estela", inicial: "Es", caracteristicas: "Hipertímida, se sale del personaje, necesita estructura." },
+            { nombre: "Jesús", inicial: "Je", caracteristicas: "Novato, potencial desconocido." },
+            { nombre: "Lucía", inicial: "Lu", caracteristicas: "Tímida, foco en escucha y cuerpo." },
+            { nombre: "Marta", inicial: "Ma", caracteristicas: "Buenísima, propone ideas, suma mucho." },
+            { nombre: "María", inicial: "MaC", caracteristicas: "Extraña, no vocaliza bien, necesita claridad." },
+            { nombre: "Patricia", inicial: "Pa", caracteristicas: "Continuidad, progresión constante." },
+            { nombre: "Raquel", inicial: "Ra", caracteristicas: "Morro y buenas ideas, tiende a liderar." },
+            { nombre: "Victoria", inicial: "Vi", caracteristicas: "Disfruta, debe atreverse a fallar más." },
+            { nombre: "Yolanda", inicial: "Yo", caracteristicas: "Vis cómica genial, energía alta." }
+        ];
+
+        const listaAlumnosDiv = document.getElementById('listaAlumnosPresentes');
+        const alumnosCountInput = document.getElementById('alumnosPresentesCount');
+        const resultadoDiv = document.getElementById('resultado');
+        const btnGenerar = document.getElementById('btnGenerar');
+
+        function generarListaAsistencia() {
+            ALUMNOS_LUNES.forEach(alumno => {
+                const label = document.createElement('label');
+                label.className = 'checkbox-item';
+                label.innerHTML = `<input type="checkbox" value="${alumno.nombre}"> ${alumno.nombre}`;
+                label.querySelector('input').addEventListener('change', actualizarConteo);
+                listaAlumnosDiv.appendChild(label);
+            });
+            actualizarConteo();
+        }
+
+        function actualizarConteo() {
+            const ausentes = Array.from(listaAlumnosDiv.querySelectorAll('input:checked')).length;
+            alumnosCountInput.value = ALUMNOS_LUNES.length - ausentes;
+        }
+
+        function markdownToHtml(text) {
+            return text
+                .replace(/^## (.*$)/gim, '<h2 class="result-subtitle">$1</h2>')
+                .replace(/^### (.*$)/gim, '<h3 style="color:#4285f4; margin-top:15px;">$1</h3>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/^- (.*$)/gim, '<li>$1</li>')
+                .replace(/\n/g, '<br>');
+        }
+
+        async function generarClase(e) {
+            e.preventDefault();
+            
+            const ausentesNombres = Array.from(listaAlumnosDiv.querySelectorAll('input:checked')).map(cb => cb.value);
+            const presentes = ALUMNOS_LUNES.filter(a => !ausentesNombres.includes(a.nombre));
+            
+            if (presentes.length === 0) {
+                alert("¡No puedes dar clase a una sala vacía!");
+                return;
+            }
+
+            const perfilesTexto = presentes.map(p => `- ${p.nombre} (${p.inicial}): ${p.caracteristicas}`).join('\n');
+            const tipoClase = document.getElementById('tipoClase').value;
+            const extras = document.getElementById('instruccionesAdicionales').value;
+
+            btnGenerar.disabled = true;
+            resultadoDiv.innerHTML = '<div class="loading">🧠 Analizando perfiles y diseñando ejercicios adaptados...</div>';
+
+            const promptFinal = `Actúa como un Impro Coach experto. Diseña un plan de clase de improvisación.
+            
+            ALUMNOS PRESENTES (${presentes.length}):
+            ${perfilesTexto}
+
+            OBJETIVO/TIPO DE CLASE: ${tipoClase}
+            INSTRUCCIONES EXTRA: ${extras}
+
+            REQUISITOS DEL PLAN:
+            1. Adapta los ejercicios a las debilidades y fortalezas mencionadas en los perfiles.
+            2. Estructura: Calentamiento, Ejercicios de Técnica, Escenas/Juegos y Cierre.
+            3. Indica por qué eliges ciertos ejercicios para estos alumnos específicos.
+            4. Usa un tono profesional pero inspirador.`;
+
+            try {
+                const response = await fetch('https://generador-impro.raul-grigelmo3.workers.dev', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: promptFinal, temp: 0.7 })
+                });
+
+                const data = await response.json();
+                const contenido = data.candidates?.[0]?.content?.parts?.[0]?.text || "Error en la respuesta.";
+                
+                resultadoDiv.innerHTML = markdownToHtml(contenido);
+            } catch (error) {
+                resultadoDiv.innerHTML = "<p style='color:red;'>Error al conectar con el Worker. Inténtalo de nuevo.</p>";
+            } finally {
+                btnGenerar.disabled = false;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', generarListaAsistencia);
+        document.getElementById('claseForm').addEventListener('submit', generarClase);
+    </script>
 </body>
 </html>

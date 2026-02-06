@@ -3,19 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Palabra al Aire - Maestro de Improvisación IA</title>
+    <title>Palabra al Aire - Maestro de Improvisaci&oacute;n IA</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        /* -------------------------------------------
-            ESTILOS CSS - LOOK AND FEEL MODERNO
-            ------------------------------------------- */
-        
         :root {
-            --color-principal: #6a1b9a; /* Púrpura Profundo */
-            --color-secundario: #00bcd4; /* Cian Vibrante */
-            --color-fondo: #212121; /* Gris Oscuro */
-            --color-claro: #f3e5f5; /* Púrpura Muy Claro */
-            --color-texto: #e0e0e0; /* Gris Claro para texto */
+            --color-principal: #6a1b9a;
+            --color-secundario: #00bcd4;
+            --color-fondo: #212121;
+            --color-claro: #f3e5f5;
+            --color-texto: #e0e0e0;
         }
 
         body { 
@@ -23,7 +19,6 @@
             padding: 20px; 
             max-width: 800px; 
             margin: 0 auto; 
-            /* Fondo con degradado sutil */
             background: linear-gradient(135deg, #121212 0%, #212121 100%);
             color: var(--color-texto);
             min-height: 100vh;
@@ -35,15 +30,8 @@
             border-bottom: 3px solid var(--color-principal); 
             padding-bottom: 15px; 
             margin-bottom: 40px; 
-            text-shadow: 0 0 10px rgba(0, 188, 212, 0.5); /* Efecto neón sutil */
+            text-shadow: 0 0 10px rgba(0, 188, 212, 0.5);
             font-weight: 900;
-        }
-
-        p.instruccion { 
-            color: var(--color-texto); 
-            margin-bottom: 25px; 
-            font-style: italic; 
-            text-align: center;
         }
 
         .botones-container {
@@ -52,7 +40,6 @@
             margin-bottom: 40px;
         }
 
-        /* Estilos del Botón - Más grande y con sombra dramática */
         button { 
             padding: 16px 30px; 
             background-color: var(--color-principal); 
@@ -63,20 +50,15 @@
             font-size: 20px; 
             font-weight: 700;
             transition: all 0.3s ease; 
-            /* Sombra profunda */
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4), 0 0 15px var(--color-secundario); 
             min-width: 300px; 
             letter-spacing: 1px;
             text-transform: uppercase;
         }
         button:hover:not(:disabled) { 
-            background-color: #7b1fa2; /* Púrpura más claro al pasar el ratón */
+            background-color: #7b1fa2;
             transform: translateY(-2px); 
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), 0 0 20px var(--color-secundario);
-        }
-        button:active:not(:disabled) { 
-            transform: translateY(0); 
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); 
         }
         button:disabled {
             background-color: #424242;
@@ -85,28 +67,23 @@
             box-shadow: none;
         }
 
-        /* Contenedor de Resultado - Diseño de "Tarjeta" flotante */
         #resultado { 
             margin-top: 35px; 
             padding: 30px; 
-            /* Borde neón */
             border: 3px solid var(--color-secundario); 
-            background-color: #313131; /* Fondo de la tarjeta */
+            background-color: #313131; 
             border-radius: 15px; 
             min-height: 200px;
             font-size: 1.2em; 
             line-height: 1.6;
             text-align: center;
             position: relative; 
-            /* Sombra y elevación */
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 5px rgba(255, 255, 255, 0.1); 
-            transition: all 0.5s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); 
         }
 
-        /* Etiqueta de Modo (IA/Offline) - Pegada a la esquina */
         .modo-tag {
             position: absolute;
-            bottom: -15px; /* Fuera del borde para un look 'flotante' */
+            bottom: -15px;
             right: 20px; 
             font-size: 0.8em;
             color: white; 
@@ -114,54 +91,32 @@
             padding: 4px 10px;
             border-radius: 5px; 
             font-weight: 700;
-            line-height: 1; 
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
         
-        /* Título de Categoría */
         .categoria-titulo { 
             color: var(--color-secundario); 
             font-size: 1.6em; 
-            margin-top: 0px; 
             margin-bottom: 15px; 
             border-bottom: 2px dashed var(--color-principal); 
             padding-bottom: 10px;
             font-weight: 700;
-            text-align: center;
-            letter-spacing: 2px;
             text-transform: uppercase;
         }
 
-        /* Palabra Principal - MUCHO más grande y llamativa */
         .palabra-principal {
-            font-size: 2.0em; /* Aumentado */
+            font-size: 2.5em;
             font-weight: 900;
             color: var(--color-principal); 
-            margin-top: 10px; 
-            margin-bottom: 20px; 
-            line-height: 1.1; 
+            margin: 15px 0;
             text-transform: uppercase;
-            /* Sombra de texto para un look 'destacado' */
-            text-shadow: 2px 2px 0px var(--color-secundario), 
-                         4px 4px 0px #424242; 
-            animation: bounce 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; /* Animación más expresiva */
+            text-shadow: 2px 2px 0px var(--color-secundario); 
+            animation: bounce 0.6s ease-out;
         }
 
-        /* Espaciado de Instrucciones Principal */
-        #resultado > p.instruccion:nth-of-type(1) {
-            margin-bottom: 15px; 
-            font-size: 1em; 
-            font-style: normal; 
-            color: var(--color-claro);
-        }
-
-        /* Palabras de Reserva - Estilo de "chips" o "etiquetas" */
         .palabras-reserva {
             margin-top: 15px; 
             padding-top: 15px; 
             border-top: 1px solid var(--color-secundario); 
-            font-size: 1em;
-            color: var(--color-claro);
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
@@ -172,94 +127,53 @@
             font-weight: 700;
             color: var(--color-principal);
             background-color: var(--color-claro);
-            margin: 0; 
-            padding: 5px 10px; 
+            padding: 5px 15px; 
             border: 2px solid var(--color-principal);
-            border-radius: 20px; /* Forma de píldora */
-            display: inline-block;
-            line-height: 1.2;
-            transition: transform 0.2s;
-        }
-        .palabras-reserva span:hover {
-             transform: scale(1.05);
+            border-radius: 20px;
         }
 
-        /* Espaciado de Instrucción de Reserva */
-        .palabras-reserva + p.instruccion {
-            margin-top: 15px !important; 
-            margin-bottom: 0; 
-            font-size: 0.9em;
-            color: #9e9e9e;
-        }
-
-        /* Animaciones y Carga (Loading Overlay) */
         .loading-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(33, 33, 33, 0.8); /* Oscurece el fondo */
-            border-radius: 15px;
-            z-index: 100; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(33, 33, 33, 0.8);
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 15px; z-index: 100;
         }
 
-        /* Windmill - Más prominente */
         .windmill {
-            width: 60px; /* Tamaño base del molino */
-            height: 60px; /* Tamaño base del molino */
-            border: 6px solid var(--color-secundario); /* Color del molino */
+            width: 50px; height: 50px;
+            border: 5px solid var(--color-secundario);
             border-radius: 50%; 
             border-top-color: transparent; 
-            border-right-color: transparent;
-            animation: spin 1s linear infinite; /* Más rápido */
-            box-sizing: border-box; 
-            filter: drop-shadow(0 0 10px var(--color-secundario)); /* Efecto neón */
+            animation: spin 1s linear infinite;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
+        @keyframes spin { 100% { transform: rotate(360deg); } }
         @keyframes bounce {
-            0% { transform: scale(0.9); opacity: 0; }
-            50% { transform: scale(1.05); opacity: 1; }
+            0% { transform: scale(0.5); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
             100% { transform: scale(1); }
         }
-
     </style>
 </head>
 <body>
-    
 
-    
+    <h1>PALABRAS AL AIRE</h1>
+
     <div class="botones-container">
-        <button onclick="generarContenido(5)">Generar Palabras</button>
+        <button id="btnGenerar" onclick="generarContenido()">Generar Palabras</button>
     </div>
     
     <div id="resultado">
-        <p class="instruccion" style="font-style: normal; margin-bottom: 0; color: var(--color-claro);">Pulsa el botón para generar las primeras palabras.</p>
+        <p style="color: var(--color-claro);">Pulsa el bot&oacute;n para lanzar las palabras al aire.</p>
         <div class="modo-tag">[Modo: Espera]</div>
     </div>
 
     <script>
-        /* -------------------------------------------
-            LÓGICA JAVASCRIPT
-            ------------------------------------------- */
-        
-        // --- CLAVE API Y CONFIGURACIÓN ---
-        const API_KEY = 'AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM';  
-        const MODEL_NAME = 'gemini-2.5-flash';
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
-        const FALLBACK_MODE = API_KEY === 'AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM';  
-        const TITULO_PALABRA = 'PALABRAS AL AIRE';  
-        const NUM_ELEMENTOS = 5;  
+        const TITULO_PALABRA = 'PALABRAS AL AIRE';
+        const NUM_ELEMENTOS = 5;
+        const FALLBACK_MODE = false; // Variable definida para evitar error
 
-        // --- LISTAS OFFLINE (SE MANTIENEN IGUAL) ---
         const palabrasOffline = [
             "Abismo", "Abeja", "Abrazo", "Abuelo", "Ajedrez", "Algoritmo", "Alfombra", "Almendra",  
             "Amazon", "Amazonia", "Amapola", "Ancla", "Arena", "Argentina", "Arcoíris", "Atlántico",  
@@ -292,214 +206,84 @@
             "The Weeknd", "Tigre", "TikTok", "Tina Fey", "Tokio", "Tormenta", "Tren", "Trinchera", "Trompeta", "Trump",  
             "Trueno", "Wos", "Twitter", "Unicornio", "Universo", "Valencia", "Válvula", "Ventana", "Venganza", "Vértigo", "Viaje",  
             "Viento", "Vinilo", "Vino", "Volcán", "Whisky", "Zafiro", "Zapatilla", "Zapato", "Zepelín", "Zendaya", "Zorro"
-        ];
+       ];
 
-        // --- FUNCIONES AUXILIARES (SE MANTIENEN IGUAL) ---
-        
         function limpiarTexto(texto) {
             if (!texto) return '';
-            let limpio = texto.trim();
-            
-            limpio = limpio.replace(/^(un|una|el|la|los|las|unos|unas)\s+/i, '');
-            limpio = limpio.replace(/[.,;:"'?!]/g, '');
-            
-            limpio = limpio.trim();
-
-            let palabras = limpio.split(/\s+/).map(p => {
-                if (p.length > 0) {
-                    return p.charAt(0).toUpperCase() + p.slice(1);
-                }
-                return p;
-            });
-
-            limpio = palabras.join(' ');
-            
-            return limpio.trim();
+            let limpio = texto.trim().replace(/[.#*]/g, '');
+            return limpio.charAt(0).toUpperCase() + limpio.slice(1);
         }
 
-        function construirPrompt() {
-            const numeroTexto = 'CINCO';
-            const numEjemplos = 4;
-            
-            const shuffle = (array) => {
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [array[i], array[j]] = [array[j], array[i]];
-                }
-                return array;
-            };
-
-            const ejemplos = shuffle([...palabrasOffline]).slice(0, numEjemplos).join('\n');
-
-
-            const instruccionConcisa = `El resultado debe ser de ${numeroTexto} palabras. NO uses viñetas, números, adjetivos, descripciones, frases, o cualquier texto adicional.`;
-
-            const contexto = `Actúa como el maestro de improvisación en un juego llamado “Palabra al aire”. Tu tarea es proporcionar un stock de ${numeroTexto} **palabras al azar** que los actores deberán integrar en la historia. Las palabras deben ser MUY variadas (Objetos, Sentimientos, Nombres Propios, Conceptos Abstractos).
-            
-            **Ejemplos de palabras válidas:**
-            ${ejemplos}
-
-            **INSTRUCCIÓN CLAVE:** El resultado debe ser EXTREMADAMENTE CONCISO: ${instruccionConcisa}
-            
-            **REGLAS DE FORMATO ESTRICTAS:**
-            1. Genera exactamente **${numeroTexto} palabras**.
-            2. Separa las categorías con el título EXACTO: **### ${TITULO_PALABRA}**.
-            3. Cada palabra/nombre debe ir en una línea separada.
-            
-            ### ${TITULO_PALABRA}
-            
-            Genera las ${numeroTexto} palabras respetando el formato estricto.`;
-            
-            return contexto;
-        }
-        
         function obtenerResultadosOffline() {
-            const shuffle = (array) => {
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [array[i], array[j]] = [array[j], array[i]];
-                }
-                return array;
-            };
-
-            if (palabrasOffline.length < NUM_ELEMENTOS) {
-                 return `### ${TITULO_PALABRA}\n¡Lista offline insuficiente!`;
-            }
-
-            const palabrasAleatorias = shuffle([...palabrasOffline]).slice(0, NUM_ELEMENTOS);
-
-            let resultadoSimulado = '';
-            resultadoSimulado += `### ${TITULO_PALABRA}\n`;
-            resultadoSimulado += palabrasAleatorias.join('\n');
-            
-            return resultadoSimulado;
+            const aleatorias = [...palabrasOffline].sort(() => 0.5 - Math.random()).slice(0, NUM_ELEMENTOS);
+            return `### ${TITULO_PALABRA}\n` + aleatorias.join('\n');
         }
 
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        // --- FUNCIÓN PRINCIPAL (SE MANTIENE IGUAL, SOLO CAMBIA EL INTERIOR DEL LOADING OVERLAY) ---
-        async function generarContenido(numElementosIgnorado) { 
+        async function generarContenido() { 
             const resultadoDiv = document.getElementById('resultado');
-            const boton = document.querySelector('.botones-container button');
+            const boton = document.getElementById('btnGenerar');
             
-            // 1. INICIO: Mostrar Carga Y Bloquear Botón
             boton.disabled = true;
-
-            // CREAR EL OVERLAY DE CARGA
             const loadingOverlay = document.createElement('div');
-            loadingOverlay.classList.add('loading-overlay');
-            // Mantenemos el windmill, ahora con el nuevo look
-            loadingOverlay.innerHTML = `<div class="windmill"></div>`; 
+            loadingOverlay.className = 'loading-overlay';
+            loadingOverlay.innerHTML = '<div class="windmill"></div>';
             resultadoDiv.appendChild(loadingOverlay);
 
-            const usarIA = FALLBACK_MODE ? false : Math.random() < 0.5;
-
-            let textoGenerado;
+            // 50% probabilidad de usar IA o Offline
+            let usarIA = FALLBACK_MODE ? false : Math.random() < 0.5;
             let modo = usarIA ? 'IA' : 'Offline';
-            
+            let textoGenerado = "";
+
             try {
                 if (usarIA) {
-                    // MODO IA
-                    const prompt = construirPrompt();
-                    
-                    const response = await fetch(API_URL, {
+                    const response = await fetch('https://generador-impro.raul-grigelmo3.workers.dev', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            contents: [{ role: "user", parts: [{ text: prompt }] }],
-                            generationConfig: { 
-                                temperature: 1.0, 
-                                maxOutputTokens: 2048,
-                            }
+                            contents: [{ parts: [{ text: "Genera 5 palabras aleatorias para improvisacion teatral. Formato: ### PALABRAS AL AIRE seguido de las palabras en lineas nuevas." }] }]
                         })
                     });
 
-                    if (!response.ok) {
-                        console.warn(`Error de la API (${response.status}). Cambiando a modo Fallback Offline.`);
-                        modo = 'Fallback Offline';
-                        textoGenerado = obtenerResultadosOffline();
-                        await sleep(1000); 
-                    } else {
+                    if (response.ok) {
                         const data = await response.json();
-                        textoGenerado = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || obtenerResultadosOffline();
+                        textoGenerado = data.candidates?.[0]?.content?.parts?.[0]?.text || obtenerResultadosOffline();
+                    } else {
+                        throw new Error("API Fallida");
                     }
                 } else {
-                    // MODO OFFLINE
-                    await sleep(800); 
+                    await new Promise(r => setTimeout(r, 800));
                     textoGenerado = obtenerResultadosOffline();
                 }
-                
-                if (!textoGenerado) throw new Error("No se pudo generar contenido.");
-                
-                // 2. PROCESAMIENTO Y RENDERIZADO ESPECIAL
-                const partes = textoGenerado.split('###').filter(parte => parte.trim().length > 0);
-                let htmlResultado = '';
-                
-                partes.forEach(parte => {
-                    const lineas = parte.trim().split('\n').filter(line => line.trim().length > 0);
-                    if (lineas.length === 0) return;
 
-                    const titulo = lineas[0].trim();
-                    const items = lineas.slice(1).map(limpiarTexto).filter(item => item.length > 0); 
+                // Procesar texto
+                const lineas = textoGenerado.split('\n').map(l => l.replace(/###/g, '').trim()).filter(l => l.length > 0);
+                const titulo = lineas[0] || TITULO_PALABRA;
+                const items = lineas.slice(1).map(limpiarTexto);
 
-                    htmlResultado += `<div class="categoria-titulo">${titulo}</div>`;
-
-                    if (items.length > 0) {
-                        const palabraPrincipal = items[0];
-                        htmlResultado += `<p class="instruccion">¡Tu palabra principal es!</p>`; /* Añadida instrucción sobre la palabra principal */
-                        htmlResultado += `<div class="palabra-principal">${palabraPrincipal}</div>`;
-
-                        if (items.length > 1) {
-                            const palabrasReserva = items.slice(1, 5); 
-                            let reservaHTML = palabrasReserva.map(p => `<span>${p}</span>`).join('');
-
-                            htmlResultado += `
-                                <div class="palabras-reserva">
-                                    ${reservaHTML}
-                                </div>
-                                <p class="instruccion">Usa estas ${palabrasReserva.length} palabras de apoyo cuando la escena lo requiera.</p>
-                            `;
-                        } else {
-                            htmlResultado += `<p class="instruccion" style="font-style: normal; margin-top: 15px;">Solo se pudo generar una palabra. ¡Pulsa de nuevo para cargar más!</p>`;
-                        }
+                let html = `<div class="categoria-titulo">${titulo}</div>`;
+                if(items.length > 0) {
+                    html += `<p>&iexcl;Tu palabra principal es!</p><div class="palabra-principal">${items[0]}</div>`;
+                    if(items.length > 1) {
+                        html += `<div class="palabras-reserva">` + items.slice(1,5).map(p => `<span>${p}</span>`).join('') + `</div>`;
+                        html += `<p style="font-size:0.8em; margin-top:15px;">Usa las palabras de apoyo si te quedas en blanco.</p>`;
                     }
-                });
-
-                // 3. FINALIZACIÓN: Eliminar Carga, Mostrar Contenido y Habilitar Botón
-                loadingOverlay.remove();
+                }
                 
-                htmlResultado += `<div class="modo-tag">[Modo: ${modo}]</div>`;
-
-                resultadoDiv.innerHTML = htmlResultado;
-                boton.disabled = false;
-
+                resultadoDiv.innerHTML = html + `<div class="modo-tag">[Modo: ${modo}]</div>`;
 
             } catch (error) {
-                // Manejo de ERRORES CRÍTICOS
-                loadingOverlay.remove();
-                resultadoDiv.innerHTML = `
-                    <strong style="color: #ff5252;">Error crítico:</strong> ${error.message}.<br><br>
-                    <strong>¡Aviso!</strong> Si el modo IA falla, verifica tu **CLAVE API**. Modo actual: ${modo}.
-                    <div class="modo-tag">[Modo: ${modo}]</div>
-                `;
+                resultadoDiv.innerHTML = `<p style="color:red;">Error conectando con la IA. Pulsa de nuevo.</p><div class="modo-tag">[Error]</div>`;
+                console.error(error);
+            } finally {
                 boton.disabled = false;
+                if(loadingOverlay) loadingOverlay.remove();
             }
         }
     </script>
-<hr style="margin-top: 40px; border-color: #ccc;">
-    <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
-        <a href="index.html" style="
-            text-decoration: none;
-            color: #5f6368;
-            font-weight: bold;
-            padding: 10px 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        ">
-            ← Volver al Menú Principal
+
+    <div style="text-align: center; margin-top: 40px; padding-bottom: 20px;">
+        <a href="index.html" style="text-decoration: none; color: #5f6368; font-weight: bold; padding: 10px 20px; border: 1px solid #ccc; border-radius: 5px;">
+            &larr; Volver al Men&uacute; Principal
         </a>
     </div>
 </body>

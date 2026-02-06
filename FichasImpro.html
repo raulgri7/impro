@@ -194,11 +194,11 @@
 </head>
 <body>
 
-    <h1>20 Fichas de Impro Grupal (5 Personas)</h1>
+    <h1>16 Fichas de Impro Grupal (5 Personas)</h1>
     
     
     <div class="control-container">
-        <button id="generar-btn" onclick="generarFichas()">Generar 20 Fichas de Escenario</button>
+        <button id="generar-btn" onclick="generarFichas()">Generar 16 Fichas de Escenario</button>
         <button id="imprimir-btn" onclick="imprimirFichas()" style="display: none;">Imprimir Fichas (DIN A4)</button>
     </div>
     
@@ -208,12 +208,7 @@
 
 
     <script>
-        // ----------------------------------------------------------
-        // --- CLAVE API Y CONFIGURACIÓN ---
-        // ----------------------------------------------------------
-        const API_KEY = 'AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM'; 
-        const MODEL_NAME = 'gemini-2.5-flash';
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+
         
         // ----------------------------------------------------------
         // --- FUNCIÓN DE IMPRESIÓN ---
@@ -228,7 +223,7 @@
         function construirPromptFichas() {
             
             // SE USA EL PROMPT ORIGINAL EXACTO PROPORCIONADO POR EL USUARIO
-            const prompt = `Quiero que generes 20 fichas para ejercicios de improvisación teatral con el mismo formato, estructura y extensión que los ejemplos que te dejo a continuación.
+            const prompt = `Quiero que generes 16 fichas para ejercicios de improvisación teatral con el mismo formato, estructura y extensión que los ejemplos que te dejo a continuación.
 
 Cada ficha debe incluir:
 ¿Quiénes son?
@@ -523,102 +518,8 @@ Quieren asustar a los visitantes
 Nadie los ve ni los oye
 
 Integrantes (5 personas):
-Grupo 16
 
-¿Quiénes son?
-
-Un grupo de profesores
-
-¿Dónde están?
-
-En el aula
-
-¿Qué situación tienen?
-
-Preparan una excursión
-
-¿Cuál es el problema?
-
-El autobús se ha ido sin ellos
-
-Integrantes (5 personas):
-Grupo 17
-
-¿Quiénes son?
-
-Un grupo de magos
-
-¿Dónde están?
-
-En una escuela de magia
-
-¿Qué situación tienen?
-
-Están practicando hechizos
-
-¿Cuál es el problema?
-
-Uno de ellos convierte a otro en rana por error
-
-Integrantes (5 personas):
-Grupo 18
-
-¿Quiénes son?
-
-Un grupo de deportistas
-
-¿Dónde están?
-
-En un estadio
-
-¿Qué situación tienen?
-
-Van a jugar la final
-
-¿Cuál es el problema?
-
-El balón desaparece justo antes del partido
-
-Integrantes (5 personas):
-Grupo 19
-
-¿Quiénes son?
-
-Un grupo de amigos
-
-¿Dónde están?
-
-En la playa
-
-¿Qué situación tienen?
-
-Van a construir el castillo más grande de arena
-
-¿Cuál es el problema?
-
-Sube la marea y amenaza con destruirlo
-
-Integrantes (5 personas):
-Grupo 20
-
-¿Quiénes son?
-
-Un grupo de inventores
-
-¿Dónde están?
-
-En su taller
-
-¿Qué situación tienen?
-
-Crean una máquina para hacer deberes
-
-¿Cuál es el problema?
-
-La máquina empieza a hablar y se rebela contra ellos
-
-Integrantes (5 personas):
-Ahora genera 20 grupos nuevos siguiendo exactamente este formato empezando la numeración por Grupo 1.`;
+Ahora genera 16 grupos nuevos siguiendo exactamente este formato empezando la numeración por Grupo 1.`;
 
             return prompt;
         }
@@ -697,17 +598,14 @@ Ahora genera 20 grupos nuevos siguiendo exactamente este formato empezando la nu
             const prompt = construirPromptFichas();
             
             try {
-                const response = await fetch(API_URL, {
+                // He cambiado la estructura del body para que sea la est¨¢ndar que esperan los Workers
+                const response = await fetch('https://generador-impro.raul-grigelmo3.workers.dev', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ role: "user", parts: [{ text: prompt }] }],
-                        generationConfig: { 
-                            temperature: 0.1, 
-                            maxOutputTokens: 8192, 
-                        }
+                        contents: [{
+                            parts: [{ text: prompt }]
+                        }]
                     })
                 });
 

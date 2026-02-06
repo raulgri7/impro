@@ -3,21 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚙️ Generador: Carrera Contra el Tiempo (Impro)</title> 
+    <title>Generador: Carrera Contra el Tiempo</title> 
     <style>
-        /* ----------------------------------------------------------
-           ESTILOS (LOOK AND FEEL - TEATRO Y DRAMATURGIA)
-           ---------------------------------------------------------- */
         body { 
             font-family: 'Roboto', sans-serif; 
             padding: 20px; 
             max-width: 900px; 
             margin: 0 auto; 
-            background-color: #e8f5e9; /* Verde claro suave */
+            background-color: #e8f5e9; 
             color: #333;
         }
         h1 { 
-            color: #388e3c; /* Verde esmeralda oscuro */
+            color: #388e3c; 
             border-bottom: 3px solid #66bb6a; 
             padding-bottom: 15px; 
             margin-bottom: 30px; 
@@ -31,7 +28,6 @@
             font-size: 1.1em;
         }
         
-        /* Contenedor del Botón */
         .boton-container {
             text-align: center;
             margin-bottom: 40px;
@@ -39,7 +35,7 @@
 
         button { 
             padding: 16px 30px; 
-            background-color: #388e3c; /* Verde principal */
+            background-color: #388e3c; 
             color: white; 
             border: none; 
             border-radius: 10px; 
@@ -65,7 +61,7 @@
             margin-top: 35px; 
             padding: 30px; 
             border: 3px solid #388e3c; 
-            background-color: #ffffff; /* Fondo blanco para el contenido */
+            background-color: #ffffff; 
             border-radius: 15px; 
             min-height: 250px; 
             font-size: 1.1em; 
@@ -73,7 +69,6 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
         
-        /* Estilos de la carga */
         .cargando { 
             color: #388e3c; 
             font-weight: bold; 
@@ -85,17 +80,6 @@
         }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
         
-        /* Estilos específicos para la respuesta generada */
-        pre { 
-            font-family: inherit; 
-            margin: 0; 
-            padding: 0; 
-            white-space: pre-wrap; 
-            line-height: 1.6; 
-            font-weight: normal;
-        }
-        
-        /* Mejorar la legibilidad de la salida */
         #resultado strong {
             color: #388e3c;
             font-weight: bold;
@@ -103,173 +87,77 @@
         #resultado h3 {
              color: #1b5e20;
              margin-top: 25px;
-             margin-bottom: 5px;
+             margin-bottom: 10px;
              border-bottom: 2px dotted #66bb6a;
              padding-bottom: 5px;
-        }
-        .error-detalle {
-            background-color: #ffebee; 
-            border: 1px solid #c53929;
-            padding: 10px;
-            margin-top: 15px;
-            border-radius: 5px;
-            font-size: 0.9em;
-            white-space: pre-wrap;
-            word-break: break-all;
         }
     </style>
 </head>
 <body>
 
-    <h1>⏱️ Escenarios: Carrera contra el Tiempo</h1>
-    <p class="instruccion">Genera 5-6 premisas argumentales para un ejercicio de improvisación de condensación rápida (7-8 actores).</p>
+    <h1>&#9201; Escenarios: Carrera contra el Tiempo</h1>
+    <p class="instruccion">Genera premisas para un ejercicio de improvisaci&oacute;n de condensaci&oacute;n r&aacute;pida (7-8 actores).</p>
     
     <div class="boton-container">
-        <button id="generar-btn" onclick="generarPremisas()">Generar Situaciones de Improvisación</button>
+        <button id="generar-btn" onclick="generarPremisas()">Generar Situaciones</button>
     </div>
     
     <div id="resultado">
-        <p style="text-align: center; color: #5f6368;">Pulsa el botón para generar las premisas que tu elenco deberá condensar en rondas de 2 min, 1 min, 30 seg y 15 seg.</p>
+        <p style="text-align: center; color: #5f6368;">Pulsa el bot&oacute;n para generar las premisas que tu elenco deber&aacute; condensar en rondas de 2 min, 1 min, 30 seg y 15 seg.</p>
     </div>
 
-
     <script>
-        // ----------------------------------------------------------
-        // --- CLAVE API Y CONFIGURACIÓN ---
-        // ----------------------------------------------------------
-        // La clave es la que proporcionaste, asumiendo que es real.
-        const API_KEY = 'AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM'; 
-        const MODEL_NAME = 'gemini-2.5-flash';
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+        // URL segura de tu Cloudflare Worker
+        const WORKER_URL = 'https://generador-impro.raul-grigelmo3.workers.dev';
 
-
-        // Función para construir el PROMPT detallado
         function construirPromptCarrera() {
-            const contexto = `Actúa como un director de teatro experto especializado en improvisación y dramaturgia. Tu tarea es generar **EXACTAMENTE 6 premisas argumentales** optimizadas para un ejercicio de improvisación llamado "Carrera contra el tiempo".
-
-INSTRUCCIONES CLAVE:
-1.  **Número de Actores:** Las situaciones deben diseñarse para ser interpretadas por un grupo de **7 u 8 actores**.
-2.  **Formato:** La salida debe ser una lista numerada con: **Título**, **Premisa** (descripción de la trama lineal y conflicto único), y sugerencia de **Roles** (para 7-8 actores, incluyendo protagonistas, antagonistas y coro/secundarios).
-3.  **Temática:** Incluye al menos dos situaciones que involucren un **vehículo de gran capacidad** (autobús, teleférico, furgoneta, etc.).
-
-REGLAS DE FORMATO ESTRICTO:
-* Usa encabezados Markdown (###) para el Título.
-* Usa negritas para las palabras clave "Título", "Premisa" y "Roles".
-
-Ejemplo de formato:
-### 1. El Juicio del Siglo
-**Premisa:** Un famoso chef está siendo juzgado por un jurado popular por cocinar con ingredientes caducados. La acusación pide cárcel, la defensa la inocencia. Todos quieren un trozo del pastel.
-**Roles:** Juez (1), Fiscal (1), Abogado Defensor (1), Chef Acusado (1), Jurado (4 personas, coro reactivo).
-
-Genera las 6 premisas ahora, sin ninguna introducción o conclusión.`;
-
-            return contexto;
+            return `Actua como experto en improvisacion. Genera EXACTAMENTE 6 premisas para el ejercicio "Carrera contra el tiempo".
+            1. Actores: 7 u 8 personas.
+            2. Formato: ### Titulo / **Premisa**: [trama] / **Roles**: [reparto para 7-8].
+            3. Tematica: Incluye al menos dos situaciones en vehiculos grandes.
+            No incluyas introducciones, solo el contenido.`;
         }
 
-        // Función auxiliar para formatear la salida (se mantiene la estructura simple)
-        function formatearResultado(texto) {
-            // Reemplazar encabezados ### con etiquetas H3 para un mejor estilo
-            return texto.replace(/###\s*(.*)/g, '<h3>$1</h3>');
-        }
-
-        // Función principal para llamar a la API
         async function generarPremisas() {
             const resultadoDiv = document.getElementById('resultado');
             const boton = document.getElementById('generar-btn');
 
             boton.disabled = true;
-            resultadoDiv.innerHTML = '<span class="cargando">Generando escenarios para la condensación dramática...</span>';
-            
-            const prompt = construirPromptCarrera();
+            resultadoDiv.innerHTML = '<span class="cargando">Generando escenarios de condensacion dramatica...</span>';
             
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(WORKER_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ role: "user", parts: [{ text: prompt }] }],
-                        generationConfig: { 
-                            temperature: 0.3, 
-                            maxOutputTokens: 4096, 
-                        }
+                        contents: [{ role: "user", parts: [{ text: construirPromptCarrera() }] }],
+                        generationConfig: { temperature: 0.7 }
                     })
                 });
 
-                // Si hay un error HTTP (ej. 403, 400, 500)
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({error: {message: 'Respuesta de error no es JSON'}}));
-                    throw new Error(`Error HTTP ${response.status}: ${errorData.error ? errorData.error.message : response.statusText}`);
-                }
+                if (!response.ok) throw new Error("Error en el servidor");
 
                 const data = await response.json();
+                const textoGenerado = data.candidates[0].content.parts[0].text.trim();
                 
-                let textoGenerado = "";
+                // Formateo y visualización
+                let htmlFinal = textoGenerado
+                    .replace(/###\s*(.*)/g, '<h3>$1</h3>')
+                    .replace(/\n/g, '<br>');
 
-                try {
-                    // Intenta extraer el texto normal
-                    textoGenerado = data.candidates[0].content.parts[0].text.trim();
-                } catch (e) {
-                    // SI FALLA (ej. por bloqueo de seguridad o respuesta vacía)
-                    
-                    // Mostrar los detalles de la respuesta JSON para el diagnóstico.
-                    let safetyReason = "Motivo desconocido (la respuesta JSON estaba vacía o mal formada).";
-                    if (data.candidates && data.candidates[0].finishReason === 'SAFETY') {
-                        safetyReason = "Bloqueado por política de seguridad (SAFETY BLOCK). Revisa el contenido de tu Prompt.";
-                    } else if (data.promptFeedback) {
-                         safetyReason = JSON.stringify(data.promptFeedback, null, 2);
-                    } else {
-                        safetyReason = JSON.stringify(data, null, 2);
-                    }
-
-                    resultadoDiv.innerHTML = `
-                        <strong style="color: #c53929;">Error: No se pudo generar el contenido útil.</strong><br>
-                        El modelo no devolvió texto o el contenido fue bloqueado.<br>
-                        <strong style="color: #5f6368;">Diagnóstico detallado:</strong>
-                        <div class="error-detalle">
-                            <pre>${safetyReason}</pre>
-                        </div>
-                    `;
-                    boton.disabled = false;
-                    return; // Salir de la función si no hay contenido válido
-                }
-
-                // Muestra el resultado final (si la extracción fue exitosa)
-                resultadoDiv.innerHTML = `<pre>${formatearResultado(textoGenerado)}</pre>`;
-                boton.disabled = false;
+                resultadoDiv.innerHTML = htmlFinal;
 
             } catch (error) {
-                // Manejo de ERRORES CRÍTICOS (CORS, Red, Clave)
-                let posibleCausa = "Clave API incorrecta, expirada o problema de CORS.";
-                if (error.message.includes('Failed to fetch') || error.message.includes('Error HTTP')) {
-                     posibleCausa = '⚠️ El problema es casi seguro de **CORS** (si estás en file:///) o la clave API está restringida.';
-                }
-                
-                resultadoDiv.innerHTML = `
-                    <strong style="color: #c53929;">Error crítico de Conexión:</strong> ${error.message}.<br><br>
-                    <strong>POSIBLES CAUSAS:</strong><br>
-                    - ${posibleCausa}<br>
-                    - El modelo no está disponible o el nombre es incorrecto.
-                `;
+                resultadoDiv.innerHTML = `<strong style="color: #c53929;">Error:</strong> No se pudo conectar con la IA.`;
+            } finally {
                 boton.disabled = false;
             }
         }
     </script>
 
-
-<hr style="margin-top: 40px; border-color: #ccc;">
-    <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
-        <a href="index.html" style="
-            text-decoration: none;
-            color: #5f6368;
-            font-weight: bold;
-            padding: 10px 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        ">
-            ← Volver al Menú Principal
+    <div style="text-align: center; margin-top: 40px; padding-bottom: 20px;">
+        <a href="index.html" style="text-decoration: none; color: #5f6368; font-weight: bold; padding: 10px 20px; border: 1px solid #ccc; border-radius: 5px;">
+            &larr; Volver al Men&uacute; Principal
         </a>
     </div>
 

@@ -5,170 +5,188 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generador de Narraciones de Movimiento</title>
     <style>
-        body { font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background-color: #f0f8ff; }
-        h1 { color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 30px; }
-        p.instruccion { color: #5f6368; margin-bottom: 25px; font-style: italic; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 20px; 
+            max-width: 850px; 
+            margin: 0 auto; 
+            background-color: #f4f7f9; 
+            color: #333;
+        }
+        h1 { 
+            color: #1a73e8; 
+            border-bottom: 3px solid #1a73e8; 
+            padding-bottom: 15px; 
+            margin-bottom: 25px; 
+            text-align: center;
+        }
+        p.instruccion { 
+            color: #5f6368; 
+            margin-bottom: 30px; 
+            text-align: center;
+            font-size: 1.1em;
+            font-style: italic; 
+        }
         
+        .boton-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
         button { 
-            padding: 14px 25px; 
-            background-color: #007bff; 
+            padding: 16px 32px; 
+            background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%); 
             color: white; 
             border: none; 
-            border-radius: 8px; 
+            border-radius: 50px; 
             cursor: pointer; 
-            font-size: 18px; 
+            font-size: 1.1em; 
             font-weight: bold;
-            transition: background-color 0.3s, transform 0.1s; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            transition: all 0.3s ease; 
+            box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3); 
         }
-        button:hover { background-color: #0056b3; }
-        button:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        button:hover { 
+            background: linear-gradient(135deg, #1557b0 0%, #114690 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26, 115, 232, 0.4);
+        }
+        button:active { 
+            transform: translateY(1px); 
+        }
         
         #resultado { 
-            margin-top: 35px; 
-            padding: 25px; 
-            border: 2px solid #007bff; 
-            background-color: #e6f2ff;
-            border-radius: 10px; 
-            min-height: 250px; 
-            white-space: pre-wrap; 
-            font-size: 1.1em; 
-            line-height: 1.8;
+            margin-top: 20px; 
+            padding: 30px; 
+            border: 1px solid #d1d9e0; 
+            background-color: #ffffff;
+            border-radius: 15px; 
+            min-height: 300px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
+
         pre { 
-            font-family: inherit; 
+            font-family: 'Georgia', serif; 
             margin: 0; 
             padding: 0; 
             white-space: pre-wrap; 
-            line-height: inherit; 
-            font-weight: 500;
+            line-height: 1.8; 
+            font-size: 1.15em;
             text-align: justify;
+            color: #2c3e50;
         }
-        .cargando { color: #007bff; font-weight: bold; animation: pulse 1.5s infinite; }
+
+        .cargando { 
+            display: block;
+            text-align: center;
+            color: #1a73e8; 
+            font-weight: bold; 
+            font-size: 1.2em;
+            margin-top: 50px;
+            animation: pulse 1.5s infinite; 
+        }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        .error-msg {
+            color: #d93025;
+            background-color: #fce8e6;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #d93025;
+            font-weight: bold;
+        }
+
+        .volver-btn {
+            display: inline-block;
+            margin-top: 40px;
+            text-decoration: none;
+            color: #5f6368;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+        .volver-btn:hover {
+            background-color: #f1f3f4;
+        }
     </style>
 </head>
 <body>
 
-    <h1>📖 Guion de Movimiento y Viaje</h1>
+    <h1>&nbsp;&nbsp;Guion de Movimiento y Viaje</h1>
     <p class="instruccion">Viaje imaginario guiado para movimiento libre con los ojos abiertos.</p>
     
-    <button onclick="generarContenido()">Generar Narración</button>
+    <div class="boton-container">
+        <button onclick="generarContenido()">Generar Narraci&oacute;n</button>
+    </div>
     
-    <div id="resultado"></div>
-
+    <div id="resultado">
+        <p style="text-align: center; color: #9aa0a6; margin-top: 100px;">
+            Haz clic en el bot&oacute;n para crear una nueva experiencia de movimiento.
+        </p>
+    </div>
 
     <script>
-        // ----------------------------------------------------------
-        // --- CLAVE API Y CONFIGURACIÓN ---
-        // ----------------------------------------------------------
-        const API_KEY = 'AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM'; // ¡RECUERDA SUSTITUIR ESTO CON TU CLAVE REAL!
-        const MODEL_NAME = 'gemini-2.5-flash';
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+        // --- CONFIGURACI&Oacute;N DEL WORKER ---
+        const WORKER_URL = 'https://generador-impro.raul-grigelmo3.workers.dev';
 
-
-        // FUNCIÓN CLAVE: Prompt para la Narración Guiada (Actualizado con tus criterios)
         function construirPromptNarracion() {
-            const contexto = `**INSTRUCCIÓN ESTRICTA:** Genera ÚNICAMENTE el texto narrativo completo. No añadas introducciones, explicaciones de rol, títulos, indicaciones al lector ('Pausa', 'Voz suave') ni frases de meditación abstracta. El texto debe ser continuo y empezar directamente con la primera frase de la historia.
+            return `**INSTRUCCI&Oacute;N ESTRICTA:** Genera &Uacute;NICAMENTE el texto narrativo completo. No a&ntilde;adas introducciones, explicaciones de rol, t&iacute;tulos, indicaciones al lector ni frases de meditaci&oacute;n abstracta. El texto debe ser continuo y empezar directamente con el tiempo de duraci&oacute;n.
 
-**OBJETIVO:** Crea un viaje imaginario guiado (6-8 minutos) pensado para que los participantes se muevan libremente con los ojos abiertos en un espacio grande. El foco es el movimiento físico y la sensación espacial.
+**OBJETIVO:** Crea un viaje imaginario guiado (6-8 minutos) para participantes que se mueven libremente con los ojos abiertos en un espacio grande. El foco es el movimiento f&iacute;sico y la sensaci&oacute;n espacial.
 
 **CRITERIOS OBLIGATORIOS:**
-1.  **Segunda persona del singular (tuteo):** Usar 'caminas', 'sientes', 'ves', etc.
-2.  **Descripciones sensoriales:** (vista, oído, tacto, olfato, equilibrio) para hacer sentir presencia física en el espacio.
-3.  **Instrucciones de movimiento físico:** Incluir caminar, girar, agacharse, saltar, inclinarse, explorar, con cambios claros de ritmo y peso.
-4.  **Ritmo y Progresión:**
-    * Inicio tranquilo.
-    * Fase de exploración y/o desafío.
-    * Clímax o cambio dinámico (climático, obstáculo, paisaje nuevo).
-    * Resolución y cierre tranquilo.
-5.  **Espacios imaginarios variados:** (Ejemplo: ciudad, cueva, desierto, barco, templo, etc. **NO USAR** bosques, prados ni ríos ya que se han usado antes).
-6.  **Formato:** Texto continuo, frases cortas y claras para seguir las instrucciones mientras se mueven. Alternar observación, acción y pausa. Evitar narración interna abstracta.
+1. Segunda persona del singular (tuteo): 'caminas', 'sientes', 'ves'.
+2. Descripciones sensoriales potentes (vista, o&iacute;do, tacto, olfato, equilibrio).
+3. Instrucciones de movimiento f&iacute;sico real: caminar, girar, agacharse, saltar, inclinarse, cambios de ritmo y peso.
+4. Ritmo y Progresi&oacute;n: Inicio tranquilo, fase de exploraci&oacute;n/desaf&iacute;o, cl&iacute;max din&aacute;mico (obst&aacute;culo o cambio de paisaje) y cierre tranquilo.
+5. Espacios imaginarios: Usa una ciudad antigua, un mercado futurista, ruinas de un templo o un desierto de cristal (NO USAR bosques, prados ni r&iacute;os).
+6. Formato: Texto continuo, frases cortas y claras.
 
-**EJEMPLO DE GUÍA:** "Inclínate y mira hacia abajo. El suelo es resbaladizo. Gira lentamente sobre tu propio eje para sentir el peso de tu cuerpo."
-
-La historia debe mantener la tensión y el interés durante todo el recorrido.
-`;
-            
-            const instruccionFinal = "Genera el texto narrativo completo basado en los criterios, asegurándote de usar espacios imaginarios nuevos (por ejemplo, una ciudad antigua, un desierto, o ruinas). Añade al inicio el tiempo aproximado (ej: Duración aproximada: 6�? minutos).";
-
-            return `${contexto}\n\n--- GENERACIÓN ---\n${instruccionFinal}`;
+A&ntilde;ade al inicio: Duraci&oacute;n aproximada: 6-8 minutos.`;
         }
 
-        // Función principal para llamar a la API
         async function generarContenido() {
             const resultadoDiv = document.getElementById('resultado');
-            resultadoDiv.innerHTML = '<span class="cargando">Creando el guion para el viaje...</span>';
+            resultadoDiv.innerHTML = '<span class="cargando">Tejiendo el hilo de la historia...</span>';
             
             const prompt = construirPromptNarracion();
             
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        contents: [{ role: "user", parts: [{ text: prompt }] }],
-                        generationConfig: { 
-                            temperature: 0.9, 
-                            maxOutputTokens: 4096,
-                        }
+                        contents: [{ parts: [{ text: prompt }] }]
                     })
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({error: {message: 'Respuesta de error no es JSON'}}));
-                    
-                    let errorMessage = errorData.error ? errorData.error.message : response.statusText;
-                    
-                    if (response.status === 429) {
-                         errorMessage = "Límite de cuota superado (Error 429). ¡Necesitas esperar o revisar tus créditos de API!";
-                    } else if (response.status === 400) {
-                        errorMessage = "Error de autenticación o solicitud incorrecta (Error 400). Verifica que tu CLAVE API sea correcta y no haya expirado.";
-                    }
-
-                    throw new Error(`Error ${response.status}: ${errorMessage}`);
+                    throw new Error('Hubo un problema al conectar con el servidor.');
                 }
 
                 const data = await response.json();
-                
-                let textoGenerado = "No se pudo generar el contenido. Vuelve a intentarlo o revisa el diagnóstico de la API.";
+                const textoGenerado = data.candidates[0].content.parts[0].text.trim();
 
-                try {
-                    textoGenerado = data.candidates[0].content.parts[0].text.trim();
-                } catch (e) {
-                    // Si falla (por contenido vacío o safety block)
-                }
-
-                // Muestra el resultado final
-                resultadoDiv.innerHTML = `
-                    <pre>${textoGenerado}</pre>
-                `;
+                resultadoDiv.innerHTML = `<pre>${textoGenerado}</pre>`;
 
             } catch (error) {
-                // Manejo de ERRORES CRÍTICOS
                 resultadoDiv.innerHTML = `
-                    <strong style="color: #c53929;">Error crítico al conectar con la API:</strong> ${error.message}.<br><br>
-                    <strong>¡PASO URGENTE!</strong> Debes sustituir la clave 'AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM' en la línea 58 del código con una **clave API nueva y válida** de Google AI Studio.
+                    <div class="error-msg">
+                        &iexcl;Vaya! No hemos podido conectar con el generador. 
+                        <br><br>
+                        Detalle: ${error.message}
+                    </div>
                 `;
             }
         }
     </script>
 
-
-<hr style="margin-top: 40px; border-color: #ccc;">
-    <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
-        <a href="index.html" style="
-            text-decoration: none;
-            color: #5f6368;
-            font-weight: bold;
-            padding: 10px 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        ">
-            �?Volver al Menú Principal
+    <div style="text-align: center; margin-bottom: 40px;">
+        <a href="index.html" class="volver-btn">
+            &larr; Volver al Men&uacute; Principal
         </a>
     </div>
 

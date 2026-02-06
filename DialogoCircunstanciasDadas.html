@@ -7,91 +7,217 @@
     <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background-color: #121212; color: #e0e0e0; }
-        h1 { color: #e53935; border-bottom: 2px solid #e53935; padding-bottom: 10px; text-align: center; }
-        .controls { text-align: center; margin: 20px 0; display: flex; justify-content: center; gap: 10px; }
-        button { padding: 12px 24px; cursor: pointer; border-radius: 5px; border: none; font-weight: bold; transition: 0.3s; }
-        .btn-gen { background-color: #e53935; color: white; }
-        .btn-gen:hover { background-color: #b71c1c; }
-        .btn-docx { background-color: #1976d2; color: white; display: none; }
-        #resultado { background-color: #1e1e1e; padding: 30px; border-radius: 8px; border: 1px solid #333; min-height: 200px; line-height: 1.6; }
-        .label { color: #e53935; font-weight: bold; text-transform: uppercase; font-size: 0.9em; margin-top: 20px; display: block; }
-        .content-box { margin-bottom: 20px; white-space: pre-wrap; }
-        .dialogue-style { font-family: 'Courier New', Courier, monospace; background: #000; padding: 15px; border-radius: 4px; color: #cfcfcf; }
-        .loading { color: #e53935; font-style: italic; text-align: center; display: block; }
+        :root {
+            --primary-red: #e53935;
+            --dark-red: #b71c1c;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --accent-blue: #1976d2;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 20px; 
+            max-width: 850px; 
+            margin: 0 auto; 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+            line-height: 1.6;
+        }
+
+        h1 { 
+            color: var(--primary-red); 
+            border-bottom: 2px solid var(--primary-red); 
+            padding-bottom: 15px; 
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .controls { 
+            text-align: center; 
+            margin: 30px 0; 
+            display: flex; 
+            justify-content: center; 
+            gap: 15px; 
+        }
+
+        button { 
+            padding: 14px 28px; 
+            cursor: pointer; 
+            border-radius: 8px; 
+            border: none; 
+            font-weight: bold; 
+            font-size: 1rem;
+            transition: all 0.3s ease; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .btn-gen { background-color: var(--primary-red); color: white; }
+        .btn-gen:hover { background-color: var(--dark-red); transform: translateY(-2px); }
+        
+        .btn-docx { 
+            background-color: var(--accent-blue); 
+            color: white; 
+            display: none; 
+        }
+        .btn-docx:hover { background-color: #1565c0; transform: translateY(-2px); }
+
+        #resultado { 
+            background-color: var(--card-bg); 
+            padding: 40px; 
+            border-radius: 12px; 
+            border: 1px solid #333; 
+            min-height: 250px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            margin-top: 20px;
+        }
+
+        .label { 
+            color: var(--primary-red); 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            font-size: 0.85em; 
+            margin-top: 30px; 
+            display: block;
+            border-left: 3px solid var(--primary-red);
+            padding-left: 10px;
+        }
+
+        .content-box { margin-bottom: 25px; white-space: pre-wrap; font-size: 1.1rem; }
+        
+        .dialogue-style { 
+            font-family: 'Courier New', Courier, monospace; 
+            background: #000; 
+            padding: 25px; 
+            border-radius: 6px; 
+            color: #d1d1d1; 
+            border: 1px inset #333;
+            margin-top: 10px;
+        }
+
+        .loading { 
+            color: var(--primary-red); 
+            font-style: italic; 
+            text-align: center; 
+            display: block;
+            font-size: 1.2rem;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        .back-nav {
+            text-align: center;
+            margin-top: 50px;
+            padding-bottom: 30px;
+        }
+
+        .btn-back {
+            text-decoration: none;
+            color: #888;
+            font-weight: bold;
+            padding: 12px 24px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            transition: 0.3s;
+        }
+
+        .btn-back:hover {
+            background-color: #222;
+            color: #fff;
+            border-color: #666;
+        }
     </style>
 </head>
 <body>
 
-    <h1>馃幁 Ejercicio de Circunstancias Dadas</h1>
+    <h1>Ejercicio: Circunstancias Dadas</h1>
     
     <div class="controls">
-        <button class="btn-gen" onclick="generarEscena()">Generar Escena</button>
+        <button class="btn-gen" id="btnGenerar" onclick="generarEscena()">Generar Escena</button>
         <button id="btnDocx" class="btn-docx" onclick="descargarDocx()">Descargar .DOCX</button>
     </div>
 
     <div id="resultado">
-        <p style="text-align: center; color: #666;">Presiona el bot贸n para crear un ejercicio teatral.</p>
+        <p style="text-align: center; color: #777; margin-top: 50px;">
+            Presiona el bot&oacute;n para crear un nuevo ejercicio teatral basado en el m&eacute;todo de las circunstancias dadas.
+        </p>
+    </div>
+
+    <div class="back-nav">
+        <a href="index.html" class="btn-back">&larr; Volver al Men&uacute; Principal</a>
     </div>
 
     <script>
-        // --- CONFIGURACI脫N PROPORCIONADA ---
-        const API_KEY = 'AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM'; 
-        const MODEL_NAME = 'gemini-2.5-flash';
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
-
         let datosEscena = { titulo: "", circunstancias: "", dialogo: "" };
 
         async function generarEscena() {
             const resDiv = document.getElementById('resultado');
             const btnD = document.getElementById('btnDocx');
-            resDiv.innerHTML = '<span class="loading">Escribiendo la escena...</span>';
+            const btnG = document.getElementById('btnGenerar');
+
+            resDiv.innerHTML = '<span class="loading">Escribiendo la escena y analizando tensiones...</span>';
             btnD.style.display = 'none';
+            btnG.disabled = true;
 
             const prompt = `Crea un ejercicio teatral de "circunstancias dadas".
             - Personajes: Dos mujeres.
-            - Tono: Inquietante, misterioso, inc贸modo.
-            - Requisito: Frases de di谩logo no muy largas y f谩ciles de memorizar.
+            - Tono: Inquietante, misterioso o de tensión contenida.
+            - Requisito: Frases de diálogo cortas y fáciles de memorizar.
             
             FORMATO OBLIGATORIO:
-            TITULO: [Escribe aqu铆]
-            CIRCUNSTANCIAS: [Escribe aqu铆 qui茅nes son, edad, relaci贸n, lugar y tensi贸n oculta]
-            DIALOGO: [Escribe el di谩logo aqu铆]`;
+            TITULO: [Escribe aquí el título]
+            CIRCUNSTANCIAS: [Escribe aquí quiénes son, lugar y la tensión oculta]
+            DIALOGO: [Escribe el diálogo aquí]`;
 
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch('https://generador-impro.raul-grigelmo3.workers.dev', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    body: JSON.stringify({ 
+                        prompt: prompt,
+                        temp: 0.8
+                    })
                 });
 
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error.message);
+                if (!response.ok) throw new Error("Error en el servidor.");
 
+                const data = await response.json();
                 const textoCompleto = data.candidates[0].content.parts[0].text;
 
-                // Sistema de extracci贸n robusto para evitar errores de undefined/trim
                 const extraer = (etiqueta, siguiente) => {
                     const regex = new RegExp(`${etiqueta}:(.*?)(?=${siguiente}:|$)`, 's');
                     const match = textoCompleto.match(regex);
                     return match ? match[1].trim() : "";
                 };
 
-                datosEscena.titulo = extraer("TITULO", "CIRCUNSTANCIAS") || "Escena sin t铆tulo";
-                datosEscena.circunstancias = extraer("CIRCUNSTANCIAS", "DIALOGO") || "No se generaron circunstancias.";
-                datosEscena.dialogo = extraer("DIALOGO", "FIN") || "No se gener贸 el di谩logo.";
+                datosEscena.titulo = extraer("TITULO", "CIRCUNSTANCIAS") || "Escena Misteriosa";
+                datosEscena.circunstancias = extraer("CIRCUNSTANCIAS", "DIALOGO") || "No se detallaron circunstancias.";
+                datosEscena.dialogo = extraer("DIALOGO", "FIN") || "No se gener&oacute; el di&aacute;logo.";
 
                 resDiv.innerHTML = `
-                    <h2 style="text-align:center; color:white;">${datosEscena.titulo}</h2>
+                    <h2 style="text-align:center; color:white; margin-bottom:10px;">${datosEscena.titulo}</h2>
                     <span class="label">Circunstancias dadas:</span>
                     <div class="content-box">${datosEscena.circunstancias}</div>
-                    <span class="label">Di谩logo:</span>
+                    <span class="label">Texto / Di&aacute;logo:</span>
                     <div class="content-box dialogue-style">${datosEscena.dialogo}</div>
                 `;
-                btnD.style.display = 'block';
+                btnD.style.display = 'inline-block';
 
             } catch (e) {
-                resDiv.innerHTML = `<b style="color:red;">Error de conexi贸n:</b> ${e.message}<br><br>Verifica que el modelo "${MODEL_NAME}" sea el correcto para tu regi贸n.`;
+                resDiv.innerHTML = `
+                    <div style="color:#ff5252; padding: 20px; border: 1px solid #ff5252; border-radius: 8px; text-align:center;">
+                        <b>Error:</b> No se pudo conectar con el generador.
+                    </div>
+                `;
+            } finally {
+                btnG.disabled = false;
             }
         }
 
@@ -101,34 +227,41 @@
             const doc = new Document({
                 sections: [{
                     children: [
-                        new Paragraph({ text: datosEscena.titulo, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
-                        new Paragraph({ text: "CIRCUNSTANCIAS DADAS", heading: HeadingLevel.HEADING_2, spacing: { before: 400 } }),
-                        new Paragraph({ children: [new TextRun({ text: datosEscena.circunstancias, size: 24 })] }),
-                        new Paragraph({ text: "DI脕LOGO", heading: HeadingLevel.HEADING_2, spacing: { before: 400 } }),
+                        new Paragraph({ 
+                            text: datosEscena.titulo, 
+                            heading: HeadingLevel.HEADING_1, 
+                            alignment: AlignmentType.CENTER 
+                        }),
+                        new Paragraph({ 
+                            text: "CIRCUNSTANCIAS DADAS", 
+                            heading: HeadingLevel.HEADING_2, 
+                            spacing: { before: 400, after: 200 } 
+                        }),
+                        new Paragraph({ 
+                            children: [new TextRun({ text: datosEscena.circunstancias, size: 24 })],
+                            spacing: { after: 400 }
+                        }),
+                        new Paragraph({ 
+                            text: "TEXTO / DIALOGO", 
+                            heading: HeadingLevel.HEADING_2, 
+                            spacing: { before: 200, after: 200 } 
+                        }),
                         ...datosEscena.dialogo.split('\n').map(l => new Paragraph({ 
-                            children: [new TextRun({ text: l, size: 24, font: "Courier New" })] 
+                            children: [new TextRun({ 
+                                text: l, 
+                                size: 24, 
+                                font: "Courier New" 
+                            })],
+                            spacing: { after: 120 }
                         }))
                     ]
                 }]
             });
 
-            Packer.toBlob(doc).then(blob => saveAs(blob, "Ejercicio_Teatro_Circunstancias.docx"));
+            Packer.toBlob(doc).then(blob => {
+                saveAs(blob, `Ejercicio_Teatro.docx`);
+            });
         }
     </script>
-<hr style="margin-top: 40px; border-color: #ccc;">
-    <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
-        <a href="index.html" style="
-            text-decoration: none;
-            color: #5f6368;
-            font-weight: bold;
-            padding: 10px 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        ">
-            鈫?Volver al Men煤 Principal
-        </a>
-    </div>
-
 </body>
 </html>

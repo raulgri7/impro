@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contador Táctil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Aplicamos estilos para que la aplicación ocupe la pantalla */
+        html, body {
+            height: 100%;
+            margin: 0;
+            user-select: none; /* Evita que se seleccione el texto al tocar */
+            -webkit-tap-highlight-color: transparent; /* Elimina el resaltado de toque en móviles */
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Estilo para el área de conteo (ajustado para dejar espacio al botón) */
+        #tap-area {
+            cursor: pointer;
+            min-height: 80vh; /* Ocupa la mayor parte de la pantalla */
+            transition: background-color 0.1s ease-out;
+        }
+
+        #tap-area:active {
+            background-color: #2c5282; 
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dark-bg': '#1a202c',
+                        'light-text': '#f7fafc',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-dark-bg text-light-text antialiased flex flex-col">
+
+    <div id="tap-area" class="w-full flex-grow flex items-center justify-center">
+        <div id="counter-display" class="text-light-text font-extrabold text-9xl sm:text-[15rem] md:text-[20rem] transition-colors duration-200">
+            0
+        </div>
+    </div>
+
+    <div class="w-full py-8 bg-dark-bg">
+        <hr class="border-gray-600 mb-6 mx-auto w-4/5">
+        <div class="text-center">
+            <a href="index.html" class="inline-block no-underline text-gray-400 font-bold py-3 px-6 border border-gray-600 rounded-lg transition-colors hover:bg-gray-800 hover:text-white">
+                ← Volver al Menú Principal
+            </a>
+        </div>
+    </div>
+
+    <script>
+        let count = 0;
+        const display = document.getElementById('counter-display');
+        const tapArea = document.getElementById('tap-area');
+
+        const updateDisplay = () => {
+            display.textContent = count;
+        };
+
+        const incrementCounter = () => {
+            count++;
+            updateDisplay();
+            // Efecto de color momentáneo
+            display.classList.remove('text-light-text');
+            display.classList.add('text-yellow-300');
+            setTimeout(() => {
+                display.classList.remove('text-yellow-300');
+                display.classList.add('text-light-text');
+            }, 100);
+        };
+
+        // Escucha el clic solo en el área designada
+        tapArea.addEventListener('click', incrementCounter);
+
+        window.onload = updateDisplay;
+    </script>
+	
+</body>
+</html>

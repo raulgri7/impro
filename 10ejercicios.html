@@ -3,365 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎬 Generador: 10 Ejercicios de Improvisación Teatral</title>
+    <title>Generador de Ejercicios</title>
     <style>
-        /* ----------------------------------------------------------
-           ESTILOS (LOOK AND FEEL - Ficha de Ejercicio/Guion)
-           ---------------------------------------------------------- */
-        body { 
-            font-family: 'Georgia', serif; 
-            padding: 20px; 
-            max-width: 900px; 
-            margin: 0 auto; 
-            background-color: #f7f7f7; /* Gris claro, papel */
-            color: #333;
-        }
-        h1 { 
-            color: #4a148c; /* Morado Oscuro (Teatro) */
-            border-bottom: 3px solid #7b1fa2; 
-            padding-bottom: 15px; 
-            margin-bottom: 30px; 
-            text-align: center;
-            font-size: 2.4em;
-            font-family: 'Times New Roman', serif;
-        }
-        p.instruccion { 
-            color: #555; 
-            margin-bottom: 25px; 
-            text-align: center;
-            font-size: 1.1em;
-            border: 1px dashed #ccc;
-            padding: 15px;
-            background-color: #fff;
-            border-radius: 5px;
-        }
-        
-        /* Contenedor de Inputs y Botón */
-        .control-container {
-            text-align: center;
-            margin-bottom: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            background-color: #ede7f6; /* Fondo morado muy claro */
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        label {
-            font-weight: bold;
-            color: #4a148c;
-            margin-right: 10px;
-        }
-
-        select {
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #7b1fa2;
-            font-size: 1em;
-            min-width: 150px;
-        }
-
-        button { 
-            padding: 12px 25px; 
-            background-color: #7b1fa2; /* Morado Principal */
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-size: 1.1em; 
-            font-weight: bold;
-            transition: background-color 0.3s, transform 0.1s; 
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); 
-            text-transform: uppercase;
-        }
-        button:hover:not(:disabled) { background-color: #5d109b; }
-        button:active:not(:disabled) { 
-            transform: translateY(2px); 
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); 
-        }
-        button:disabled {
-            background-color: #ce93d8;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-        
-        #resultado { 
-            margin-top: 35px; 
-            padding: 30px; 
-            border: 3px solid #7b1fa2; 
-            background-color: #ffffff; /* Fondo blanco */
-            border-radius: 15px; 
-            min-height: 250px; 
-            font-size: 1.1em; 
-            line-height: 1.6;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        /* ESTILOS AÑADIDOS/MODIFICADOS PARA EL AJUSTE DE PALABRA */
-        #resultado pre {
-             font-family: inherit; 
-             margin: 0; 
-             padding: 0; 
-             white-space: pre-wrap; 
-             line-height: 1.6; 
-             font-weight: normal;
-             /* Propiedades para forzar el ajuste de texto dentro del contenedor */
-             overflow-wrap: break-word; 
-             word-wrap: break-word; 
-        }
-        
-        /* Estilos de la carga */
-        .cargando { 
-            color: #7b1fa2; 
-            font-weight: bold; 
-            animation: pulse 1.5s infinite; 
-            display: block;
-            text-align: center;
-            font-size: 1.2em;
-            padding: 20px 0;
-        }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-        
-        /* Mejorar la legibilidad de la salida */
-        #resultado strong {
-            color: #4a148c;
-            font-weight: bold;
-        }
-        /* Estilo para los títulos de los ejercicios */
-        #resultado h3 {
-             color: #4a148c;
-             margin-top: 30px;
-             margin-bottom: 10px;
-             padding-bottom: 5px;
-             border-bottom: 2px solid #ce93d8;
-             font-family: 'Times New Roman', serif;
-             font-size: 1.4em;
-        }
-        #resultado ul {
-            list-style: none; /* Eliminar viñetas */
-            padding-left: 0;
-        }
-        #resultado li {
-            margin-bottom: 5px;
-            font-weight: normal;
-        }
-        .error-detalle {
-            background-color: #fce4ec; /* Rosa claro */
-            border: 1px solid #c53929;
-            padding: 10px;
-            margin-top: 15px;
-            border-radius: 5px;
-            font-size: 0.9em;
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
+        body { font-family: 'Georgia', serif; padding: 20px; max-width: 800px; margin: 0 auto; background-color: #f7f7f7; color: #333; }
+        h1 { color: #4a148c; text-align: center; border-bottom: 3px solid #7b1fa2; padding-bottom: 10px; }
+        .control-container { background: #ede7f6; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
+        button { padding: 12px 25px; background: #7b1fa2; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        button:disabled { background: #ccc; }
+        #resultado { background: white; padding: 25px; border: 2px solid #7b1fa2; border-radius: 15px; min-height: 200px; }
+        .ejercicio { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .ejercicio h3 { color: #4a148c; margin: 0 0 10px 0; }
+        .cargando { color: #7b1fa2; font-weight: bold; display: block; text-align: center; }
     </style>
 </head>
 <body>
 
-    <h1>🎬 Generador de Fichas de Improvisación</h1>
-    <p class="instruccion">Genera 10 ejercicios de improvisación teatral únicos adaptados al número de personas seleccionado.</p>
+    <h1>Generador de Fichas</h1>
     
     <div class="control-container">
-        <label for="num-personas">¿Para cuántas personas serán los ejercicios?</label>
+        <label>&iquest;N&uacute;mero de personas?: </label>
         <select id="num-personas">
             <option value="2">2 Personas</option>
-            <option value="2/3">2 ó 3 Personas</option>
             <option value="3">3 Personas</option>
-            <option value="3/4">3 ó 4 Personas</option>
             <option value="4">4 Personas</option>
-            <option value="grupo">Grupo (5+ Personas)</option>
+            <option value="grupo">Grupo (5+)</option>
         </select>
-        <button id="generar-btn" onclick="generarPremisas()">Generar 10 Ejercicios</button>
-    </div>
-    
-    <div id="resultado">
-        <p style="text-align: center; color: #5f6368;">Selecciona el número de personas y pulsa el botón para generar tu lista de ejercicios.</p>
+        <button id="btn" onclick="generar()">Generar 10 Ejercicios</button>
     </div>
 
+    <div id="resultado">
+        <p style="text-align:center; color:#888;">El resultado aparecer&aacute; aqu&iacute;...</p>
+    </div>
 
     <script>
-        // ----------------------------------------------------------
-        // --- CLAVE API Y CONFIGURACIÓN ---
-        // ----------------------------------------------------------
-        const API_KEY = 'AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM'; 
-        const MODEL_NAME = 'gemini-2.5-flash';
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
-        
-        // ----------------------------------------------------------
-        // --- FUNCIÓN PARA CONSTRUIR EL PROMPT ---
-        // ----------------------------------------------------------
-        function construirPromptEjercicios(numPersonas) {
-            
-            // Adaptar la entrada para que el modelo la entienda mejor en el prompt
-            let numPersonasTexto = numPersonas;
-            if (numPersonas === '2/3') {
-                numPersonasTexto = '2 o 3';
-            } else if (numPersonas === '3/4') {
-                numPersonasTexto = '3 o 4';
-            } else if (numPersonas === 'grupo') {
-                numPersonasTexto = 'para Grupos grandes (5 o más)';
-            }
+        async function generar() {
+            const resDiv = document.getElementById('resultado');
+            const btn = document.getElementById('btn');
+            const num = document.getElementById('num-personas').value;
 
-            const prompt = `Actúa como un profesor y experto en improvisación teatral. Tu tarea es generar una lista de 10 ejercicios de improvisación.
+            btn.disabled = true;
+            resDiv.innerHTML = '<span class="cargando">Conectando con la IA... espera unos 10 segundos...</span>';
 
-El público ha solicitado ejercicios para **${numPersonasTexto}** personas. **ASEGÚRATE** de que el campo "Número de improvisadores" refleje el rango o número solicitado por el usuario, o un número adecuado si es "Grupo".
+            const miPrompt = "Actua como experto en teatro. Genera 10 ejercicios de impro para " + num + " personas. Usa este formato: ### Titulo / Descripcion: ... / Variante: ...";
 
-El formato de cada ejercicio debe ser **ESTRICTAMENTE** en Markdown, siguiendo esta plantilla para cada uno de los 10 ejercicios (sin numeración de lista ni introducción o conclusión fuera de las fichas):
-
-### Título del ejercicio
-* Tipo de impro: [Tipo de enfoque (ej. Estilo, Narrativa, Emocional)]
-* Número de improvisadores: [El número o rango de personas para este ejercicio]
-* Breve explicación: [Una frase concisa]
-* Explicación extensa: [Un párrafo detallado sobre la mecánica y el objetivo]
-* Variantes: [Una lista de 3 opciones cortas]
-
-Toma como referencia la calidad y estructura de estos ejemplos:
-
-- El objeto que no es lo que parece
-- Historias en tres frases
-- Cambio de emoción
-- Impro al estilo cinematográfico
-- Palabra prohibida
-- El entrevistador
-- Escena congelada
-- Impro de un minuto
-
-Genera los 10 ejercicios nuevos ahora.`;
-
-            return prompt;
-        }
-
-        // ----------------------------------------------------------
-        // --- FUNCIÓN AUXILIAR PARA FORMATEAR LA SALIDA ---
-        // ----------------------------------------------------------
-        function formatearResultado(texto) {
-            // 1. Reemplazar encabezados ### con etiquetas H3
-            let html = texto.replace(/###\s*(.*)/g, '<h3>$1</h3>');
-            
-            // 2. Reemplazar listas Markdown (* o -) con etiquetas UL/LI y negrita para los campos
-            // Aseguramos que la negrita se use para el nombre del campo (ej. Tipo de impro:)
-            html = html.replace(/^\*\s*(.*?):\s*(.*)/gm, '<li><strong>$1:</strong> $2</li>');
-            
-            // 3. Envolver los bloques de lista en <ul>
-            let bloques = html.split('<h3>');
-            let resultadoFinal = bloques[0]; // Texto antes del primer <h3>
-            
-            for (let i = 1; i < bloques.length; i++) {
-                let bloque = '<h3>' + bloques[i];
-                let inicioLista = bloque.indexOf('<li>');
-                if (inicioLista !== -1) {
-                    let listaContent = bloque.substring(inicioLista);
-                    let tituloContent = bloque.substring(0, inicioLista);
-                    resultadoFinal += `${tituloContent}<ul>${listaContent}</ul>`;
-                } else {
-                    resultadoFinal += bloque;
-                }
-            }
-            
-            // Envolver todo en la etiqueta <pre> con los estilos de ajuste
-            return `<pre>${resultadoFinal}</pre>`;
-        }
-
-        // ----------------------------------------------------------
-        // --- FUNCIÓN PRINCIPAL PARA LLAMAR A LA API ---
-        // ----------------------------------------------------------
-        async function generarPremisas() {
-            const resultadoDiv = document.getElementById('resultado');
-            const boton = document.getElementById('generar-btn');
-            const numPersonasSelect = document.getElementById('num-personas');
-            
-            const numPersonas = numPersonasSelect.value;
-            
-            boton.disabled = true;
-            resultadoDiv.innerHTML = '<span class="cargando">Generando 10 ejercicios de improvisación...</span>';
-            
-            const prompt = construirPromptEjercicios(numPersonas);
-            
             try {
-                const response = await fetch(API_URL, {
+                // He cambiado la estructura del body para que sea la est��ndar que esperan los Workers
+                const response = await fetch('https://generador-impro.raul-grigelmo3.workers.dev', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ role: "user", parts: [{ text: prompt }] }],
-                        generationConfig: { 
-                            temperature: 0.8, 
-                            maxOutputTokens: 8192, // AUMENTADO A 8192
-                        }
+                        contents: [{
+                            parts: [{ text: miPrompt }]
+                        }]
                     })
                 });
 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({error: {message: 'Respuesta de error no es JSON'}}));
-                    throw new Error(`Error HTTP ${response.status}: ${errorData.error ? errorData.error.message : response.statusText}`);
-                }
+                if (!response.ok) throw new Error("Servidor ca&iacute;do (Status: " + response.status + ")");
 
                 const data = await response.json();
                 
-                let textoGenerado = "";
-
-                try {
-                    textoGenerado = data.candidates[0].content.parts[0].text.trim();
-                } catch (e) {
-                    let safetyReason = JSON.stringify(data, null, 2);
-                    if (data.candidates && data.candidates[0].finishReason === 'SAFETY') {
-                        safetyReason = "Bloqueado por política de seguridad (SAFETY BLOCK).";
-                    } else if (data.promptFeedback && data.promptFeedback.blockReason) {
-                        safetyReason = `Bloqueado. Razón: ${data.promptFeedback.blockReason}`;
-                    }
-
-                    resultadoDiv.innerHTML = `
-                        <strong style="color: #c53929;">Error: No se pudo generar el contenido útil.</strong><br>
-                        El modelo no devolvió texto o el contenido fue bloqueado.
-                        <div class="error-detalle">
-                            <pre>${safetyReason}</pre>
-                        </div>
-                    `;
-                    boton.disabled = false;
-                    return; 
+                // Intentamos sacar el texto de varias formas posibles por si el Worker cambia el formato
+                let texto = "";
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    texto = data.candidates[0].content.parts[0].text;
+                } else if (data.text) {
+                    texto = data.text;
                 }
 
-                // Muestra el resultado final (La función formatearResultado añade la etiqueta <pre>
-                resultadoDiv.innerHTML = formatearResultado(textoGenerado);
-                boton.disabled = false;
+                if (!texto) throw new Error("La IA respondi&oacute; vac&iacute;o.");
 
-            } catch (error) {
-                let posibleCausa = "Clave API incorrecta, expirada o problema de CORS.";
-                if (error.message.includes('Failed to fetch') || error.message.includes('Error HTTP')) {
-                    posibleCausa = '⚠️ El problema es casi seguro de **CORS** o la clave API está restringida.';
-                }
-                
-                resultadoDiv.innerHTML = `
-                    <strong style="color: #c53929;">Error crítico de Conexión:</strong> ${error.message}.<br><br>
-                    <strong>POSIBLES CAUSAS:</strong><br>
-                    - ${posibleCausa}<br>
-                    - El modelo no está disponible o el nombre es incorrecto.
-                `;
-                boton.disabled = false;
+                // Procesamos el texto para mostrarlo bonito
+                const bloques = texto.split('###').filter(b => b.trim().length > 5);
+                let finalHTML = "";
+
+                bloques.forEach(b => {
+                    const lineas = b.split('\n');
+                    const titulo = lineas.shift();
+                    const resto = lineas.join('<br>').replace(/\*\*/g, '');
+                    finalHTML += `<div class="ejercicio"><h3>${titulo}</h3><p>${resto}</p></div>`;
+                });
+
+                resDiv.innerHTML = finalHTML;
+
+            } catch (err) {
+                resDiv.innerHTML = `<div style="color:red; font-weight:bold;">Error: ${err.message}<br><small>Revisa que el Worker est&eacute; "Enabled" en Cloudflare.</small></div>`;
+            } finally {
+                btn.disabled = false;
             }
         }
     </script>
-
-
-<hr style="margin-top: 40px; border-color: #ccc;">
-    <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
-        <a href="index.html" style="
-            text-decoration: none;
-            color: #5f6368;
-            font-weight: bold;
-            padding: 10px 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        ">
-            �?Volver al Menú Principal
-        </a>
-    </div>
-
 </body>
 </html>

@@ -3,205 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Excusas de Improvisación</title>
+    <title>Generador de Excusas de Improvisaci&oacute;n</title>
     <style>
-        body { font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background-color: #f7f7f7; }
-        h1 { color: #8a2be2; border-bottom: 2px solid #8a2be2; padding-bottom: 10px; margin-bottom: 30px; }
-        p.instruccion { color: #5f6368; margin-bottom: 25px; font-style: italic; }
-        
-        button { 
-            padding: 14px 25px; 
-            background-color: #8a2be2; 
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-size: 18px; 
-            font-weight: bold;
-            transition: background-color 0.3s, transform 0.1s; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+        :root {
+            --primary: #8a2be2;
+            --primary-light: #f0e6ff;
+            --accent: #ff00ff;
+            --text-dark: #2d3436;
+            --text-gray: #5f6368;
+            --white: #ffffff;
         }
-        button:hover { background-color: #6a1ba5; }
-        button:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 20px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background-color: #f9f7ff; 
+            color: var(--text-dark);
+        }
+
+        h1 { 
+            color: var(--primary); 
+            text-align: center;
+            border-bottom: 3px solid var(--primary); 
+            padding-bottom: 15px; 
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        p.instruccion { 
+            color: var(--text-gray); 
+            margin-bottom: 25px; 
+            font-style: italic; 
+            text-align: center;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        button { 
+            padding: 16px 40px; 
+            background: linear-gradient(135deg, var(--primary) 0%, #6a1ba5 100%);
+            color: var(--white); 
+            border: none; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(138, 43, 226, 0.2);
+        }
+
+        button:hover { 
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px rgba(138, 43, 226, 0.3);
+            filter: brightness(1.1);
+        }
+
+        button:active { 
+            transform: translateY(1px); 
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
         
         #resultado { 
-            margin-top: 35px; 
-            padding: 25px; 
-            border: 2px solid #8a2be2; 
-            background-color: #f0e6ff;
-            border-radius: 10px; 
+            margin-top: 20px; 
+            padding: 30px; 
+            border: 2px solid var(--primary); 
+            background-color: var(--white);
+            border-radius: 20px; 
             min-height: 250px; 
-            white-space: pre-wrap; 
-            font-size: 1.15em; 
-            line-height: 1.5; /* Ajustado para listas */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
-        pre { 
-            font-family: inherit; 
+
+        .categoria-titulo { 
+            color: var(--primary); 
+            font-size: 1.5rem; 
+            margin-top: 20px; 
+            margin-bottom: 15px; 
+            display: flex;
+            align-items: center;
+            font-weight: 800;
+        }
+
+        .categoria-titulo::before {
+            content: "✦";
+            margin-right: 10px;
+            color: var(--accent);
+        }
+
+        ul { 
+            list-style-type: none; 
             margin: 0; 
             padding: 0; 
-            white-space: pre-wrap; 
-            line-height: inherit; 
-            text-align: left;
-            font-weight: 500;
         }
-        .categoria-titulo { 
-            color: #8a2be2; 
-            font-size: 1.4em; 
-            margin-top: 15px; 
-            margin-bottom: 5px; 
-            border-bottom: 2px dashed #d5baff; 
-            padding-bottom: 5px;
-            font-weight: bold;
-        }
-        ul { list-style-type: disc; margin-left: 20px; padding-left: 0; }
-        li { margin-bottom: 10px; font-weight: bold; }
 
-        .cargando { color: #8a2be2; font-weight: bold; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        li { 
+            margin-bottom: 12px; 
+            padding: 12px 18px;
+            background-color: var(--primary-light);
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+            font-weight: 500;
+            line-height: 1.4;
+            transition: transform 0.2s;
+        }
+
+        li:hover {
+            transform: scale(1.02);
+        }
+
+        .cargando { 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary); 
+            font-weight: bold; 
+            padding: 50px 0;
+            animation: pulse 1.5s infinite; 
+        }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .error-msg {
+            background-color: #fff5f5;
+            color: #c53929;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #fab1a0;
+        }
+
+        .footer-nav {
+            text-align: center;
+            margin-top: 50px;
+            padding-bottom: 40px;
+        }
+
+        .footer-nav a {
+            text-decoration: none;
+            color: var(--text-gray);
+            font-weight: bold;
+            padding: 12px 25px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .footer-nav a:hover {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
     </style>
 </head>
 <body>
 
-    <h1>😂 ¿Por qué he llegado tarde al trabajo?</h1>
-    <p class="instruccion"></p>
+    <h1>&#128104;&#8205;&#128187; ¿Por qu&eacute; he llegado tarde?</h1>
+    <p class="instruccion">Generador de excusas para juegos de improvisaci&oacute;n teatral. &iexcl;Usa la que m&aacute;s te guste!</p>
     
-    <button onclick="generarContenido()">¡ Generar Excusas !</button>
+    <div class="btn-container">
+        <button id="mainButton" onclick="generarContenido()">&iexcl; Generar Excusas !</button>
+    </div>
     
-    <div id="resultado"></div>
+    <div id="resultado">
+        <div style="text-align:center; color:#ccc; padding-top:80px;">Las excusas aparecer&aacute;n aqu&iacute;...</div>
+    </div>
 
+    <div class="footer-nav">
+        <a href="index.html">&larr; Volver al Men&uacute; Principal</a>
+    </div>
 
     <script>
-        // ----------------------------------------------------------
-        // --- CLAVE API Y CONFIGURACIÓN ---
-        // ----------------------------------------------------------
-        const API_KEY = 'AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM'; // ¡RECUERDA SUSTITUIR ESTO CON TU CLAVE REAL!
-        const MODEL_NAME = 'gemini-2.5-flash';
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+        // URL de tu Worker de Cloudflare
+        const WORKER_URL = 'https://generador-impro.raul-grigelmo3.workers.dev';
 
-
-        // FUNCIÓN CLAVE: Prompt para generar Excusas Absurdas y Realistas
         function construirPromptExcusas() {
-            const contexto = `Quiero que generes DOS sets de excusas para el juego de improvisación “Tres excusas por las que he llegado tarde”.
-Eres un guionista que domina tanto el absurdo como el realismo cotidiano.
-
-**REGLAS DE FORMATO ESTRICTAS:**
-1. Genera exactamente **TRES excusas ABSURDAS** y exactamente **TRES excusas REALISTAS** (un total de 6).
-2. Separa las categorías con los títulos EXACTOS: **### ABSURDAS** y **### REALISTAS**.
-3. El resto del texto (las excusas) debe ir en líneas separadas, sin números ni viñetas.
-
-### ABSURDAS
-Deben ser surrealistas, divertidas y completamente inverosímiles.
-
-### REALISTAS
-Deben ser mundanas, de andar por casa, creíbles y basadas en la vida cotidiana.
-
-Genera las seis excusas respetando el formato estricto. No añadas introducciones ni conclusiones.`;
-            
-            const instruccionFinal = "Genera las seis excusas: tres absurdas y tres realistas, siguiendo el formato estricto de dos encabezados y una excusa por línea.";
-
-            return `${contexto}\n\n--- GENERACIÓN ---\n${instruccionFinal}`;
+            return `Genera exactamente 3 excusas ABSURDAS y 3 excusas REALISTAS para haber llegado tarde al trabajo.
+            Formato de salida estricto:
+            ### ABSURDAS
+            (aqu&iacute; las 3 l&iacute;neas)
+            ### REALISTAS
+            (aqu&iacute; las 3 l&iacute;neas)
+            No a&ntilde;adas n&uacute;meros ni guiones. Solo el texto por l&iacute;nea.`;
         }
 
-        // Función principal para llamar a la API
         async function generarContenido() {
             const resultadoDiv = document.getElementById('resultado');
-            resultadoDiv.innerHTML = '<span class="cargando">Inventando las mejores excusas...</span>';
+            const btn = document.getElementById('mainButton');
             
+            resultadoDiv.innerHTML = '<div class="cargando"><span>&#128161; Inventando historias...</span></div>';
+            btn.disabled = true;
+
             const prompt = construirPromptExcusas();
             
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(WORKER_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        contents: [{ role: "user", parts: [{ text: prompt }] }],
-                        generationConfig: { 
-                            temperature: 0.9, 
-                            maxOutputTokens: 2048,
-                        }
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt })
                 });
 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({error: {message: 'Respuesta de error no es JSON'}}));
-                    
-                    let errorMessage = errorData.error ? errorData.error.message : response.statusText;
-                    
-                    if (response.status === 429) {
-                         errorMessage = "Límite de cuota superado (Error 429). ¡Necesitas esperar o revisar tus créditos de API!";
-                    } else if (response.status === 400) {
-                        errorMessage = "Error de autenticación o solicitud incorrecta (Error 400). Verifica que tu CLAVE API sea correcta y no haya expirado.";
-                    }
-
-                    throw new Error(`Error ${response.status}: ${errorMessage}`);
-                }
+                if (!response.ok) throw new Error('Error en la respuesta del servidor');
 
                 const data = await response.json();
                 
-                let textoGenerado = "No se pudo generar el contenido. Vuelve a intentarlo o revisa el diagnóstico de la API.";
+                // Ajuste seg&uacute;n la estructura de respuesta de tu Worker
+                let textoGenerado = data.candidates?.[0]?.content?.parts?.[0]?.text || data.text || "";
 
-                try {
-                    textoGenerado = data.candidates[0].content.parts[0].text.trim();
-                } catch (e) {
-                    // Si falla (por contenido vacío o safety block)
-                }
-                
-                // ----------------------------------------------------
-                // --- MANEJO Y CONVERSIÓN DEL FORMATO DE SALIDA ---
-                // ----------------------------------------------------
-                
+                if (!textoGenerado) throw new Error('No se recibi&oacute; contenido v&aacute;lido');
+
                 const partes = textoGenerado.split('###');
                 let htmlResultado = '';
 
                 partes.forEach(parte => {
-                    if (parte.trim().length === 0) return;
-
-                    const lineas = parte.trim().split('\n').filter(line => line.trim().length > 0);
+                    const lineas = parte.trim().split('\n').filter(l => l.trim().length > 0);
                     if (lineas.length === 0) return;
 
                     const titulo = lineas[0].trim();
                     const excusas = lineas.slice(1);
 
-                    htmlResultado += `<div class="categoria-titulo">${titulo}</div>`;
-                    htmlResultado += '<ul>';
-                    
+                    htmlResultado += `<div class="categoria-titulo">${titulo}</div><ul>`;
                     excusas.forEach(excusa => {
                         htmlResultado += `<li>${excusa.trim()}</li>`;
                     });
-                    
                     htmlResultado += '</ul>';
                 });
 
-
-                // Muestra el resultado final
                 resultadoDiv.innerHTML = htmlResultado;
 
             } catch (error) {
-                // Manejo de ERRORES CRÍTICOS
                 resultadoDiv.innerHTML = `
-                    <strong style="color: #c53929;">Error crítico al conectar con la API:</strong> ${error.message}.<br><br>
-                    <strong>¡PASO URGENTE!</strong> Debes sustituir la clave 'AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM' en la línea 58 del código con una **clave API nueva y válida** de Google AI Studio.
-                `;
+                    <div class="error-msg">
+                        <strong>&#9888; Error:</strong> No se pudo conectar con el generador.<br>
+                        Detalle: ${error.message}
+                    </div>`;
+            } finally {
+                btn.disabled = false;
             }
         }
     </script>
-
-<hr style="margin-top: 40px; border-color: #ccc;">
-    <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
-        <a href="index.html" style="
-            text-decoration: none;
-            color: #5f6368;
-            font-weight: bold;
-            padding: 10px 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        ">
-            ← Volver al Menú Principal
-        </a>
-    </div>
 
 </body>
 </html>

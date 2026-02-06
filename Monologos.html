@@ -1,268 +1,240 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buscador de Monólogos Contemporáneos</title>
+    <title>Buscador de Mon&oacute;logos Contempor&aacute;neos</title>
     <style>
-        /* Estilos CSS */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f0f2f5; color: #333; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
-        h1 { color: #1a73e8; text-align: center; margin-bottom: 25px; }
-        button { padding: 12px 25px; background-color: #34a853; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 17px; font-weight: bold; transition: background-color 0.3s, transform 0.1s; display: block; width: 100%; margin-top: 15px;}
-        button:hover { background-color: #1e8e3e; transform: translateY(-1px); }
-        button:disabled { background-color: #a1c6a7; cursor: not-allowed; }
-        #loading { text-align: center; color: #fbbc05; margin-top: 20px; font-weight: bold; display: none; }
-        .monologo-section { margin-top: 30px; padding: 25px; border: 1px solid #ddd; border-radius: 10px; background-color: #f7f7f7; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); }
-        .monologo-section h2 { color: #4285f4; border-bottom: 2px solid #4285f4; padding-bottom: 8px; margin-top: 0; }
-        .monologo-section h3 { color: #3c7f0d; margin-top: 15px; }
-        .monologo-section p { white-space: pre-wrap; text-align: justify; line-height: 1.6; margin-top: 15px; }
-        .reference { font-style: italic; margin-top: 15px; padding: 10px; background-color: #fff3cd; border-left: 5px solid #ffbb00; color: #856404; border-radius: 4px; }
-        .error-message { color: white; background-color: #dc3545; padding: 15px; border-radius: 8px; margin-top: 20px; font-weight: bold; }
-        /* Estilo para el selector dropdown */
-        #monologo-selector { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; background-color: #fff; }
-        /* Estilo para el campo de texto adicional */
-        #prompt-adicional { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; resize: vertical; min-height: 80px; }
+        :root {
+            --primary: #2563eb;
+            --secondary: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f1f5f9;
+            --text: #1e293b;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            padding: 20px; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            line-height: 1.6;
+        }
+
+        .container { 
+            max-width: 800px; 
+            margin: auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+        }
+
+        h1 { color: var(--primary); text-align: center; margin-bottom: 25px; font-size: 2rem; }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; }
+
+        select, textarea { 
+            width: 100%; 
+            padding: 12px; 
+            border-radius: 12px; 
+            border: 2px solid #e2e8f0; 
+            font-size: 16px; 
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, textarea:focus { outline: none; border-color: var(--primary); }
+
+        button { 
+            padding: 15px; 
+            background-color: var(--secondary); 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-size: 18px; 
+            font-weight: bold; 
+            width: 100%; 
+            transition: transform 0.1s, background-color 0.3s;
+        }
+
+        button:hover { background-color: #059669; }
+        button:active { transform: scale(0.98); }
+        button:disabled { background-color: #94a3b8; cursor: not-allowed; }
+
+        #loading { 
+            text-align: center; 
+            color: var(--warning); 
+            margin: 20px 0; 
+            display: none; 
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .monologo-card { 
+            margin-top: 25px; 
+            padding: 25px; 
+            border-radius: 15px; 
+            background-color: #ffffff; 
+            border-left: 6px solid var(--primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .monologo-card h2 { margin-top: 0; color: var(--primary); font-size: 1.2rem; text-transform: uppercase; }
+        .monologo-card h3 { color: #334155; margin: 10px 0; font-size: 1.4rem; }
+        .monologo-card p { white-space: pre-wrap; color: #4b5563; text-align: justify; }
+
+        .reference-box { 
+            margin-top: 15px; 
+            padding: 12px; 
+            background: #fffbeb; 
+            border-radius: 8px; 
+            font-size: 0.9rem; 
+            color: #854d0e; 
+            border: 1px solid #fef3c7;
+        }
+
+        .error-banner { 
+            background-color: #fee2e2; 
+            color: #b91c1c; 
+            padding: 15px; 
+            border-radius: 12px; 
+            margin-top: 20px; 
+            border: 1px solid #fecaca;
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>🎭 Buscador de Monólogos Contemporáneos</h1>
 
-    <div style="margin-bottom: 20px;">
-        <label for="monologo-selector" style="display: block; margin-bottom: 8px; font-weight: bold; color: #555;">Selecciona los monólogos a generar:</label>
+<div class="container">
+    <h1>&#127921; Taller de Mon&oacute;logos</h1>
+
+    <div class="form-group">
+        <label for="monologo-selector">Qu&eacute; quieres generar?</label>
         <select id="monologo-selector">
-            <option value="todos">Los 4 Monólogos (Estándar, Largo, Inventado, Surrealista)</option>
-            <option value="estandar">Monólogo Real (Estándar, 2-4 min)</option>
-            <option value="largo">Monólogo Real (Largo, 4-6 min)</option>
-            <option value="inventado">Monólogo Inventado (Serio, 2-4 min)</option>
-            <option value="surrealista">Monólogo Real (Surrealista/Absurdo, 2-4 min)</option>
+            <option value="todos">Pack Completo (4 Estilos)</option>
+            <option value="estandar">Mon&oacute;logo Real (Est&aacute;ndar)</option>
+            <option value="largo">Mon&oacute;logo Real (Largo)</option>
+            <option value="inventado">Mon&oacute;logo Inventado</option>
+            <option value="surrealista">Mon&oacute;logo Surrealista</option>
         </select>
     </div>
-    
-    <div style="margin-bottom: 25px;">
-        <label for="prompt-adicional" style="display: block; margin-bottom: 8px; font-weight: bold; color: #555;">¿Quieres añadir algo? (Opcional, para enriquecer la búsqueda):</label>
-        <textarea id="prompt-adicional" placeholder="Ej: Que el tema sea sobre la IA, o que el tono sea más cómico."></textarea>
+
+    <div class="form-group">
+        <label for="prompt-adicional">Notas de estilo o tema (Opcional):</label>
+        <textarea id="prompt-adicional" placeholder="Ej: Tema de la vejez, lenguaje de calle, tono de comedia negra..."></textarea>
     </div>
-    <button id="searchButton" onclick="generarMonologos()">Buscar y Generar Monólogo(s)</button>
+
+    <button id="searchButton" onclick="generarMonologos()">Generar Contenido</button>
     
-    <div id="loading">... La IA está escribiendo y buscando contenido. Un momento, por favor...</div>
+    <div id="loading">&#128221; La musa est&aacute; inspirada, redactando...</div>
     <div id="results"></div>
-    
-    <div style="margin-top: 25px; font-size: 0.9em; color: #666;">
-        <p></p>
-    </div>
 </div>
+
 <script>
-// !!! CLAVE API UTILIZADA POR EL USUARIO !!!
-const API_KEY = "AIzaSyCsbHnWzkKzwqMYV5oRZSfZvO9SNvjPTAM"; 
+const WORKER_URL = "https://generador-impro.raul-grigelmo3.workers.dev";
 
-// --- El PROMPT (Instrucción a la IA) MODIFICADO ---
-const PROMPT_BASE = `Genera un objeto JSON válido que contenga la(s) siguiente(s) sección(es) de monólogo(s) en español. La respuesta debe ser **ÚNICAMENTE** el objeto JSON, **sin ningún texto adicional** fuera de las llaves JSON, y **SIN usar bloques de código markdown (\`\`\`json...\`\`\`)**.
-
-Debes incluir solo las claves de monólogos solicitadas: {CLAVES_SOLICITADAS}.
-
-Todos los monólogos reales deben ser fragmentos de obras existentes, y todos deben ser **estrictamente en prosa (no en verso)**, con un tono y temas **contemporáneos**.
-
-{PROMPTS_ADICIONAL}
-
-{PROMPTS_ESPECIFICOS}`; // He movido esta variable al final por claridad en la construcción.
+const PROMPT_BASE = `Responde EXCLUSIVAMENTE con un objeto JSON v&aacute;lido. 
+IMPORTANTE: Si el texto es largo, aseg&uacute;rate de cerrar todas las llaves y comillas. 
+No uses markdown ni bloques de c&oacute;digo. 
+Estructura: {CLAVES_SOLICITADAS}.
+Contenido: Mon&oacute;logos en prosa, teatro contempor&aacute;neo. {PROMPTS_ADICIONAL} {PROMPTS_ESPECIFICOS}`;
 
 const PROMPT_PARTIALS = {
-    // 1. Monólogo REAL (Estándar) - 2 a 4 minutos
     monologoRealEstandar: {
         clave: "monologoRealEstandar",
-        instruccion: `1. **Monólogo REAL (monologoRealEstandar - Estándar):**
-    * Duración estimada: **2 a 4 minutos** (aprox. 250 a 450 palabras).
-    * Debe ser un fragmento en prosa de una obra o publicación contemporánea (de los últimos 50 años), pero no te lo inventes, si no eres capaz de encontrarlo no devuelvas nada.
-    * Debe incluir las claves "titulo", "referencia" (autor, obra, página o URL), y "texto" (el monólogo en sí).`,
-        tituloDisplay: '📜 Monólogo Real Contemporáneo y Referenciado (Estándar)'
+        instruccion: `monologoRealEstandar: Fragmento real de obra (350 palabras). Incluye "titulo", "referencia" y "texto".`,
+        titulo: 'Real Contempor&aacute;neo'
     },
-    // 2. Monólogo INVENTADO (Serio) - 2 a 4 minutos
     monologoInventado: {
         clave: "monologoInventado",
-        instruccion: `2. **Monólogo INVENTADO (monologoInventado - Serio):**
-    * Duración estimada: **2 a 4 minutos** (aprox. 250 a 450 palabras).
-    * Debe ser un monólogo original **en prosa**, serio, profundo, con un tono reflexivo y temática moderna (ej. redes sociales, tecnología, ansiedad laboral, identidad).
-    * Debe incluir las claves "titulo" (inventado) y "texto" (el monólogo en sí).`,
-        tituloDisplay: '🧠 Monólogo Inventado (Contemporáneo y Serio)'
+        instruccion: `monologoInventado: Original e in&eacute;dito (350 palabras). Profundo. Incluye "titulo" y "texto".`,
+        titulo: 'Original Inventado'
     },
-    // 3. Monólogo REAL (Largo) - 4 a 6 minutos (NUEVO)
     monologoRealLargo: {
         clave: "monologoRealLargo",
-        instruccion: `3. **Monólogo REAL (monologoRealLargo - Largo):**
-    * Duración estimada: **4 a 6 minutos** (aprox. 500 a 800 palabras) para una pieza más sustancial.
-    * Debe ser un fragmento en prosa de una obra o publicación contemporánea (de los últimos 50 años), pero no te lo inventes, si no eres capaz de encontrarlo no devuelvas nada.
-    * Debe incluir las claves "titulo", "referencia" (autor, obra, página o URL), y "texto" (el monólogo en sí).`,
-        tituloDisplay: '📚 Monólogo Real Contemporáneo y Referenciado (Largo)'
+        instruccion: `monologoRealLargo: Fragmento real extenso (600 palabras). Muy detallado. Incluye "titulo", "referencia" y "texto".`,
+        titulo: 'Real Extenso'
     },
-    // 4. Monólogo REAL (Surrealista) - 2 a 4 minutos (NUEVO)
     monologoRealSurrealista: {
         clave: "monologoRealSurrealista",
-        instruccion: `4. **Monólogo REAL (monologoRealSurrealista - Surrealista):**
-    * Duración estimada: **2 a 4 minutos** (aprox. 250 a 450 palabras).
-    * Debe ser un fragmento en prosa de una obra o publicación contemporánea (de los últimos 50 años) con un tono **surrealista, onírico, o de teatro del absurdo**, pero no te lo inventes, si no eres capaz de encontrarlo no devuelvas nada.
-    * Debe incluir las claves "titulo", "referencia" (autor, obra, página o URL), y "texto" (el monólogo en sí).`,
-        tituloDisplay: '🌌 Monólogo Real (Surrealista/Absurdo)'
+        instruccion: `monologoRealSurrealista: Fragmento real absurdo/on&iacute;rico. Incluye "titulo", "referencia" y "texto".`,
+        titulo: 'Real Surrealista'
     }
 };
 
-// Mapeo de la selección del dropdown a las claves internas
-const SELECTION_MAP = {
-    'todos': ['monologoRealEstandar', 'monologoInventado', 'monologoRealLargo', 'monologoRealSurrealista'],
-    'estandar': ['monologoRealEstandar'],
-    'largo': ['monologoRealLargo'],
-    'inventado': ['monologoInventado'],
-    'surrealista': ['monologoRealSurrealista']
-};
-
-// Función principal para llamar a la IA
 async function generarMonologos() {
     const resultsDiv = document.getElementById('results');
     const loadingDiv = document.getElementById('loading');
-    const button = document.getElementById('searchButton');
-    const selector = document.getElementById('monologo-selector');
-    
-    // Obtener el nuevo campo de texto
-    const promptAdicionalElement = document.getElementById('prompt-adicional');
-    const promptAdicional = promptAdicionalElement.value.trim(); // Leer y limpiar el valor
-    
-    const selectedOption = selector.value;
-    const selectedKeys = SELECTION_MAP[selectedOption];
+    const btn = document.getElementById('searchButton');
+    const adicional = document.getElementById('prompt-adicional').value.trim();
+    const seleccion = document.getElementById('monologo-selector').value;
 
-    if (!selectedKeys || selectedKeys.length === 0) {
-        resultsDiv.innerHTML = '<div class="error-message">Por favor, selecciona al menos un tipo de monólogo.</div>';
-        return;
-    }
+    const keys = seleccion === 'todos' 
+        ? Object.keys(PROMPT_PARTIALS) 
+        : [PROMPT_PARTIALS[seleccion === 'estandar' ? 'monologoRealEstandar' : (seleccion === 'largo' ? 'monologoRealLargo' : (seleccion === 'inventado' ? 'monologoInventado' : 'monologoRealSurrealista'))].clave];
 
-    // Preparar la parte adicional del prompt
-    let additionalPromptText = '';
-    if (promptAdicional) {
-        additionalPromptText = `INSTRUCCIÓN ADICIONAL DEL USUARIO: Considera esta indicación para los monólogos generados: "${promptAdicional}"\n\n`;
-    }
-    
-    // Construir el prompt específico
-    const promptsToInclude = selectedKeys.map(key => PROMPT_PARTIALS[key].instruccion).join('\n\n');
-    const keysForJson = selectedKeys.map(key => `"${key}"`).join(', ');
+    const specificPrompts = keys.map(k => PROMPT_PARTIALS[k].instruccion).join(' ');
     
     const finalPrompt = PROMPT_BASE
-        .replace('{CLAVES_SOLICITADAS}', keysForJson)
-        .replace('{PROMPTS_ADICIONAL}', additionalPromptText) // Reemplazar la nueva variable
-        .replace('{PROMPTS_ESPECIFICOS}', promptsToInclude);
+        .replace('{CLAVES_SOLICITADAS}', keys.map(k => `"${k}"`).join(', '))
+        .replace('{PROMPTS_ADICIONAL}', adicional ? `Tema espec&iacute;fico: ${adicional}.` : '')
+        .replace('{PROMPTS_ESPECIFICOS}', specificPrompts);
 
     resultsDiv.innerHTML = '';
     loadingDiv.style.display = 'block';
-    button.disabled = true;
+    btn.disabled = true;
 
-    // --- CONFIGURACIÓN DE LA LLAMADA A LA API DE GEMINI ---
-    const API_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
-    
     try {
-        const response = await fetch(API_ENDPOINT, {
+        const response = await fetch(WORKER_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{ text: finalPrompt }]
-                }],
-                // ***********************************************
-                // CORRECCIÓN APLICADA: USANDO 'generationConfig' 
-                // EN LUGAR DE 'config' PARA EVITAR EL ERROR 400
-                // ***********************************************
-                generationConfig: {
-                    temperature: selectedOption === 'surrealista' || selectedOption === 'todos' ? 0.9 : 0.7 
-                }
-            })
+            body: JSON.stringify({ prompt: finalPrompt })
         });
 
-        // Manejo de errores HTTP 
-        if (!response.ok) {
-            const errorBody = await response.json();
-            const errorMessage = errorBody.error ? errorBody.error.message : response.statusText;
-            throw new Error(`Error ${response.status}: ${errorMessage}`);
-        }
-
         const data = await response.json();
-        
-        // Extracción de la respuesta JSON del campo 'text'
-        let rawContent = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        let raw = data.candidates?.[0]?.content?.parts?.[0]?.text || data.text || "";
 
-        if (!rawContent) {
-            throw new Error("La IA no devolvió contenido de texto. Revise si la API está activada y si la clave es válida.");
+        // LIMPIEZA Y REPARACI&Oacute;N DE JSON
+        raw = raw.replace(/```json\s*|```/g, '').trim();
+        
+        // Si el JSON viene cortado, intentamos cerrar la estructura b&aacute;sica
+        if (raw.charAt(0) === '{' && raw.charAt(raw.length - 1) !== '}') {
+            raw += '"} }'; // Intento de cierre de emergencia
         }
 
-        // --- MANEJO ROBUSTO DEL JSON ---
-        let monologos;
-        try {
-            // Limpiamos el texto para eliminar cualquier bloque de código Markdown (```json ```)
-            rawContent = rawContent.replace(/```json\s*|```/g, '').trim(); 
-            monologos = JSON.parse(rawContent);
-        } catch (e) {
-            throw new Error(`Error de Parseo JSON. La IA no devolvió un JSON limpio. Respuesta cruda (primeros 200 caracteres): ${rawContent.substring(0, 200)}...`);
-        }
+        const parsed = JSON.parse(raw);
         
-        // Mostrar resultados
-        selectedKeys.forEach(key => {
-            if (monologos[key]) {
-                displayMonologo(monologos[key], PROMPT_PARTIALS[key].tituloDisplay, key.startsWith('monologoReal'));
-            } else {
-                 resultsDiv.innerHTML += `<div class="error-message" style="background-color: #ffc107; color: #333;">Advertencia: La IA no incluyó la clave esperada: ${key}</div>`;
+        keys.forEach(k => {
+            if (parsed[k]) {
+                const item = parsed[k];
+                resultsDiv.innerHTML += `
+                    <div class="monologo-card">
+                        <h2>${PROMPT_PARTIALS[k].titulo}</h2>
+                        <h3>${item.titulo || 'Sin T&iacute;tulo'}</h3>
+                        <p>${item.texto || 'Sin contenido generado.'}</p>
+                        ${item.referencia ? `<div class="reference-box"><strong>Fuente:</strong> ${item.referencia}</div>` : ''}
+                    </div>`;
             }
         });
 
-    } catch (error) {
-        console.error("Hubo un error en la solicitud o el parseo:", error);
-        resultsDiv.innerHTML = `<div class="error-message">
-            <strong>¡Error! No se pudieron obtener los monólogos.</strong>
-            <br>Detalle del Error: ${error.message}
-            <br><br><strong>Próximo Paso:</strong> Si el error persiste y el código HTTP es 403 (Forbidden) o 400, casi siempre es un problema de **restricción de clave** (Google Cloud > Credenciales > tu clave API > Restricciones).
+    } catch (e) {
+        console.error(e);
+        resultsDiv.innerHTML = `<div class="error-banner">
+            <strong>&iexcl;Vaya! La respuesta ha sido demasiado larga para el JSON.</strong><br>
+            Prueba a seleccionar un mon&oacute;logo individualmente para obtener la m&aacute;xima calidad y longitud.
         </div>`;
     } finally {
         loadingDiv.style.display = 'none';
-        button.disabled = false;
+        btn.disabled = false;
     }
-}
-
-// Función para mostrar cada monólogo en el DOM
-function displayMonologo(monologo, titleDisplay, isReal) {
-    const resultsDiv = document.getElementById('results');
-    const titulo = monologo.titulo || 'Monólogo sin Título';
-    const texto = monologo.texto || 'Contenido no disponible.';
-    const referencia = monologo.referencia || 'Referencia no especificada.';
-
-    let html = `
-        <div class="monologo-section">
-            <h2>${titleDisplay}</h2>
-            <h3>${titulo}</h3>
-            <p>${texto}</p>
-    `;
-    
-    // Solo mostramos la referencia si el monólogo es 'Real'
-    if (isReal) {
-        html += `<div class="reference"><strong>Referencia:</strong> ${referencia}</div>`;
-    }
-
-    html += `</div>`;
-    resultsDiv.innerHTML += html;
 }
 </script>
-
-<hr style="margin-top: 40px; border-color: #ccc;">
-    <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
-        <a href="index.html" style="
-            text-decoration: none;
-            color: #5f6368;
-            font-weight: bold;
-            padding: 10px 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        ">
-            �?Volver al Menú Principal
-        </a>
-    </div>
-
 
 </body>
 </html>
