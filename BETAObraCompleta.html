@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escritor Pro: Obras por Actos (v5)</title>
+    <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        :root { --primary: #fb8c00; --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; }
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; max-width: 900px; margin: 0 auto; background: var(--bg); color: var(--text); line-height: 1.6; }
+        h1 { color: var(--primary); text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 10px; text-transform: uppercase; }
+        .form-container { background: var(--card); padding: 20px; border-radius: 10px; border: 1px solid #333; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .full { grid-column: 1 / -1; }
+        label { display: block; font-size: 0.85rem; color: var(--primary); font-weight: bold; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid #444; border-radius: 5px; color: white; box-sizing: border-box; font-size: 1rem; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 1rem; margin-top: 10px; transition: 0.3s; }
+        .btn-gen { background: var(--primary); color: white; }
+        .btn-next { background: #43a047; color: white; display: none; }
+        .btn-docx { background: #1976d2; color: white; display: none; margin-top: 20px; }
+        #log { background: #000; color: #0f0; font-family: monospace; padding: 15px; border-radius: 5px; font-size: 0.85rem; margin-top: 20px; max-height: 200px; overflow-y: auto; border: 1px solid #333; }
+        #monitor { margin-top: 20px; padding: 20px; background: var(--card); border-radius: 10px; border: 1px dashed #555; text-align: center; }
+        .step { color: var(--primary); font-weight: bold; font-size: 1.2rem; }
+        .err-msg { color: #ff5252; font-weight: bold; background: rgba(255,82,82,0.1); padding: 2px 5px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <h1>Escritor de Obras por Actos</h1>
+
+    <div class="form-container">
+        <form id="obraForm">
+            <div class="grid">
+                <div class="full">
+                    <label>Tema o argumento base:</label>
+                    <textarea id="tema" placeholder="Ej: Un grupo de amigos en una caba&ntilde;a aislada..." required></textarea>
+                </div>
+                <div><label>Actores (Hombres):</label><select id="actores"></select></div>
+                <div><label>Actrices (Mujeres):</label><select id="actrices"></select></div>
+                <div><label>Estilo:</label><input type="text" id="estilo" value="Drama"></div>
+                <div><label>Total de Actos:</label>
+                    <select id="totalActos">
+                        <option value="1">1 Acto</option>
+                        <option value="2">2 Actos</option>
+                        <option value="3" selected>3 Actos</option>
+                        <option value="4">4 Actos</option>
+                        <option value="5">5 Actos</option>
+                    </select>
+                </div>
+                <div class="full">
+                    <label>Duraci&oacute;n total deseada (minutos):</label>
+                    <select id="duracion">
+                        <option value="15">15 min</option>
+                        <option value="30">30 min</option>
+                        <option value="45">45 min</option>
+                        <option value="60" selected>60 min</option>
+                        <option value="90">90 min</option>
+                        <option value="120">120 min</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-gen" id="btnIniciar">Configurar Obra</button>
+        </form>
+    </div>
+
+    <div id="monitor">
+        <div id="status">Esperando datos...</div>
+        <button class="btn btn-next" id="btnSiguiente" onclick="generarSiguienteActo()"></button>
+        <button class="btn btn-docx" id="btnDocx" onclick="descargarDocx()">Descargar Obra Completa (.DOCX)</button>
+    </div>
+
+    <div id="log">Consola de sistema lista.</div>
+
+    <script>
+        const fill = (id) => {
+            const s = document.getElementById(id);
+            for(let i=0; i<=15; i++) {
+                let o = document.createElement('option'); o.value = i; o.innerHTML = i;
+                if(i===1) o.selected = true;
+                s.appendChild(o);
+            }
+        };
+        fill('actores'); fill('actrices');
+
+        let obraData = { titulo: "", personajes: "", estructura: "", actos: [], actual: 1, total: 0, duracion: "" };
+
+        const log = (msg, isError = false) => {
+            const l = document.getElementById('log');
+            const colorClass = isError ? 'class="err-msg"' : '';
+            l.innerHTML += `<br>> <span ${colorClass}>${msg}</span>`;
+            l.scrollTop = l.scrollHeight;
+        };
+
+        document.getElementById('obraForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btnI = document.getElementById('btnIniciar');
+            obraData.total = parseInt(document.getElementById('totalActos').value);
+            obraData.duracion = document.getElementById('duracion').value;
+            obraData.actos = [];
+            obraData.actual = 1;
+            btnI.disabled = true;
+
+            log("Solicitando estructura inicial...");
+
+            const p = `Escribe la estructura de una obra teatral de ${obraData.total} actos sobre: ${document.getElementById('tema').value}. Estilo: ${document.getElementById('estilo').value}. Reparto: ${document.getElementById('actores').value}H y ${document.getElementById('actrices').value}M. Duraci&oacute;n: ${obraData.duracion} min. 
+            Responde as&iacute;: TITULO: [Nombre], PERSONAJES: [Lista], RESUMEN: [Mapa de actos]`;
+
+            try {
+                const response = await fetch('https://generador-impro.raul-grigelmo3.workers.dev', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: p, temp: 0.7 })
+                });
+
+                if (response.status === 429) throw new Error("Servidor saturado (429). Espera 10 segundos.");
+                if (!response.ok) throw new Error("Error de red: " + response.status);
+
+                const data = await response.json();
+                const texto = data.candidates[0].content.parts[0].text;
+
+                const extraer = (et, sig) => {
+                    const r = new RegExp(`${et}:(.*?)(?=${sig}:|$)`, 's');
+                    const m = texto.match(r);
+                    return m ? m[1].trim() : "";
+                };
+
+                obraData.titulo = extraer("TITULO", "PERSONAJES") || "Obra sin t&iacute;tulo";
+                obraData.personajes = extraer("PERSONAJES", "RESUMEN");
+                obraData.estructura = extraer("RESUMEN", "FIN") || texto;
+
+                log("Estructura guardada: " + obraData.titulo);
+                updateUI();
+            } catch (err) {
+                log(err.message, true);
+                btnI.disabled = false;
+            }
+        });
+
+        function updateUI() {
+            const st = document.getElementById('status');
+            const btnS = document.getElementById('btnSiguiente');
+            const btnD = document.getElementById('btnDocx');
+
+            if (obraData.actual <= obraData.total) {
+                st.innerHTML = `<span class="step">OBRA EN MARCHA</span><br>T&iacute;tulo: ${obraData.titulo}<br>Siguiente paso: Acto ${obraData.actual}`;
+                btnS.innerHTML = `Redactar Acto ${obraData.actual}`;
+                btnS.style.display = 'block';
+                btnD.style.display = 'none';
+            } else {
+                st.innerHTML = `<span class="step">&iexcl;FINALIZADO!</span><br>Libreto listo para descargar.`;
+                btnS.style.display = 'none';
+                btnD.style.display = 'block';
+            }
+        }
+
+        async function generarSiguienteActo() {
+            const btnS = document.getElementById('btnSiguiente');
+            btnS.disabled = true;
+            log(`Generando Acto ${obraData.actual}...`);
+
+            const p = `Escribe el libreto completo (di&aacute;logos y acotaciones) del ACTO ${obraData.actual} de la obra "${obraData.titulo}". Personajes: ${obraData.personajes}. Guion: ${obraData.estructura}. Tiempo de este acto: ${Math.round(obraData.duracion/obraData.total)} min. S&eacute; conciso para que el texto no se corte.`;
+
+            try {
+                const response = await fetch('https://generador-impro.raul-grigelmo3.workers.dev', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: p, temp: 0.8 })
+                });
+
+                if (response.status === 429) throw new Error("Servidor saturado. Espera 15 segundos y reintenta.");
+                if (!response.ok) throw new Error("Fallo de red: " + response.status);
+
+                const data = await response.json();
+                const textoActo = data.candidates[0].content.parts[0].text;
+
+                obraData.actos.push(`ACTO ${obraData.actual}\n\n${textoActo}`);
+                log(`Acto ${obraData.actual} completado y guardado.`);
+                obraData.actual++;
+                updateUI();
+            } catch (err) {
+                log(err.message, true);
+                log("No has perdido el progreso. Solo vuelve a pulsar el bot&oacute;n en un momento.");
+            } finally {
+                btnS.disabled = false;
+            }
+        }
+
+        function descargarDocx() {
+            const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = docx;
+            let content = [
+                new Paragraph({ text: obraData.titulo, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
+                new Paragraph({ text: "REPARTO", heading: HeadingLevel.HEADING_2, spacing: {before: 400} }),
+                new Paragraph({ text: obraData.personajes, spacing: {after: 400} })
+            ];
+
+            obraData.actos.forEach(texto => {
+                texto.split('\n').forEach(l => {
+                    content.push(new Paragraph({ children: [new TextRun({ text: l, size: 24, font: "Courier New" })], spacing: {after: 100} }));
+                });
+            });
+
+            const doc = new Document({ sections: [{ children: content }] });
+            Packer.toBlob(doc).then(b => saveAs(b, `${obraData.titulo.replace(/\s+/g, '_')}.docx`));
+        }
+    </script>
+</body>
+</html>
