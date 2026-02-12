@@ -23,7 +23,6 @@
     <style>
         :root { --acc: #e74c3c; --hi: #2980b9; --bg: #f4f7f6; --card: #ffffff; --text: #2c3e50; --border: #dcdde1; }
         body { font-family: 'Roboto', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        
         .top-title { font-weight: 900; text-transform: uppercase; letter-spacing: 2px; color: #7f8c8d; font-size: 0.9rem; margin-bottom: 20px; }
         .logo-container { text-align: center; margin-bottom: 10px; }
         .logo-container img { max-width: 250px; height: auto; border-radius: 8px; }
@@ -31,25 +30,21 @@
         .logo-subtitle a.handle { display: inline-block; font-weight: 700; color: var(--text); font-size: 1.1rem; margin-bottom: 4px; text-decoration: none; transition: color 0.3s ease; }
         .logo-subtitle a.handle:hover { color: var(--acc); }
         .logo-subtitle .location { display: block; color: #7f8c8d; font-size: 0.9rem; letter-spacing: 1px; }
-
         .section-instruction { width: 100%; max-width: 1000px; margin-bottom: 15px; font-weight: bold; color: var(--hi); text-transform: uppercase; font-size: 0.85rem; border-left: 4px solid var(--acc); padding-left: 10px; }
-
-        /* CENTRADO DEL CARGANDO: Fuera del grid para que no falle */
         .loading-container { width: 100%; text-align: center; padding: 40px; color: var(--hi); font-weight: bold; }
-
         .event-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; }
         .event-card { position: relative; background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 12px; transition: all 0.3s ease; cursor: pointer; }
         .event-card:hover { border-color: var(--hi); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
         .event-card.selected { border-color: var(--acc); border-width: 2px; background: #fffdfd; }
-        
         .event-radio { position: absolute; top: 15px; right: 15px; transform: scale(1.3); cursor: pointer; }
-
         .date { color: var(--hi); font-size: 0.9rem; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; }
         .event-card h3 { margin: 0 0 10px 0; font-size: 1.3rem; padding-right: 25px; }
         .desc { font-size: 0.9rem; color: #636e72; line-height: 1.4; margin-bottom: 15px; }
         .stock { font-size: 0.8rem; color: #95a5a6; border-top: 1px solid var(--border); padding-top: 12px;}
-
-        #reservation-form { width: 100%; max-width: 600px; margin-top: 40px; background: var(--card); padding: 30px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 50px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        
+        /* El formulario ahora tiene display:none por defecto */
+        #reservation-form { display: none; width: 100%; max-width: 600px; margin-top: 40px; background: var(--card); padding: 30px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 50px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        
         #reservation-form h2 { margin-top:0; font-size: 1.4rem; color: var(--acc); border-bottom: 2px solid var(--bg); padding-bottom: 10px; margin-bottom: 20px; }
         label { font-size: 0.75rem; color: #7f8c8d; text-transform: uppercase; margin-bottom: 6px; display: block; font-weight: bold; }
         input[type="text"], input[type="email"], select { width: 100%; box-sizing: border-box; background: #fff; border: 1px solid var(--border); padding: 12px; border-radius: 6px; font-size: 1rem; }
@@ -66,29 +61,29 @@
         <span class="location">Espacio Creativo · Palencia</span>
     </div>
 
-    <div id="instruction-text" class="section-instruction" style="display:none;">1. Selecciona un evento de la cartelera:</div>
+    <div id="instruction-text" class="section-instruction" style="display:none;"><h2 style="color: #2980b9;">Selecciona un evento</h2></div>
     <div id="status-container" class="loading-container">Cargando cartelera y disponibilidad...</div>
     
     <div class="event-grid" id="grid-eventos"></div>
 
     <div id="reservation-form">
-        <h2>2. CONFIRMAR RESERVA</h2>
+        <h2 style="color: #2980b9;">CONFIRMAR RESERVA</h2>
         <div style="display: flex; flex-direction: column; gap: 20px;">
             <div>
-                <label>Evento Seleccionado</label>
+                <label style="color: #2980b9;">Evento Seleccionado</label>
                 <input type="text" id="form-evento" readonly style="color: var(--hi); font-weight: bold; background: #f9f9f9;" placeholder="Selecciona un show arriba">
             </div>
             <div>
-                <label style="color: #27ae60;">Tu Email</label>
+                <label style="color: #2980b9;">Tu Email</label>
                 <input type="email" id="form-email" placeholder="ejemplo@correo.com" required>
             </div>
             <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                 <div style="flex: 2; min-width: 200px;">
-                    <label>Nombre Completo</label>
+                    <label style="color: #2980b9;">Nombre Completo</label>
                     <input type="text" id="form-nombre" placeholder="Nombre y apellidos">
                 </div>
                 <div style="flex: 1; min-width: 140px;">
-                    <label>Nº Entradas</label>
+                    <label style="color: #2980b9;">Nº De Entradas</label>
                     <select id="form-cantidad">
                         <option value="1">1 Persona</option><option value="2">2 Personas</option><option value="3">3 Personas</option><option value="4">4 Personas</option><option value="5">5 Personas</option><option value="6">6 Personas</option><option value="7">7 Personas</option><option value="8">8 Personas</option><option value="9">9 Personas</option>
                     </select>
@@ -116,6 +111,8 @@
             const grid = document.getElementById('grid-eventos');
             const status = document.getElementById('status-container');
             const inst = document.getElementById('instruction-text');
+            const form = document.getElementById('reservation-form'); // Capturamos el formulario
+
             try {
                 const response = await fetch(URL_GAS);
                 datosEventos = await response.json();
@@ -155,8 +152,12 @@
                     grid.appendChild(card);
                 });
 
-                if (grid.children.length > 0) inst.style.display = "block";
-                else grid.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: #7f8c8d; padding: 20px;'>No hay eventos próximos.</p>";
+                if (grid.children.length > 0) {
+                    inst.style.display = "block";
+                    form.style.display = "block"; // MOSTRAMOS EL FORMULARIO SOLO SI HAY EVENTOS
+                } else {
+                    grid.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: #7f8c8d; padding: 20px;'>No hay eventos próximos.</p>";
+                }
 
             } catch (e) {
                 status.textContent = "Error al cargar cartelera.";
@@ -166,11 +167,9 @@
 
         function seleccionar(ev) {
             eventoSeleccionado = ev;
-            // Desmarcar todas las cards y radios
             document.querySelectorAll('.event-card').forEach(c => c.classList.remove('selected'));
             document.querySelectorAll('.event-radio').forEach(r => r.checked = false);
             
-            // Marcar la seleccionada
             document.getElementById(`ev-${ev.id}`).classList.add('selected');
             document.getElementById(`radio-${ev.id}`).checked = true;
             document.getElementById('form-evento').value = ev.nombre;
