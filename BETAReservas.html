@@ -108,25 +108,43 @@
 
         window.onload = () => { cargarEventos(); };
 
-        async function cargarEventos() {
+async function cargarEventos() {
             const grid = document.getElementById('grid-eventos');
             const status = document.getElementById('status-container');
             try {
                 const response = await fetch(URL_GAS);
                 datosEventos = await response.json();
                 
-                status.style.display = "none"; // Quitamos el cargando
+                status.style.display = "none";
                 grid.innerHTML = ""; 
 
+                // AHORA: Obtenemos la fecha Y HORA exacta de este preciso instante
+                const ahora = new Date();
+
                 datosEventos.forEach(ev => {
+                    const fechaObj = new Date(ev.fecha);
+                    
+                    // Si la fecha del evento es anterior a este mismo segundo, no se muestra
+                    if (!isNaN(fechaObj.getTime()) && fechaObj < ahora) {
+                        return;
+                    }
+
+                    const opciones = { 
+                        day: '2-digit', 
+                        month: '2-digit', 
+                        year: 'numeric', 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    };
+                    const fechaBonita = fechaObj.toLocaleString('es-ES', opciones);
+
                     const agotado = ev.stock <= 0;
                     const card = document.createElement('div');
                     card.className = 'event-card';
                     card.id = `ev-${ev.id}`;
                     
-                    // USAMOS UNA MEZCLA SEGURA: innerHTML solo para estructura, s() para datos
                     card.innerHTML = `
-                        <div class="date">${s(ev.fecha)}</div>
+                        <div class="date">${s(fechaBonita)}</div>
                         <h3 style="${agotado ? 'text-decoration:line-through;color:#b2bec3' : ''}">${s(ev.nombre)}</h3>
                         <p class="desc">${s(ev.desc)}</p>
                         <div class="stock">Disponibles: <b style="color:${agotado ? '#e74c3c' : '#27ae60'}">${agotado ? 'AGOTADO' : s(ev.stock)}</b></div>
@@ -135,8 +153,14 @@
                     card.onclick = () => agotado ? alert("Agotado") : seleccionar(ev);
                     grid.appendChild(card);
                 });
+
+                if (grid.children.length === 0) {
+                    grid.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: #7f8c8d; padding: 20px;'>No hay eventos próximos.</p>";
+                }
+
             } catch (e) {
                 status.textContent = "Error al cargar cartelera.";
+                console.error(e);
             }
         }
 
