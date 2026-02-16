@@ -1847,7 +1847,6 @@ async function bucleCargaIA() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contents: [{ parts: [{ text: PROMPT }] }] }),
-                // Añadimos la señal para que el fetch sepa cuándo abortar
                 signal: controller.signal 
             });
             
@@ -1864,18 +1863,21 @@ async function bucleCargaIA() {
                 bufferPalabras.push(...nuevas);
                 status.innerText = "Cargador lleno (+100)";
             }
+
+            // --- EL CAMBIO ESTÁ AQUÍ ---
+            // Esperamos 30 segundos antes de la siguiente llamada (2 llamadas/minuto)
+            status.innerText = "En espera (30s)...";
+            await new Promise(r => setTimeout(r, 30000)); 
+
         } catch (e) {
-            // Si el error es porque nosotros hemos abortado la petición, ponemos un mensaje suave
             if (e.name === 'AbortError') {
                 status.innerText = "IA Detenida.";
+                await new Promise(r => setTimeout(r, 1000)); // Pausa corta si abortamos
             } else {
-                status.innerText = "Error. Reintentando...";
-                await new Promise(r => setTimeout(r, 3000));
+                status.innerText = "Error. Reintentando en 10s...";
+                await new Promise(r => setTimeout(r, 10000)); // Si falla, esperamos 10s para no saturar
             }
         }
-
-        // Pequeña pausa de cortesía entre peticiones exitosas
-        await new Promise(r => setTimeout(r, 1000));
     }
 }
 
