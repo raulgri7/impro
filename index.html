@@ -14,6 +14,7 @@
             --text-main: #202124;
             --text-sub: #5f6368;
             --white: #ffffff;
+            --desc-text: #5f6368;
         }
 
         body {
@@ -53,15 +54,15 @@
             font-size: 1rem;
         }
 
-        /* SECCIONES */
         .section-title {
             display: flex;
             align-items: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: var(--text-sub);
-            margin: 25px 0 15px 5px;
+            margin: 30px 0 15px 5px;
+            font-weight: bold;
         }
 
         .section-title::after {
@@ -82,7 +83,7 @@
             margin-bottom: 12px;
         }
 
-        /* ENLACES */
+        /* ENLACES CON DESCRIPCIÓN */
         .menu-list a {
             display: flex;
             align-items: center;
@@ -91,17 +92,37 @@
             color: var(--primary);
             text-decoration: none;
             border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border: 1px solid rgba(26, 115, 232, 0.2);
+            border: 1px solid rgba(26, 115, 232, 0.15);
             transition: all 0.2s ease;
+        }
+
+        .link-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .link-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        .link-desc {
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: var(--desc-text);
+            margin-top: 2px;
         }
 
         .menu-list a:hover {
             background-color: var(--primary);
-            color: var(--white);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2);
+        }
+
+        .menu-list a:hover .link-title,
+        .menu-list a:hover .link-desc,
+        .menu-list a:hover .emoji {
+            color: var(--white);
         }
 
         /* DESTACADO */
@@ -109,16 +130,18 @@
             background-color: var(--primary);
             color: var(--white);
             border: 2px solid var(--primary-dark);
-            font-size: 1.3rem;
             justify-content: center;
             padding: 20px;
         }
+        
+        .btn-featured .link-title { font-size: 1.3rem; }
+        .btn-featured .link-desc { color: #d1e3ff; text-align: center; }
 
         .btn-featured a:hover {
             background-color: var(--primary-dark);
         }
 
-        /* GRUPO COMPACTO (EMOCIONES/ESTRÉS) */
+        /* GRUPO COMPACTO */
         .compact-group {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -127,27 +150,27 @@
         }
 
         .compact-group a {
-            font-size: 0.9rem !important;
             padding: 12px 5px;
             justify-content: center;
             text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
         }
 
         /* RESPONSIVE */
         @media (max-width: 480px) {
+            .container { padding: 15px; }
             h1 { font-size: 1.5rem; }
-            .compact-group {
-                grid-template-columns: 1fr; /* Se apilan en móvil para no fallar el clic */
-            }
-            .menu-list a {
-                font-size: 1rem;
-                padding: 14px 16px;
-            }
+            .compact-group { grid-template-columns: 1fr; }
+            .menu-list a { padding: 14px 16px; }
         }
 
         .emoji {
-            margin-right: 12px;
+            margin-right: 15px;
             font-style: normal;
+            font-size: 1.3rem;
+            min-width: 25px;
+            text-align: center;
         }
     </style>
 </head>
@@ -160,22 +183,28 @@
 
         <ul class="menu-list">
             <li class="btn-featured">
-                <a href="ImproLunes.html"><i class="emoji">🚀</i>¡Improvisemos!</a>
+                <a href="ImproLunes.html">
+                    <i class="emoji">🚀</i>
+                    <div class="link-content">
+                        <span class="link-title">¡Improvisemos!</span>
+                        <span class="link-desc">Tu panel de control para el entrenamiento diario</span>
+                    </div>
+                </a>
             </li>
 
             <div class="section-title">Generadores de Escena</div>
-            <li><a href="Microvisacion.html"><i class="emoji">🐜</i>Microvisación</a></li>
-			<li><a href="BasesDeImpro.html"><i class="emoji">🎭</i>Bases de Escena (v1)</a></li>
-            <li><a href="BasesDeImpro2.html"><i class="emoji">🎬</i>Bases de Escena (v2)</a></li>
-            <li><a href="Situaciones.html"><i class="emoji">📍</i>Situaciones Azar</a></li>
-            <li><a href="DialogoUnico.html"><i class="emoji">💬</i>Diálogo Único</a></li>
-            <li><a href="DialogoCircunstanciasDadas.html"><i class="emoji">📝</i>Diálogo Circunstancias</a></li>
+            <li><a href="Microvisacion.html"><i class="emoji">🐜</i><div class="link-content"><span class="link-title">Microvisación</span><span class="link-desc">Escenas rápidas con disparadores mínimos</span></div></a></li>
+            <li><a href="BasesDeImpro.html"><i class="emoji">🎭</i><div class="link-content"><span class="link-title">Bases de Escena (v1)</span><span class="link-desc">Define el Quién, Dónde y Qué</span></div></a></li>
+            <li><a href="BasesDeImpro2.html"><i class="emoji">🎬</i><div class="link-content"><span class="link-title">Bases de Escena (v2)</span><span class="link-desc">Variante avanzada para motores de escena</span></div></a></li>
+            <li><a href="Situaciones.html"><i class="emoji">📍</i><div class="link-content"><span class="link-title">Situaciones Azar</span><span class="link-desc">Conflictos y lugares aleatorios</span></div></a></li>
+            <li><a href="DialogoUnico.html"><i class="emoji">💬</i><div class="link-content"><span class="link-title">Diálogo Único</span><span class="link-desc">Frases potentes para iniciar la acción</span></div></a></li>
+            <li><a href="DialogoCircunstanciasDadas.html"><i class="emoji">📝</i><div class="link-content"><span class="link-title">Diálogo Circunstancias</span><span class="link-desc">Textos basados en contexto previo</span></div></a></li>
 
             <div class="section-title">Dinámicas y Juegos</div>
-            <li><a href="10ejercicios.html"><i class="emoji">📚</i>10 Ejercicios de Impro</a></li>
-            <li><a href="Excusas.html"><i class="emoji">🏃</i>Llego tarde: Excusas</a></li>
-            <li><a href="Pitonisa.html"><i class="emoji">🔮</i>La Pitonisa</a></li>
-            <li><a href="SurrealismoParaDos.html"><i class="emoji">🌈</i>Surrealismo Emocional</a></li>
+            <li><a href="10ejercicios.html"><i class="emoji">📚</i><div class="link-content"><span class="link-title">10 Ejercicios de Impro</span><span class="link-desc">Recopilación de dinámicas para grupos</span></div></a></li>
+            <li><a href="Excusas.html"><i class="emoji">🏃</i><div class="link-content"><span class="link-title">Llego tarde: Excusas</span><span class="link-desc">Generador de justificaciones creativas</span></div></a></li>
+            <li><a href="Pitonisa.html"><i class="emoji">🔮</i><div class="link-content"><span class="link-title">La Pitonisa</span><span class="link-desc">Predicciones y disparadores místicos</span></div></a></li>
+            <li><a href="SurrealismoParaDos.html"><i class="emoji">🌈</i><div class="link-content"><span class="link-title">Surrealismo Emocional</span><span class="link-desc">Exploración de atmósferas y sentimientos</span></div></a></li>
             
             <li>
                 <div class="compact-group">
@@ -185,28 +214,45 @@
                 </div>
             </li>
 
-            <li><a href="Carrera.html"><i class="emoji">⏱️</i>Carrera: 2m > 1m > 30s > 15s</a></li>
-            <li><a href="FrasesYPais.html"><i class="emoji">🌍</i>6 Frases, 1 País, 5 Hechos</a></li>
+            <li><a href="Carrera.html"><i class="emoji">⏱️</i><div class="link-content"><span class="link-title">Carrera: 2m > 1m > 30s > 15s</span><span class="link-desc">Juego de compresión temporal de escenas</span></div></a></li>
+            <li><a href="FrasesYPais.html"><i class="emoji">🌍</i><div class="link-content"><span class="link-title">6 Frases, 1 País, 5 Hechos</span><span class="link-desc">Estructura para creación de historias</span></div></a></li>
 
             <div class="section-title">Docencia y Formación</div>
-            <li><a href="FichasImpro.html"><i class="emoji">📎</i>Fichas Impro Coles (Imprimir)</a></li>
-            <li><a href="CircunstanciasDadas.html"><i class="emoji">🎴</i>12 Tarjetas de Impro</a></li>
-            <li><a href="ClaseImproAvanzada.html"><i class="emoji">🎓</i>Clase Impro Avanzada</a></li>
-            <li><a href="Improlab60.html"><i class="emoji">🧪</i>ImproLab60</a></li>
-			<li><a href="ImproLunes60.html"><i class="emoji">🧪</i>ImproLunes60</a></li>
+            <li><a href="FichasImpro.html"><i class="emoji">📎</i><div class="link-content"><span class="link-title">Fichas Impro Coles</span><span class="link-desc">Material descargable y listo para imprimir</span></div></a></li>
+            <li><a href="CircunstanciasDadas.html"><i class="emoji">🎴</i><div class="link-content"><span class="link-title">12 Tarjetas de Impro</span><span class="link-desc">Cartas con disparadores visuales</span></div></a></li>
+            <li><a href="ClaseImproAvanzada.html"><i class="emoji">🎓</i><div class="link-content"><span class="link-title">Clase Impro Avanzada</span><span class="link-desc">Planificación de sesiones de alto nivel</span></div></a></li>
+            <li><a href="Improlab60.html"><i class="emoji">🧪</i><div class="link-content"><span class="link-title">ImproLab60</span><span class="link-desc">Laboratorio de experimentación rápida</span></div></a></li>
+            <li><a href="ImproLunes60.html"><i class="emoji">🧪</i><div class="link-content"><span class="link-title">ImproLunes60</span><span class="link-desc">Sesiones intensivas de 60 minutos</span></div></a></li>
 
             <div class="section-title">Herramientas y Búsqueda</div>
-            <li><a href="Nube.html"><i class="emoji">🌀</i>Nube de Expresiones para completar</a></li>
-			<li><a href="ImproTitulos.html"><i class="emoji">🎬</i>5 Títulos para una Impro</a></li>
-			<li><a href="Noticia.html"><i class="emoji">📰</i>Impro basada en Noticia</a></li>
-            <li><a href="Monologos.html"><i class="emoji">👤</i>Buscador de Monólogos</a></li>
-            <li><a href="BuscaObras.html"><i class="emoji">📖</i>Buscador de Obras</a></li>
-            <li><a href="Palabra.html"><i class="emoji">🌈</i>Palabras al Azar</a></li>
-            <li><a href="ContadorNew.html"><i class="emoji">🔢</i>Contador de Público</a></li>
-			
-			<li class="btn-featured">
-                <a href="index2.html"><i class="emoji">🚀</i>Otras cosas</a>
+            <li><a href="Nube.html"><i class="emoji">🌀</i><div class="link-content"><span class="link-title">Nube de Expresiones</span><span class="link-desc">Completa las frases para crear diálogos</span></div></a></li>
+            <li><a href="ImproTitulos.html"><i class="emoji">🎬</i><div class="link-content"><span class="link-title">5 Títulos para una Impro</span><span class="link-desc">Sugerencias para nombrar tus escenas</span></div></a></li>
+            <li><a href="Noticia.html"><i class="emoji">📰</i><div class="link-content"><span class="link-title">Impro basada en Noticia</span><span class="link-desc">Actualidad convertida en teatro</span></div></a></li>
+            <li><a href="Monologos.html"><i class="emoji">👤</i><div class="link-content"><span class="link-title">Buscador de Monólogos</span><span class="link-desc">Encuentra el texto perfecto para ti</span></div></a></li>
+            <li><a href="BuscaObras.html"><i class="emoji">📖</i><div class="link-content"><span class="link-title">Buscador de Obras</span><span class="link-desc">Base de datos de textos teatrales</span></div></a></li>
+            <li><a href="Palabra.html"><i class="emoji">🌈</i><div class="link-content"><span class="link-title">Palabras al Azar</span><span class="link-desc">Conceptos sueltos para inspirarte</span></div></a></li>
+            <li><a href="ContadorNew.html"><i class="emoji">🔢</i><div class="link-content"><span class="link-title">Contador de Público</span><span class="link-desc">Herramienta técnica para taquilla</span></div></a></li>
+            
+            <li class="btn-featured" style="margin-top: 20px;">
+                <a href="index2.html">
+                    <i class="emoji">🚀</i>
+                    <div class="link-content">
+                        <span class="link-title">Otras cosas</span>
+                        <span class="link-desc">Explora el resto del archivo</span>
+                    </div>
+                </a>
             </li>
+            
+            <div id="repo-iconos" style="display: none;">
+                🔬 🗺️ 🎞️ ✂️ 🤸 🖨️ 🎲 🃏 🌀 ⚡ 👺 💔 🕵️ 👽 🔊 ⏲️ 💡 🧱 🔮 ✨ 💀 
+                🎭 🎬 🚀 📍 💬 📝 📚 🏃 🔮 🌈 🧘 🧊 🔥 ⏱️ 🌍 📎 🎴 🎓 🏫 🧪 
+                📰 👤 📖 🔡 🔢 🧬 🌪️ 🏹 🚪 🕯️ 👣 🗝️ 📣 🎭 🎪 🎬 🛸 🧪 🧬 🌑 
+                🌋 🧩 🧱 💣 🎈 🧬 🧿
+            </div>
+        </ul>
+    </div>
+</body>
+</html>
 			
 			<div id="repo-iconos" style="display: none;">
 				🔬 🗺️ 🎞️ ✂️ 🤸 🖨️ 🎲 🃏 🌀 ⚡ 👺 💔 🕵️ 👽 🔊 ⏲️ 💡 🧱 🔮 ✨ 💀 
