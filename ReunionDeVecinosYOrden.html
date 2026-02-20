@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impro IA - Reunión de Vecinos 🎭</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --main: #2c3e50; --acc: #e67e22; --hi: #2980b9; --bg: #fdfdfd; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background: var(--bg); padding: 20px; color: var(--main); }
+        
+        .no-print { text-align: center; margin-bottom: 20px; }
+        h1 { font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .subtitulo { font-size: 0.95em; color: #444; margin-bottom: 25px; line-height: 1.5; }
+        .regla { display: block; font-weight: bold; color: #c0392b; margin-top: 5px; }
+        
+        .botones-wrap { display: flex; justify-content: center; gap: 10px; }
+        
+        button { 
+            padding: 15px 25px; font-weight: bold; cursor: pointer; 
+            color: white; border: none; border-radius: 8px; 
+            text-transform: uppercase; transition: all 0.1s;
+        }
+        
+        #btn-abrir-config { background: var(--acc); box-shadow: 0 4px 0 #d35400; }
+        #btn-imprimir { background: #e74c3c; box-shadow: 0 4px 0 #c0392b; }
+        
+        #modal-genero {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; padding: 30px; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 100; text-align: center; border: 2px solid var(--main);
+        }
+        .overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 90; }
+        select { padding: 10px; font-size: 1.1em; border-radius: 5px; margin: 15px 0; width: 100%; }
+
+        #resultado { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+            background: white; border: 1px solid #ccc; max-width: 1200px; margin: 0 auto; 
+        }
+        
+        .tarjeta { 
+            padding: 20px; border-right: 1px dashed #ccc; border-bottom: 1px dashed #ccc; 
+            min-height: 380px; background: #fff; display: flex; flex-direction: column;
+        }
+
+        .orden-dia { background-color: #f0f4f8 !important; border: 2px solid var(--hi) !important; }
+        
+        .t-num { color: var(--hi); font-weight: 900; font-size: 1.1em; border-bottom: 2px solid var(--acc); display: inline-block; margin-bottom: 12px; }
+        .item { margin-bottom: 10px; }
+        .item b { display: block; font-size: 0.7em; color: #7f8c8d; text-transform: uppercase; margin-bottom: 1px; }
+        .item span { font-size: 1em; font-weight: 500; color: #2c3e50; display: block; line-height: 1.2; }
+
+        .aviso { background: #fff4e5; border: 1px solid var(--acc); padding: 10px; margin-top: auto; border-radius: 5px; }
+        .aviso b { color: #d35400; font-size: 0.75em; }
+        .aviso span { font-style: italic; font-size: 0.92em; color: #444; }
+
+        @media print { 
+            @page { size: A4 portrait; margin: 0.4cm; }
+            .no-print, .noprint, #modal-genero, .overlay { display: none !important; } 
+            body { background: white; padding: 0; }
+            #resultado { display: grid !important; grid-template-columns: 1fr 1fr !important; border: 1px solid #000 !important; width: 100% !important; } 
+            .tarjeta { border: 1px dashed black !important; break-inside: avoid; padding: 12px !important; min-height: 14.2cm !important; justify-content: flex-start; }
+            .item { margin-bottom: 6px !important; }
+            .item span { font-size: 0.88em !important; line-height: 1.1 !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print">
+        <h1>Reunión de Vecinos 🏢</h1>
+        <div class="subtitulo">
+            <span class="regla">1- Escribe tu nombre en una tarjeta y te lo pones en una zona visible.</span>
+            <span class="regla">2- Lee tu "Aviso a Navegantes" y comparte lo que consideres necesario con todos/algunos de los demás antes de comenzar.</span>
+        </div>
+        <div class="botones-wrap">
+            <button id="btn-abrir-config" onclick="toggleModal(true)">Generar 15 Tarjetas</button>
+            <button id="btn-imprimir" onclick="window.print()" style="display: none;">Imprimir Set Completo</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="toggleModal(false)"></div>
+    <div id="modal-genero">
+        <h3>Configurar Géneros</h3>
+        <p>¿Cuántos personajes <b>MASCULINOS</b>?</p>
+        <select id="select-masculinos"></select>
+        <button id="btn-generar" onclick="confirmarGeneracion()" style="background: var(--hi); width: 100%;">¡Generar Todo!</button>
+    </div>
+
+    <div id="resultado">
+        <p style="padding: 60px; text-align: center; grid-column: 1/-1; color: #7f8c8d;">Configura los géneros para crear los vecinos y el orden del día.</p>
+    </div>
+
+    <script>
+        const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+
+        const selectMasc = document.getElementById('select-masculinos');
+        for (let i = 0; i <= 12; i++) {
+            let opt = document.createElement('option');
+            opt.value = i;
+            opt.innerHTML = i + (i === 1 ? " Hombre" : " Hombres");
+            if (i === 6) opt.selected = true;
+            selectMasc.appendChild(opt);
+        }
+
+        function toggleModal(show) {
+            document.getElementById('modal-genero').style.display = show ? 'block' : 'none';
+            document.getElementById('overlay').style.display = show ? 'block' : 'none';
+        }
+
+        function confirmarGeneracion() {
+            const m = parseInt(selectMasc.value);
+            const f = 12 - m;
+            toggleModal(false);
+            generar(m, f);
+        }
+
+        async function generar(masculinos, femeninos) {
+            const btnGen = document.getElementById('btn-abrir-config');
+            const btnImp = document.getElementById('btn-imprimir');
+            const resDiv = document.getElementById('resultado');
+            
+            btnGen.disabled = true;
+            btnImp.style.display = 'none';
+            resDiv.innerHTML = `<p style="grid-column:1/-1; text-align:center; padding:60px;">Redactando las actas y convocando vecinos...</p>`;
+
+            const promptEspecífico = `Crea 15 tarjetas para una reunión de vecinos. 
+1. Primero genera 12 personajes distintos para una escena de improvisación situada en una reunión de vecinos. Genera ${masculinos} hombres y ${femeninos} mujeres. Cada personaje debe tener un rasgo, hábito, manía o historia que lo haga peculiar, raro, molesto o memorable. Mantén todo realista o ligeramente surrealista, pero que podría pasar en la vida real.
+Para cada personaje, incluye estos apartados:
+
+Nombre y mote/alias:
+Rasgo: Una peculiaridad destacable, manía, hábito extraño, gesto, olor, forma de hablar, etc.
+Breve historia: Algo que explique su comportamiento o lo haga más interesante.
+Forma de hablar o actitud: Cómo se comporta en la reunión, si aporta algo a la escena.
+Aviso a Navegantes: (opcional): Algo que los demás actores deben saber antes de empezar la impro para poder interactuar con el personaje, como un olor, un hábito constante, una queja habitual de reuniones anteriores, un gesto oculto, o algo que afecta directamente a la interacción. Solo se incluye si es relevante para mejorar la improvisación; si no es necesario, se deja vacío o se indica “no aplica”. Puede ser también que tenga un mote entre los demás vecinos, que este personaje desconozca.
+
+Entrega la lista de 12 personajes de forma clara, numerada y lista para usar en una improvisación, asegurándote de que haya variedad de rasgos y niveles de impacto en la escena.
+
+		
+
+2. Después genera 3 TARJETAS de "Orden del Día" distintas. Cada una debe tener de 2 a 5 puntos a tratar. Estos puntos deben estar relacionados con los conflictos, manías o historias de los personajes que acabas de crear. Formato: Título: Orden del Día (Opción A/B/C), Puntos:.
+
+No uses asteriscos ni negritas. Sé creativo, breve y asegúrate de que el orden del día genere conflicto inmediato.`;
+
+            try {
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: promptEspecífico }] }] })
+                });
+
+                const data = await response.json();
+                const texto = data.candidates[0].content.parts[0].text.replace(/\*/g, '');
+                
+                // Dividir el texto en dos partes: Personajes y Órdenes del día
+                const secciones = texto.split(/TÍTULO:/i);
+                const personajesTexto = secciones[0];
+                const ordenesTexto = secciones.slice(1);
+
+                // Parsear Personajes
+                const etiquetasP = ["Nombre y mote/alias", "Rasgo", "Historia", "Actitud", "Aviso a Navegantes"];
+                const regexP = new RegExp(`(${etiquetasP.join('|')}):?\\s*([^\\n]+)`, 'gi');
+                let hallazgosP = [];
+                let match;
+                while ((match = regexP.exec(personajesTexto)) !== null) {
+                    hallazgosP.push({ etiqueta: match[1].toUpperCase(), valor: match[2].trim() });
+                }
+
+                let html = '';
+                for (let i = 0; i < hallazgosP.length; i += 5) {
+                    html += `<div class="tarjeta"><span class="t-num">VECINO ${(i/5)+1}</span>`;
+                    for (let j = 0; j < 5; j++) {
+                        if (hallazgosP[i+j]) {
+                            const esAviso = hallazgosP[i+j].etiqueta === "AVISO A NAVEGANTES";
+                            html += `<div class="item ${esAviso ? 'aviso' : ''}"><b>${hallazgosP[i+j].etiqueta}</b><span>${hallazgosP[i+j].valor}</span></div>`;
+                        }
+                    }
+                    html += `</div>`;
+                }
+
+                // Parsear Órdenes del Día
+                ordenesTexto.forEach((txt, index) => {
+                    const puntosMatch = txt.match(/Puntos:?\s*([\s\S]+)/i);
+                    const titulo = "ORDEN DEL DÍA " + (index + 1);
+                    const contenido = puntosMatch ? puntosMatch[1].trim().replace(/\n/g, '<br>• ') : txt;
+                    
+                    html += `<div class="tarjeta orden-dia">
+                        <span class="t-num">${titulo}</span>
+                        <div class="item"><b>Temas a tratar:</b><span>• ${contenido}</span></div>
+                        <div class="aviso"><b>Nota:</b><span>Elige este acta si quieres una reunión centrada en estos conflictos específicos.</span></div>
+                    </div>`;
+                });
+
+                resDiv.innerHTML = html;
+                btnImp.style.display = 'inline-block';
+            } catch (e) {
+                console.error(e);
+                resDiv.innerHTML = `<p style="grid-column:1/-1; text-align:center; padding:60px; color:red;">Error al generar el set de 15 tarjetas. Reintenta.</p>`;
+            } finally {
+                btnGen.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
