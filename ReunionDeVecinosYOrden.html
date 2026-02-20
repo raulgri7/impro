@@ -71,8 +71,11 @@
     <div class="no-print">
         <h1>Reunión de Vecinos 🏢</h1>
         <div class="subtitulo">
-            <span class="regla">1- Escribe tu nombre en una tarjeta y te lo pones en una zona visible.</span>
-            <span class="regla">2- Lee tu "Aviso a Navegantes" y comparte lo que consideres necesario con todos/algunos de los demás antes de comenzar.</span>
+		<div class="subtitulo">
+            <span class="regla">1- Escribe tu nombre en una tarjeta y póntelo en una zona visible.</span>
+            <span class="regla">2- La sección "Aviso a Navegantes" tiene info que puedes compartir con los demás antes de comenzar la impro.</span>
+            <span class="regla">3- Del resto de info, puedes compartir alguna cosa si lo consideras oportuno.</span>
+        </div>
         </div>
         <div class="botones-wrap">
             <button id="btn-abrir-config" onclick="toggleModal(true)">Generar 15 Tarjetas</button>
@@ -123,25 +126,24 @@
             
             btnGen.disabled = true;
             btnImp.style.display = 'none';
-            resDiv.innerHTML = `<p style="grid-column:1/-1; text-align:center; padding:60px;">Redactando las actas y convocando vecinos...</p>`;
+            resDiv.innerHTML = `<p style="grid-column:1/-1; text-align:center; padding:60px;">Redactando las actas y ubicando a los vecinos en sus pisos...</p>`;
 
             const promptEspecífico = `Crea 15 tarjetas para una reunión de vecinos. 
-1. Primero genera 12 personajes distintos para una escena de improvisación situada en una reunión de vecinos. Genera ${masculinos} hombres y ${femeninos} mujeres. Cada personaje debe tener un rasgo, hábito, manía o historia que lo haga peculiar, raro, molesto o memorable. Mantén todo realista o ligeramente surrealista, pero que podría pasar en la vida real.
+1. Primero genera 12 personajes distintos para una escena de improvisación situada en una reunión de vecinos. Genera ${masculinos} hombres y ${femeninos} mujeres. Distribúyelos en un edificio de 4 plantas (Bajo, 1º, 2º, 3º) con letras A, B y C. 
 Para cada personaje, incluye estos apartados:
 
 Nombre y mote/alias:
+Piso y letra: (Ej: 2ºB, Bajo A...)
 Rasgo: Una peculiaridad destacable, manía, hábito extraño, gesto, olor, forma de hablar, etc.
 Breve historia: Algo que explique su comportamiento o lo haga más interesante.
-Forma de hablar o actitud: Cómo se comporta en la reunión, si aporta algo a la escena.
-Aviso a Navegantes: (opcional): Algo que los demás actores deben saber antes de empezar la impro para poder interactuar con el personaje, como un olor, un hábito constante, una queja habitual de reuniones anteriores, un gesto oculto, o algo que afecta directamente a la interacción. Solo se incluye si es relevante para mejorar la improvisación; si no es necesario, se deja vacío o se indica “no aplica”. Puede ser también que tenga un mote entre los demás vecinos, que este personaje desconozca.
+Forma de hablar o actitud: Cómo se comporta en la reunión.
+Aviso a Navegantes: Información CRÍTICA que el resto de improvisadores deben saber sobre este personaje ANTES de empezar para que la interacción funcione. No des consejos de actuación, da datos contextuales para los demás (ej: deudas, olores, mala fama, vecino nuevo).
 
-Entrega la lista de 12 personajes de forma clara, numerada y lista para usar en una improvisación, asegurándote de que haya variedad de rasgos y niveles de impacto en la escena.
+Entrega la lista de 12 personajes de forma clara, numerada y lista para usar, asegurándote de que los pisos generen conflictos de vecindad (ej: el del 3º hace ruido al del 2º).
 
-		
+2. Después genera 3 TARJETAS de "Orden del Día" distintas. Cada una debe tener de 2 a 5 puntos a tratar. Estos puntos deben estar relacionados con los conflictos, pisos o historias de los personajes que acabas de crear. Formato: Título: Orden del Día (Opción A/B/C), Puntos:.
 
-2. Después genera 3 TARJETAS de "Orden del Día" distintas. Cada una debe tener de 2 a 5 puntos a tratar. Estos puntos deben estar relacionados con los conflictos, manías o historias de los personajes que acabas de crear. Formato: Título: Orden del Día (Opción A/B/C), Puntos:.
-
-No uses asteriscos ni negritas. Sé creativo, breve y asegúrate de que el orden del día genere conflicto inmediato.`;
+No uses asteriscos ni negritas. Sé creativo, breve y asegura conflicto inmediato.`;
 
             try {
                 const response = await fetch(URL_WORKER, {
@@ -153,13 +155,12 @@ No uses asteriscos ni negritas. Sé creativo, breve y asegúrate de que el orden
                 const data = await response.json();
                 const texto = data.candidates[0].content.parts[0].text.replace(/\*/g, '');
                 
-                // Dividir el texto en dos partes: Personajes y Órdenes del día
                 const secciones = texto.split(/TÍTULO:/i);
                 const personajesTexto = secciones[0];
                 const ordenesTexto = secciones.slice(1);
 
-                // Parsear Personajes
-                const etiquetasP = ["Nombre y mote/alias", "Rasgo", "Historia", "Actitud", "Aviso a Navegantes"];
+                // Añadimos "Piso y letra" a las etiquetas que buscamos
+                const etiquetasP = ["Nombre y mote/alias", "Piso y letra", "Rasgo", "Historia", "Actitud", "Aviso a Navegantes"];
                 const regexP = new RegExp(`(${etiquetasP.join('|')}):?\\s*([^\\n]+)`, 'gi');
                 let hallazgosP = [];
                 let match;
@@ -167,36 +168,39 @@ No uses asteriscos ni negritas. Sé creativo, breve y asegúrate de que el orden
                     hallazgosP.push({ etiqueta: match[1].toUpperCase(), valor: match[2].trim() });
                 }
 
-                let html = '';
-                for (let i = 0; i < hallazgosP.length; i += 5) {
-                    html += `<div class="tarjeta"><span class="t-num">VECINO ${(i/5)+1}</span>`;
-                    for (let j = 0; j < 5; j++) {
+                let htmlPersonajes = '';
+                // Ahora el bucle salta de 6 en 6 porque hay un campo más
+                const camposPorTarjeta = 6;
+                for (let i = 0; i < hallazgosP.length; i += camposPorTarjeta) {
+                    htmlPersonajes += `<div class="tarjeta"><span class="t-num">VECINO ${(i/camposPorTarjeta)+1}</span>`;
+                    for (let j = 0; j < camposPorTarjeta; j++) {
                         if (hallazgosP[i+j]) {
-                            const esAviso = hallazgosP[i+j].etiqueta === "AVISO A NAVEGANTES";
-                            html += `<div class="item ${esAviso ? 'aviso' : ''}"><b>${hallazgosP[i+j].etiqueta}</b><span>${hallazgosP[i+j].valor}</span></div>`;
+                            const label = hallazgosP[i+j].etiqueta;
+                            const esAviso = label === "AVISO A NAVEGANTES";
+                            htmlPersonajes += `<div class="item ${esAviso ? 'aviso' : ''}"><b>${label}</b><span>${hallazgosP[i+j].valor}</span></div>`;
                         }
                     }
-                    html += `</div>`;
+                    htmlPersonajes += `</div>`;
                 }
 
-                // Parsear Órdenes del Día
+                let htmlOrdenDia = '';
                 ordenesTexto.forEach((txt, index) => {
                     const puntosMatch = txt.match(/Puntos:?\s*([\s\S]+)/i);
                     const titulo = "ORDEN DEL DÍA " + (index + 1);
                     const contenido = puntosMatch ? puntosMatch[1].trim().replace(/\n/g, '<br>• ') : txt;
                     
-                    html += `<div class="tarjeta orden-dia">
+                    htmlOrdenDia += `<div class="tarjeta orden-dia">
                         <span class="t-num">${titulo}</span>
                         <div class="item"><b>Temas a tratar:</b><span>• ${contenido}</span></div>
-                        <div class="aviso"><b>Nota:</b><span>Elige este acta si quieres una reunión centrada en estos conflictos específicos.</span></div>
+                        <div class="aviso"><b>Nota:</b><span>Conflictos específicos basados en los pisos y personajes.</span></div>
                     </div>`;
                 });
 
-                resDiv.innerHTML = html;
+                resDiv.innerHTML = htmlOrdenDia + htmlPersonajes;
                 btnImp.style.display = 'inline-block';
             } catch (e) {
                 console.error(e);
-                resDiv.innerHTML = `<p style="grid-column:1/-1; text-align:center; padding:60px; color:red;">Error al generar el set de 15 tarjetas. Reintenta.</p>`;
+                resDiv.innerHTML = `<p style="grid-column:1/-1; text-align:center; padding:60px; color:red;">Error al generar el set. Reintenta.</p>`;
             } finally {
                 btnGen.disabled = false;
             }
