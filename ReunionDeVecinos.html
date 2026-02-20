@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impro IA - Reunión de Vecinos 🎭</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --main: #2c3e50; --acc: #e67e22; --hi: #2980b9; --bg: #fdfdfd; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background: var(--bg); padding: 20px; color: var(--main); }
+        
+        .no-print { text-align: center; margin-bottom: 20px; }
+        h1 { font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .subtitulo { font-size: 0.95em; color: #444; margin-bottom: 25px; line-height: 1.5; }
+        .regla { display: block; font-weight: bold; color: #c0392b; margin-top: 5px; }
+        
+        .botones-wrap { display: flex; justify-content: center; gap: 10px; }
+        
+        button { 
+            padding: 15px 25px; font-weight: bold; cursor: pointer; 
+            color: white; border: none; border-radius: 8px; 
+            text-transform: uppercase; transition: all 0.1s;
+        }
+        
+        #btn-generar { background: var(--acc); box-shadow: 0 4px 0 #d35400; }
+        #btn-imprimir { background: #e74c3c; box-shadow: 0 4px 0 #c0392b; }
+        
+        button:active { transform: translateY(3px); box-shadow: none; }
+        button:disabled { background: #ccc; box-shadow: none; opacity: 0.8; cursor: not-allowed; }
+        
+        #resultado { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+            background: white; border: 1px solid #ccc; max-width: 1200px; margin: 0 auto; 
+        }
+        
+        .tarjeta { 
+            padding: 20px; border-right: 1px dashed #ccc; border-bottom: 1px dashed #ccc; 
+            min-height: 350px; background: #fff; 
+            display: flex; flex-direction: column;
+        }
+        
+        .t-num { color: var(--hi); font-weight: 900; font-size: 1.1em; border-bottom: 2px solid var(--acc); display: inline-block; margin-bottom: 15px; }
+        
+        .item { margin-bottom: 10px; }
+        .item b { display: block; font-size: 0.7em; color: #7f8c8d; text-transform: uppercase; margin-bottom: 1px; }
+        .item span { font-size: 1em; font-weight: 500; color: #2c3e50; display: block; line-height: 1.2; }
+
+        .aviso { background: #fff4e5; border: 1px solid var(--acc); padding: 10px; margin-top: auto; border-radius: 5px; }
+        .aviso b { color: #d35400; font-size: 0.75em; }
+        .aviso span { font-style: italic; font-size: 0.9em; }
+
+        @media print { 
+            @page { size: A4; margin: 0.8cm; }
+            .no-print, .noprint { display: none !important; } 
+            body { background: white; padding: 0; }
+            #resultado { 
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                border: 1px solid black !important;
+                width: 100% !important;
+            } 
+            .tarjeta { 
+                border: 1px dashed black !important; 
+                break-inside: avoid; 
+                padding: 15px !important;
+                min-height: 440px; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print">
+        <h1>Reunión de Vecinos 🏢</h1>
+        <div class="subtitulo">
+            <span class="regla">1- Escribe tu nombre en una tarjeta y te lo pones en una zona visible.</span>
+            <span class="regla">2- Lee tu "Aviso a Navegantes" y comparte lo que consideres necesario con todos/algunos de los demás antes de comenzar.</span>
+        </div>
+        <div class="botones-wrap">
+            <button id="btn-generar" onclick="prepararGeneracion()">Generar 12 Vecinos</button>
+            <button id="btn-imprimir" onclick="window.print()" style="display: none;">Imprimir (4 por hoja)</button>
+        </div>
+    </div>
+
+    <div id="resultado">
+        <p style="padding: 60px; text-align: center; grid-column: 1/-1; color: #7f8c8d;">Configura los géneros para convocar a la junta.</p>
+    </div>
+
+    <script>
+        const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+
+        async function prepararGeneracion() {
+            let numMasc = prompt("¿Cuántos personajes MASCULINOS quieres generar? (El resto hasta 12 serán femeninos)", "6");
+            
+            if (numMasc === null) return; // Usuario canceló
+            
+            let m = parseInt(numMasc);
+            if (isNaN(m) || m < 0) m = 6;
+            if (m > 12) m = 12;
+            
+            let f = 12 - m;
+            generar(m, f);
+        }
+
+        async function generar(masculinos, femeninos) {
+            const btnGen = document.getElementById('btn-generar');
+            const btnImp = document.getElementById('btn-imprimir');
+            const resDiv = document.getElementById('resultado');
+            
+            btnGen.disabled = true;
+            btnImp.style.display = 'none';
+            resDiv.innerHTML = `<p style="grid-column:1/-1; text-align:center; padding:60px;">Convocando a ${masculinos} hombres y ${femeninos} mujeres...</p>`;
+
+            const promptEspecífico = `Crea 12 personajes para una reunión de vecinos. Genera exactamente ${masculinos} personajes masculinos y ${femeninos} femeninos. Usa este formato exacto:
+Nombre: 
+Rasgo: 
+Historia: 
+Actitud: 
+Aviso a Navegantes: (Datos críticos para otros actores: cargos, conflictos históricos o secretos).
+No uses asteriscos. Tono realista o surrealista suave.`;
+
+            try {
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: promptEspecífico }] }]
+                    })
+                });
+
+                const data = await response.json();
+                const texto = data.candidates[0].content.parts[0].text.replace(/\*/g, '');
+                
+                const etiquetas = ["Nombre", "Rasgo", "Historia", "Actitud", "Aviso a Navegantes"];
+                const regex = new RegExp(`(${etiquetas.join('|')}):?\\s*([^\\n]+)`, 'gi');
+                
+                let hallazgos = [];
+                let match;
+                while ((match = regex.exec(texto)) !== null) {
+                    hallazgos.push({ etiqueta: match[1].toUpperCase(), valor: match[2].trim() });
+                }
+
+                let html = '';
+                let tNum = 1;
+                const camposPorTarjeta = 5;
+                
+                for (let i = 0; i < hallazgos.length; i += camposPorTarjeta) {
+                    html += `<div class="tarjeta"><span class="t-num">VECINO ${tNum++}</span>`;
+                    for (let j = 0; j < camposPorTarjeta; j++) {
+                        if (hallazgos[i+j]) {
+                            const esAviso = hallazgos[i+j].etiqueta === "AVISO A NAVEGANTES";
+                            html += `<div class="item ${esAviso ? 'aviso' : ''}">
+                                <b>${hallazgos[i+j].etiqueta}</b>
+                                <span>${hallazgos[i+j].valor}</span>
+                            </div>`;
+                        }
+                    }
+                    html += `</div>`;
+                }
+
+                resDiv.innerHTML = html;
+                btnImp.style.display = 'inline-block';
+
+            } catch (e) {
+                resDiv.innerHTML = `<p style="grid-column:1/-1; text-align:center; padding:60px; color:red;">Error al convocar. Reintenta.</p>`;
+            } finally {
+                btnGen.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
