@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -134,27 +135,13 @@
             btnImp.style.display = 'none';
             resDiv.innerHTML = `<p style="grid-column:1/-1; text-align:center; padding:60px;">Convocando a ${masculinos} vecinos y ${femeninos} vecinas...</p>`;
 
-            const promptEspecífico = `
-			
-			
-
-Crea 12 personajes distintos para una escena de improvisación situada en una reunión de vecinos. Genera ${masculinos} hombres y ${femeninos} mujeres. Cada personaje debe tener un rasgo, hábito, manía o historia que lo haga peculiar, raro, molesto o memorable. Mantén todo realista o ligeramente surrealista, pero que podría pasar en la vida real.
-Para cada personaje, incluye estos apartados:
-
-Nombre y mote/alias:
-Rasgo: Una peculiaridad destacable, manía, hábito extraño, gesto, olor, forma de hablar, etc.
-Breve historia: Algo que explique su comportamiento o lo haga más interesante.
-Forma de hablar o actitud: Cómo se comporta en la reunión, si aporta algo a la escena.
-Aviso a Navegantes: (opcional): Algo que los demás actores deben saber antes de empezar la impro para poder interactuar con el personaje, como un olor, un hábito constante, una queja habitual de reuniones anteriores, un gesto oculto, o algo que afecta directamente a la interacción. Solo se incluye si es relevante para mejorar la improvisación; si no es necesario, se deja vacío o se indica “no aplica”. Puede ser también que tenga un mote entre los demás vecinos, que este personaje desconozca.
-
-Entrega la lista de 12 personajes de forma clara, numerada y lista para usar en una improvisación, asegurándote de que haya variedad de rasgos y niveles de impacto en la escena.
-
-			
-			
-			`;
-
-
-
+            const promptEspecífico = `Crea 12 personajes para una reunión de vecinos. Genera exactamente ${masculinos} personajes masculinos y ${femeninos} femeninos. Usa este formato exacto:
+Nombre: 
+Rasgo: 
+Historia: 
+Actitud: 
+Aviso a Navegantes: (Datos críticos para otros actores: cargos como presidente/secretario, conflictos históricos específicos con otros vecinos o secretos).
+No uses asteriscos. Tono realista o surrealista suave.`;
 
             try {
                 const response = await fetch(URL_WORKER, {
@@ -168,7 +155,7 @@ Entrega la lista de 12 personajes de forma clara, numerada y lista para usar en 
                 const data = await response.json();
                 const texto = data.candidates[0].content.parts[0].text.replace(/\*/g, '');
                 
-                const etiquetas = ["Nombre y mote/alias", "Rasgo", "Historia", "Actitud", "Aviso a Navegantes"];
+                const etiquetas = ["Nombre", "Rasgo", "Historia", "Actitud", "Aviso a Navegantes"];
                 const regex = new RegExp(`(${etiquetas.join('|')}):?\\s*([^\\n]+)`, 'gi');
                 
                 let hallazgos = [];
