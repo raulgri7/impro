@@ -10,6 +10,7 @@
         * { box-sizing: border-box; }
         body { font-family: 'Roboto', sans-serif; background: var(--bg); padding: 20px; color: var(--main); }
         
+        /* Cabecera y Reglas */
         .no-print { text-align: center; margin-bottom: 20px; }
         h1 { font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
         .subtitulo { font-size: 0.95em; color: #444; margin-bottom: 25px; line-height: 1.5; }
@@ -23,26 +24,37 @@
             text-transform: uppercase; transition: all 0.1s;
         }
         
-        #btn-generar { background: var(--acc); box-shadow: 0 4px 0 #d35400; }
+        #btn-abrir-config { background: var(--acc); box-shadow: 0 4px 0 #d35400; }
         #btn-imprimir { background: #e74c3c; box-shadow: 0 4px 0 #c0392b; }
         
         button:active { transform: translateY(3px); box-shadow: none; }
         button:disabled { background: #ccc; box-shadow: none; opacity: 0.8; cursor: not-allowed; }
+
+        /* Modal Desplegable */
+        #modal-genero {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; padding: 30px; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 100; text-align: center; border: 2px solid var(--main);
+        }
+        .overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 90; }
         
+        select { padding: 10px; font-size: 1.1em; border-radius: 5px; margin: 15px 0; width: 100%; cursor: pointer; }
+
+        /* Estilos Tarjetas */
         #resultado { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
             background: white; border: 1px solid #ccc; max-width: 1200px; margin: 0 auto; 
         }
         
         .tarjeta { 
             padding: 20px; border-right: 1px dashed #ccc; border-bottom: 1px dashed #ccc; 
-            min-height: 350px; background: #fff; 
-            display: flex; flex-direction: column;
+            min-height: 350px; background: #fff; display: flex; flex-direction: column;
         }
         
         .t-num { color: var(--hi); font-weight: 900; font-size: 1.1em; border-bottom: 2px solid var(--acc); display: inline-block; margin-bottom: 15px; }
-        
         .item { margin-bottom: 10px; }
         .item b { display: block; font-size: 0.7em; color: #7f8c8d; text-transform: uppercase; margin-bottom: 1px; }
         .item span { font-size: 1em; font-weight: 500; color: #2c3e50; display: block; line-height: 1.2; }
@@ -53,20 +65,10 @@
 
         @media print { 
             @page { size: A4; margin: 0.8cm; }
-            .no-print, .noprint { display: none !important; } 
+            .no-print, .noprint, #modal-genero, .overlay { display: none !important; } 
             body { background: white; padding: 0; }
-            #resultado { 
-                display: grid !important;
-                grid-template-columns: 1fr 1fr !important;
-                border: 1px solid black !important;
-                width: 100% !important;
-            } 
-            .tarjeta { 
-                border: 1px dashed black !important; 
-                break-inside: avoid; 
-                padding: 15px !important;
-                min-height: 440px; 
-            }
+            #resultado { display: grid !important; grid-template-columns: 1fr 1fr !important; border: 1px solid black !important; width: 100% !important; } 
+            .tarjeta { border: 1px dashed black !important; break-inside: avoid; padding: 15px !important; min-height: 440px; }
         }
     </style>
 </head>
@@ -79,46 +81,65 @@
             <span class="regla">2- Lee tu "Aviso a Navegantes" y comparte lo que consideres necesario con todos/algunos de los demás antes de comenzar.</span>
         </div>
         <div class="botones-wrap">
-            <button id="btn-generar" onclick="prepararGeneracion()">Generar 12 Vecinos</button>
+            <button id="btn-abrir-config" onclick="toggleModal(true)">Generar 12 Vecinos</button>
             <button id="btn-imprimir" onclick="window.print()" style="display: none;">Imprimir (4 por hoja)</button>
         </div>
     </div>
 
+    <div class="overlay" id="overlay" onclick="toggleModal(false)"></div>
+    <div id="modal-genero">
+        <h3>Configurar Géneros</h3>
+        <p>¿Cuántos personajes <b>MASCULINOS</b>?</p>
+        <select id="select-masculinos">
+            </select>
+        <p style="font-size: 0.85em; color: #666;">El resto hasta 12 serán femeninos.</p>
+        <button id="btn-generar" onclick="confirmarGeneracion()" style="background: var(--hi); width: 100%;">¡Generar Personajes!</button>
+    </div>
+
     <div id="resultado">
-        <p style="padding: 60px; text-align: center; grid-column: 1/-1; color: #7f8c8d;">Configura los géneros para convocar a la junta.</p>
+        <p style="padding: 60px; text-align: center; grid-column: 1/-1; color: #7f8c8d;">Configura los géneros para comenzar la sesión.</p>
     </div>
 
     <script>
         const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
 
-        async function prepararGeneracion() {
-            let numMasc = prompt("¿Cuántos personajes MASCULINOS quieres generar? (El resto hasta 12 serán femeninos)", "6");
-            
-            if (numMasc === null) return; // Usuario canceló
-            
-            let m = parseInt(numMasc);
-            if (isNaN(m) || m < 0) m = 6;
-            if (m > 12) m = 12;
-            
-            let f = 12 - m;
+        // Llenar el dropdown automáticamente del 0 al 12
+        const selectMasc = document.getElementById('select-masculinos');
+        for (let i = 0; i <= 12; i++) {
+            let opt = document.createElement('option');
+            opt.value = i;
+            opt.innerHTML = i + (i === 1 ? " Hombre" : " Hombres");
+            if (i === 6) opt.selected = true; // Valor por defecto
+            selectMasc.appendChild(opt);
+        }
+
+        function toggleModal(show) {
+            document.getElementById('modal-genero').style.display = show ? 'block' : 'none';
+            document.getElementById('overlay').style.display = show ? 'block' : 'none';
+        }
+
+        function confirmarGeneracion() {
+            const m = parseInt(selectMasc.value);
+            const f = 12 - m;
+            toggleModal(false);
             generar(m, f);
         }
 
         async function generar(masculinos, femeninos) {
-            const btnGen = document.getElementById('btn-generar');
+            const btnGen = document.getElementById('btn-abrir-config');
             const btnImp = document.getElementById('btn-imprimir');
             const resDiv = document.getElementById('resultado');
             
             btnGen.disabled = true;
             btnImp.style.display = 'none';
-            resDiv.innerHTML = `<p style="grid-column:1/-1; text-align:center; padding:60px;">Convocando a ${masculinos} hombres y ${femeninos} mujeres...</p>`;
+            resDiv.innerHTML = `<p style="grid-column:1/-1; text-align:center; padding:60px;">Convocando a ${masculinos} vecinos y ${femeninos} vecinas...</p>`;
 
             const promptEspecífico = `Crea 12 personajes para una reunión de vecinos. Genera exactamente ${masculinos} personajes masculinos y ${femeninos} femeninos. Usa este formato exacto:
 Nombre: 
 Rasgo: 
 Historia: 
 Actitud: 
-Aviso a Navegantes: (Datos críticos para otros actores: cargos, conflictos históricos o secretos).
+Aviso a Navegantes: (Datos críticos para otros actores: cargos como presidente/secretario, conflictos históricos específicos con otros vecinos o secretos).
 No uses asteriscos. Tono realista o surrealista suave.`;
 
             try {
@@ -164,7 +185,7 @@ No uses asteriscos. Tono realista o surrealista suave.`;
                 btnImp.style.display = 'inline-block';
 
             } catch (e) {
-                resDiv.innerHTML = `<p style="grid-column:1/-1; text-align:center; padding:60px; color:red;">Error al convocar. Reintenta.</p>`;
+                resDiv.innerHTML = `<p style="grid-column:1/-1; text-align:center; padding:60px; color:red;">Error en la junta. Reintenta.</p>`;
             } finally {
                 btnGen.disabled = false;
             }
