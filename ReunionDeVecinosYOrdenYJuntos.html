@@ -49,6 +49,7 @@
         }
 
         .orden-dia { background-color: #f0f4f8 !important; border: 2px solid var(--hi) !important; }
+        .admin-fincas { background-color: #fff4f4 !important; border: 2px solid #c0392b !important; }
         
         .t-num { color: var(--hi); font-weight: 900; font-size: 1.1em; border-bottom: 2px solid var(--acc); display: inline-block; margin-bottom: 12px; }
         .item { margin-bottom: 10px; }
@@ -169,7 +170,7 @@
                 ? "IMPORTANTE: Cada personaje debe vivir en una vivienda distinta (piso y letra únicos)." 
                 : "IMPORTANTE: Algunos personajes pueden compartir vivienda (parejas, familia, compañeros). Si decides que dos o más personajes vivan en la misma casa, DEBES mencionar explícitamente el NOMBRE de los otros personajes con los que convive en sus respectivos apartados de Historia o Aviso a Navegantes.";
 
-            const promptEspecífico = `Crea ${total + 3} tarjetas para una reunión de vecinos. 
+            const promptEspecífico = `Crea ${total + 4} tarjetas para una reunión de vecinos. 
 1. Primero genera ${total} personajes distintos para una escena de improvisación. Genera ${masculinos} hombres y ${femeninos} mujeres. Distribúyelos en un edificio de 4 plantas (Bajo, 1º, 2º, 3º) con letras A, B y C. 
 ${reglaVivienda}
 
@@ -181,9 +182,9 @@ Breve historia: Algo que explique su comportamiento. (Si vive con alguien, indic
 Forma de hablar o actitud: Cómo se comporta en la reunión.
 Aviso a Navegantes: Información CRÍTICA que el resto de improvisadores deben saber sobre este personaje ANTES de empezar para que la interacción funcione. No des consejos de actuación, da datos contextuales para los demás (ej: deudas, olores, mala fama, vecino nuevo). Si vive con alguien, menciónalo también aquí claramente.
 
-Entrega la lista de ${total} personajes de forma clara, numerada y lista para usar, asegurándote de que los pisos generen conflictos de vecindad.
+2. Después genera 1 TARJETA de "Orden del Día". Debe tener 4-5 puntos a tratar. Estos puntos deben estar relacionados con los conflictos, pisos o historias de los personajes que acabas de crear. No olvides también que puedes incluir conflictos con zonas comunes como parkings, rellanos, trasteros, jardines interiores, piscinas, pista de padel, columpios, etc. Formato: Título: Orden del Día (Opción A/B/C), Puntos:.
 
-2. Después genera 3 TARJETAS de "Orden del Día" distintas. Cada una debe tener de 2 a 5 puntos a tratar. Estos puntos deben estar relacionados con los conflictos, pisos o historias de los personajes que acabas de crear.  Formato: Título: Orden del Día (Opción A/B/C), Puntos:.
+3. Por último, genera una tarjeta especial llamada "TÍTULO: TARJETA DEL ADMINISTRADOR". Esta tarjeta es para el moderador (el profesor). Debe contener 5 frases o estímulos externos para lanzar durante la reunión. Estas frases DEBEN ser congruentes con los personajes creados: si mencionas a un vecino por su nombre o piso para culparle de algo o pedirle explicaciones, asegúrate de que el género (vecino/vecina) y su rasgo o historia coincidan con lo generado anteriormente. Indica si la frase es para decir a todos, a alguien en concreto o a un minigrupo.
 
 No uses asteriscos ni negritas. Sé creativo, breve y asegura conflicto inmediato.`;
 
@@ -197,10 +198,16 @@ No uses asteriscos ni negritas. Sé creativo, breve y asegura conflicto inmediat
                 const data = await response.json();
                 const texto = data.candidates[0].content.parts[0].text.replace(/\*/g, '');
                 
-                const secciones = texto.split(/TÍTULO:/i);
-                const personajesTexto = secciones[0];
-                const ordenesTexto = secciones.slice(1);
+                // Dividir por los títulos principales
+                const seccionesOrden = texto.split(/TÍTULO: ORDEN DEL DÍA/i);
+                const personajesTexto = seccionesOrden[0];
+                const restoTexto = seccionesOrden.slice(1).join('TÍTULO: ORDEN DEL DÍA');
+                
+                const seccionesAdmin = restoTexto.split(/TÍTULO: TARJETA DEL ADMINISTRADOR/i);
+                const ordenesTexto = seccionesAdmin[0].split(/TÍTULO: ORDEN DEL DÍA/i).filter(t => t.trim().length > 0);
+                const adminTexto = seccionesAdmin[1] || "";
 
+                // Parsear Personajes
                 const etiquetasP = ["Nombre y mote/alias", "Piso y letra", "Rasgo", "Historia", "Actitud", "Aviso a Navegantes"];
                 const regexP = new RegExp(`(${etiquetasP.join('|')}):?\\s*([^\\n]+)`, 'gi');
                 let hallazgosP = [];
@@ -223,20 +230,31 @@ No uses asteriscos ni negritas. Sé creativo, breve y asegura conflicto inmediat
                     htmlPersonajes += `</div>`;
                 }
 
+                // Parsear Órdenes del Día
                 let htmlOrdenDia = '';
                 ordenesTexto.forEach((txt, index) => {
                     const puntosMatch = txt.match(/Puntos:?\s*([\s\S]+)/i);
                     const titulo = "ORDEN DEL DÍA " + (index + 1);
-                    const contenido = puntosMatch ? puntosMatch[1].trim().replace(/\n/g, '<br>• ') : txt;
+                    const contenido = puntosMatch ? puntosMatch[1].trim().replace(/\n/g, '<br>• ') : txt.trim().replace(/\n/g, '<br>• ');
                     
                     htmlOrdenDia += `<div class="tarjeta orden-dia">
                         <span class="t-num">${titulo}</span>
                         <div class="item"><b>Temas a tratar:</b><span>• ${contenido}</span></div>
-                        <div class="aviso"><b>Nota:</b><span>Conflictos específicos basados en los pisos y personajes.</span></div>
                     </div>`;
                 });
 
-                resDiv.innerHTML = htmlOrdenDia + htmlPersonajes;
+                // Parsear Tarjeta Administrador
+                let htmlAdmin = '';
+                if (adminTexto) {
+                    const frasesAdmin = adminTexto.trim().split('\n').filter(f => f.trim().length > 5);
+                    htmlAdmin = `<div class="tarjeta admin-fincas">
+                        <span class="t-num">HOJA DEL ADMINISTRADOR (PROFE)</span>
+                        <div class="item"><b>Estímulos coherentes con los vecinos:</b><span>• ${frasesAdmin.join('<br><br>• ')}</span></div>
+                        <div class="aviso"><b>Nota para el Profe:</b><span>Lanza estos estímulos para romper bloqueos o avivar conflictos específicos.</span></div>
+                    </div>`;
+                }
+
+                resDiv.innerHTML = htmlAdmin + htmlOrdenDia + htmlPersonajes;
                 btnImp.style.display = 'inline-block';
             } catch (e) {
                 console.error(e);
