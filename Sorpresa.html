@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impro Trigger IA ⚡</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050a0f;
+            --panel: #101a24;
+            --text: #00f2ff;
+            --border: #004d55;
+            --danger: #ff0055;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Share Tech Mono', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .main-frame {
+            border: 2px solid var(--border);
+            padding: 40px;
+            background: var(--panel);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.1);
+            max-width: 600px;
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            letter-spacing: 5px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        #stimulus-box {
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 20px 0;
+            text-transform: uppercase;
+            color: #fff;
+            text-shadow: 0 0 10px var(--text);
+        }
+
+        .category {
+            font-size: 0.8rem;
+            color: var(--danger);
+            margin-bottom: 5px;
+        }
+
+        .grid-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid var(--text);
+            color: var(--text);
+            padding: 15px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background: var(--text);
+            color: var(--bg);
+            box-shadow: 0 0 15px var(--text);
+        }
+
+        button:active { transform: scale(0.95); }
+
+        .loading { opacity: 0.5; pointer-events: none; }
+
+        /* Escaneado visual */
+        .scanner {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--text);
+            opacity: 0.3;
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-frame">
+        <div class="scanner"></div>
+        <h1>ESTÍMULO EXTERNO IA</h1>
+        
+        <div id="container">
+            <div class="category" id="cat-label">SISTEMA LISTO</div>
+            <div id="stimulus-box">PULSA PARA INTERRUMPIR LA ESCENA</div>
+        </div>
+
+        <div class="grid-buttons">
+            <button onclick="getTrigger('sensorial')">Olfato/Oído</button>
+            <button onclick="getTrigger('fisico')">Impulso Físico</button>
+            <button onclick="getTrigger('entorno')">Cambio Entorno</button>
+            <button onclick="getTrigger('urgente')">¡SORPRESA!</button>
+        </div>
+    </div>
+
+    <script>
+        const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playAlertSound(freq = 440) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+        }
+
+        async function getTrigger(tipo) {
+    const box = document.getElementById('stimulus-box');
+    const label = document.getElementById('cat-label');
+    const container = document.querySelector('.main-frame');
+    
+    container.classList.add('loading');
+    playAlertSound(880);
+    box.innerText = "PROCESANDO...";
+
+    // PROMPT BLINDADO: Instrucciones ultra-específicas para evitar listas
+    let contextoIA = "Actúa como un director de improvisación teatral. ";
+    let restriccion = " IMPORTANTE: Responde ÚNICAMENTE con una frase corta. Prohibido dar listas, prohibido dar opciones, prohibido usar números. Solo una acción.";
+    
+    let mision = "";
+    if(tipo === 'sensorial') mision = "Genera un estímulo sensorial repentino (olor, sonido o sabor).";
+    if(tipo === 'fisico') mision = "Genera una sensación física interna o externa para el actor.";
+    if(tipo === 'entorno') mision = "Genera un cambio climático o ambiental repentino en el lugar.";
+    if(tipo === 'urgente') mision = "Genera un evento externo disruptivo o una noticia inesperada.";
+
+    const promptFinal = contextoIA + mision + restriccion;
+
+    try {
+        const response = await fetch(URL_WORKER, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: promptFinal }] }] })
+        });
+
+        const data = await response.json();
+        let texto = data.candidates[0].content.parts[0].text;
+        
+        // Limpieza extra por si la IA se salta las reglas
+        // Nos quedamos solo con la primera frase o línea si devuelve varias
+        texto = texto.split('\n')[0].split('.')[0] + ".";
+
+        label.innerText = "ALERTA: " + tipo.toUpperCase();
+        box.innerText = texto.toUpperCase(); // En mayúsculas queda más "tecnológico"
+        playAlertSound(660);
+
+    } catch (error) {
+        box.innerText = "FALLO DE CONEXIÓN";
+    } finally {
+        container.classList.remove('loading');
+    }
+}
+    </script>
+</body>
+</html>

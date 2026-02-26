@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Impro Master Plan ⚡</title>
+    <style>
+        :root { --accent: #ff4757; --bg: #ffffff; --text: #2f3542; }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .wrapper { max-width: 1000px; margin: 0 auto; }
+        
+        header { border-bottom: 4px solid #000; padding: 20px 0; display: flex; justify-content: space-between; align-items: center; }
+        h1 { margin: 0; font-size: 2rem; letter-spacing: -1px; }
+        
+        .main-btn { background: #000; color: #fff; border: none; padding: 15px 30px; cursor: pointer; font-weight: bold; border-radius: 4px; }
+        .main-btn:hover { background: var(--accent); }
+
+        h2 { font-size: 1.5rem; margin-top: 40px; color: var(--accent); border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        
+        .game-item { padding: 25px 0; border-bottom: 1px solid #eee; position: relative; }
+        .game-item:last-child { border-bottom: none; }
+        
+        .game-title { font-size: 1.4rem; font-weight: 800; display: block; margin-bottom: 10px; color: #000; text-transform: uppercase; }
+        .game-desc { font-size: 1.1rem; line-height: 1.6; color: #444; margin-bottom: 15px; }
+        
+        .refresh-single { background: #f1f2f6; border: none; padding: 8px 15px; cursor: pointer; font-size: 0.8rem; border-radius: 4px; transition: 0.2s; }
+        .refresh-single:hover { background: #dfe4ea; color: #000; }
+
+        .loading { opacity: 0.3; pointer-events: none; filter: blur(2px); }
+        .status-bar { font-size: 0.8rem; color: #aaa; text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <header>
+        <h1>CONTROL DE SESIÓN</h1>
+        <button class="main-btn" onclick="generarTodo()">GENERAR 11 JUEGOS NUEVOS</button>
+    </header>
+
+    <div id="session-content">
+        <section>
+            <h2>BLOQUE 1: COLECTIVOS (10-13 PERSONAS)</h2>
+            <div id="grupo-colectivo"></div>
+        </section>
+
+        <section>
+            <h2>BLOQUE 2: TRÍOS</h2>
+            <div id="grupo-trio"></div>
+        </section>
+
+        <section>
+            <h2>BLOQUE 3: PAREJAS</h2>
+            <div id="grupo-duo"></div>
+        </section>
+    </div>
+</div>
+
+<script>
+    const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+
+    const secciones = [
+        { id: 'colectivo', cant: 3, p: "Juego colectivo de cohesión para 13 personas. Explica dinámica, reglas y objetivo." },
+        { id: 'trio', cant: 4, p: "Ejercicio técnico para 3 personas con foco en escucha o conflicto." },
+        { id: 'duo', cant: 4, p: "Escena dramática o cómica para 2 personas con un disparador claro." }
+    ];
+
+    function init() {
+        secciones.forEach(s => {
+            const container = document.getElementById(`grupo-${s.id}`);
+            for(let i=1; i<=s.cant; i++) {
+                container.innerHTML += `
+                    <div class="game-item" id="${s.id}-${i}">
+                        <span class="game-title" id="t-${s.id}-${i}">---</span>
+                        <p class="game-desc" id="d-${s.id}-${i}">Esperando contenido...</p>
+                        <button class="refresh-single" onclick="refreshIndividual('${s.id}', ${i})">🔄 CAMBIAR ESTE JUEGO</button>
+                    </div>`;
+            }
+        });
+    }
+
+    async function generarTodo() {
+        document.getElementById('session-content').classList.add('loading');
+        
+        // Prompt maestro súper estricto
+        const promptTotal = `Genera 11 ejercicios de improvisación técnica. 
+        3 Colectivos, 4 Tríos, 4 Parejas. 
+        REGLA: No saludes, no digas "aquí tienes". 
+        Formato por cada juego: [TITULO] descripción detallada paso a paso de al menos 4 líneas. 
+        Separa cada uno de los 11 juegos EXCLUSIVAMENTE con el símbolo "@@".`;
+
+        try {
+            const res = await fetch(URL_WORKER, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ contents: [{ parts: [{ text: promptTotal }] }] })
+            });
+            const data = await res.json();
+            const texto = data.candidates[0].content.parts[0].text;
+            const juegos = texto.split('@@').filter(j => j.trim().length > 20);
+
+            let pointer = 0;
+            secciones.forEach(s => {
+                for(let i=1; i<=s.cant; i++) {
+                    if(juegos[pointer]) {
+                        parsearJuego(juegos[pointer], s.id, i);
+                    }
+                    pointer++;
+                }
+            });
+        } catch (e) { console.error(e); }
+        document.getElementById('session-content').classList.remove('loading');
+    }
+
+    async function refreshIndividual(id, i) {
+        const item = document.getElementById(`${id}-${i}`);
+        item.classList.add('loading');
+        
+        const prompt = `Inventa un ejercicio de impro para ${id === 'colectivo' ? '13' : (id === 'trio' ? '3' : '2')} personas. 
+        Formato: [TITULO] seguido de una explicación detallada de cómo se juega, reglas y variantes. No saludes.`;
+
+        try {
+            const res = await fetch(URL_WORKER, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            const data = await res.json();
+            parsearJuego(data.candidates[0].content.parts[0].text, id, i);
+        } catch (e) {}
+        item.classList.remove('loading');
+    }
+
+    function parsearJuego(texto, id, i) {
+        const raw = texto.replace(/\*/g, '').trim();
+        let titulo = "JUEGO NUEVO";
+        let desc = raw;
+
+        if (raw.includes(']') ) {
+            titulo = raw.split(']')[0].replace('[', '');
+            desc = raw.split(']')[1];
+        } else if (raw.includes('\n')) {
+            titulo = raw.split('\n')[0];
+            desc = raw.split('\n').slice(1).join(' ');
+        }
+
+        document.getElementById(`t-${id}-${i}`).innerText = titulo.trim();
+        document.getElementById(`d-${id}-${i}`).innerText = desc.trim();
+    }
+
+    init();
+</script>
+</body>
+</html>

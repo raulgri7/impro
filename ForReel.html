@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Reel Factory 2026 🎬</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #ff0050; --secondary: #00f2ea; --bg: #0b0b0e; --card-bg: #16161a; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { max-width: 800px; width: 100%; }
+        
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-weight: 900; letter-spacing: -1px; margin-bottom: 5px; font-size: 2.2rem; }
+        .header span { color: var(--primary); }
+        .date-badge { background: #333; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; color: var(--secondary); font-weight: bold; }
+
+        .card { background: var(--card-bg); border-radius: 15px; padding: 25px; margin-bottom: 20px; border: 1px solid #2a2a2a; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .card-label { position: absolute; top: -12px; left: 20px; background: var(--primary); padding: 3px 12px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .btn-main { background: white; color: black; border: none; padding: 18px 30px; border-radius: 40px; font-weight: 900; cursor: pointer; width: 100%; font-size: 1.2rem; transition: all 0.2s; margin-bottom: 30px; box-shadow: 0 0 20px rgba(255,255,255,0.1); }
+        .btn-main:hover { background: var(--secondary); transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,242,234,0.4); }
+        .btn-main:active { transform: translateY(1px); }
+        .btn-main:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+
+        .copy-btn { background: #2a2a2a; border: 1px solid #444; color: #aaa; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; float: right; transition: 0.2s; }
+        .copy-btn:hover { background: #444; color: white; border-color: var(--secondary); }
+
+        pre { white-space: pre-wrap; word-wrap: break-word; font-family: 'Inter', sans-serif; line-height: 1.6; color: #ddd; margin-top: 15px; font-size: 1rem; }
+        .noticia-title { color: var(--secondary); font-weight: 800; font-size: 1.4rem; margin-top: 10px; display: block; line-height: 1.2; }
+        
+        .loader { display: none; text-align: center; margin: 20px 0; font-weight: bold; color: var(--primary); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        .footer-note { text-align: center; font-size: 0.7rem; color: #555; margin-top: 40px; text-transform: uppercase; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>REEL<span>FACTORY</span></h1>
+        <div class="date-badge" id="currentDate">FEBRERO 2026</div>
+    </div>
+
+    <button class="btn-main" id="generateBtn" onclick="generateViralContent()">BUSCAR TENDENCIA Y GENERAR PROMPT</button>
+
+    <div id="loader" class="loader">ACCEDIENDO A REDES NEURONALES...</div>
+
+    <div id="resultArea" style="display: none;">
+        <div class="card">
+            <span class="card-label">ACTUALIDAD REAL</span>
+            <span id="newsTitle" class="noticia-title"></span>
+        </div>
+
+        <div class="card">
+            <span class="card-label">GUIÓN DE LOCUCIÓN</span>
+            <button class="copy-btn" onclick="copyText('scriptText')">Copiar Script</button>
+            <pre id="scriptText"></pre>
+        </div>
+
+        <div class="card" style="border-color: var(--secondary);">
+            <span class="card-label" style="background: var(--secondary); color: black;">PROMPT PARA IA DE VÍDEO (SORA/KLING)</span>
+            <button class="copy-btn" onclick="copyText('promptText')">Copiar Prompt</button>
+            <pre id="promptText" style="color: white; font-style: italic; font-weight: 500;"></pre>
+        </div>
+    </div>
+
+    <div class="footer-note">Sistema de Generación de Contenido Inmediato v2.6</div>
+</div>
+
+<script>
+    const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+
+    async function generateViralContent() {
+        const btn = document.getElementById('generateBtn');
+        const loader = document.getElementById('loader');
+        const resultArea = document.getElementById('resultArea');
+        
+        btn.disabled = true;
+        loader.style.display = 'block';
+        resultArea.style.display = 'none';
+
+        // Prompt ultra-restrictivo para evitar el pasado (2024/2025)
+        const prompt = `Actúa como un cazador de tendencias en tiempo real. 
+        ESTAMOS EN FEBRERO DE 2026. 
+        
+        TAREA:
+        1. Identifica una noticia REAL o un hito tecnológico/científico/cultural que esté ocurriendo o sea inminente en FEBRERO DE 2026. 
+        2. IMPORTANTE: Ignora cualquier evento de 2024 o 2025 (prohibido hablar de iPhone 16, Vision Pro, o IA antigua).
+        3. Escribe un SCRIPT viral de 30 segundos con un hook potente.
+        4. Crea un PROMPT visual para una IA de vídeo (estilo Sora/Kling) con detalles de cámara, luz y atmósfera.
+
+        RESPONDE EXACTAMENTE ASÍ (Sin asteriscos):
+        NOTICIA: [Título de la noticia de 2026]
+        SCRIPT: [El guión completo]
+        PROMPT_VIDEO: [El prompt detallado para generar el video]`;
+
+        try {
+            const response = await fetch(URL_WORKER, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+
+            const data = await response.json();
+            const fullText = data.candidates[0].content.parts[0].text;
+
+            // Limpiar y separar
+            const noticia = fullText.match(/NOTICIA:(.*)/i)?.[1] || "Actualidad 2026";
+            const script = fullText.match(/SCRIPT:([\s\S]*?)PROMPT_VIDEO:/i)?.[1] || "Error en guión";
+            const promptVideo = fullText.match(/PROMPT_VIDEO:([\s\S]*)/i)?.[1] || "Error en prompt visual";
+
+            document.getElementById('newsTitle').innerText = noticia.trim();
+            document.getElementById('scriptText').innerText = script.trim();
+            document.getElementById('promptText').innerText = promptVideo.trim();
+
+            resultArea.style.display = 'block';
+            
+            if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+
+        } catch (error) {
+            alert("Error: No se ha podido conectar con el presente.");
+        } finally {
+            btn.disabled = false;
+            loader.style.display = 'none';
+        }
+    }
+
+    function copyText(id) {
+        const text = document.getElementById(id).innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "¡COPIADO!";
+            btn.style.borderColor = "#00f2ea";
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.borderColor = "#444";
+            }, 2000);
+        });
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA Impro Slot Real 🎰</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d0d1a;
+            --slot-bg: #16213e;
+            --text-color: #ffffff;
+            --accent-color: #e94560;
+            --neon: #00ff00;
+        }
+
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.5rem;
+            color: var(--neon);
+            text-shadow: 0 0 15px var(--neon);
+            margin-bottom: 60px;
+            text-align: center;
+        }
+
+        .slot-machine {
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            padding: 50px 40px 40px 40px;
+            border-radius: 20px;
+            border: 4px solid #333;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            position: relative;
+        }
+
+        .slot-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .slot-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* LAS ETIQUETAS (LOS CARTELITOS) */
+        .slot-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            color: var(--neon);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px var(--neon);
+        }
+
+        .slot-reel {
+            background-color: #050510;
+            border: 3px solid var(--accent-color);
+            border-radius: 10px;
+            width: 250px;
+            height: 140px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 15px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0,0,0,1);
+        }
+
+        .slot-display {
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            line-height: 1.2;
+            transition: transform 0.1s ease-in-out;
+        }
+
+        .spinning {
+            animation: slotScroll 0.15s linear infinite;
+            filter: blur(2px);
+            opacity: 0.7;
+        }
+
+        @keyframes slotScroll {
+            0% { transform: translateY(-30px); }
+            100% { transform: translateY(30px); }
+        }
+
+        button {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #952d3e;
+            transition: all 0.1s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #952d3e;
+        }
+
+        button:disabled { opacity: 0.5; cursor: wait; }
+
+        @media (max-width: 900px) {
+            .slot-container { flex-direction: column; }
+            .slot-reel { width: 300px; height: 100px; }
+            h1 { font-size: 1.2rem; margin-top: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>IMPRO IA CASINO 🎰</h1>
+
+    <div class="slot-machine">
+        <div class="slot-container">
+            <div class="slot-column">
+                <div class="slot-label">¿Quiénes son?</div>
+                <div class="slot-reel">
+                    <div class="slot-display" id="reel1">ESPERANDO...</div>
+                </div>
+            </div>
+
+            <div class="slot-column">
+                <div class="slot-label">¿Dónde están?</div>
+                <div class="slot-reel">
+                    <div class="slot-display" id="reel2">ESPERANDO...</div>
+                </div>
+            </div>
+
+            <div class="slot-column">
+                <div class="slot-label">¿Qué ocurre?</div>
+                <div class="slot-reel">
+                    <div class="slot-display" id="reel3">ESPERANDO...</div>
+                </div>
+            </div>
+        </div>
+
+        <button id="spinButton">¡GENERAR ESCENA!</button>
+    </div>
+
+    <script>
+        const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        const placeholders = ["HÉROES", "ZOMBIES", "MARTE", "BÚNKER", "SECRETO", "BODA", "CÁRCEL", "MAGOS", "ASCENSOR"];
+
+        function playSound(type) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            if (type === 'click') {
+                osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+            } else if (type === 'stop') {
+                osc.frequency.setValueAtTime(250, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            }
+        }
+
+        const btn = document.getElementById('spinButton');
+        const displays = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
+
+        async function spin() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            btn.disabled = true;
+            
+            // Iniciar giro visual
+            displays.forEach(d => d.classList.add('spinning'));
+            
+            const shuffleInterval = setInterval(() => {
+                displays.forEach(d => d.innerText = placeholders[Math.floor(Math.random()*placeholders.length)]);
+                playSound('click');
+            }, 100);
+
+            const prompt = "Genera una situación de improvisación teatral. Responde solo con 3 frases cortas separadas por el símbolo '|'. 1: Dos personajes breves. 2: Un lugar breve. 3: Un conflicto corto. No uses negritas.";
+
+            try {
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                const data = await response.json();
+                const partes = data.candidates[0].content.parts[0].text.split('|').map(p => p.trim());
+
+                clearInterval(shuffleInterval);
+
+                // Parada secuencial
+                partes.forEach((texto, i) => {
+                    setTimeout(() => {
+                        displays[i].classList.remove('spinning');
+                        displays[i].innerText = texto;
+                        playSound('stop');
+                        if (i === 2) btn.disabled = false;
+                    }, i * 700);
+                });
+
+            } catch (error) {
+                clearInterval(shuffleInterval);
+                displays.forEach(d => {
+                    d.classList.remove('spinning');
+                    d.innerText = "Error";
+                });
+                btn.disabled = false;
+            }
+        }
+
+        btn.addEventListener('click', spin);
+    </script>
+</body>
+</html>

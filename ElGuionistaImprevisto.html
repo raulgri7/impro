@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>IMPRO - LÍNEAS FORZADAS 💬</title>
+    <style>
+        body { 
+            background: #e5ddd5; font-family: sans-serif; margin: 0; 
+            display: flex; flex-direction: column; height: 100vh;
+        }
+        #chat-container {
+            flex: 1; display: flex; flex-direction: column; justify-content: flex-end;
+            padding: 20px; overflow-y: auto; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+        }
+        .burbuja {
+            background: white; padding: 15px 25px; border-radius: 20px;
+            max-width: 70%; align-self: flex-start; margin-bottom: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2); font-size: 1.5rem;
+            position: relative; animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .burbuja::before {
+            content: ""; position: absolute; left: -10px; top: 10px;
+            border-style: solid; border-width: 10px 10px 10px 0;
+            border-color: transparent white transparent transparent;
+        }
+        @keyframes pop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        #input-area { background: #f0f0f0; padding: 20px; display: flex; gap: 15px; }
+        button {
+            flex: 1; background: #25d366; color: white; border: none; padding: 20px;
+            font-size: 1.5rem; font-weight: bold; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        button:active { background: #128c7e; transform: scale(0.98); }
+        button:disabled { background: #ccc; }
+    </style>
+</head>
+<body>
+
+    <div id="chat-container">
+        <div class="burbuja">¡Empezad la escena! Cuando diga una frase, debéis decirla tal cual.</div>
+    </div>
+
+    <div id="input-area">
+        <button id="btn-frase" onclick="obtenerFrase()">📥 NUEVA FRASE FORZADA</button>
+    </div>
+
+    <script>
+        const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+
+        async function obtenerFrase() {
+            const btn = document.getElementById('btn-frase');
+            const container = document.getElementById('chat-container');
+
+            btn.disabled = true;
+
+            const prompt = "Genera una frase corta para un ejercicio de improvisación. Debe ser una frase que rompa la escena, algo inesperado, emocional o absurdo. Máximo 10 palabras. Solo la frase, sin etiquetas ni comillas.";
+
+            try {
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                const data = await response.json();
+                const frase = data.candidates[0].content.parts[0].text.trim();
+                
+                // Crear nueva burbuja
+                const div = document.createElement('div');
+                div.className = 'burbuja';
+                div.innerText = frase;
+                container.appendChild(div);
+                
+                // Auto-scroll
+                container.scrollTop = container.scrollHeight;
+
+            } catch (err) {
+                const div = document.createElement('div');
+                div.className = 'burbuja';
+                div.style.background = '#ffcccc';
+                div.innerText = "Error de conexión. Di: '¡He olvidado mi nombre!'";
+                container.appendChild(div);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

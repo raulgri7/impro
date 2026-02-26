@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impro Flow - El Director 🎬</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #0a0a0a; --accent: #ff3e3e; --text: #eee; }
+        body { 
+            background: var(--bg); color: var(--text); font-family: 'Special Elite', cursive;
+            margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        /* Pantalla de Proyección */
+        #pantalla {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 40px; text-align: center; border-bottom: 2px solid #333;
+            background: radial-gradient(circle, #1a1a1a 0%, #0a0a0a 100%);
+        }
+
+        #escena-actual { font-size: 1.5rem; color: #888; margin-bottom: 20px; max-width: 800px; }
+        #orden-texto { 
+            font-family: 'Bebas Neue', sans-serif; font-size: 5rem; 
+            color: var(--accent); text-transform: uppercase; line-height: 1;
+            text-shadow: 0 0 20px rgba(255, 62, 62, 0.5);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Controles (Abajo) */
+        #controles { background: #151515; padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        
+        button {
+            padding: 15px; border: none; border-radius: 5px; cursor: pointer;
+            font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; transition: 0.2s;
+        }
+
+        .btn-main { background: var(--accent); color: white; grid-column: span 3; font-size: 1.8rem; }
+        .btn-sub { background: #333; color: #ccc; }
+        .btn-sub:hover { background: #444; color: white; }
+        button:active { transform: scale(0.95); }
+
+        /* Animación de entrada */
+        .flash { animation: flash-anim 0.5s ease-out; }
+        @keyframes flash-anim {
+            0% { background: #fff; opacity: 0.5; }
+            100% { background: transparent; opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="pantalla">
+        <div id="escena-actual">Pulsa "NUEVA ESCENA" para empezar...</div>
+        <div id="orden-texto">ESPERANDO ACCIÓN</div>
+    </div>
+
+    <div id="controles">
+        <button class="btn-main" onclick="nuevaEscena()">🎭 NUEVA ESCENA (IA)</button>
+        <button class="btn-sub" onclick="lanzarOrden('EMOCIÓN')">😊 CAMBIO EMOCIONAL</button>
+        <button class="btn-sub" onclick="lanzarOrden('ESTILO')">🎥 CAMBIO DE ESTILO</button>
+        <button class="btn-sub" onclick="lanzarOrden('ACCIÓN')">⚡ ACCIÓN FÍSICA</button>
+    </div>
+
+    <script>
+        const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+        const pantalla = document.getElementById('pantalla');
+        const txtEscena = document.getElementById('escena-actual');
+        const txtOrden = document.getElementById('orden-texto');
+
+        async function nuevaEscena() {
+            txtEscena.innerText = "Pensando situación...";
+            txtOrden.innerText = "PUNTUANDO...";
+            
+            const prompt = "Inventa una situación de improvisación para 2-3 personas muy breve (máximo 20 palabras). Ejemplo: 'Dos astronautas descubren que se han dejado las llaves de la nave fuera'.";
+
+            try {
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({contents: [{parts: [{text: prompt}]}]})
+                });
+                const d = await response.json();
+                txtEscena.innerText = d.candidates[0].content.parts[0].text.replace(/\*/g, '');
+                txtOrden.innerText = "¡ACCIÓN!";
+                pantalla.classList.add('flash');
+                setTimeout(() => pantalla.classList.remove('flash'), 500);
+            } catch(e) {
+                txtEscena.innerText = "Error de conexión. Improvisa tú: 'Un funeral donde el muerto no está'.";
+            }
+        }
+
+        async function lanzarOrden(tipo) {
+            txtOrden.style.transform = "scale(0.8)";
+            
+            const prompt = `Dame una sola orden de dirección de improvisación corta (máximo 3 palabras) de tipo ${tipo}. 
+            Ejemplo EMOCIÓN: 'Odio profundo'. Ejemplo ESTILO: 'Cine de terror'. Ejemplo ACCIÓN: 'Al suelo todos'.
+            No uses negritas.`;
+
+            try {
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({contents: [{parts: [{text: prompt}]}]})
+                });
+                const d = await response.json();
+                txtOrden.innerText = d.candidates[0].content.parts[0].text.replace(/\*/g, '').toUpperCase();
+                txtOrden.style.transform = "scale(1.1)";
+                
+                // Efecto visual
+                pantalla.style.backgroundColor = "#220000";
+                setTimeout(() => pantalla.style.backgroundColor = "transparent", 200);
+            } catch(e) {
+                txtOrden.innerText = "¡MÁS ENERGÍA!";
+            }
+        }
+    </script>
+</body>
+</html>
