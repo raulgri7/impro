@@ -23,12 +23,12 @@ window.ALUMNOS_POR_CLASE = {
         "Isra|M", "Julia|F", "María|F", "Natalia|F", "Paloma|F", "Yesi|F"
     ],
     "Jueves 5": [
-        "Alex|M", "David|M", "Elena|F", "Félix|M", "Fuen|F", 
+        "Alex|M", "David|M", "Elena|F", "Félix|M",  
         "Gema|F", "Héctor|M", "Irene|F", "Sara|F", "Óscar|M"
     ],
     "Jueves 7": [
         "Ángeles|F", "Aroa|F", "Beloki|F", "Elena|F", "Eva|F", "Jesús|M", 
-        "María|F", "Paula|F", "Pilar|F", "Raúl|M", "Rous|F", "Virgi|F"
+        "María|F", "Mery|F", "Paula|F", "Pilar|F", "Raúl|M", "Rous|F", "Virgi|F"
     ],
     "Viernes": [
         "Rubén|M", "Lucía|F", "Guillermo|M", "Marina|F", "Álvaro|M", 
