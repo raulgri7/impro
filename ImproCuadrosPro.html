@@ -55,12 +55,12 @@
 <div class="max-w-[900px] w-full flex flex-col gap-6">
     <header class="text-center my-6">
         <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-brand-indigoDark mb-2">Impro al Fresco 🎭</h1>
-        <p class="text-slate-500 text-lg">Sorteador con propuestas de escenario breves y dinámicas creadas por la IA</p>
+        <p class="text-slate-500 text-lg"></p>
     </header>
 
     <!-- Botón de Sorteo Principal -->
     <button id="btn-sortear" class="w-full bg-brand-primary hover:bg-brand-hover text-white text-xl font-bold py-5 px-6 rounded-2xl shadow-lg hover:shadow-indigo-500/30 transition-all duration-200 transform hover:-translate-y-0.5 disabled:bg-slate-300 disabled:cursor-not-allowed disabled:shadow-none uppercase tracking-wide" onclick="sortearElenco()">
-        Sortear Elenco y Pedir Propuestas
+        Sorteo
     </button>
 
     <div id="status-log" class="text-center text-lg text-brand-accent font-semibold min-h-[28px]"></div>
@@ -103,195 +103,215 @@
     const WORKER_URL = 'https://generador-impro.raul-grigelmo3.workers.dev';
     
     // BASE DE DATOS FIEL Y DETALLADA DE PERSONAJES REALES (Actrices homogeneizadas)
-    const bibliotecaPersonajes = [
-        { 
-            nombre: "La Paciente neurótica", 
-            escena: "Complejo de mucha castración", 
-            actriz: "Andrea", 
-            desc: "Mujer hiper-intelectualizada y obsesiva en plena sesión de terapia. Utiliza un lenguaje pedante plagado de terminología del psicoanálisis lacaniano y freudiano. Ve un 'complejo de castración' galopante en cualquier actitud masculina y sabotea sus propias relaciones verbalizando en bucle sus brotes del inconsciente y sus traumas edípicos. Analiza de forma enfermiza sus sueños, sus proyecciones y sus frustraciones sexuales con una rigidez mental que desquicia a cualquiera." 
-        },
-        { 
-            nombre: "Trini", 
-            escena: "Mujeres de vida fácil", 
-            actriz: "Andrea", 
-            desc: "Prostituta de calle, cínica, ruda y de vuelta de todo, armada con una verborrea popular brillante, ingeniosa y mordaz. Su gran conflicto es la traición de los hombres y la vida perra del oficio. Está en shock y consumida por el despecho tras descubrir a su chulo Julián follando en la era a pleno sol con otra mujer. Su lenguaje es directo, desgarrado y busca venganza o un desahogo inmediato para salvar su orgullo herido." 
-        },
-        { 
-            nombre: "La Juli", 
-            escena: "Entre rejas", 
-            actriz: "Andrea", 
-            desc: "Presa conflictiva, marginal y agresiva que está disfrutando de un tenso permiso carcelario. Su lenguaje es puramente callejero y carcelario; desconfía por completo de las pijas y de cualquier atisbo de autoridad. Su único fin en la calle es exprimir las horas buscando trapicheos rápidos, carteras que robar, alcohol o ajustar cuentas pendientes antes de tener que regresar a la celda a cumplir su condena." 
-        },
-        { 
-            nombre: "Pili", 
-            escena: "Edificio okupado", 
-            actriz: "Andrea", 
-            desc: "Chica antisistema y okupa radical de la vieja escuela con una actitud permanentemente desafiante. Está asignada a las tareas de vigilancia en los accesos del edificio okupado para 'dar el agua' (avisar) si viene la madero o los albañiles del desalojo. Defiende el caos, la 'Kultura alternativa' y odia profundamente las normas del sistema aburguesado, la propiedad privada y la policía." 
-        },
-        { 
-            nombre: "Mercedes (La Profesora)", 
-            escena: "Confidencias de mujer", 
-            actriz: "Bea G.", 
-            desc: "Mujer sofisticada, culta y profundamente aburrida, atrapada en la monotonía y la frialdad de su matrimonio burgués. Habla de forma lírica, existencialista y un punto pedante. Sus fijaciones son el hastío matrimonial, las tendencias de la revista Vogue, la música de Mozart y una necesidad desesperada y casi patológica de sentirse deseada por hombres ausentes o idilios platónicos para escapar de su realidad." 
-        },
-        { 
-            nombre: "Lola", 
-            escena: "Tiempos modernos", 
-            actriz: "Bea G.", 
-            desc: "Ferviente y ruidosa defensora ultra-conservadora de la decencia, la moral católica tradicional y las buenas costumbres. Considera que cualquier actitud moderna, desinhibida o de liberación sexual es un pecado mortal que el Papa condena firmemente. Aborda a la gente con un tono inquisitorial y fanático para advertirles, con lujo de detalles, que irán derechos al fuego eterno del infierno por inmorales." 
-        },
-        { 
-            nombre: "La Rubia de la ecografía", 
-            escena: "Ecografía muy húmeda", 
-            actriz: "Bea G.", 
-            desc: "Mujer embarazada en un estado de nerviosismo e histeria absoluto en la sala de espera de una clínica. Está a punto de hacerse una ecografía y, por orden médica, lleva retenida en la vejiga una cantidad ingente e insostenible de pis. Su única obsesión es encontrar a su novio Paco (o Tano) para que la acompañe en los ejercicios de respiración antes de que la presión venza y se mee encima delante de todos." 
-        },
-        { 
-            nombre: "La Doctora de hospital", 
-            escena: "Azul y rojo", 
-            actriz: "Bea O.", 
-            desc: "Médico de urgencias fría, pragmática, sarcástica y completamente saboteada por la burocracia y la falta de medios del hospital. No tiene paciencia ni empatía para los dramas emocionales o las metáforas poéticas de los pacientes. Le saca de quicio a nivel profesional que la gente empiece a ponerse físicamente de color azul brillante por culpa de puros bajones amorosos o desengaños románticos." 
-        },
-        { 
-            nombre: "La Morena de la ecografía", 
-            escena: "Ecografía muy húmeda", 
-            actriz: "Bea O.", 
-            desc: "Mujer embarazada que comparte la sala de espera en un estado de tortura física insoportable, aguantando desesperadamente unas ganas épicas de orinar necesarias para su examen médico. Su universo estalla al descubrir en la clínica que el padre de su futuro hijo es Paco (o Tano), el novio de la paciente Rubia que está sentada a su lado, desatando una guerra de celos gestacionales bajo presión vesical extrema." 
-        },
-        { 
-            nombre: "Carmen", 
-            escena: "Sinceridad", 
-            actriz: "Elena", 
-            desc: "Esposa de clase alta, elegante, sofisticada pero herida de muerte y llena de una ira gélida y contenida. Ha quedado en un café con Isabel, la amante de su marido Alfredo, con el único objetivo de desarmar su cinismo, defender su territorio y destrozar la seguridad de la joven mediante una humillación psicológica sutil, educada, pero implacable y letal." 
-        },
-        { 
-            nombre: "La Paciente azul", 
-            escena: "Azul y rojo", 
-            actriz: "Elena", 
-            desc: "Mujer profundamente melancólica y desolada que sufre una patología psicosomática absurda: se vuelve de color azul brillante debido a un desengaño amoroso desgarrador. Deambula rota por la indiferencia médica y confiesa que su único consuelo para aliviar el dolor y atenuar su color es refugiarse de incógnito en las filas traseras del Cine Postas a ver películas X en bucle." 
-        },
-        { 
-            nombre: "Maruchi", 
-            escena: "Mujeres de vida fácil", 
-            actriz: "Elena", 
-            desc: "Prostituta veterana de carretera, cansada del oficio y compañera de Trini. Es extremadamente quejica, pesimista y materialista. Su gran conflicto es el desgaste físico de la calle y la fijación con las miserias económicas. Protesta sin cesar por lo insufrible que es tener que aguantar a tipos babosos de cien kilos encima por tarifas ridículas solo para poder pagar el alquiler de la pensión." 
-        },
-        { 
-            nombre: "Isabel", 
-            escena: "Sinceridad", 
-            actriz: "Lucía", 
-            desc: "La amante moderna, desinhibida, segura de sí misma y carente de cualquier tipo de remordimiento moral o respeto por el matrimonio tradicional. Defiende una 'sinceridad descarnada y egoísta' como estilo de vida. Se enfrenta cara a cara con la esposa (Carmen), echándole en cara con crueldad y sin filtros que su matrimonio con Alfredo está muerto y que ella es una reliquia del pasado." 
-        },
-        { 
-            nombre: "Isa", 
-            escena: "Buenos días, señor doctor", 
-            actriz: "Lucía", 
-            desc: "Paciente hospitalaria desquiciada, infantil y perversa. Está peligrosamente obsesionada con el médico de planta, idealizándolo hasta el extremo. Es una celosa compulsiva, vigila su barra de labios como si fuera oro y compite con una agresividad pasiva y desquiciada contra Carmina para acaparar la atención del doctor y boicotear las revisiones de su rival." 
-        },
-        { 
-            nombre: "Olga", 
-            escena: "Tiempos modernos", 
-            actriz: "Lucía", 
-            desc: "Mujer liberada, elocuente y combativa que defiende la revolución sexual, el feminismo y la autonomía de su cuerpo. Reivindica con orgullo su derecho absoluto a meter hombres en su cama cuando le apetezca. Disfruta chocando de frente y escandalizando a las mentes pacatas y puritanas de su entorno, a las que acusa de reprimidas, envidiosas e hipócritas." 
-        },
-        { 
-            nombre: "Juanita", 
-            escena: "Edificio okupado", 
-            actriz: "María", 
-            desc: "Okupa sumisa, asustadiza e ingenua atrapada en las absurdas e inflexibles normas asamblearias del colectivo. Aparece llorando amargamente porque en la comunidad anarquista las parejas y las camas se sortean democráticamente; esa semana le ha tocado compartir colchón con un punki asqueroso sin dientes en lugar de estar con su verdadero chico, colapsando ante la norma comunal." 
-        },
-        { 
-            nombre: "Sor Justina", 
-            escena: "Amor divino, amor humano", 
-            actriz: "María", 
-            desc: "Monja novicia extremadamente joven, ingenua y atormentada por crisis místicas y sofocos incontrolables. Su gran pecado secreto es que no puede dejar de tener pensamientos impuros y carnales con Antón, el calvo huertero del convento. Vive en un colapso psicológico constante al confundir la fe devota con el deseo sexual reprimido y la culpa del pecado." 
-        },
-        { 
-            nombre: "Carmina", 
-            escena: "Buenos días, señor doctor", 
-            actriz: "Marta", 
-            desc: "Paciente ingresada que compite de forma histérica, ruidosa y teatral con Isa por el amor del médico guapo del hospital. Utiliza dolencias falsas, ataques simulados de hiperventilación, desmayos ensayados en los pasillos y cualquier artimaña dramática para boicotear a su rival de planta y conseguir que el doctor pase más tiempo tomándole el pulso a ella." 
-        },
-        { 
-            nombre: "Gloria", 
-            escena: "Secretos eróticos", 
-            actriz: "Marta", 
-            desc: "Señora burguesa, remilgada, asustadiza y fácilmente escandalizable ante cualquier muestra de ordinariez. Viene huyendo a toda prisa, sofocada y con el bolso apretado contra el pecho, tras salir corriendo de una cabina de masajes donde recibió una proposición sexual explícita por parte de su masajista, sintiendo que su decencia moral y estatus están bajo amenaza." 
-        },
-        { 
-            nombre: "Paquiña", 
-            escena: "Promesa de amor", 
-            actriz: "Patricia", 
-            desc: "Gallega completamente demente y peligrosa que se ha escapado del ala psiquiátrica de un hospital. Viaja haciendo auto-stop con una vieja maleta de cartón para volver a Orense. Habla con un marcado acento y lleva con orgullo delirante una tartera que contiene las auténticas orejas que le cortó a su marido Julián con unas tijeras de esquilar por haberle sido infiel." 
-        },
-        { 
-            nombre: "Ella (Esposa de los huevos)", 
-            escena: "Problemas conyugales", 
-            actriz: "Patricia", 
-            desc: "Esposa atrapada en una neurosis matrimonial obsesivo-compulsiva destructiva. Es capaz de iniciar una guerra psicológica maniática y despiadada con su marido basándose en discusiones absurdas y microscópicas, como la cantidad exacta de huevos fritos que consumen al año, el control del colesterol familiar o el miedo desmedido a contraer la salmonela." 
-        },
-        { 
-            nombre: "La Rizos", 
-            escena: "Edificio okupado", 
-            actriz: "Patricia", 
-            desc: "La líder ideológica indiscutible, guerrillera y portavoz del edificio okupado. Posee una energía física arrolladora y una retórica revolucionaria ensayada. Defiende a ultranza la autogestión y el asamblearismo radical, y está dispuesta a organizar barricadas con colchones y atrincherarse ante la policía para proteger el espacio de la comunidad." 
-        },
-        { 
-            nombre: "La Funcionaria", 
-            escena: "Confidencias de mujer", 
-            actriz: "Raquel", 
-            desc: "Trabajadora de un ministerio, amargada, gris y completamente absorbida por la burocracia del estado. Sufre una crisis de ansiedad existencial e histérica porque se acaba de manchar el vestido con café; se siente sola, siente que nadie la quiere y que el frío sistema administrativo la está aplastando viva, convirtiendo un pequeño incidente en un drama absoluto." 
-        },
-        { 
-            nombre: "Ella 2 (Cónyuge de los huevos)", 
-            escena: "Problemas conyugales", 
-            actriz: "Raquel", 
-            desc: "La otra parte de la pareja alienada por la rutina y la convivencia destructiva. Replica de manera cuadriculada, fría, cortante y matemática los ataques obsesivos de su cónyuge. Analiza con rigidez exasperante las bacterias del huevo, los presupuestos del supermercado y la falta de pasión, transformando una discusión culinaria en un juicio de divorcio implacable." 
-        },
-        { 
-            nombre: "El Presidente de Lituania", 
-            escena: "El honor de la patria", 
-            actriz: "Raquel", 
-            desc: "Alto cargo político adaptado para mujer: corrupta, altiva y clasista, pero en el fondo cobarde y rastrera. Sufre un ataque de pánico absoluto porque la están chantajeando con filtrar unas fotografías íntimas de ella en ropa interior masculina absurda, y necesita desviar fondos reservados de cultura urgentemente para tapar el escándalo y salvar su carrera." 
-        },
-        { 
-            nombre: "La Coja", 
-            escena: "Agosto", 
-            actriz: "Vic", 
-            desc: "Náufraga vestida con un viejo y raído chaqué masculino en una isla desierta. Es huraña, profundamente celosa, ansiosa y violenta. Está obsesionada y enamorada de una hoja de calendario del mes de 'Agosto' que muestra la foto de una mujer desnuda. No soporta el turno de la otra para estar con el papel y defiende su posesión amenazando salvajemente con un gran cuchillo de carnicera." 
-        },
-        { 
-            nombre: "La Tomates", 
-            escena: "Entre rejas", 
-            actriz: "Vic", 
-            desc: "Ex-convicta ruda, peligrosa y viuda de un Guardia Civil al que despreciaba profundamente. Es una mujer de acción, fría y de pocas palabras; su solución práctica e inmediata para solventar cualquier conflicto humano, discusión o injusticia social es meter veneno de matarratas inyectado con jeringuilla directamente en la comida de sus enemigos para liquidar el problema." 
-        },
-        { 
-            nombre: "La Masajista", 
-            escena: "Secretos eróticos", 
-            actriz: "Vic", 
-            desc: "Masajista terapéutica sumamente liberal, mística y defensora de la liberación de la energía sexual. Persigue de manera incansable y asfixiante a sus clientas burguesas y rígidas para intentar romper sus corazas morales mediante masajes atrevidos, tocamientos directos y técnicas de relajación tántrica extremas, sin importarle el escándalo público." 
-        },
-        { 
-            nombre: "La Manca", 
-            escena: "Agosto", 
-            actriz: "Yolanda", 
-            desc: "Náufraga manca de un brazo que viste un descolorido y roto traje de marinera en una isla desierta. Comparte con la Coja una obsesión enfermiza y posesiva por un recorte de calendario de 'Agosto'. Para que su compañera le deje disfrutar a solas de su turno con el papel, permite sumisamente que esta le vaya cortando trozos de su propio cuerpo para hacer caldo." 
-        },
-        { 
-            nombre: "La Doctora porteña", 
-            escena: "Complejo de mucha castración", 
-            actriz: "Yolanda", 
-            desc: "Psicoanalista argentina expeditiva, egocéntrica, dramática y de un carácter tajante e insoportable. Despacha los traumas de sus pacientes con desprecio, gritando con acento porteño que todo se debe a fijaciones fálicas infantiles o envidia del pene, mientras se mira al espejo y recomienda cirugías estéticas drásticas en clínicas clandestinas de Casablanca." 
-        },
-        { 
-            nombre: "La Madre Superiora", 
-            escena: "Amor divino, amor humano", 
-            actriz: "Yolanda", 
-            desc: "Líder implacable, severa y controladora que gobierna el convento con mano de hierro. Obsesionada con el pecado y el castigo divino, intimida a las jóvenes novicias con descripciones sádicas y terroríficas del fuego del infierno por culpa de los pensamientos impuros cotidianos, todo para ocultar que ella misma esconde una peligrosa fijación mística y carnal con el Padre Felipe." 
-        }
-    ];
+const bibliotecaPersonajes = [
+    // ANDREA
+    { 
+        nombre: "La Paciente neurótica", 
+        escena: "Complejo de mucha castración", 
+        actriz: "Andrea", 
+        desc: "Mujer definida como 'neurótica de vocación' que transita la escena en un llanto compulsivo e infantilizado. Su conflicto nace de una dependencia absoluta hacia Carlos, a quien ama y odia simultáneamente. Representa el trauma del 'objeto perdido' bajo la mirada de un psicoanálisis que reduce su angustia vital a la carencia de un símbolo fálico paterno." 
+    },
+    { 
+        nombre: "Trini", 
+        escena: "Mujeres de vida fácil", 
+        actriz: "Andrea", 
+        desc: "Prostituta de calle, ruda y cínica, que oculta tras su lenguaje vulgar un miedo atroz a la enfermedad (el sida) y a la indigencia. Vive atormentada por el abandono de Julián y la responsabilidad de una hija a la que desea salvar de su propio destino, mientras espera amargamente que el destino le mande 'todo a tomar por el culo'." 
+    },
+    { 
+        nombre: "La Juli", 
+        escena: "Entre rejas", 
+        actriz: "Andrea", 
+        desc: "Presa joven, con estética de 'colgada y drogata', que vive un permiso carcelario con los nervios a flor de piel. Su lenguaje es puramente jergal y su único asidero con la realidad es una obsesión erótica compulsiva por los hombres ('los troncos'), a quienes imagina desnudos como una vía de escape mental frente a la frialdad del talego." 
+    },
+    { 
+        nombre: "Pili", 
+        escena: "Edificio okupado", 
+        actriz: "Andrea", 
+        desc: "Punki radical totalmente integrada en la cultura de la okupación. Defiende con agresividad el azar y la propiedad colectiva frente a la moral tradicional. Su pragmatismo es absoluto: para ella, los hombres son objetos que se sortean y no entiende el apego sentimental de quienes aún creen en el matrimonio o los 'papeles'." 
+    },
 
+    // BEA G.
+    { 
+        nombre: "Mercedes (La Profesora)", 
+        escena: "Confidencias de mujer", 
+        actriz: "Bea G.", 
+        desc: "Mujer de mediana edad, profesora de instituto y esposa de un militar, que proyecta una imagen de estabilidad burguesa. Sin embargo, en la intimidad de un café, confiesa sentirse 'atrofiada, paralizada y muerta por dentro'. Su verdad es el hastío existencial de una convivencia monótona donde el amor ha dejado de sonar como en las películas para convertirse en simple rutina." 
+    },
+    { 
+        nombre: "Lola", 
+        escena: "Tiempos modernos", 
+        actriz: "Bea G.", 
+        desc: "Monja que viste en mallas y frecuenta gimnasios modernos para ocultar su identidad y vivir como 'una persona normal'. Su personaje es un puente cómico entre la fe católica y el culto al cuerpo; aunque defiende el dogma frente a su compañera de piso, termina aceptando con resignación irónica que los 'tiempos modernos' exigen nuevas formas de convivencia." 
+    },
+    { 
+        nombre: "La Rubia", 
+        escena: "Ecografía muy húmeda", 
+        actriz: "Bea G.", 
+        desc: "Embarazada primeriza, ingenua y dulce, que ha bebido dos litros de agua siguiendo estrictamente las instrucciones médicas. Su verdad se desmorona en un clímax esperpéntico al descubrir que su 'cielo' de pareja, Tano, es en realidad Paco, el marido de la mujer que tiene al lado y padre de sus otros cuatro hijos." 
+    },
+
+    // Bea O.
+    { 
+        nombre: "La Doctora", 
+        escena: "Azul y rojo", 
+        actriz: "Bea O.", 
+        desc: "Médico viuda y solitaria que diagnostica patologías imposibles con una timidez patológica que la hace ponerse roja físicamente. Representa la soledad del siglo XXI tras la bata blanca, buscando un café y una conexión humana con una paciente que, como ella, sufre de un exceso de corazón y falta de compañía." 
+    },
+    { 
+        nombre: "La Morena", 
+        escena: "Ecografía muy húmeda", 
+        actriz: "Bea O.", 
+        desc: "Mujer gruesa y experimentada en su cuarto embarazo, que afronta la maternidad con un humor ácido y una vejiga al límite. Su franqueza cruda sobre su marido Paco y su desprecio por las idealizaciones románticas la llevan a un final de impacto al descubrir la doble vida de su esposo en la sala de espera." 
+    },
+
+    // ELENA
+    { 
+        nombre: "Carmen", 
+        escena: "Sinceridad", 
+        actriz: "Elena", 
+        desc: "Mujer elegante y sofisticada que busca la complicidad de la esposa de su amante para mantener un 'equilibrio entre los tres'. Su verdad es el miedo a perder su posición frente a una rival más joven. Su mundo de seguridad aristocrática estalla cuando descubre que la sinceridad puede ser usada como una venganza mucho más refinada que la suya." 
+    },
+    { 
+        nombre: "La Paciente", 
+        escena: "Azul y rojo", 
+        actriz: "Elena", 
+        desc: "Persona que padece una patología cromática literal: tiene dos corazones y se pone de color azul cuando sufre por amor. Es la encarnación poética de la vulnerabilidad; alguien 'todo corazón' que ha pasado meses de azul intenso en la Plaza Mayor tras ser abandonada, convirtiendo sus sentimientos en un estigma físico visible." 
+    },
+    { 
+        nombre: "Maruchi", 
+        escena: "Mujeres de vida fácil", 
+        actriz: "Elena", 
+        desc: "Prostituta veterana marcada por la dureza de la calle y el refugio en el alcohol para olvidar desgracias pasadas. A través de un humor amargo y realista, critica la etiqueta de 'vida fácil' y muestra un pragmatismo cínico hacia el futuro de los hijos de quienes habitan el bar de alterne." 
+    },
+
+    // LUCÍA
+    { 
+        nombre: "Isabel", 
+        escena: "Sinceridad", 
+        actriz: "Lucía", 
+        desc: "Mujer calculadora y aristocrática que utiliza la verdad como un arma de destrucción masiva. Tras descubrir la infidelidad de su marido, decide seducir al esposo de la amante para jugar al mismo juego. Su desapego emocional es tal que termina la escena citando fríamente a Clark Gable: 'Francamente, querida... eso ya no me importa'." 
+    },
+    { 
+        nombre: "Isa", 
+        escena: "Buenos días, señor doctor", 
+        actriz: "Lucía", 
+        desc: "Anciana de 90 años hospitalizada que mantiene una competitividad feroz y coqueta con su compañera de habitación. Su verdad es el deseo agónico de seguir siendo atractiva y joven a los ojos del doctor, llegando a quitarse décadas de encima en sus papeles y a pelear por un espejo en la antesala de la muerte." 
+    },
+    { 
+        nombre: "Olga", 
+        escena: "Tiempos modernos", 
+        actriz: "Lucía", 
+        desc: "Joven universitaria liberada que entiende el sexo y el placer como una forma de libertad individual. Su choque frontal con la moral católica de su compañera de piso revela la convivencia de valores opuestos en la gran ciudad, defendiendo su derecho a 'hacer su vida normal' incluso bajo la mirada de una monja." 
+    },
+
+    // MARÍA
+    { 
+        nombre: "Juanita", 
+        escena: "Edificio okupado", 
+        actriz: "María", 
+        desc: "Ex-administrativa arrojada a la marginalidad por una hipoteca impagada. Es el personaje más trágico de la escena: una 'integrada' que intenta mantener inútilmente las formas de clase media (el libro de familia) en un entorno punki que desprecia la exclusividad matrimonial y acaba pidiendo a gritos la llegada de la policía." 
+    },
+    { 
+        nombre: "Sor Justina", 
+        escena: "Amor divino, amor humano", 
+        actriz: "María", 
+        desc: "Monja joven que vive una lucha tortuosa entre su devoción mística y un deseo carnal abrasador por Antón, el huertero. Su conflicto se manifiesta físicamente a través de sofocos, suspiros y el ritmo de canciones infantiles que golpea con el pie, revelando que la 'carne es débil' incluso dentro de los muros del convento." 
+    },
+
+    // MARTA
+    { 
+        nombre: "Carmina", 
+        escena: "Buenos días, señor doctor", 
+        actriz: "Marta", 
+        desc: "Anciana hospitalizada, 'enchufada al gota a gota', que conserva una ilusión romántica casi delirante. A pesar de estar desahuciada y llena de operaciones, planea desnudarse y ofrecerse al médico en cuanto la mire, buscando un último momento de pasión antes de que le pongan el biombo definitivo." 
+    },
+    { 
+        nombre: "Gloria", 
+        escena: "Secretos eróticos", 
+        actriz: "Marta", 
+        desc: "Mujer de mediana edad, conservadora y temerosa, que acude a un salón de masajes buscando relajación. Su personaje encarna el miedo a la propia sexualidad y a lo desconocido; se siente intimidada por el contacto físico y los relatos de la masajista, terminando por huir despavorida al verse incapaz de gestionar la provocación erótica." 
+    },
+
+    // PATRICIA
+    { 
+        nombre: "Paquiña", 
+        escena: "Promesa de amor", 
+        actriz: "Patricia", 
+        desc: "Mujer de ambiente rural marcada por una locura auténtica y violenta. Escapada de un psiquiátrico donde 'meten cuerda', Paquiña justifica haberle comido las orejas a su novio Julián como el cumplimiento sagrado de una promesa. Representa la lógica implacable y delirante de un honor antiguo llevado al canibalismo." 
+    },
+    { 
+        nombre: "Ella", 
+        escena: "Problemas conyugales", 
+        actriz: "Patricia", 
+        desc: "Sujeto de una pareja sumida en un 'orgasmo triste y rutinario'. Habita una depresión existencial profunda, sintiéndose desgraciada y vacía. Focaliza toda su frustración vital en el acto de freír huevos, convirtiendo un detalle doméstico en el detonante de una ruptura definitiva con un portazo en medio de la gran ciudad." 
+    },
+    { 
+        nombre: "La Rizos", 
+        escena: "Edificio okupado", 
+        actriz: "Patricia", 
+        desc: "Okupa veterana y ruda que ha pasado por siete casas en un mes. Rige su vida por la supervivencia y el desprecio a la moral de sus padres. Para ella, los hombres son como los edificios: están 'okupaos' por quien le toque en el sorteo, y no tolera los sentimentalismos de las nuevas incorporaciones al grupo." 
+    },
+
+    // RAQUEL
+    { 
+        nombre: "La Funcionaria", 
+        escena: "Confidencias de mujer", 
+        actriz: "Raquel", 
+        desc: "Mujer soltera que trabaja en un ministerio y se autodefine como una 'eterna inmadura'. Su vida ha sido una búsqueda desesperada y fracasada de un amor de película. Su verdad es la tristeza grabada en el cuerpo por haberse equivocado, refugiándose en el café y en conversaciones con extrañas para aliviar un dolor que siente como un 'hierro al rojo vivo'." 
+    },
+    { 
+        nombre: "Ella 2", 
+        escena: "Problemas conyugales", 
+        actriz: "Raquel", 
+        desc: "Pareja pragmática y racionalista que intenta tapar el vacío emocional con teorías absurdas sobre el zinc en la comida y la salmonela. Su incapacidad para empatizar con el dolor del otro la lleva a proponer comer huevos fritos cuando su mujer llora, demostrando una incomunicación crónica y ridícula." 
+    },
+    { 
+        nombre: "El Presidente", 
+        escena: "El honor de la patria", 
+        actriz: "Raquel", 
+        desc: "Estadista que gestiona un chantaje sexual con la frialdad de un gestor cultural. Representa la amoralidad del poder: a pesar de la evidencia fotográfica de la infidelidad de su mujer con otro presidente, su única preocupación es negociar el pago de diez millones de dólares a través de un 'acuerdo de cooperación cultural'." 
+    },
+
+    // VIC
+    { 
+        nombre: "La Coja", 
+        escena: "Agosto", 
+        actriz: "Vic", 
+        desc: "Náufraga vestida de chaqué raído en una isla desierta. Vive en un estado de alucinación por soledad extrema, peleando con su compañera por la posesión de una hoja de calendario ('Agosto') que representa a su objeto amado. Su verdad es el canibalismo simbólico: es capaz de cortar carne propia para ganar tiempo con un fetiche de papel." 
+    },
+    { 
+        nombre: "La Tomates", 
+        escena: "Entre rejas", 
+        actriz: "Vic", 
+        desc: "Presa andaluza que envenenó a su marido, un cabo de la Guardia Civil maltratador. Tras su apariencia de ama de casa de Úbeda, oculta una tragedia de violencia de género. Utiliza el humor negro y una supuesta inocencia por 'equivocación' con el matarratas para justificar su acto frente a sus compañeras de galería." 
+    },
+    { 
+        nombre: "La Masajista", 
+        escena: "Secretos eróticos", 
+        actriz: "Vic", 
+        desc: "Joven profesional, guapa y provocativa, que utiliza el contacto físico para desafiar la comodidad burguesa de sus clientas. Representa la libertad de una generación que no cree en ilusiones con hombres y propone el placer entre mujeres como la mejor forma de evitar los 'chascos' y peligros del mundo masculino." 
+    },
+
+    // YOLANDA
+    { 
+        nombre: "La Manca", 
+        escena: "Agosto", 
+        actriz: "Yolanda", 
+        desc: "Compañera de naufragio que impone una disciplina estricta de turnos en la isla. Su personaje muestra la capacidad humana de crear rituales sagrados a partir de la nada (un recorte de cartón) para no sucumbir a la locura total. Representa la autoridad en medio del caos de los harapos y la fiebre." 
+    },
+    { 
+        nombre: "La Doctora (Psicoanalista)", 
+        escena: "Complejo de mucha castración", 
+        actriz: "Yolanda", 
+        desc: "Psicoanalista porteña que oculta sus propias carencias tras un discurso dogmático sobre el Edipo. Su personaje culmina en una revelación esperpéntica y paródica: tras años de sufrir por 'falta de pene', se operó en Casablanca y ahora luce sus propios 'atributos' ante la paciente, rompiendo toda lógica analítica." 
+    },
+    { 
+        nombre: "La Madre Superiora", 
+        escena: "Amor divino, amor humano", 
+        actriz: "Yolanda", 
+        desc: "Autoridad del convento que intenta contener los 'malos pensamientos' de su comunidad mediante el miedo al infierno. Su personaje combina una sabiduría gamberra con un rigor hipócrita; critica los deseos de las demás mientras ella misma se 'pincha' y confiesa haber tenido sus propios incidentes en las misiones del Alto Volta." 
+    }
+];
     // NOMBRES BASE DE LAS ACTRICES (Limpia sin Alba ni Estela. Victoria es Vic. Beas diferenciadas.)
     const NOMBRES_INICIALES = [
         "Andrea", "Bea G.", "Bea O.", "Elena", "Lucía", 
@@ -381,7 +401,7 @@
             btn.textContent = "⚠️ Mínimo 2 actrices presentes";
         } else {
             btn.disabled = false;
-            btn.textContent = `Sortear Elenco (${sacoActivo} en el saco) y Pedir Propuestas`;
+            btn.textContent = `Sorteo (${sacoActivo} actrices en el saco)`;
         }
     }
 
@@ -451,7 +471,7 @@
             numPersonajes = 2; // Agota el saco
         }
 
-        status.innerText = `Sorteando elenco de ${numPersonajes} actrices y conectando con la IA...`;
+        status.innerText = `Sorteando ${numPersonajes} actrices...`;
 
         // Selección aleatoria del elenco activo
         const disponiblesCopia = [...participantesDisponibles];
