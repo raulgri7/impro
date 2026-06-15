@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impro al Fresco 🎭</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght=300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            bg: '#f8fafc',
+                            text: '#0f172a',
+                            primary: '#6366f1',
+                            hover: '#4f46e5',
+                            accent: '#f43f5e',
+                            card: '#ffffff',
+                            border: '#e2e8f0',
+                            indigoDark: '#1e1b4b'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Lexend', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .asistencia-card {
+            transition: all 0.2s ease;
+        }
+        .asistencia-card.ausente {
+            opacity: 0.5;
+            background: #f1f5f9;
+        }
+        .asistencia-card.ausente span {
+            text-decoration: line-through;
+            color: #94a3b8;
+        }
+        .asistencia-card.sorteado {
+            border-color: #cbd5e1;
+            background: #f1f5f9;
+        }
+        .badge-espera { background: #e0e7ff; color: #4338ca; }
+        .badge-jugado { background: #e2e8f0; color: #475569; }
+        .badge-ausente { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body class="bg-brand-bg text-brand-text p-5 md:p-10 flex flex-col items-center">
+
+<div class="max-w-[900px] w-full flex flex-col gap-6">
+    <header class="text-center my-6">
+        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-brand-indigoDark mb-2">Impro al Fresco 🎭</h1>
+        <p class="text-slate-500 text-lg">Sorteador con propuestas de escenario breves y dinámicas creadas por la IA</p>
+    </header>
+
+    <!-- Botón de Sorteo Principal -->
+    <button id="btn-sortear" class="w-full bg-brand-primary hover:bg-brand-hover text-white text-xl font-bold py-5 px-6 rounded-2xl shadow-lg hover:shadow-indigo-500/30 transition-all duration-200 transform hover:-translate-y-0.5 disabled:bg-slate-300 disabled:cursor-not-allowed disabled:shadow-none uppercase tracking-wide" onclick="sortearElenco()">
+        Sortear Elenco y Pedir Propuestas
+    </button>
+
+    <div id="status-log" class="text-center text-lg text-brand-accent font-semibold min-h-[28px]"></div>
+
+    <!-- Bloque de actrices convocadas en el sorteo actual -->
+    <div id="bloque-reparto" class="bg-brand-card border border-brand-border rounded-2xl p-6 shadow-sm hidden">
+        <h3 class="text-xl font-bold text-brand-indigoDark mb-4 uppercase tracking-wide">🎭 Reparto Convocado:</h3>
+        <div id="lista-actrices" class="flex flex-col gap-3"></div>
+    </div>
+
+    <!-- Bloque de las 5 propuestas dinámicas de la IA -->
+    <div id="bloque-propuestas" class="hidden">
+        <h3 class="text-xl font-bold text-brand-indigoDark mb-4 uppercase tracking-wide">📍 Elige una de estas 5 propuestas:</h3>
+        <div id="propuestas-lista" class="flex flex-col gap-4 mb-6"></div>
+    </div>
+
+    <!-- Panel de control de asistencia de actrices (Saco de Sorteo) -->
+    <div class="bg-brand-card border border-brand-border rounded-2xl p-6 shadow-sm">
+        <h3 class="text-xl font-bold text-brand-indigoDark mb-2 uppercase tracking-wide">⚙️ Control de Asistencia y Ronda</h3>
+        <p class="text-slate-500 text-sm mb-4 leading-relaxed">
+            Haz clic sobre cualquier actriz para marcarla como ausente hoy. El sorteador llevará el control para que jueguen todas de forma equitativa antes de repetir, evitando de forma inteligente que ninguna se quede sola al final de la ronda.
+        </p>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="asistencia-lista"></div>
+        
+        <button class="mt-5 bg-slate-600 hover:bg-slate-700 text-white text-xs font-semibold py-2 px-4 rounded-lg transition-colors" onclick="reiniciarRondaManual()">
+            🔄 Reiniciar Saco Manualmente
+        </button>
+    </div>
+
+    <!-- BOTÓN DE VOLVER (Añade este bloque aquí, dentro del contenedor) -->
+    <div class="mt-12 mb-8 text-center">
+        <a href="index.html" class="inline-block px-6 py-3 border border-slate-300 rounded-xl text-slate-500 font-semibold hover:bg-slate-100 transition-colors">
+            &larr; Volver al Menú Principal
+        </a>
+    </div>
+</div> <!-- ESTE ES EL CIERRE DEL CONTENEDOR PRINCIPAL -->
+
+<script>
+    const WORKER_URL = 'https://generador-impro.raul-grigelmo3.workers.dev';
+    
+    // BASE DE DATOS FIEL Y DETALLADA DE PERSONAJES REALES (Actrices homogeneizadas)
+    const bibliotecaPersonajes = [
+        { 
+            nombre: "La Paciente neurótica", 
+            escena: "Complejo de mucha castración", 
+            actriz: "Andrea", 
+            desc: "Mujer hiper-intelectualizada y obsesiva en plena sesión de terapia. Utiliza un lenguaje pedante plagado de terminología del psicoanálisis lacaniano y freudiano. Ve un 'complejo de castración' galopante en cualquier actitud masculina y sabotea sus propias relaciones verbalizando en bucle sus brotes del inconsciente y sus traumas edípicos. Analiza de forma enfermiza sus sueños, sus proyecciones y sus frustraciones sexuales con una rigidez mental que desquicia a cualquiera." 
+        },
+        { 
+            nombre: "Trini", 
+            escena: "Mujeres de vida fácil", 
+            actriz: "Andrea", 
+            desc: "Prostituta de calle, cínica, ruda y de vuelta de todo, armada con una verborrea popular brillante, ingeniosa y mordaz. Su gran conflicto es la traición de los hombres y la vida perra del oficio. Está en shock y consumida por el despecho tras descubrir a su chulo Julián follando en la era a pleno sol con otra mujer. Su lenguaje es directo, desgarrado y busca venganza o un desahogo inmediato para salvar su orgullo herido." 
+        },
+        { 
+            nombre: "La Juli", 
+            escena: "Entre rejas", 
+            actriz: "Andrea", 
+            desc: "Presa conflictiva, marginal y agresiva que está disfrutando de un tenso permiso carcelario. Su lenguaje es puramente callejero y carcelario; desconfía por completo de las pijas y de cualquier atisbo de autoridad. Su único fin en la calle es exprimir las horas buscando trapicheos rápidos, carteras que robar, alcohol o ajustar cuentas pendientes antes de tener que regresar a la celda a cumplir su condena." 
+        },
+        { 
+            nombre: "Pili", 
+            escena: "Edificio okupado", 
+            actriz: "Andrea", 
+            desc: "Chica antisistema y okupa radical de la vieja escuela con una actitud permanentemente desafiante. Está asignada a las tareas de vigilancia en los accesos del edificio okupado para 'dar el agua' (avisar) si viene la madero o los albañiles del desalojo. Defiende el caos, la 'Kultura alternativa' y odia profundamente las normas del sistema aburguesado, la propiedad privada y la policía." 
+        },
+        { 
+            nombre: "Mercedes (La Profesora)", 
+            escena: "Confidencias de mujer", 
+            actriz: "Bea G.", 
+            desc: "Mujer sofisticada, culta y profundamente aburrida, atrapada en la monotonía y la frialdad de su matrimonio burgués. Habla de forma lírica, existencialista y un punto pedante. Sus fijaciones son el hastío matrimonial, las tendencias de la revista Vogue, la música de Mozart y una necesidad desesperada y casi patológica de sentirse deseada por hombres ausentes o idilios platónicos para escapar de su realidad." 
+        },
+        { 
+            nombre: "Lola", 
+            escena: "Tiempos modernos", 
+            actriz: "Bea G.", 
+            desc: "Ferviente y ruidosa defensora ultra-conservadora de la decencia, la moral católica tradicional y las buenas costumbres. Considera que cualquier actitud moderna, desinhibida o de liberación sexual es un pecado mortal que el Papa condena firmemente. Aborda a la gente con un tono inquisitorial y fanático para advertirles, con lujo de detalles, que irán derechos al fuego eterno del infierno por inmorales." 
+        },
+        { 
+            nombre: "La Rubia de la ecografía", 
+            escena: "Ecografía muy húmeda", 
+            actriz: "Bea G.", 
+            desc: "Mujer embarazada en un estado de nerviosismo e histeria absoluto en la sala de espera de una clínica. Está a punto de hacerse una ecografía y, por orden médica, lleva retenida en la vejiga una cantidad ingente e insostenible de pis. Su única obsesión es encontrar a su novio Paco (o Tano) para que la acompañe en los ejercicios de respiración antes de que la presión venza y se mee encima delante de todos." 
+        },
+        { 
+            nombre: "La Doctora de hospital", 
+            escena: "Azul y rojo", 
+            actriz: "Bea O.", 
+            desc: "Médico de urgencias fría, pragmática, sarcástica y completamente saboteada por la burocracia y la falta de medios del hospital. No tiene paciencia ni empatía para los dramas emocionales o las metáforas poéticas de los pacientes. Le saca de quicio a nivel profesional que la gente empiece a ponerse físicamente de color azul brillante por culpa de puros bajones amorosos o desengaños románticos." 
+        },
+        { 
+            nombre: "La Morena de la ecografía", 
+            escena: "Ecografía muy húmeda", 
+            actriz: "Bea O.", 
+            desc: "Mujer embarazada que comparte la sala de espera en un estado de tortura física insoportable, aguantando desesperadamente unas ganas épicas de orinar necesarias para su examen médico. Su universo estalla al descubrir en la clínica que el padre de su futuro hijo es Paco (o Tano), el novio de la paciente Rubia que está sentada a su lado, desatando una guerra de celos gestacionales bajo presión vesical extrema." 
+        },
+        { 
+            nombre: "Carmen", 
+            escena: "Sinceridad", 
+            actriz: "Elena", 
+            desc: "Esposa de clase alta, elegante, sofisticada pero herida de muerte y llena de una ira gélida y contenida. Ha quedado en un café con Isabel, la amante de su marido Alfredo, con el único objetivo de desarmar su cinismo, defender su territorio y destrozar la seguridad de la joven mediante una humillación psicológica sutil, educada, pero implacable y letal." 
+        },
+        { 
+            nombre: "La Paciente azul", 
+            escena: "Azul y rojo", 
+            actriz: "Elena", 
+            desc: "Mujer profundamente melancólica y desolada que sufre una patología psicosomática absurda: se vuelve de color azul brillante debido a un desengaño amoroso desgarrador. Deambula rota por la indiferencia médica y confiesa que su único consuelo para aliviar el dolor y atenuar su color es refugiarse de incógnito en las filas traseras del Cine Postas a ver películas X en bucle." 
+        },
+        { 
+            nombre: "Maruchi", 
+            escena: "Mujeres de vida fácil", 
+            actriz: "Elena", 
+            desc: "Prostituta veterana de carretera, cansada del oficio y compañera de Trini. Es extremadamente quejica, pesimista y materialista. Su gran conflicto es el desgaste físico de la calle y la fijación con las miserias económicas. Protesta sin cesar por lo insufrible que es tener que aguantar a tipos babosos de cien kilos encima por tarifas ridículas solo para poder pagar el alquiler de la pensión." 
+        },
+        { 
+            nombre: "Isabel", 
+            escena: "Sinceridad", 
+            actriz: "Lucía", 
+            desc: "La amante moderna, desinhibida, segura de sí misma y carente de cualquier tipo de remordimiento moral o respeto por el matrimonio tradicional. Defiende una 'sinceridad descarnada y egoísta' como estilo de vida. Se enfrenta cara a cara con la esposa (Carmen), echándole en cara con crueldad y sin filtros que su matrimonio con Alfredo está muerto y que ella es una reliquia del pasado." 
+        },
+        { 
+            nombre: "Isa", 
+            escena: "Buenos días, señor doctor", 
+            actriz: "Lucía", 
+            desc: "Paciente hospitalaria desquiciada, infantil y perversa. Está peligrosamente obsesionada con el médico de planta, idealizándolo hasta el extremo. Es una celosa compulsiva, vigila su barra de labios como si fuera oro y compite con una agresividad pasiva y desquiciada contra Carmina para acaparar la atención del doctor y boicotear las revisiones de su rival." 
+        },
+        { 
+            nombre: "Olga", 
+            escena: "Tiempos modernos", 
+            actriz: "Lucía", 
+            desc: "Mujer liberada, elocuente y combativa que defiende la revolución sexual, el feminismo y la autonomía de su cuerpo. Reivindica con orgullo su derecho absoluto a meter hombres en su cama cuando le apetezca. Disfruta chocando de frente y escandalizando a las mentes pacatas y puritanas de su entorno, a las que acusa de reprimidas, envidiosas e hipócritas." 
+        },
+        { 
+            nombre: "Juanita", 
+            escena: "Edificio okupado", 
+            actriz: "María", 
+            desc: "Okupa sumisa, asustadiza e ingenua atrapada en las absurdas e inflexibles normas asamblearias del colectivo. Aparece llorando amargamente porque en la comunidad anarquista las parejas y las camas se sortean democráticamente; esa semana le ha tocado compartir colchón con un punki asqueroso sin dientes en lugar de estar con su verdadero chico, colapsando ante la norma comunal." 
+        },
+        { 
+            nombre: "Sor Justina", 
+            escena: "Amor divino, amor humano", 
+            actriz: "María", 
+            desc: "Monja novicia extremadamente joven, ingenua y atormentada por crisis místicas y sofocos incontrolables. Su gran pecado secreto es que no puede dejar de tener pensamientos impuros y carnales con Antón, el calvo huertero del convento. Vive en un colapso psicológico constante al confundir la fe devota con el deseo sexual reprimido y la culpa del pecado." 
+        },
+        { 
+            nombre: "Carmina", 
+            escena: "Buenos días, señor doctor", 
+            actriz: "Marta", 
+            desc: "Paciente ingresada que compite de forma histérica, ruidosa y teatral con Isa por el amor del médico guapo del hospital. Utiliza dolencias falsas, ataques simulados de hiperventilación, desmayos ensayados en los pasillos y cualquier artimaña dramática para boicotear a su rival de planta y conseguir que el doctor pase más tiempo tomándole el pulso a ella." 
+        },
+        { 
+            nombre: "Gloria", 
+            escena: "Secretos eróticos", 
+            actriz: "Marta", 
+            desc: "Señora burguesa, remilgada, asustadiza y fácilmente escandalizable ante cualquier muestra de ordinariez. Viene huyendo a toda prisa, sofocada y con el bolso apretado contra el pecho, tras salir corriendo de una cabina de masajes donde recibió una proposición sexual explícita por parte de su masajista, sintiendo que su decencia moral y estatus están bajo amenaza." 
+        },
+        { 
+            nombre: "Paquiña", 
+            escena: "Promesa de amor", 
+            actriz: "Patricia", 
+            desc: "Gallega completamente demente y peligrosa que se ha escapado del ala psiquiátrica de un hospital. Viaja haciendo auto-stop con una vieja maleta de cartón para volver a Orense. Habla con un marcado acento y lleva con orgullo delirante una tartera que contiene las auténticas orejas que le cortó a su marido Julián con unas tijeras de esquilar por haberle sido infiel." 
+        },
+        { 
+            nombre: "Ella (Esposa de los huevos)", 
+            escena: "Problemas conyugales", 
+            actriz: "Patricia", 
+            desc: "Esposa atrapada en una neurosis matrimonial obsesivo-compulsiva destructiva. Es capaz de iniciar una guerra psicológica maniática y despiadada con su marido basándose en discusiones absurdas y microscópicas, como la cantidad exacta de huevos fritos que consumen al año, el control del colesterol familiar o el miedo desmedido a contraer la salmonela." 
+        },
+        { 
+            nombre: "La Rizos", 
+            escena: "Edificio okupado", 
+            actriz: "Patricia", 
+            desc: "La líder ideológica indiscutible, guerrillera y portavoz del edificio okupado. Posee una energía física arrolladora y una retórica revolucionaria ensayada. Defiende a ultranza la autogestión y el asamblearismo radical, y está dispuesta a organizar barricadas con colchones y atrincherarse ante la policía para proteger el espacio de la comunidad." 
+        },
+        { 
+            nombre: "La Funcionaria", 
+            escena: "Confidencias de mujer", 
+            actriz: "Raquel", 
+            desc: "Trabajadora de un ministerio, amargada, gris y completamente absorbida por la burocracia del estado. Sufre una crisis de ansiedad existencial e histérica porque se acaba de manchar el vestido con café; se siente sola, siente que nadie la quiere y que el frío sistema administrativo la está aplastando viva, convirtiendo un pequeño incidente en un drama absoluto." 
+        },
+        { 
+            nombre: "Ella 2 (Cónyuge de los huevos)", 
+            escena: "Problemas conyugales", 
+            actriz: "Raquel", 
+            desc: "La otra parte de la pareja alienada por la rutina y la convivencia destructiva. Replica de manera cuadriculada, fría, cortante y matemática los ataques obsesivos de su cónyuge. Analiza con rigidez exasperante las bacterias del huevo, los presupuestos del supermercado y la falta de pasión, transformando una discusión culinaria en un juicio de divorcio implacable." 
+        },
+        { 
+            nombre: "El Presidente de Lituania", 
+            escena: "El honor de la patria", 
+            actriz: "Raquel", 
+            desc: "Alto cargo político adaptado para mujer: corrupta, altiva y clasista, pero en el fondo cobarde y rastrera. Sufre un ataque de pánico absoluto porque la están chantajeando con filtrar unas fotografías íntimas de ella en ropa interior masculina absurda, y necesita desviar fondos reservados de cultura urgentemente para tapar el escándalo y salvar su carrera." 
+        },
+        { 
+            nombre: "La Coja", 
+            escena: "Agosto", 
+            actriz: "Vic", 
+            desc: "Náufraga vestida con un viejo y raído chaqué masculino en una isla desierta. Es huraña, profundamente celosa, ansiosa y violenta. Está obsesionada y enamorada de una hoja de calendario del mes de 'Agosto' que muestra la foto de una mujer desnuda. No soporta el turno de la otra para estar con el papel y defiende su posesión amenazando salvajemente con un gran cuchillo de carnicera." 
+        },
+        { 
+            nombre: "La Tomates", 
+            escena: "Entre rejas", 
+            actriz: "Vic", 
+            desc: "Ex-convicta ruda, peligrosa y viuda de un Guardia Civil al que despreciaba profundamente. Es una mujer de acción, fría y de pocas palabras; su solución práctica e inmediata para solventar cualquier conflicto humano, discusión o injusticia social es meter veneno de matarratas inyectado con jeringuilla directamente en la comida de sus enemigos para liquidar el problema." 
+        },
+        { 
+            nombre: "La Masajista", 
+            escena: "Secretos eróticos", 
+            actriz: "Vic", 
+            desc: "Masajista terapéutica sumamente liberal, mística y defensora de la liberación de la energía sexual. Persigue de manera incansable y asfixiante a sus clientas burguesas y rígidas para intentar romper sus corazas morales mediante masajes atrevidos, tocamientos directos y técnicas de relajación tántrica extremas, sin importarle el escándalo público." 
+        },
+        { 
+            nombre: "La Manca", 
+            escena: "Agosto", 
+            actriz: "Yolanda", 
+            desc: "Náufraga manca de un brazo que viste un descolorido y roto traje de marinera en una isla desierta. Comparte con la Coja una obsesión enfermiza y posesiva por un recorte de calendario de 'Agosto'. Para que su compañera le deje disfrutar a solas de su turno con el papel, permite sumisamente que esta le vaya cortando trozos de su propio cuerpo para hacer caldo." 
+        },
+        { 
+            nombre: "La Doctora porteña", 
+            escena: "Complejo de mucha castración", 
+            actriz: "Yolanda", 
+            desc: "Psicoanalista argentina expeditiva, egocéntrica, dramática y de un carácter tajante e insoportable. Despacha los traumas de sus pacientes con desprecio, gritando con acento porteño que todo se debe a fijaciones fálicas infantiles o envidia del pene, mientras se mira al espejo y recomienda cirugías estéticas drásticas en clínicas clandestinas de Casablanca." 
+        },
+        { 
+            nombre: "La Madre Superiora", 
+            escena: "Amor divino, amor humano", 
+            actriz: "Yolanda", 
+            desc: "Líder implacable, severa y controladora que gobierna el convento con mano de hierro. Obsesionada con el pecado y el castigo divino, intimida a las jóvenes novicias con descripciones sádicas y terroríficas del fuego del infierno por culpa de los pensamientos impuros cotidianos, todo para ocultar que ella misma esconde una peligrosa fijación mística y carnal con el Padre Felipe." 
+        }
+    ];
+
+    // NOMBRES BASE DE LAS ACTRICES (Limpia sin Alba ni Estela. Victoria es Vic. Beas diferenciadas.)
+    const NOMBRES_INICIALES = [
+        "Andrea", "Bea G.", "Bea O.", "Elena", "Lucía", 
+        "María", "Marta", "Patricia", "Raquel", "Vic", "Yolanda"
+    ];
+
+    // ESTADO GLOBAL DEL SACO DE SORTEO Y ASISTENCIA
+    let participantesAusentes = new Set();  
+    let participantesSorteados = new Set(); 
+    let participantesDisponibles = [];     
+    
+    let personajesSeleccionados = [];
+    let listaOpcionesIA = [];
+
+    // Auxiliar para mezclar arrays
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function inicializarAsistencia() {
+        reinicializarParticipantesDisponibles();
+        renderAsistencia();
+    }
+
+    // Renderiza la cuadrícula de asistencia de forma reactiva y moderna
+    function renderAsistencia() {
+        const grid = document.getElementById('asistencia-lista');
+        grid.innerHTML = NOMBRES_INICIALES.map(nombre => {
+            const esAusente = participantesAusentes.has(nombre);
+            const esSorteado = participantesSorteados.has(nombre);
+            
+            let cardClass = "asistencia-card cursor-pointer border rounded-xl p-3 flex items-center gap-3 bg-white hover:border-indigo-500 shadow-sm";
+            let badgeText = "En espera";
+            let badgeClass = "badge-espera";
+            
+            if (esAusente) {
+                cardClass += " ausente";
+                badgeText = "Ausente";
+                badgeClass = "badge-ausente";
+            } else if (esSorteado) {
+                cardClass += " sorteado";
+                badgeText = "Sorteada";
+                badgeClass = "badge-jugado";
+            }
+            
+            const nombreMostrar = nombre === 'Vic' ? 'Victoria (Vic)' : nombre;
+            
+            return `
+                <div class="${cardClass}" onclick="toggleAsistencia('${nombre}')">
+                    <input type="checkbox" id="chk-${nombre}" ${esAusente ? 'checked' : ''} class="w-5 h-5 accent-brand-primary" onclick="event.stopPropagation(); toggleAsistencia('${nombre}')">
+                    <span class="font-semibold text-brand-indigoDark">${nombreMostrar}</span>
+                    <span class="text-[11px] px-2 py-0.5 rounded-full font-bold ml-auto ${badgeClass}">${badgeText}</span>
+                </div>
+            `;
+        }).join('');
+        
+        actualizarBotonSorteo();
+    }
+
+    function toggleAsistencia(nombre) {
+        if (participantesAusentes.has(nombre)) {
+            participantesAusentes.delete(nombre);
+        } else {
+            participantesAusentes.add(nombre);
+            participantesSorteados.delete(nombre);
+        }
+        reinicializarParticipantesDisponibles();
+        renderAsistencia();
+    }
+
+    function reinicializarParticipantesDisponibles() {
+        participantesDisponibles = NOMBRES_INICIALES.filter(nombre => 
+            !participantesAusentes.has(nombre) && !participantesSorteados.has(nombre)
+        );
+    }
+
+    function actualizarBotonSorteo() {
+        const btn = document.getElementById('btn-sortear');
+        const totalPresentes = NOMBRES_INICIALES.filter(n => !participantesAusentes.has(n)).length;
+        const sacoActivo = participantesDisponibles.length;
+        
+        if (totalPresentes < 2) {
+            btn.disabled = true;
+            btn.textContent = "⚠️ Mínimo 2 actrices presentes";
+        } else {
+            btn.disabled = false;
+            btn.textContent = `Sortear Elenco (${sacoActivo} en el saco) y Pedir Propuestas`;
+        }
+    }
+
+    function reiniciarRondaManual() {
+        participantesSorteados.clear();
+        reinicializarParticipantesDisponibles();
+        renderAsistencia();
+        const status = document.getElementById('status-log');
+        status.innerText = "🔄 Saco de actrices reiniciado correctamente.";
+        setTimeout(() => { if(status.innerText.includes("reiniciado")) status.innerText = ""; }, 3000);
+    }
+
+    async function llamarWorker(promptTexto) {
+        const response = await fetch(WORKER_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: promptTexto })
+        });
+        if (!response.ok) throw new Error("Error en la respuesta del servidor del Worker.");
+        const data = await response.json();
+        
+        if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+            return data.candidates[0].content.parts[0].text;
+        } else if (data.text) {
+            return data.text;
+        }
+        return data; 
+    }
+
+    async function sortearElenco() {
+        const btnSortear = document.getElementById('btn-sortear');
+        const status = document.getElementById('status-log');
+        const propuestasLista = document.getElementById('propuestas-lista');
+        
+        document.getElementById('bloque-propuestas').classList.add('hidden');
+        document.getElementById('bloque-reparto').classList.add('hidden');
+
+        btnSortear.disabled = true;
+        
+        let N = participantesDisponibles.length;
+        const totalPresentes = NOMBRES_INICIALES.filter(n => !participantesAusentes.has(n)).length;
+
+        // Reinicio automático de ronda inteligente
+        if (N < 2) {
+            participantesSorteados.clear();
+            reinicializarParticipantesDisponibles();
+            N = participantesDisponibles.length;
+            
+            const aviso = document.createElement('div');
+            aviso.className = "text-center text-brand-primary font-bold my-2";
+            aviso.innerText = "✨ ¡Todas han jugado! Iniciamos nueva ronda con las presentes.";
+            status.after(aviso);
+            setTimeout(() => aviso.remove(), 4000);
+        }
+
+        // Algoritmo matemático para evitar dejar a una sola rezagada al final
+        let numPersonajes = 2;
+        if (N >= 6) {
+            numPersonajes = Math.floor(Math.random() * 2) + 2; // 2 o 3 aleatorio
+        } else if (N === 5) {
+            numPersonajes = Math.floor(Math.random() * 2) + 2; // 2 o 3 (evita dejar 1)
+        } else if (N === 4) {
+            numPersonajes = 2; // Fuerza 2, deja 2
+        } else if (N === 3) {
+            numPersonajes = 3; // Fuerza 3, agota el saco
+        } else if (N === 2) {
+            numPersonajes = 2; // Agota el saco
+        }
+
+        status.innerText = `Sorteando elenco de ${numPersonajes} actrices y conectando con la IA...`;
+
+        // Selección aleatoria del elenco activo
+        const disponiblesCopia = [...participantesDisponibles];
+        shuffleArray(disponiblesCopia);
+        const actricesElegidas = disponiblesCopia.slice(0, numPersonajes);
+
+        // Selección de personaje real asignado a cada actriz
+        personajesSeleccionados = actricesElegidas.map(actriz => {
+            const personajesActriz = bibliotecaPersonajes.filter(p => p.actriz === actriz);
+            return personajesActriz[Math.floor(Math.random() * personajesActriz.length)];
+        });
+
+        // Tachar actrices del saco de ronda
+        actricesElegidas.forEach(actriz => participantesSorteados.add(actriz));
+        reinicializarParticipantesDisponibles();
+        renderAsistencia();
+
+        // Mostrar elenco en pantalla
+        const listaDiv = document.getElementById('lista-actrices');
+        listaDiv.innerHTML = personajesSeleccionados.map(p => `
+            <div class="actriz-tag bg-slate-50 border-l-4 border-brand-primary p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+                <span><strong class="text-brand-indigoDark text-lg">${p.nombre}</strong> <span class="text-slate-400 text-sm">(Original: ${p.escena})</span></span>
+                <span class="text-slate-600">Actriz: <strong class="text-brand-hover">${p.actriz === 'Vic' ? 'Victoria' : p.actriz}</strong></span>
+            </div>
+        `).join('');
+        document.getElementById('bloque-reparto').classList.remove('hidden');
+
+        // PROMPT DINÁMICO REFORZADO PARA ADAPTAR EL CONFLICTO SEGÚN EL NÚMERO DE ACTRICES (2 o 3)
+        let promptOpciones = `Genera exactamente 5 propuestas de improvisación muy cortas para estas actrices convocadas:\n`;
+        personajesSeleccionados.forEach(p => {
+            promptOpciones += `- ${p.nombre} (interpretada por ${p.actriz}): ${p.desc}\n`;
+        });
+
+        const numActrices = personajesSeleccionados.length;
+
+        promptOpciones += `\nREGLAS IMPRESCINDIBLES DE RESPUESTA:
+1. El conflicto de cada propuesta DEBE involucrar activamente a las ${numActrices} actrices mencionadas arriba. No dejes a ninguna fuera de la situación bajo ningún concepto.
+2. Mantén el texto ultra-corto y directo al grano, sin rodeos de dos líneas.
+3. Devuelve exactamente 5 líneas (una por opción) usando este formato estricto separado por "||" sin añadir introducciones de texto ni marcas markdown de código:`;
+
+        if (numActrices === 3) {
+            promptOpciones += `
+Ejemplos de formato para 3 actrices (involucrando a las tres):
+OPCION: un banco del parque || dos discuten por sentarse y la tercera se les sienta encima ignorándolas
+OPCION: un puesto de churros || una intenta colarse, otra la increpa y la tercera regenta el puesto cobrándoles de más
+OPCION: el arenero infantil || una vive allí, otra viene a enterrar algo y la tercera lo desentierra pensando que es comida
+OPCION: una farola rota || dos esperan a un novio común y la tercera busca colillas metiéndose en su conversación
+OPCION: una estatua de piedra || dos se disputan su sombra y la tercera vigila que nadie la raye ni la pinte`;
+        } else {
+            promptOpciones += `
+Ejemplos de formato para 2 actrices (involucrando a las dos):
+OPCION: un banco del parque || se encuentran en el arenero, una vive allí y la otra iba a enterrar algo
+OPCION: un puesto de churros || discuten en la cola porque una intenta colarse
+OPCION: una farola rota || una espera a su novio mientras la otra busca colillas
+OPCION: una estatua de piedra || se disputan la sombra de la estatatu en pleno agosto
+OPCION: el césped del parque || una hace yoga y la otra le ensucia la esterilla sin querer`;
+        }
+
+        promptOpciones += `\n\nEscribe tus 5 opciones reales ahora siguiendo ese patrón estricto sin añadir introducciones, conclusiones ni explicaciones:`;
+
+        try {
+            const respuestaTexto = await llamarWorker(promptOpciones);
+            const lineas = respuestaTexto.split('\n').filter(l => l.includes('||'));
+            listaOpcionesIA = [];
+
+            lineas.forEach(linea => {
+                let contenido = linea.replace(/^OPCION:/i, '').trim();
+                let partes = contenido.split('||');
+                if (partes.length >= 2) {
+                    listaOpcionesIA.push({
+                        lugar: partes[0].trim(),
+                        situacion: partes[1].trim()
+                    });
+                }
+            });
+
+            if (listaOpcionesIA.length === 0) {
+                throw new Error("El formato devuelto por la IA no contiene los separadores esperados.");
+            }
+
+            propuestasLista.innerHTML = "";
+            listaOpcionesIA.forEach((opt, i) => {
+                const card = document.createElement('div');
+                card.className = 'propuesta-card bg-brand-card border-2 border-brand-border rounded-2xl p-5 hover:border-brand-primary hover:bg-indigo-50/20 transition-all';
+                card.innerHTML = `
+                    <div class="propuesta-num text-xs font-bold text-slate-400 uppercase mb-1">Opción de Escenario 0${i+1}</div>
+                    <div class="propuesta-lugar text-lg font-bold text-brand-indigoDark mb-1">📍 ${opt.lugar}</div>
+                    <div class="propuesta-situacion text-slate-600 leading-relaxed">${opt.situacion}</div>
+                `;
+                propuestasLista.appendChild(card);
+            });
+
+            document.getElementById('bloque-propuestas').classList.remove('hidden');
+            status.innerText = "¡Propuestas listas para jugar!";
+        } catch (error) {
+            status.innerText = "⚠️ Error al conectar o procesar: " + error.message + ". Inténtalo de nuevo.";
+            console.error(error);
+        } finally {
+            btnSortear.disabled = false;
+        }
+    }
+
+    // Inicialización del saco de sorteo al cargar la página
+    window.onload = inicializarAsistencia;
+</script>
+
+
+</body>
+</html>
