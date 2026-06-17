@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gógol Engine</title>
+    <style>
+        :root {
+            --accent: #ff4757;
+            --accent-hover: #ff6b81;
+            --bg-main: #f8f9fa;
+            --bg-card: #ffffff;
+            --border-color: #e9ecef;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --timeline-bg: #f1f3f5;
+            --timeline-text: #495057;
+        }
+
+        /* Reset y Estructura Moderna */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            padding: 60px 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Cabecera Minimalista Limpia */
+        h1 { 
+            font-size: 2.6rem;
+            font-weight: 800;
+            text-align: center;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            margin-bottom: 40px;
+            font-weight: 400;
+        }
+
+        .container { text-align: center; margin-bottom: 40px; }
+
+        /* Botón de Acción Moderno */
+        button { 
+            padding: 16px 40px; 
+            background-color: var(--accent); 
+            color: #fff; 
+            border: none;
+            border-radius: 14px; 
+            cursor: pointer; 
+            font-size: 1.05rem; 
+            font-weight: 600;
+            letter-spacing: 0.1px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 14px rgba(255, 71, 87, 0.2);
+        }
+
+        button:hover { 
+            background-color: var(--accent-hover); 
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.3);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        button:disabled {
+            background-color: #dee2e6;
+            color: var(--text-secondary);
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Contenedor de Texto */
+        #resultado { 
+            padding: 50px; 
+            background-color: var(--bg-card); 
+            border: 1px solid var(--border-color);
+            border-radius: 24px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            min-height: 250px;
+        }
+
+        /* Etiqueta del Momento Temporal Seleccionado */
+        .timeline-badge {
+            display: inline-block;
+            background-color: var(--timeline-bg);
+            color: var(--timeline-text);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 25px;
+        }
+
+        /* Título de la Escena */
+        .obra-titulo {
+            font-size: 1.7rem;
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-bottom: 35px;
+            letter-spacing: -0.3px;
+            display: block;
+        }
+
+        /* Espaciado estructurado entre diálogos */
+        .obra-cuerpo {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            white-space: pre-line;
+            display: block;
+        }
+
+        /* Separación limpia entre párrafos de los hablantes */
+        .obra-cuerpo p {
+            margin-bottom: 1.8rem; 
+        }
+
+        /* Estado de Carga Moderno */
+        .cargando { 
+            color: var(--text-secondary); 
+            font-size: 1.1rem;
+            animation: pulse 1.5s infinite ease-in-out; 
+            display: block; 
+            text-align: center; 
+            padding-top: 50px;
+        }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 0.2; } 100% { opacity: 0.6; } }
+
+        /* Tarjeta de Error */
+        .error-card { 
+            color: var(--accent); 
+            background-color: #fff5f5; 
+            padding: 24px; 
+            border: 1px solid rgba(255, 71, 87, 0.1);
+            border-radius: 16px; 
+            text-align: center;
+            font-size: 1.05rem;
+        }
+        
+        /* Footer */
+        .footer { 
+            margin-top: 60px; 
+            text-align: center; 
+            border-top: 1px solid var(--border-color); 
+            padding-top: 30px; 
+        }
+        
+        .btn-volver { 
+            text-decoration: none; 
+            color: var(--text-secondary); 
+            font-weight: 500; 
+            font-size: 0.95rem; 
+            transition: color 0.2s;
+        }
+        .btn-volver:hover { 
+            color: var(--accent); 
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            body { padding: 40px 16px; }
+            h1 { font-size: 2.1rem; }
+            #resultado { padding: 35px 20px; }
+            button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Gógol Engine</h1>
+    <div class="subtitle">Generador Automático de Escenas de los Inspectores</div>
+
+    <div class="container">
+        <button id="btn-main" onclick="generarEscenaGogol()">Generar Escena</button>
+    </div>
+
+    <div id="resultado">
+        <p style="text-align: center; color: var(--text-secondary); padding-top: 40px; font-size: 1.1rem;">
+            Presiona el botón para compilar una nueva pieza teatral.
+        </p>
+    </div>
+
+    <script>
+        function limpiarFormato(texto) {
+            return texto.replace(/^#\s+/gm, '').replace(/\*\*/g, '').trim();
+        }
+
+        async function generarEscenaGogol() {
+            const resultadoDiv = document.getElementById('resultado');
+            const btn = document.getElementById('btn-main');
+            
+            btn.disabled = true;
+            resultadoDiv.innerHTML = '<span class="cargando">Gógol está escribiendo...</span>';
+            
+            // BANCO DE MARCOS TEMPORALES CONFIGURADOS CON SU TEXTO INFORMATIVO VISIBLE
+            const marcosTemporales = [
+                {
+                    badge: "Esta escena sucedió antes de la llegada de los inspectores",
+                    instruccion: "OBLIGATORIO SITUAR LA HISTORIA EN ESTE CONTEXTO: ANTES de la llegada de los falsos inspectores. La vida cotidiana del pueblo transcurre con normalidad, pero ya corre el pánico, el caos burocrático o el rumor de que vienen dos inspectores a auditar el lugar."
+                },
+                {
+                    badge: "Esta escena sucedió durante la estancia de los inspectores",
+                    instruccion: "OBLIGATORIO SITUAR LA HISTORIA EN ESTE CONTEXTO: DURANTE la estancia de los inspectores. Los dos falsos inspectores ya están instalados en el pueblo interactuando con la gente, o bien los personajes locales conspiran a escondidas o hablan directamente con ellos bajo un estado de pavor total."
+                },
+                {
+                    badge: "Esta escena sucedió el día del descubrimiento del engaño",
+                    instruccion: "OBLIGATORIO SITUAR LA HISTORIA EN ESTE CONTEXTO: EL DÍA DEL DESCUBRIMIENTO. Justo en el instante en que los dos falsos inspectores se acaban de marchar del pueblo y las autoridades locales descubren mediante una carta o un chisme la monumental estafa de la que han sido víctimas."
+                },
+                {
+                    badge: "Esta escena sucedió tras la llegada del inspector verdadero",
+                    instruccion: "OBLIGATORIO SITUAR LA HISTORIA EN ESTE CONTEXTO: EL FUTURO INMEDIATO. Justo después de la demoledora llegada del inspector general VERDADERO, mostrando el colapso absoluto del pueblo."
+                },
+                {
+                    badge: "Esta escena sucedió en un futuro lejano",
+                    instruccion: "OBLIGATORIO SITUAR LA HISTORIA EN ESTE CONTEXTO: UN FUTURO LEJANO. Varios años después de los incidentes, donde el pueblo aún arrastra las secuelas económicas y psicológicas de haber sido timado por duplicado en el pasado."
+                }
+            ];
+
+            // Selección aleatoria del objeto de contexto
+            const contextoElegido = marcosTemporales[Math.floor(Math.random() * marcosTemporales.length)];
+
+            // PROMPT DINÁMICO REESTRUCTURADO SIN NEGRITAS
+            const promptGogol = `Escribe directamente una escena teatral breve, totalmente graciosa, fluida, natural y CON SENTIDO narrativo, asumiendo el rol de Nikolai Gogol (particularmente en la obra de Nikolái Gógol y su sátira "El inspector general").
+Comienza el texto de inmediato con un título CORTO, satírico y sugerente que encabece la obra, sin introducciones, preámbulos, saludos ni explicaciones.
+
+🛑 REGLA SUPREMA DE CONTEXTO CRONOLÓGICO:
+${contextoElegido.instruccion}
+Asegúrate de que la trama gire única y exclusivamente en torno a esta situación cronológica concreta para que cada escena sea 100% original y distinta de las demás.
+
+🛑 EL GIRO IMPERATIVO:
+A diferencia de la obra original, Jlestakov no es un único funcionario: ¡son DOS falsos inspectores! Adapta su presencia física, las interacciones o las menciones de los personajes hacia ellos de acuerdo con la época elegida arriba.
+
+📋 REGLAS DE FORMATO Y ESTILO:
+- Uso del arsenal (No saturar): Del listado de abajo, selecciona únicamente unas pocas palabras (máximo 8 o 10) que encajen de forma orgánica, elegante y lógica en el diálogo. El texto debe respirar. No debe parecer un inventario.
+- NO utilices negritas en el texto bajo ninguna circunstancia. Todo el diálogo debe mantener un formato plano y limpio.
+- Separa las líneas de los personajes mediante saltos de línea claros y marcados.
+
+📋 LISTADO DE PALABRAS Y CONCEPTOS (DISPONIBLES PARA SELECCIÓN ORGÁNICA):
+Birlocho, Troika, Charreteras, Casimir, Estraza, Samovar, Tabaquera, Vodevil, Pipones, Librea, Zaga, Postas, Relevos, Peccadillo, Coima, Perdiguero, Volterianos, Whist, Cabriola, Cascabeles, Jándra, Bárshina, Obrók, Lapti, Sermiaga, Zipún, Labardán, Esturión, Salmuera, Caviar, Movetón, Intelligentsia, Alogismos, Skazka, Bicorporalidad, Cronotopo, Dialogismo, Anisomorfismo, Polisemia, Prosodia, Catafóricas, Anafóricas, Eslavófilos, Occidentalistas, Hagiografía, Rusofobia, Anglofobia, Mimetismo, Teócritos, Raznochintsy, Nariézhni, Jácaras, Chaveta, Plumíferos, Escritorzuelos, Panzudos, Gendarme, Edecanes, Ordenanza, Ujier, Alcornoque, Mejunje, Lisonjearlo, Zángano, Emisarios, Bagatelas, Flacucho, Cotorras, Graznido, Vituerables, Jacobino, Bazofia, Impostura, Narigón, Títere, Petrificado, Sabandijas, Despotriquen, Vehemente, Fidedigna, Bríos, Pícaros, Ambages, Ladino, Encasquetársela, Empavonarle, Dengues, Tinterillo, Francachela, Lacayo, Sobrenadan, Ambigú, Galimatías, Cohecho, Pasquín, Autos, Infundio, Exordio, Fas, Mequetrefe, Papanatas, Asesor de Colegio, Escribano, Levita, Chupa, Fandango, Andurriales, Vituallas, Bodrio, Incógnito, Fisco, Caudillo político, Falso mutis, Mutis general, Ropas menores, Bribones, Pillos, Descomunal, Atolladero, Avicultura, Litigantes, Ineptitud, Perrería, Galantea, Tocar la diana, Irse de cabezal, Varados, Gran tren, Gran señor, Lenguaje florido, Que me echen un galgo, Capote, Azotaina, Revolearte, Meterles prisa, Hacha cocinada, Despellejar, Dar de comer madera, Darse ínfulas, Guiñar el ojo, Girar el picaporte, Dilatados de temor, De tierra adentro, Lince, Hilar fino, Endosé, Marchar sobre rieles, Fresco como una lechuga, Sonsacaré, Emplastos, En un santiamén, Desprenderse de sus goznes, Hacer una escapadita, Estúpida coquetería, Sentir miedo, Turban a uno, Pepinos en vinagre, Huevas de arenque, Engalanarnos, Llevar la contraria, General de verdad, General del otro lado, Kasha, Medrar, Celo, Laboriosidad y abnegación, Arrancar las flores del placer, En un abrir y cerrar de ojos, Oropel y vanidad, Donjuanesca, Cumplido, Metrópoli, Tinieblas de la ignorancia, Escribiente, Dale que te dale con la pluma, Agilidad mental, Marmita, Vapor nunca visto, Suntuosa, Legión de emisarios, Foja de servicios, Tarea endiablada, Terremoto, Caos en la cabeza, Mosca con las alas cortadas, Rendirse con armas y bagajes, Palablería, Cosas concretas, Lo positivo, Monten guardia, Agárrenlo del cuello, A media voz, Círculo cerrado, Desfile militar, Untarle la mano, A la chita callando, Creación del mundo, Tener el dinero en el puño, El puño me arde, Sobre unas brasas, Hombre al agua, Sácame de este trance, Alcornoques de provincias, Buen tono, Compañías agradables, Servicial, Maldita timidez, Maldita lengua, Poner una pica en Flandes, Cazar liebres, Perros en la antesala, Principios corruptores, Hurgándose en el bolsillo, Agujero en el bolsillo derecho, Vínculos conyugales, Hijo legítimo, Pergeña cosas, Palabra mordaz, Sacarle partido, Papel grasiento, Volarían como flechas, Postillones, Derechos de postas, Vejámenes insoportables, Salteador de caminos, Cumpleaños por partida doble, Tinaja de vino, Pilones de azúcar, Bandeja de plata, Una cuerda, enganchar en el ejército, Que lo zurre bien Dios, Por error, Multa por el error cometido, Trono, Gorrión, Pedir perdón de rodillas, De hinojos, Qué situación, Demonios, Apetitosa, Piso no está limpio, Pender de un hilo, Corazón en llamas, Karamzin, Las leyes nos condenan, Ligera de cascos, Gata escalda, Corriente de aire por la cabeza, Bendiga nuestro eterno amor, Dar la bendición, Estafan y roban en el peso, Se azotó ella misma, Perder los sesos, Pegar un tiro, Inocente en cuerpo y alma, Mareado, Más tonto que nunca, Un novio de verdad, Un tío viejo y rico, Ochocientos justitos, Papelitos más nuevos, Dinero nuevo da dicha nueva, Coche sin elásticos, Alfombrrita persa celeste, Heno, En marcha, caballitos míos, Sus, sus, Pajarracos de alto vuelo, Bajar los humos, Mano de hierro, Echar las campanas a vuelo, Carne y uña con los ministros, Charreteras azules, Charreteras rojas, Pescado sabroso, Se babea de placer, Entornar los ojos, Engendros del diablo, Patanes, Barba de chivo, Paño podrido, Madera de veinte mil rublos, Arrastrarse a los pies, Hundido en el barro, Tirar un leño encima, Vestido de oro, Sopas refinadas, Lágrimas brotan como un río, Raras virtues, Silla de montar a una vaca, Poner los pies sobre la mesa, Fuerza sobrenatural, El demonio me murmuraba, Apretar el lacre, Fuego en las venas, Ni fu ni fa, El diablo sabe quién, Pavo cebado, Cerdo con birrete, Huevas de arenque, Huele a cebolla, Os reís de vosotros mismos, Quitar el discernimiento, Niebla en la cabeza, Chismosos del pueblo, Intrigantes panzudos, Escena muda, Signo de interrogación, Boquiabiertos, Ojos fuera de las órbitas, Juicio Final.
+
+👥 LISTADO DE NOMBRES PROPIOS (DISPONIBLES PARA SELECCIÓN):
+Antón Antónovich Scvoznik-Dmujanovsky, Antón Antónovich, Antoñito, Antón, Antosha, Ana Andreevna, Ana, Mamita, María Antónovna, Masha, Máshenka, Iván Aleksándrovich Jlestakov, Iván Aleksándrovich, Vania, Osip, Ósip, Amos Fédorovich Liapkin-Tiapkin, Amos Fédorovich, Artemio Filípovich Zemlianika, Artemio Filípovich, Luká Lúkich Jlópov, Luká Lúkich, Iván Kúsmich Shpekin, Iván Kúsmich, Petr Ivánovich Bóbchinsky, Petr Ivánovich Dóbchinsky, Cristian Ivánovich Gíbner, Stepán Ilich Ujovértov, Stepán Ilich, Svistünov, Púgovitzin, Derjimordaj, Abdulin, Févronia Petrovna Poshlépkina, Mishka, Avdotia, Andrei Ivánovich Chmíjov, Ana Kirílovna, Iván Kirílovích, Filip Antónovich Pochechúev, Vías, Iván Vasilievitch Triapichkin, Nijeev, Cherniáiev, Cheptóvich, Berjovinsky, Fédor Andréievich Liúliokov, Stepán Ivánovich Korobkin, Iván Lisarevich Rastakovsky, Nicolás, Iván, Isabel, María, Anastasia, Pushkin, Aleksandr Pushkin, Barón Branbeus, Smirdin, Zagoskin, Joachim, Mavra, Isidoro, Iván Karpovich, Nástenga.`;
+
+            try {
+                const response = await fetch('https://generador-impro.raul-grigelmo3.workers.dev', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt: promptGogol,
+                        temp: 0.98
+                    })
+                });
+
+                const data = await response.json();
+                let textoRaw = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                
+                if (!textoRaw) {
+                    throw new Error("Respuesta inválida");
+                }
+
+                // Asegurar limpieza de negritas accidentales
+                textoRaw = textoRaw.replace(/\*\*/g, '');
+
+                const lineas = textoRaw.split('\n').filter(l => l.trim() !== "");
+                let titulo = "DESPACHO EXPERIMENTAL";
+                let cuerpo = textoRaw;
+
+                if (lineas.length > 0) {
+                    titulo = limpiarFormato(lineas[0]);
+                    cuerpo = lineas.slice(1).join('\n');
+                }
+
+                const bloquesTexto = cuerpo.split('\n').filter(b => b.trim() !== "");
+                const cuerpoFormateado = bloquesTexto.map(bloque => `<p>${bloque}</p>`).join('');
+
+                // Modificado para inyectar dinámicamente la etiqueta arriba de la historia
+                resultadoDiv.innerHTML = `
+                    <div style="text-align: center;"><span class="timeline-badge">${contextoElegido.badge}</span></div>
+                    <span class="obra-titulo" style="text-align: center;">${titulo}</span>
+                    <div class="obra-cuerpo">${cuerpoFormateado}</div>
+                `;
+
+            } catch (error) {
+                resultadoDiv.innerHTML = `<div class="error-card">Runtime Error: No se pudo compilar el libreto dramático. Intente refrescar el sistema.</div>`;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+
+
+
+</body>
+</html>
