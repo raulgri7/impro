@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cluedo IA - Deduccion Lógica 馃攳</title>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --dark: #1a1a1a; --blood: #8e0000; --paper: #f4e7d3; --ink: #2c3e50; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background: #222; color: var(--ink); margin: 0; padding: 20px; }
+        
+        .no-print { background: #333; padding: 20px; border-radius: 10px; color: white; max-width: 800px; margin: 0 auto 30px; text-align: center; }
+        h1 { font-family: 'Special Elite', cursive; color: #ff4d4d; margin: 0; }
+
+        #resultado { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        .tarjeta { 
+            background: var(--paper); 
+            padding: 15px; 
+            border: 1px solid #bc9e82;
+            display: flex;
+            flex-direction: column;
+            min-height: 14.8cm;
+            position: relative;
+        }
+
+        .header-card { border-bottom: 2px solid var(--blood); margin-bottom: 8px; }
+        .rol-tag { font-family: 'Special Elite'; color: var(--blood); font-size: 1em; }
+        h3 { margin: 5px 0; font-size: 1.2em; }
+
+        .campo { margin-bottom: 8px; font-size: 0.85em; line-height: 1.2; }
+        .campo b { display: block; text-transform: uppercase; font-size: 0.65em; color: #5d4037; margin-bottom: 1px; }
+
+        .secreto-area { 
+            margin-top: 5px;
+            padding: 10px; 
+            border: 2px dashed #8e0000; 
+            background: rgba(142, 0, 0, 0.05);
+        }
+        .secreto-area h4 { margin: 0 0 5px 0; color: var(--blood); font-family: 'Special Elite'; font-size: 0.8em; text-align: center; }
+
+        .instruccion-obligatoria {
+            background: #fff;
+            border-left: 4px solid var(--blood);
+            padding: 8px;
+            font-style: italic;
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+
+        /* GUÍA DE JUEGO EN LA TARJETA */
+        .guia-tarjeta {
+            margin-top: auto;
+            border-top: 1px solid #ccc;
+            padding-top: 8px;
+            font-size: 0.7em;
+            color: #666;
+            line-height: 1.1;
+        }
+        .guia-tarjeta b { color: var(--blood); text-transform: uppercase; font-size: 0.8em; }
+
+        .crimen-card {
+            grid-column: 1 / -1;
+            background: #fff;
+            border: 4px double var(--dark);
+            padding: 25px;
+            font-family: 'Special Elite';
+        }
+
+        button { padding: 12px 25px; background: var(--blood); color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; }
+
+        @media print {
+            .no-print { display: none; }
+            body { background: white; padding: 0; }
+            #resultado { display: grid !important; gap: 0; width: 100%; }
+            .tarjeta { border: 1px solid #000; page-break-inside: avoid; height: 14.8cm; width: 50%; float: left; box-shadow: none; }
+            .crimen-card { border: 2px solid #000; page-break-after: always; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print">
+        <h1>Cluedo IA: El Error del Asesino</h1>
+        <p>Genera un misterio donde la lógica y las contradicciones son la clave.</p>
+        <select id="num-pers">
+<option value="3">3 Sospechosos</option>
+<option value="4">4 Sospechosos</option>
+<option value="5">5 Sospechosos</option>
+<option value="6" selected>6 Sospechosos</option>
+<option value="7">7 Sospechosos</option>
+<option value="8">8 Sospechosos</option>
+<option value="9">9 Sospechosos</option>
+<option value="10">10 Sospechosos</option>
+<option value="11">11 Sospechosos</option>
+<option value="12">12 Sospechosos</option>
+<option value="13">13 Sospechosos</option>
+<option value="14">14 Sospechosos</option>
+<option value="15">15 Sospechosos</option>
+
+        </select>
+        <button onclick="generarCluedo()">Generar, Configurar e Imprimir</button>
+    </div>
+
+    <div id="resultado"></div>
+
+    <script>
+        const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+
+        async function generarCluedo() {
+            const resDiv = document.getElementById('resultado');
+            const total = document.getElementById('num-pers').value;
+            resDiv.innerHTML = "<p style='color:white; text-align:center;'>La IA está cruzando coartadas y creando una mentira delatadora...</p>";
+
+            const prompt = `Crea un Cluedo de ${total} personas.
+            ESCENA: Lugar, Víctima y Arma.
+            SOSPECHOSOS: Para cada uno:
+            - Nombre y Relación.
+            - Coartada Real (dónde estaba de verdad).
+            - Chisme: Un dato sobre la ubicación de OTRO personaje (debe ser verdad).
+            - Pecado: Un secreto turbio no relacionado con el crimen.
+            - EL DESLIZ: Una mentira específica que solo el asesino dirá y que contradice el "Chisme" de alguien.
+            
+            Formato Estricto:
+            ESCENA: [Texto]
+            PERSONAJE: [Nombre]
+            RELACION: [Texto]
+            COARTADA: [Texto]
+            CHISME: [Un dato sobre otro]
+            PECADO: [Secreto]
+            DESLIZ: [La mentira delatadora]`;
+
+            try {
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const data = await response.json();
+                procesarTexto(data.candidates[0].content.parts[0].text.replace(/\*/g, ''), total);
+            } catch (e) { resDiv.innerHTML = "Error de conexión."; }
+        }
+
+        function procesarTexto(texto, total) {
+            const resDiv = document.getElementById('resultado');
+            const escena = texto.match(/ESCENA:([\s\S]*?)PERSONAJE:/i)?.[1] || "Misterio";
+            const bloques = texto.split(/PERSONAJE:/i).slice(1);
+            const indexAsesino = Math.floor(Math.random() * bloques.length);
+
+            let html = `<div class="crimen-card"><h2>DOSSIER: EL INCIDENTE</h2><p>${escena}</p></div>`;
+
+            bloques.forEach((bloque, i) => {
+                const datos = {
+                    nombre: (bloque.match(/^([^\n]*)/i)?.[1] || "Sospechoso").trim(),
+                    relacion: (bloque.match(/RELACION:([^\n]*)/i)?.[1] || "").trim(),
+                    coartada: (bloque.match(/COARTADA:([^\n]*)/i)?.[1] || "").trim(),
+                    chisme: (bloque.match(/CHISME:([^\n]*)/i)?.[1] || "").trim(),
+                    pecado: (bloque.match(/PECADO:([^\n]*)/i)?.[1] || "").trim(),
+                    desliz: (bloque.match(/DESLIZ:([^\n]*)/i)?.[1] || "").trim()
+                };
+
+                const esAsesino = (i === indexAsesino);
+
+                html += `
+                    <div class="tarjeta">
+                        <div class="header-card"><span class="rol-tag">EXPEDIENTE</span><h3>${datos.nombre}</h3></div>
+                        <div class="campo"><b>Relación con la víctima:</b> ${datos.relacion}</div>
+                        <div class="campo"><b>Tu Versión (Dila al ser preguntado):</b> ${esAsesino ? datos.desliz : datos.coartada}</div>
+                        
+                        <div class="secreto-area">
+                            <h4>TOP SECRET</h4>
+                            <div class="campo"><b>Lo que sabes de otro:</b> "Tú viste que... ${datos.chisme}"</div>
+                            <div class="campo"><b>Tu Secreto Personal:</b> ${datos.pecado}</div>
+                            ${esAsesino ? 
+                                `<div class="instruccion-obligatoria">ERES EL ASESINO. Tu versión es MENTIRA y contradice el rumor de alguien. Debes convencerles de que tú dices la verdad!</div>` : 
+                                `<div class="instruccion-obligatoria">Eres INOCENTE. Tu versión y lo que viste son REALES. Si alguien contradice tu rumor, es el asesino.</div>`}
+                        </div>
+
+                        <div class="guia-tarjeta">
+                            <b>Cómo jugar:</b><br>
+                            1. Habla con todos. Pregunta coartadas.<br>
+                            2. <b>Suelta tu rumor</b> discretamente para ver quién reacciona.<br>
+                            3. Si eres inocente, di siempre la verdad de esta ficha.<br>
+                            4. Si alguien miente sobre lo que tú sabes... ACÚSALO!
+                        </div>
+                    </div>`;
+            });
+
+            resDiv.innerHTML = html;
+            window.print();
+        }
+    </script>
+	
+	    <div class="noprint" style="text-align: center; margin-top: 40px; padding-bottom: 40px;">
+        <hr style="border: 0; border-top: 1px solid #ccc; margin-bottom: 20px;">
+        <a href="index2.html" style="text-decoration:none; color:#7f8c8d; font-weight:bold; border:1px solid #ccc; padding:10px 20px; border-radius:8px;">
+            ← Volver al Men&uacute; Principal
+        </a>
+    </div>
+	
+</body>
+</html>

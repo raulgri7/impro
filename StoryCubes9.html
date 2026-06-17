@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Impro Dice - Mazo Definitivo</title>
+    <style>
+        body { background: #1a1a2e; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        h1 { margin-bottom: 10px; color: #e94560; }
+        .info { font-size: 0.9rem; color: #888; margin-bottom: 20px; }
+        .contenedor-dados { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; }
+        .dado { 
+            background: #fff; color: #000; width: 90px; height: 90px; 
+            display: flex; justify-content: center; align-items: center; 
+            font-size: 3rem; border-radius: 15px; box-shadow: 0 8px 0 #333; 
+            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+        }
+        button { padding: 15px 40px; font-size: 1.5rem; cursor: pointer; border-radius: 50px; border: none; font-weight: bold; background: #e94560; color: white; box-shadow: 0 5px 0 #951c30; }
+        button:disabled { background: #444; box-shadow: none; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <h1>Story Cubes (Definitivo)</h1>
+    <div class="info" id="status-info">Colección: cargando...</div>
+    <div class="contenedor-dados" id="grid-dados"></div>
+    <button id="btn-lanzar" onclick="lanzarDados()">🎲 LANZAR DADOS</button>
+
+    <script>
+        // Tu lista intacta
+        let poolDeIconos = new Set(["🚀", "🔑", "💡", "🌲", "⌚", "🧩", "🔥", "🌊", "🔮", "🚲", "⚓", "🛹", "🎻", "🌋", "🏰", "📡", "🛸", "🚁", "🚂", "🚜", "🏎️", "🛵", "🛰️", "🏗️", "🏢", "🏘️", "🏚️", "🏟️", "🗼", "🗽", "⛲", "⛺", "🌁", "🌃", "🏙️", "🌆", "🌇", "🌄", "🌅", "🌉", "🌌", "🏔️", "⛰️", "🗻", "🏕️", "🏖️", "🏜️", "🏝️", "🏭", "🏠", "🏡", "🏣", "🏤", "🏥", "🏦", "🏨", "🏩", "🏪", "🏫", "🏬", "🏮", "🏯", "🏳️", "🏴", "🚩", "🎌", "🗺️", "🗾", "🎑", "🎒", "🎓", "🎖️", "🎗️", "🎙️", "🎚️", "🎛️", "🎞️", "🎟️", "🎬", "🎭", "🎮", "🕹️", "🎰", "🎲", "🎯", "🎳", "🏏", "🎾", "⚽", "🏀", "🏐", "🏈", "🏉", "🥏", "🏓", "🏸", "🏒", "🏑", "🥍", "🏹", "🎣", "🎽", "🎿", "🛷", "⛸️", "🥌", "⛳", "🤿", "🥊", "🥋", "🥅", "🛼", "🪁", "🧿", "🪀", "🪗", "🪕", "🎷", "🎺", "🎸", "🥁", "🪘", "🎼", "🎹", "🎧", "🎤", "📻"]); 
+        
+        const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+        const grid = document.getElementById('grid-dados');
+        for(let i=0; i<9; i++) grid.innerHTML += `<div class="dado" id="dado${i}">🎲</div>`;
+
+        async function lanzarDados() {
+            const btn = document.getElementById('btn-lanzar');
+            const dados = document.querySelectorAll('.dado');
+            btn.disabled = true;
+
+            const mazoArray = Array.from(poolDeIconos);
+            const duracion = 800;
+            const intervalo = 70; 
+
+            dados.forEach((dado) => {
+                const startTime = Date.now();
+                const animar = setInterval(() => {
+                    dado.innerText = mazoArray[Math.floor(Math.random() * mazoArray.length)];
+                    if (Date.now() - startTime >= duracion) {
+                        clearInterval(animar);
+                        // Filtro final: si el icono no se ve, ponemos un dado
+                        if (dado.scrollWidth === 0) dado.innerText = "🎲";
+                    }
+                }, intervalo);
+            });
+
+            setTimeout(() => {
+                btn.disabled = false;
+                actualizarColeccion();
+            }, duracion);
+        }
+
+        async function actualizarColeccion() {
+            try {
+                const prompt = "Dame 50 emojis de herramientas, ciencia, arquitectura, clima, transporte, tecnología y símbolos. PROHIBIDO: caras, personas, partes del cuerpo o banderas. Solo emojis juntos.";
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                
+                const data = await response.json();
+                const texto = data.candidates[0].content.parts[0].text.trim();
+                const emojiRegex = /\p{Emoji_Presentation}/gu;
+                const matches = texto.match(emojiRegex);
+                
+                if (matches) {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    ctx.font = '30px serif';
+
+                    for (const emoji of matches) {
+                        ctx.fillText(emoji, 0, 30);
+                        // Si el navegador puede medirlo, lo añadimos
+                        if (ctx.measureText(emoji).width > 5) {
+                            poolDeIconos.add(emoji);
+                        }
+                    }
+                    document.getElementById('status-info').innerText = `Colección: ${poolDeIconos.size} iconos únicos`;
+                }
+            } catch (e) { console.error("Error renovando"); }
+        }
+    </script>
+</body>
+</html>

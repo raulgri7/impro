@@ -37,22 +37,59 @@
         .opcion-modal { text-align: left; margin-bottom: 10px; }
         .opcion-modal label { font-weight: bold; font-size: 0.85em; display: block; }
 
-        #resultado { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); background: white; border: 1px solid #ccc; max-width: 1200px; margin: 0 auto; }
-        .tarjeta { padding: 20px; border-right: 1px dashed #ccc; border-bottom: 1px dashed #ccc; min-height: 380px; background: #fff; display: flex; flex-direction: column; }
-        .orden-dia { background-color: #f0f4f8 !important; border: 2px solid var(--hi) !important; }
+        #resultado { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+            background: white; 
+            border: 1px solid #ccc; 
+            max-width: 1200px; 
+            margin: 0 auto;
+        }
+        
+        /* MEJORA: Evitar cortes y asegurar altura */
+        .tarjeta { 
+            padding: 20px; 
+            border-right: 1px dashed #ccc; 
+            border-bottom: 1px dashed #ccc; 
+            min-height: 400px; 
+            background: #fff; 
+            display: flex; 
+            flex-direction: column;
+            break-inside: avoid; /* Evita cortes en impresión */
+            page-break-inside: avoid;
+            overflow: hidden; /* Evita que el contenido se salga */
+        }
+
         .t-num { color: var(--hi); font-weight: 900; font-size: 1.1em; border-bottom: 2px solid var(--acc); display: inline-block; margin-bottom: 12px; }
         .item { margin-bottom: 10px; }
         .item b { display: block; font-size: 0.7em; color: #7f8c8d; text-transform: uppercase; margin-bottom: 1px; }
-        .item span { font-size: 1em; font-weight: 500; color: #2c3e50; display: block; line-height: 1.2; }
-        .aviso { background: #fff4e5; border: 1px solid var(--acc); padding: 10px; margin-top: auto; border-radius: 5px; }
+        .item span { font-size: 0.95em; font-weight: 500; color: #2c3e50; display: block; line-height: 1.2; word-wrap: break-word; }
+        
+        .aviso { 
+            background: #fff4e5; 
+            border: 1px solid var(--acc); 
+            padding: 10px; 
+            margin-top: auto; /* Empuja el aviso siempre al final */
+            border-radius: 5px; 
+        }
         .aviso b { color: #d35400; font-size: 0.75em; }
 
         @media print { 
-            @page { size: A4 portrait; margin: 0.4cm; }
+            @page { size: A4 portrait; margin: 0.8cm; }
+            body { padding: 0; background: white; }
             .no-print, #modal-genero, .overlay { display: none !important; } 
-            #resultado { display: grid !important; grid-template-columns: 1fr 1fr !important; width: 100% !important; border: none !important; } 
-            .tarjeta { border: 1px dashed black !important; break-inside: avoid; min-height: 14cm !important; }
-            .header-ejercicio { border: 1px solid #000; background: white; }
+            #resultado { 
+                display: grid !important; 
+                grid-template-columns: 1fr 1fr !important; /* Dos columnas fijas para impresión */
+                width: 100% !important; 
+                border: 1px solid #000 !important; 
+            } 
+            .tarjeta { 
+                border: 1px solid #000 !important; 
+                min-height: 13.5cm !important; /* Altura fija para que queden 4 por hoja (2x2) */
+                max-height: 13.5cm !important;
+            }
+            .header-ejercicio { border: 1px solid #000; background: white; page-break-after: avoid; }
         }
     </style>
 </head>
@@ -213,7 +250,6 @@
                 const data = await response.json();
                 let texto = data.candidates[0].content.parts[0].text.replace(/\*/g, '');
                 
-                // Extraer contexto dinámico si es modo Lucky
                 if (isLucky) {
                     const matchCtx = texto.match(/CONTEXTO:\s*([^\n]+)/i);
                     if (matchCtx) {
@@ -224,7 +260,6 @@
 
                 const secciones = texto.split(/TÍTULO:/i);
                 const personajesTexto = secciones[0];
-                const contextosTexto = secciones.slice(1);
 
                 const etiquetasP = ["Nombre y mote", "Vínculo o Posición", "Rasgo", "Historia", "Actitud", "Aviso a Navegantes"];
                 const regexP = new RegExp(`(${etiquetasP.join('|')}):?\\s*([^\\n]+)`, 'gi');
@@ -249,16 +284,7 @@
                     htmlPersonajes += `</div>`;
                 }
 
-                let htmlContextos = '';
-                if (!isLucky) {
-                    contextosTexto.forEach((txt, index) => {
-                        const puntosMatch = txt.match(/Puntos:?\s*([\s\S]+)/i);
-                        const contenido = puntosMatch ? puntosMatch[1].trim().replace(/\n/g, '<br>• ') : txt;
-                        htmlContextos += `<div class="tarjeta orden-dia"><span class="t-num">OPCIÓN DE JUEGO ${index+1}</span><div class="item"><b>Situación:</b><span>• ${contenido}</span></div></div>`;
-                    });
-                }
-
-                resDiv.innerHTML = htmlHeader + htmlContextos + htmlPersonajes;
+                resDiv.innerHTML = htmlHeader + htmlPersonajes;
                 btnImp.style.display = 'inline-block';
             } catch (e) {
                 resDiv.innerHTML = `<p style="grid-column:1/-1; text-align:center; padding:60px; color:red;">Error de conexión. Reintenta.</p>`;

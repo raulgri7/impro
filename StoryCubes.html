@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Impro Dice - Story Cubes 🎲</title>
+    <style>
+        body { 
+            background: #1a1a2e; color: #e94560; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            display: flex; flex-direction: column; height: 100vh; margin: 0; text-align: center;
+        }
+        #display { 
+            flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;
+        }
+        .contenedor-dados {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 500px;
+        }
+        .dado {
+            background: #fff;
+            border-radius: 15px;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 0 #d1d1d1, 0 15px 20px rgba(0,0,0,0.5);
+            transition: transform 0.1s;
+        }
+        .dado-icono { font-size: 3.5rem; }
+        .dado-label { 
+            font-size: 0.7rem; 
+            color: #333; 
+            font-weight: bold; 
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+        h1 { font-size: 1.5rem; color: #0f3460; background: #e94560; padding: 10px 20px; border-radius: 50px; margin-bottom: 30px; color: white; }
+        
+        #controles { background: #16213e; padding: 30px; border-top: 4px solid #e94560; }
+        button {
+            background: #e94560; color: #fff; border: none; padding: 20px 50px;
+            font-size: 1.8rem; font-weight: bold; cursor: pointer; border-radius: 50px;
+            box-shadow: 0 5px 0 #951c30; transition: 0.2s;
+        }
+        button:active { transform: translateY(4px); box-shadow: 0 1px 0 #951c30; }
+        button:disabled { background: #444; box-shadow: none; cursor: not-allowed; }
+        .error { color: #ff4444; font-size: 0.8rem; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+    <div id="display">
+        <h1>STORY CUBES: ¿QUIÉNES Y DÓNDE?</h1>
+        <div class="contenedor-dados">
+            <div class="dado">
+                <div id="dado1" class="dado-icono">👤</div>
+                <div class="dado-label">Quién 1</div>
+            </div>
+            <div class="dado">
+                <div id="dado2" class="dado-icono">👤</div>
+                <div class="dado-label">Quién 2</div>
+            </div>
+            <div class="dado">
+                <div id="dado3" class="dado-icono">📍</div>
+                <div class="dado-label">Dónde</div>
+            </div>
+            <div class="dado">
+                <div id="dado4" class="dado-icono">🎲</div>
+                <div class="dado-label">Objeto</div>
+            </div>
+        </div>
+        <div id="log-error" class="error"></div>
+    </div>
+
+    <div id="controles">
+        <button id="btn-fetch" onclick="lanzarDados()">🎲 LANZAR DADOS</button>
+    </div>
+
+    <script>
+        const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+
+        async function lanzarDados() {
+            const btn = document.getElementById('btn-fetch');
+            const log = document.getElementById('log-error');
+            const dados = [
+                document.getElementById('dado1'),
+                document.getElementById('dado2'),
+                document.getElementById('dado3'),
+                document.getElementById('dado4')
+            ];
+
+            btn.disabled = true;
+            log.innerText = "";
+            dados.forEach(d => d.style.opacity = "0.3");
+
+            // Prompt diseñado para Story Cubes
+//            const miPrompt = "Actúa como un juego de Story Cubes. Dame 4 conceptos para una escena de improvisación: 2 personajes y 2 elementos de lugar. Formato: EMOJI|EMOJI|EMOJI|EMOJI. Solo devuelve los 4 emojis separados por tuberías, sin texto adicional.";
+            //const miPrompt = "Actúa como un juego de Story Cubes. Dame 4 conceptos para una escena de improvisación: 2 personajes, 1 elemento de lugar y 1 objeto. Formato: EMOJI|EMOJI|EMOJI|EMOJI. Solo devuelve los 4 emojis separados por tuberías, sin texto adicional.";
+			const miPrompt = "Actúa como un juego de Story Cubes. Dame 4 conceptos para una escena de improvisación: 2 personajes, 1 elemento de lugar y 1 objeto, pero que no tengan ninguna conexión entre ellos, no tienen porque estar relacionados. Formato: EMOJI|EMOJI|EMOJI|EMOJI. Solo devuelve los 4 emojis separados por tuberías, sin texto adicional.";
+			//const miPrompt = "Actúa como un juego de Story Cubes. Dame 4 conceptos para una escena de improvisación: 2 personajes, 1 lugar y 1 objeto. **IMPORTANTE: Usa emojis poco comunes o variados, no repitas los típicos, busca en todo el espectro de Unicode.** Formato: EMOJI|EMOJI|EMOJI|EMOJI. Solo devuelve los 4 emojis, sin texto adicional.";
+		
+			
+            try {
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: miPrompt }] }]
+                    })
+                });
+
+                if (!response.ok) throw new Error(`Status: ${response.status}`);
+
+                const data = await response.json();
+                const respuestaIA = data.candidates[0].content.parts[0].text.trim();
+                
+                // Limpieza de posibles caracteres extraños que meta la IA
+                const iconos = respuestaIA.split('|').map(s => s.trim());
+                
+                if (iconos.length >= 4) {
+                    iconos.forEach((icono, index) => {
+                        if(index < 4) {
+                            dados[index].innerText = icono;
+                            dados[index].style.opacity = "1";
+                        }
+                    });
+                } else {
+                    throw new Error("Formato de respuesta incorrecto");
+                }
+
+            } catch (err) {
+                log.innerText = "Error de conexión con los dados mágicos.";
+                dados.forEach(d => d.style.opacity = "1");
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
