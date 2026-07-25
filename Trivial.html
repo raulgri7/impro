@@ -28,50 +28,37 @@
             text-align: center;
         }
 
-        /* --- QUESITO DE TRIVIAL EN CSS --- */
+        /* --- QUESITO SVG PERFECTO --- */
         .quesito-container {
-            position: relative;
             width: 320px;
             height: 320px;
-            border-radius: 50%;
-            overflow: hidden;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.1));
+        }
+
+        .sector-path {
             cursor: pointer;
-            border: 4px solid #333;
-        }
-
-        .sector {
-            position: absolute;
-            width: 50%;
-            height: 50%;
-            transform-origin: 100% 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             transition: transform 0.2s, filter 0.2s;
+            transform-origin: 160px 160px;
         }
 
-        .sector:hover {
-            filter: brightness(1.2);
-            z-index: 10;
+        .sector-path:hover {
+            filter: brightness(1.25);
+            transform: scale(1.03);
         }
 
-        .sector-content {
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            font-size: 1.8rem;
-            transform: rotate(-30deg);
+        .sector-icon {
+            font-size: 28px;
+            pointer-events: none;
             user-select: none;
+            text-anchor: middle;
+            dominant-baseline: central;
         }
-
-        /* Colores Genus y Posiciones del Quesito (60deg cada uno) */
-        .geografia { background: #0072ce; transform: rotate(0deg) skewY(-30deg); }
-        .espectaculos { background: #e03c8a; transform: rotate(60deg) skewY(-30deg); }
-        .historia { background: #ffcc00; transform: rotate(120deg) skewY(-30deg); }
-        .arte { background: #8d5524; transform: rotate(180deg) skewY(-30deg); }
-        .ciencia { background: #009e49; transform: rotate(240deg) skewY(-30deg); }
-        .ocio { background: #ff6600; transform: rotate(300deg) skewY(-30deg); }
 
         /* --- PANTALLA DE PREGUNTA --- */
         .card-pregunta {
@@ -126,7 +113,6 @@
             border-color: #666;
         }
 
-        /* Estilos de Validación */
         .btn-opcion.correcta {
             background-color: #27ae60 !important;
             border-color: #2ecc71 !important;
@@ -140,7 +126,6 @@
             color: white !important;
         }
 
-        /* --- BOTÓN DE REINICIAR --- */
         .btn-reiniciar {
             display: none;
             margin-top: 20px;
@@ -169,14 +154,36 @@
 
     <h1>Trivial Pursuit - Edición Genus</h1>
 
-    <!-- El Quesito 6 Colores -->
+    <!-- El Quesito Creado con SVG Perfecto (320x320) -->
     <div id="quesito" class="quesito-container">
-        <div class="sector geografia" onclick="seleccionarCategoria('Geografía', '#0072ce')"><span class="sector-content">🌍</span></div>
-        <div class="sector espectaculos" onclick="seleccionarCategoria('Espectáculos', '#e03c8a')"><span class="sector-content">🎭</span></div>
-        <div class="sector historia" onclick="seleccionarCategoria('Historia', '#ffcc00')"><span class="sector-content">📜</span></div>
-        <div class="sector arte" onclick="seleccionarCategoria('Arte y Literatura', '#8d5524')"><span class="sector-content">🎨</span></div>
-        <div class="sector ciencia" onclick="seleccionarCategoria('Ciencias y Naturaleza', '#009e49')"><span class="sector-content">🔬</span></div>
-        <div class="sector ocio" onclick="seleccionarCategoria('Ocio y Deportes', '#ff6600')"><span class="sector-content">⚽</span></div>
+        <svg viewBox="0 0 320 320">
+            <!-- Borde exterior de la ruleta -->
+            <circle cx="160" cy="160" r="155" fill="none" stroke="#333" stroke-width="4"/>
+
+            <!-- 1. Geografía (Azul) 0º a 60º -->
+            <path class="sector-path" fill="#0072ce" d="M160,160 L310,160 A150,150 0 0,1 235,289.9 Z" onclick="seleccionarCategoria('Geografía', '#0072ce')"/>
+            <text x="235" y="200" class="sector-icon">🌍</text>
+
+            <!-- 2. Espectáculos (Rosa) 60º a 120º -->
+            <path class="sector-path" fill="#e03c8a" d="M160,160 L235,289.9 A150,150 0 0,1 85,289.9 Z" onclick="seleccionarCategoria('Espectáculos', '#e03c8a')"/>
+            <text x="160" y="245" class="sector-icon">🎭</text>
+
+            <!-- 3. Historia (Amarillo) 120º a 180º -->
+            <path class="sector-path" fill="#ffcc00" d="M160,160 L85,289.9 A150,150 0 0,1 10,160 Z" onclick="seleccionarCategoria('Historia', '#ffcc00')"/>
+            <text x="85" y="200" class="sector-icon">📜</text>
+
+            <!-- 4. Arte y Literatura (Marrón) 180º a 240º -->
+            <path class="sector-path" fill="#8d5524" d="M160,160 L10,160 A150,150 0 0,1 85,30.1 Z" onclick="seleccionarCategoria('Arte y Literatura', '#8d5524')"/>
+            <text x="85" y="120" class="sector-icon">🎨</text>
+
+            <!-- 5. Ciencias y Naturaleza (Verde) 240º a 300º -->
+            <path class="sector-path" fill="#009e49" d="M160,160 L85,30.1 A150,150 0 0,1 235,30.1 Z" onclick="seleccionarCategoria('Ciencias y Naturaleza', '#009e49')"/>
+            <text x="160" y="75" class="sector-icon">🔬</text>
+
+            <!-- 6. Ocio y Deportes (Naranja) 300º a 360º -->
+            <path class="sector-path" fill="#ff6600" d="M160,160 L235,30.1 A150,150 0 0,1 310,160 Z" onclick="seleccionarCategoria('Ocio y Deportes', '#ff6600')"/>
+            <text x="235" y="120" class="sector-icon">⚽</text>
+        </svg>
     </div>
 
     <div id="loading" class="loading-text">Generando pregunta de Trivial... 🧠</div>
@@ -219,7 +226,6 @@
                 const data = await response.json();
                 let rawText = data.candidates[0].content.parts[0].text;
                 
-                // Limpiar posibles etiquetas de Markdown ```json ... ```
                 rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
                 const jsonPregunta = JSON.parse(rawText);
 
@@ -261,15 +267,12 @@
             respondido = true;
 
             const botones = document.querySelectorAll('.btn-opcion');
-            
-            // Deshabilitar todos los botones
             botones.forEach(btn => btn.disabled = true);
 
             if (indiceSeleccionado === respuestaCorrectaIndex) {
                 botonPulsado.classList.add('correcta');
             } else {
                 botonPulsado.classList.add('incorrecta');
-                // Revelar la correcta en verde
                 botones[respuestaCorrectaIndex].classList.add('correcta');
             }
 
