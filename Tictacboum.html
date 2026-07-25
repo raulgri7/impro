@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Bomba 💣 - Juego de Palabras</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #111;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .header {
+            font-size: 1.2rem;
+            letter-spacing: 3px;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .tablero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+            flex-grow: 1;
+            width: 100%;
+        }
+
+        .bomba-icon {
+            font-size: clamp(6rem, 18vw, 12rem);
+            transition: transform 0.1s ease;
+            filter: drop-shadow(0 0 20px rgba(255, 68, 68, 0.2));
+        }
+
+        .activa {
+            animation: latido 0.8s infinite alternate ease-in-out;
+        }
+
+        @keyframes latido {
+            from { transform: scale(1); filter: drop-shadow(0 0 20px rgba(255, 68, 68, 0.4)); }
+            to { transform: scale(1.15); filter: drop-shadow(0 0 50px rgba(255, 0, 0, 0.8)); }
+        }
+
+        .regla-box {
+            font-size: clamp(1.5rem, 4vw, 2.8rem);
+            font-weight: 700;
+            color: #ffcc00;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: #222;
+            padding: 10px 30px;
+            border-radius: 50px;
+            border: 2px solid #333;
+        }
+
+        .silaba-box {
+            font-size: clamp(5rem, 16vw, 10rem);
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 4px;
+            text-shadow: 0 5px 20px rgba(255,255,255,0.2);
+            line-height: 1;
+        }
+
+        .btn-bomba {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.8rem;
+            font-weight: 900;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .btn-bomba:active {
+            transform: scale(0.95);
+        }
+
+        .explosion {
+            background-color: #900 !important;
+            animation: sacudida 0.1s infinite;
+        }
+
+        @keyframes sacudida {
+            0% { transform: translate(3px, 3px) rotate(0deg); }
+            20% { transform: translate(-3px, -3px) rotate(-1deg); }
+            40% { transform: translate(-3px, 3px) rotate(1deg); }
+            60% { transform: translate(3px, 1px) rotate(0deg); }
+            80% { transform: translate(1px, -2px) rotate(1deg); }
+            100% { transform: translate(-1px, 2px) rotate(-1deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">TIC TAC BOUM</div>
+
+    <div class="tablero">
+        <div id="bomba" class="bomba-icon">💣</div>
+        <div id="regla" class="regla-box">PULSA PARA ACTIVAR</div>
+        <div id="silaba" class="silaba-box">--</div>
+    </div>
+
+    <button id="btn" class="btn-bomba" onclick="toggleBomba()">¡INICIAR BOMBA!</button>
+
+    <script>
+        // Mazo ampliado a 50 sílabas
+        const silabas = [
+            "AR", "MA", "CA", "PA", "TO", "LA", "EN", "DE", "TE", "TR",
+            "BAR", "CON", "PAR", "MAR", "COR", "PER", "CAR", "SAN", "BAL", "PIS",
+            "RO", "RE", "CI", "ME", "BO", "GA", "FA", "LIS", "TER", "VAL",
+            "BLA", "CLU", "DRA", "FLA", "FRA", "GLO", "GRA", "PLA", "PRI", "PRO",
+            "ESP", "EST", "MON", "RES", "SOL", "TAL", "VER", "ZAR", "CRU", "PRE"
+        ];
+
+        const reglas = [
+            "EMPIEZA POR",
+            "CONTIENE",
+            "ACABA EN"
+        ];
+
+        let temporizador = null;
+        let intervaloSonido = null;
+        let estaActiva = false;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function sonarTic() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+
+        function sonarBoom() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 0.8);
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.8);
+        }
+
+        function toggleBomba() {
+            initAudio();
+
+            if (estaActiva) {
+                desactivarBomba();
+            } else {
+                iniciarBomba();
+            }
+        }
+
+        function iniciarBomba() {
+            estaActiva = true;
+            document.body.classList.remove('explosion');
+
+            const silabaRandom = silabas[Math.floor(Math.random() * silabas.length)];
+            const reglaRandom = reglas[Math.floor(Math.random() * reglas.length)];
+
+            document.getElementById('silaba').innerText = silabaRandom;
+            document.getElementById('regla').innerText = reglaRandom;
+            document.getElementById('bomba').classList.add('activa');
+            document.getElementById('bomba').innerText = '💣';
+            document.getElementById('btn').innerText = 'REINICIAR';
+            document.getElementById('btn').style.background = '#555';
+
+            const tiempoTotalMs = Math.floor(Math.random() * (60000 - 15000 + 1)) + 15000;
+
+            intervaloSonido = setInterval(sonarTic, 800);
+
+            temporizador = setTimeout(() => {
+                explotar();
+            }, tiempoTotalMs);
+        }
+
+        function explotar() {
+            clearInterval(intervaloSonido);
+            sonarBoom();
+
+            document.getElementById('bomba').classList.remove('activa');
+            document.getElementById('bomba').innerText = '💥';
+            document.getElementById('regla').innerText = '¡¡BOOOOM!!';
+            document.getElementById('silaba').innerText = '¡PERDISTE!';
+            document.body.classList.add('explosion');
+
+            document.getElementById('btn').innerText = '¡JUGAR DE NUEVO!';
+            document.getElementById('btn').style.background = '#e74c3c';
+            estaActiva = false;
+        }
+
+        function desactivarBomba() {
+            clearTimeout(temporizador);
+            clearInterval(intervaloSonido);
+            document.getElementById('bomba').classList.remove('activa');
+            document.body.classList.remove('explosion');
+            estaActiva = false;
+            iniciarBomba();
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space') {
+                event.preventDefault();
+                toggleBomba();
+            }
+        });
+    </script>
+</body>
+</html>
