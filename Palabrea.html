@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palabrea Express 🎲</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 20px;
+            user-select: none;
+        }
+
+        .header {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            color: #888;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .tablero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-grow: 1;
+            width: 100%;
+        }
+
+        /* Letra en formato gigante */
+        .letra-box {
+            font-size: clamp(8rem, 25vw, 16rem);
+            font-weight: 900;
+            line-height: 1;
+            color: #ffcc00;
+            text-shadow: 0 10px 30px rgba(255, 204, 0, 0.3);
+            transition: transform 0.1s ease;
+        }
+
+        /* Categoría con icono y texto gigante */
+        .categoria-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            background: #1e1e1e;
+            border: 3px solid #333;
+            padding: 20px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            max-width: 90vw;
+            text-align: center;
+        }
+
+        .categoria-icono {
+            font-size: clamp(3rem, 8vw, 5rem);
+        }
+
+        .categoria-nombre {
+            font-size: clamp(1.8rem, 5vw, 3.5rem);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #ffffff;
+        }
+
+        /* Botón de acción */
+        .btn-generar {
+            background-color: #ff3366;
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(255, 51, 102, 0.4);
+            transition: all 0.1s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-generar:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 10px rgba(255, 51, 102, 0.4);
+        }
+
+        .instrucciones {
+            font-size: 0.9rem;
+            color: #555;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">PALABREA</div>
+
+    <div class="tablero">
+        <div class="letra-box" id="letra">?</div>
+        
+        <div class="categoria-box">
+            <span class="categoria-icono" id="icono">🎲</span>
+            <span class="categoria-nombre" id="categoria">PULSA PARA EMPEZAR</span>
+        </div>
+    </div>
+
+    <button class="btn-generar" onclick="siguienteTurno()">¡SIGUIENTE!</button>
+    <div class="instrucciones">Puedes pulsar la BARRA ESPACIADORA para cambiar</div>
+
+    <script>
+        // Abecedario español optimizado para fluidez en el juego
+        const letras = [
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 
+            'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T', 'U', 'V'
+        ];
+
+        // Las 10 categorías calcadas de tu carta física de Palabrea
+        const categorias = [
+            { nombre: "Animal", icono: "🐓" },
+            { nombre: "Ciudad", icono: "🏙️" },
+            { nombre: "País", icono: "🌍" },
+            { nombre: "Personaje Famoso", icono: "🥸" },
+            { nombre: "Profesión", icono: "👨‍🍳" },
+            { nombre: "Objeto", icono: "🪑" },
+            { nombre: "Planta / Árbol", icono: "🌻" },
+            { nombre: "Comida", icono: "🍲" },
+            { nombre: "Serie TV / Película", icono: "🎥" },
+            { nombre: "Nombre", icono: "👦👧" }
+        ];
+
+        let ultimaLetra = '';
+        let ultimaCategoria = '';
+
+        function siguienteTurno() {
+            // Seleccionar letra sin repetir consecutivamente
+            let nuevaLetra;
+            do {
+                nuevaLetra = letras[Math.floor(Math.random() * letras.length)];
+            } while (nuevaLetra === ultimaLetra);
+            ultimaLetra = nuevaLetra;
+
+            // Seleccionar categoría sin repetir consecutivamente
+            let nuevaCat;
+            do {
+                nuevaCat = categorias[Math.floor(Math.random() * categorias.length)];
+            } while (nuevaCat.nombre === ultimaCategoria);
+            ultimaCategoria = nuevaCat.nombre;
+
+            // Renderizar en pantalla
+            const elemLetra = document.getElementById('letra');
+            elemLetra.innerText = nuevaLetra;
+            
+            // Efecto visual rápido
+            elemLetra.style.transform = 'scale(1.1)';
+            setTimeout(() => elemLetra.style.transform = 'scale(1)', 100);
+
+            document.getElementById('icono').innerText = nuevaCat.icono;
+            document.getElementById('categoria').innerText = nuevaCat.nombre;
+        }
+
+        // Permitir usar la barra espaciadora
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space') {
+                event.preventDefault();
+                siguienteTurno();
+            }
+        });
+    </script>
+
+</body>
+</html>
