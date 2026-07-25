@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trivial Pursuit Genus 🧠</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            color: #ccc;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* --- QUESITO DE TRIVIAL EN CSS --- */
+        .quesito-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            border: 4px solid #333;
+        }
+
+        .sector {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, filter 0.2s;
+        }
+
+        .sector:hover {
+            filter: brightness(1.2);
+            z-index: 10;
+        }
+
+        .sector-content {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            font-size: 1.8rem;
+            transform: rotate(-30deg);
+            user-select: none;
+        }
+
+        /* Colores Genus y Posiciones del Quesito (60deg cada uno) */
+        .geografia { background: #0072ce; transform: rotate(0deg) skewY(-30deg); }
+        .espectaculos { background: #e03c8a; transform: rotate(60deg) skewY(-30deg); }
+        .historia { background: #ffcc00; transform: rotate(120deg) skewY(-30deg); }
+        .arte { background: #8d5524; transform: rotate(180deg) skewY(-30deg); }
+        .ciencia { background: #009e49; transform: rotate(240deg) skewY(-30deg); }
+        .ocio { background: #ff6600; transform: rotate(300deg) skewY(-30deg); }
+
+        /* --- PANTALLA DE PREGUNTA --- */
+        .card-pregunta {
+            display: none;
+            background: #1e1e1e;
+            border: 2px solid #333;
+            border-radius: 16px;
+            padding: 25px;
+            max-width: 650px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .categoria-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .texto-pregunta {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .opciones-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .btn-opcion {
+            background: #2a2a2a;
+            color: #fff;
+            border: 2px solid #444;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-opcion:hover:not([disabled]) {
+            background: #3a3a3a;
+            border-color: #666;
+        }
+
+        /* Estilos de Validación */
+        .btn-opcion.correcta {
+            background-color: #27ae60 !important;
+            border-color: #2ecc71 !important;
+            color: white !important;
+            font-weight: bold;
+        }
+
+        .btn-opcion.incorrecta {
+            background-color: #c0392b !important;
+            border-color: #e74c3c !important;
+            color: white !important;
+        }
+
+        /* --- BOTÓN DE REINICIAR --- */
+        .btn-reiniciar {
+            display: none;
+            margin-top: 20px;
+            background: #ffffff;
+            color: #121212;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(255,255,255,0.2);
+        }
+
+        .loading-text {
+            display: none;
+            font-size: 1.2rem;
+            color: #aaa;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Trivial Pursuit - Edición Genus</h1>
+
+    <!-- El Quesito 6 Colores -->
+    <div id="quesito" class="quesito-container">
+        <div class="sector geografia" onclick="seleccionarCategoria('Geografía', '#0072ce')"><span class="sector-content">🌍</span></div>
+        <div class="sector espectaculos" onclick="seleccionarCategoria('Espectáculos', '#e03c8a')"><span class="sector-content">🎭</span></div>
+        <div class="sector historia" onclick="seleccionarCategoria('Historia', '#ffcc00')"><span class="sector-content">📜</span></div>
+        <div class="sector arte" onclick="seleccionarCategoria('Arte y Literatura', '#8d5524')"><span class="sector-content">🎨</span></div>
+        <div class="sector ciencia" onclick="seleccionarCategoria('Ciencias y Naturaleza', '#009e49')"><span class="sector-content">🔬</span></div>
+        <div class="sector ocio" onclick="seleccionarCategoria('Ocio y Deportes', '#ff6600')"><span class="sector-content">⚽</span></div>
+    </div>
+
+    <div id="loading" class="loading-text">Generando pregunta de Trivial... 🧠</div>
+
+    <!-- Card de la Pregunta -->
+    <div id="card" class="card-pregunta">
+        <div id="badge" class="categoria-badge">CATEGORÍA</div>
+        <div id="pregunta" class="texto-pregunta">Cargando pregunta...</div>
+        <div id="opciones" class="opciones-grid"></div>
+    </div>
+
+    <button id="btn-nuevo" class="btn-reiniciar" onclick="volverAlQuesito()">Elegir otro quesito</button>
+
+    <script>
+        const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+
+        let respuestaCorrectaIndex = null;
+        let respondido = false;
+
+        async function seleccionarCategoria(categoria, color) {
+            document.getElementById('quesito').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+
+            const prompt = `Genera una pregunta tipo Trivial Pursuit de nivel medio sobre la categoría: ${categoria}.
+            Devuelve ÚNICAMENTE un objeto JSON válido (sin Markdown, sin explicaciones) con la siguiente estructura:
+            {
+              "pregunta": "Texto de la pregunta aquí",
+              "opciones": ["Opción A", "Opción B", "Opción C", "Opción D"],
+              "correcta": 0
+            }
+            Donde "correcta" es el índice (0, 1, 2 o 3) de la respuesta correcta.`;
+
+            try {
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                const data = await response.json();
+                let rawText = data.candidates[0].content.parts[0].text;
+                
+                // Limpiar posibles etiquetas de Markdown ```json ... ```
+                rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                const jsonPregunta = JSON.parse(rawText);
+
+                mostrarPregunta(jsonPregunta, categoria, color);
+
+            } catch (e) {
+                alert("Error al conectar con la IA. Inténtalo de nuevo.");
+                volverAlQuesito();
+            }
+        }
+
+        function mostrarPregunta(datos, categoria, color) {
+            document.getElementById('loading').style.display = 'none';
+            
+            const badge = document.getElementById('badge');
+            badge.innerText = categoria;
+            badge.style.backgroundColor = color;
+
+            document.getElementById('pregunta').innerText = datos.pregunta;
+            respuestaCorrectaIndex = datos.correcta;
+            respondido = false;
+
+            const contenedorOpciones = document.getElementById('opciones');
+            contenedorOpciones.innerHTML = '';
+
+            datos.opciones.forEach((opcion, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-opcion';
+                btn.innerText = `${String.fromCharCode(65 + index)}) ${opcion}`;
+                btn.onclick = () => responder(index, btn);
+                contenedorOpciones.appendChild(btn);
+            });
+
+            document.getElementById('card').style.display = 'block';
+        }
+
+        function responder(indiceSeleccionado, botonPulsado) {
+            if (respondido) return;
+            respondido = true;
+
+            const botones = document.querySelectorAll('.btn-opcion');
+            
+            // Deshabilitar todos los botones
+            botones.forEach(btn => btn.disabled = true);
+
+            if (indiceSeleccionado === respuestaCorrectaIndex) {
+                botonPulsado.classList.add('correcta');
+            } else {
+                botonPulsado.classList.add('incorrecta');
+                // Revelar la correcta en verde
+                botones[respuestaCorrectaIndex].classList.add('correcta');
+            }
+
+            document.getElementById('btn-nuevo').style.display = 'block';
+        }
+
+        function volverAlQuesito() {
+            document.getElementById('card').style.display = 'none';
+            document.getElementById('btn-nuevo').style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('quesito').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
