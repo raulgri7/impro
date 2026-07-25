@@ -125,7 +125,6 @@
     <button id="btn" class="btn-bomba" onclick="toggleBomba()">¡INICIAR BOMBA!</button>
 
     <script>
-        // Mazo ampliado a 50 sílabas
         const silabas = [
             "AR", "MA", "CA", "PA", "TO", "LA", "EN", "DE", "TE", "TR",
             "BAR", "CON", "PAR", "MAR", "COR", "PER", "CAR", "SAN", "BAL", "PIS",
@@ -145,43 +144,55 @@
         let estaActiva = false;
         let audioCtx = null;
 
-        function initAudio() {
+        // Desbloqueo explícito del audio del navegador al interactuar
+        async function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                await audioCtx.resume();
             }
         }
 
         function sonarTic() {
             if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.05);
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.05);
+            } catch (e) {
+                console.error("Error al reproducir el tic:", e);
+            }
         }
 
         function sonarBoom() {
             if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(120, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 0.8);
-            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.8);
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 0.8);
+                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.8);
+            } catch (e) {
+                console.error("Error al reproducir el boom:", e);
+            }
         }
 
-        function toggleBomba() {
-            initAudio();
+        async function toggleBomba() {
+            await initAudio();
 
             if (estaActiva) {
                 desactivarBomba();
@@ -206,6 +217,7 @@
 
             const tiempoTotalMs = Math.floor(Math.random() * (60000 - 15000 + 1)) + 15000;
 
+            sonarTic(); // Primer tic inmediato
             intervaloSonido = setInterval(sonarTic, 800);
 
             temporizador = setTimeout(() => {
@@ -246,3 +258,4 @@
     </script>
 </body>
 </html>
+
