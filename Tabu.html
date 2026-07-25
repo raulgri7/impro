@@ -159,6 +159,20 @@
         let timerInterval = null;
         let audioCtx = null;
 
+        // Categorías temáticas para forzar variabilidad extrema en cada llamada
+        const categoriasTematicas = [
+            "Objetos cotidianos raros o antiguos",
+            "Profundidades del océano y naturaleza salvaje",
+            "Eventos históricos y conceptos de ciencia",
+            "Comidas del mundo y elementos de gastronomía",
+            "Profesiones inusuales o aficiones",
+            "Lugares geográficos, monumentos o fenómenos naturales",
+            "Cine, música, literatura y arte pop",
+            "Tecnología, informática y universo digital",
+            "Emociones humanas, gestos o sensaciones físicas",
+            "Deportes, juegos tradicionales y herramientas"
+        ];
+
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -209,7 +223,15 @@
             document.getElementById('loading').style.display = 'block';
             document.getElementById('loading').innerText = 'Generando tarjeta con IA... 🧠';
 
-            const prompt = `Genera una tarjeta del juego Tabú en español.
+            // Seleccionar temática al azar e inyectar semilla única
+            const tematicaAzar = categoriasTematicas[Math.floor(Math.random() * categoriasTematicas.length)];
+            const semilla = Date.now() + '_' + Math.floor(Math.random() * 10000);
+
+            const prompt = `Genera una tarjeta original para el juego Tabú en español.
+            Temática sugerida para inspirarte: ${tematicaAzar}.
+            Semilla de variación única: ${semilla}.
+            Sé creativo y evita palabras obvias o repetitivas.
+            
             Devuelve ÚNICAMENTE un JSON válido (sin Markdown, sin bloques de código) con este formato:
             {
               "palabra": "PALABRA CLAVE",
