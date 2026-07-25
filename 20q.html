@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>20Q - Adivina lo que piensas 🧠</title>
+    <title>20Q Clásico 🧠</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
@@ -123,14 +123,14 @@
 
     <div class="container">
         <div class="header">
-            <div class="titulo">20 QUESTIONS IA</div>
+            <div class="titulo">20Q CLÁSICO IA</div>
             <div id="contador" class="contador">Pregunta 1/20</div>
         </div>
 
         <div id="badge-intento" style="display: none;"></div>
 
         <div id="pantalla" class="pantalla-pregunta">
-            Piensa en un objeto, animal, personaje o concepto... ¡y pulsa Empezar cuando estés listo!
+            Piensa en cualquier objeto, ser vivo o concepto... ¡y pulsa "Empezar" cuando lo tengas en mente!
         </div>
 
         <div id="controles" class="grid-respuestas">
@@ -161,7 +161,6 @@
         async function siguientePaso() {
             mostrarCargando();
 
-            // Evaluar si toca hacer hipótesis (Pregunta 20 o Pregunta 25)
             if (numPregunta === 20 || (primerIntentoFallado && numPregunta === 25)) {
                 modoAdivinar = true;
             } else {
@@ -191,28 +190,39 @@
         }
 
         function construirPrompt() {
-            const contextoHistorial = historial.map((h, i) => `P${i+1}: ${h.pregunta} -> Respuesta: ${h.respuesta}`).join('\n');
+            const contextoHistorial = historial.map((h, i) => `P${i+1}: "${h.pregunta}" -> Resp: ${h.respuesta}`).join('\n');
 
             if (modoAdivinar) {
-                return `Actúas como el juego 20Q (20 Preguntas). Basándote estrictamente en este historial de respuestas:
+                return `Actúas como el algoritmo del juguete 20Q original.
+                Revisa detenidamente las respuestas acumuladas:
                 ${contextoHistorial}
 
-                Debes arriesgarte y hacer tu MEJOR PREDICCIÓN de lo que el usuario está pensando.
-                Devuelve ÚNICAMENTE un JSON válido sin markdown con esta estructura:
+                Ha llegado el momento de arriesgarte con tu predicción final.
+                Devuelve ÚNICAMENTE un JSON válido sin markdown:
                 {
                   "es_prediccion": true,
                   "texto": "¿Estás pensando en [TU PREDICCIÓN CONCRETA]?"
                 }`;
             } else {
-                return `Actúas como el juego 20Q (20 Preguntas). Vas por la pregunta número ${numPregunta}.
-                Historial hasta ahora:
+                return `Actúas EXACTAMENTE como el algoritmo del juego clásico de bolsillo "20Q" (20 Questions).
+                Vas por la pregunta número ${numPregunta} de ${primerIntentoFallado ? '25' : '20'}.
+                
+                HISTORIAL DE PREGUNTAS Y RESPUESTAS:
                 ${contextoHistorial}
 
-                Haz la SIGUIENTE PREGUNTA inteligente de Sí/No para acorralar el objeto/concepto pensado.
-                Devuelve ÚNICAMENTE un JSON válido sin markdown con esta estructura:
+                REGLAS CRUCIALES DEL ESTILO 20Q:
+                1. NO hagas preguntas delatoras o demasiado específicas (NO preguntes "¿Tiene ruedas y motor?" si sospechas de un coche).
+                2. Haz preguntas de ATRIBUTOS GENERALES y CATEGORÍAS ABSTRACTAS según la fase del juego:
+                   - Primeras preguntas (P1 a P7): Origen/Naturaleza (¿Animal, vegetal, mineral?), tamaño general (¿Cabe en una caja de zapatos?), ubicación (¿Suele estar en interiores?).
+                   - Preguntas medias (P8 a P14): Propiedades físicas y uso (¿Funciona con electricidad?, ¿Se puede tocar o es abstracto?, ¿Hace ruido al usarse?, ¿Es algo caro?).
+                   - Preguntas avanzadas (P15 a P19): Matices funcionales o emocionales (¿Tiene relación con la comida?, ¿Lo usas a diario?, ¿Suele comprarse en tiendas de regalos?).
+                3. Las preguntas deben ser genéricas, breves y en un tono neutro estilo 20Q original (ej: "¿Se sostiene con una sola mano?", "¿Es más pesado que una persona?", "¿Contiene partes metálicas?").
+
+                Genera la SIGUIENTE pregunta de atributo general.
+                Devuelve ÚNICAMENTE un JSON válido sin markdown:
                 {
                   "es_prediccion": false,
-                  "texto": "Texto de la pregunta aquí..."
+                  "texto": "Texto de la pregunta genérica aquí"
                 }`;
             }
         }
@@ -241,7 +251,7 @@
                 controles.innerHTML = `
                     <button class="btn btn-si" onclick="responder('Sí')">Sí</button>
                     <button class="btn btn-no" onclick="responder('No')">No</button>
-                    <button class="btn btn-aveces" onclick="responder('A veces / A medias')">A veces</button>
+                    <button class="btn btn-aveces" onclick="responder('A veces / Depende')">A veces</button>
                     <button class="btn btn-nose" onclick="responder('No lo sé')">No lo sé</button>
                 `;
             }
@@ -259,34 +269,32 @@
             const pantalla = document.getElementById('pantalla');
             
             if (acertado) {
-                pantalla.innerText = `¡LA MÁQUINA GANA! 🧠✨ He adivinado tu pensamiento en la pregunta ${numPregunta}.`;
+                pantalla.innerText = `¡LA MÁQUINA GANA! 🧠✨ He analizado tus respuestas y adivinado tu pensamiento en la pregunta ${numPregunta}.`;
                 mostrarBotonReiniciar();
             } else {
                 if (!primerIntentoFallado) {
-                    // Falló en la 20. Le damos bonus hasta la 25.
                     primerIntentoFallado = true;
                     historial.push({ pregunta: pantalla.innerText, respuesta: "Predicción incorrecta en P20" });
                     
-                    alert("¡Vaya! He fallado en la pregunta 20. Dame 5 preguntas más (hasta la 25) para mi segunda oportunidad.");
+                    alert("¡He fallado en el primer intento! Voy a recopilar 5 atributos más hasta la pregunta 25.");
                     numPregunta = 21;
                     siguientePaso();
                 } else {
-                    // Falló en la 25. ¡Ha perdido la máquina!
-                    pantalla.innerText = "¡ME HAS VENCIDO! 🎉🤖 No he sido capaz de adivinarlo en 25 preguntas. ¡Enhorabuena!";
+                    pantalla.innerText = "¡ENHORABUENA, HAS VENCIDO A LA MÁQUINA! 🎉🤖 No he logrado deducir tu concepto tras 25 preguntas de atributos.";
                     mostrarBotonReiniciar();
                 }
             }
         }
 
         function mostrarCargando() {
-            document.getElementById('pantalla').innerText = 'Pensando la siguiente pregunta... 🧠';
-            document.getElementById('controles').innerHTML = `<div class="loading" style="grid-column: span 2;">Analizando respuestas previas...</div>`;
+            document.getElementById('pantalla').innerText = 'Analizando atributos... 🧠';
+            document.getElementById('controles').innerHTML = `<div class="loading" style="grid-column: span 2;">Procesando patrón del concepto...</div>`;
         }
 
         function mostrarBotonReiniciar() {
             document.getElementById('badge-intento').style.display = 'none';
             document.getElementById('controles').innerHTML = `
-                <button class="btn btn-reiniciar" onclick="iniciarJuego()">Jugar otra partida</button>
+                <button class="btn btn-reiniciar" onclick="iniciarJuego()">Volver a jugar</button>
             `;
         }
     </script>
