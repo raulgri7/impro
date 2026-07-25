@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabú Express 🚫</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #0f172a;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            user-select: none;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 10px;
+        }
+
+        .titulo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: #f43f5e;
+            text-transform: uppercase;
+        }
+
+        .timer-box {
+            background: #1e293b;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #fbbf24;
+            border: 2px solid #334155;
+        }
+
+        /* --- TARJETA DE TABÚ --- */
+        .tarjeta-container {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .card {
+            background: #ffffff;
+            color: #0f172a;
+            border-radius: 24px;
+            padding: 30px;
+            width: 100%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            display: none;
+        }
+
+        .palabra-clave {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #2563eb;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding-bottom: 15px;
+            border-bottom: 4px solid #f1f5f9;
+            margin-bottom: 20px;
+        }
+
+        .seccion-prohibidas {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .prohibida-tag {
+            background: #ffe4e6;
+            color: #e11d48;
+            font-size: 1.2rem;
+            font-weight: 700;
+            padding: 10px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- BOTONES DE CONTROL --- */
+        .controles-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            max-width: 480px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            border: none;
+            padding: 18px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            border-radius: 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: transform 0.1s;
+        }
+
+        .btn:active { transform: scale(0.96); }
+
+        .btn-acierto { background: #22c55e; color: white; }
+        .btn-falta { background: #ef4444; color: white; grid-column: span 2; font-size: 1.4rem; }
+        .btn-siguiente { background: #3b82f6; color: white; grid-column: span 2; font-size: 1.4rem; }
+
+        .loading {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="titulo">TABÚ</div>
+        <div id="timer" class="timer-box">60s</div>
+    </div>
+
+    <div class="tarjeta-container">
+        <div id="loading" class="loading">Pulsa "Siguiente Tarjeta" para empezar 🎲</div>
+        
+        <div id="card" class="card">
+            <div id="palabra-clave" class="palabra-clave">---</div>
+            <div id="prohibidas" class="seccion-prohibidas"></div>
+        </div>
+    </div>
+
+    <div class="controles-grid">
+        <button id="btn-siguiente" class="btn btn-siguiente" onclick="nuevaTarjeta()">¡Siguiente Tarjeta!</button>
+        <button id="btn-acierto" class="btn btn-acierto" style="display:none;" onclick="acierto()">Acierto (+1)</button>
+        <button id="btn-falta" class="btn btn-falta" style="display:none;" onclick="sonarBuzzer()">¡FALTA / TABÚ! 🚨</button>
+    </div>
+
+    <script>
+        const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+        let tiempoRestante = 60;
+        let timerInterval = null;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function sonarBuzzer() {
+            initAudio();
+            if (!audioCtx) return;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(110, audioCtx.currentTime + 0.15);
+
+            gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.4);
+        }
+
+        function iniciarTimer() {
+            clearInterval(timerInterval);
+            tiempoRestante = 60;
+            document.getElementById('timer').innerText = tiempoRestante + 's';
+
+            timerInterval = setInterval(() => {
+                tiempoRestante--;
+                document.getElementById('timer').innerText = tiempoRestante + 's';
+
+                if (tiempoRestante <= 0) {
+                    clearInterval(timerInterval);
+                    sonarBuzzer();
+                    alert("¡TIEMPO AGOTADO!");
+                }
+            }, 1000);
+        }
+
+        async function nuevaTarjeta() {
+            initAudio();
+            document.getElementById('card').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('loading').innerText = 'Generando tarjeta con IA... 🧠';
+
+            const prompt = `Genera una tarjeta del juego Tabú en español.
+            Devuelve ÚNICAMENTE un JSON válido (sin Markdown, sin bloques de código) con este formato:
+            {
+              "palabra": "PALABRA CLAVE",
+              "prohibidas": ["PROHIBIDA 1", "PROHIBIDA 2", "PROHIBIDA 3", "PROHIBIDA 4"]
+            }`;
+
+            try {
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                const data = await response.json();
+                let rawText = data.candidates[0].content.parts[0].text;
+                rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                
+                const jsonCard = JSON.parse(rawText);
+                renderizarTarjeta(jsonCard);
+
+            } catch (e) {
+                document.getElementById('loading').innerText = 'Error al cargar tarjeta. Reintenta.';
+            }
+        }
+
+        function renderizarTarjeta(datos) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('palabra-clave').innerText = datos.palabra;
+
+            const contProhibidas = document.getElementById('prohibidas');
+            contProhibidas.innerHTML = '';
+
+            datos.prohibidas.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'prohibida-tag';
+                div.innerText = p;
+                contProhibidas.appendChild(div);
+            });
+
+            document.getElementById('card').style.display = 'block';
+            document.getElementById('btn-acierto').style.display = 'block';
+            document.getElementById('btn-falta').style.display = 'block';
+
+            iniciarTimer();
+        }
+
+        function acierto() {
+            nuevaTarjeta();
+        }
+    </script>
+</body>
+</html>
