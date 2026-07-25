@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Mentiroso 🤥</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #0f172a;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            user-select: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: #1e293b;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            border: 2px solid #334155;
+            text-align: center;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #334155;
+        }
+
+        .titulo {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #a855f7;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .categoria-badge {
+            background: #0f172a;
+            color: #38bdf8;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border: 1px solid #334155;
+        }
+
+        .pregunta-box {
+            font-size: 1.35rem;
+            font-weight: 700;
+            line-height: 1.5;
+            color: #f8fafc;
+            margin-bottom: 25px;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hueco {
+            color: #a855f7;
+            text-decoration: underline;
+            font-weight: 900;
+        }
+
+        .grid-opciones {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .btn-opcion {
+            background: #334155;
+            color: white;
+            border: 2px solid #475569;
+            padding: 16px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .btn-opcion:hover:not(:disabled) {
+            background: #475569;
+            border-color: #a855f7;
+        }
+
+        .btn-opcion.correcta {
+            background: #22c55e !important;
+            border-color: #16a34a !important;
+            color: white;
+        }
+
+        .btn-opcion.incorrecta {
+            background: #ef4444 !important;
+            border-color: #dc2626 !important;
+            color: white;
+            opacity: 0.6;
+        }
+
+        .explicacion-box {
+            background: #0f172a;
+            border: 2px solid #a855f7;
+            border-radius: 16px;
+            padding: 18px;
+            margin-top: 15px;
+            text-align: left;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #e2e8f0;
+            display: none;
+        }
+
+        .btn-siguiente {
+            background: #a855f7;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            border-radius: 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 15px;
+            transition: transform 0.1s;
+        }
+
+        .btn-siguiente:active { transform: scale(0.97); }
+
+        .loading {
+            color: #94a3b8;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div class="titulo">EL MENTIROSO 🤥</div>
+            <div id="categoria" class="categoria-badge">Historia & Curiosidades</div>
+        </div>
+
+        <div id="pregunta" class="pregunta-box">
+            Pulsa el botón de abajo para generar la primera historia.
+        </div>
+
+        <div id="opciones" class="grid-opciones"></div>
+
+        <div id="explicacion" class="explicacion-box"></div>
+
+        <button id="btn-accion" class="btn-siguiente" onclick="cargarNuevoDato()">Siguiente Dato 🎲</button>
+    </div>
+
+    <script>
+        const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+
+        const temas = [
+            "Leyes e historias insólitas",
+            "Ciencia y naturaleza extraña",
+            "Inventos fracasados o absurdos",
+            "Cine, música y celebridades",
+            "Récords insólitos y tradiciones del mundo"
+        ];
+
+        async function cargarNuevoDato() {
+            const elPregunta = document.getElementById('pregunta');
+            const elOpciones = document.getElementById('opciones');
+            const elExplicacion = document.getElementById('explicacion');
+            const elBtnAccion = document.getElementById('btn-accion');
+
+            elOpciones.innerHTML = '';
+            elExplicacion.style.display = 'none';
+            elPregunta.innerText = 'Buscando un dato disparatado... 🧠';
+            elBtnAccion.style.display = 'none';
+
+            const temaAzar = temas[Math.floor(Math.random() * temas.length)];
+            document.getElementById('categoria').innerText = temaAzar;
+            
+            const semilla = Date.now() + '_' + Math.floor(Math.random() * 1000);
+
+            const prompt = `Genera un dato curioso real pero insólito en español con el formato del juego Fibbage.
+            Tema: ${temaAzar}.
+            Semilla: ${semilla}.
+            
+            Requisitos:
+            1. El enunciado debe tener una frase incompleta marcada con "_____" en la parte clave.
+            2. Genera 1 respuesta VERDADERA (la real).
+            3. Genera 3 respuestas FALSAS pero MUY creíbles, divertidas o verosímiles.
+            4. Una breve explicación del contexto real.
+
+            Devuelve ÚNICAMENTE un JSON válido sin markdown:
+            {
+              "enunciado": "En 1923, un jockey ganó una carrera a pesar de estar _____.",
+              "verdadera": "Muerto",
+              "falsas": ["Borracho", "Ciego", "Dormido"],
+              "explicacion": "El jockey Frank Hayes sufrió un ataque al corazón a mitad de la carrera, pero su caballo llegó en primer lugar con él aún en la silla."
+            }`;
+
+            try {
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                const data = await response.json();
+                let rawText = data.candidates[0].content.parts[0].text;
+                rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                
+                const dato = JSON.parse(rawText);
+                renderizarJuego(dato);
+
+            } catch (e) {
+                elPregunta.innerText = 'Error al obtener el dato. Inténtalo de nuevo.';
+                elBtnAccion.innerText = 'Reintentar';
+                elBtnAccion.style.display = 'block';
+            }
+        }
+
+        function renderizarJuego(datos) {
+            const elPregunta = document.getElementById('pregunta');
+            const elOpciones = document.getElementById('opciones');
+            const elExplicacion = document.getElementById('explicacion');
+
+            // Formatear el hueco
+            const textoFormateado = datos.enunciado.replace('_____', '<span class="hueco">_____</span>');
+            elPregunta.innerHTML = textoFormateado;
+
+            // Mezclar opciones
+            const todasLasOpciones = [
+                { texto: datos.verdadera, esCorrecta: true },
+                ...datos.falsas.map(f => ({ texto: f, esCorrecta: false }))
+            ].sort(() => Math.random() - 0.5);
+
+            elOpciones.innerHTML = '';
+            todasLasOpciones.forEach(op => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-opcion';
+                btn.innerText = op.texto;
+                btn.onclick = () => revelarRespuesta(btn, op.esCorrecta, datos.verdadera, datos.explicacion);
+                elOpciones.appendChild(btn);
+            });
+
+            elExplicacion.innerHTML = `<strong>💡 ¿Qué ocurrió realmente?</strong><br>${datos.explicacion}`;
+        }
+
+        function revelarRespuesta(btnSeleccionado, esCorrecta, respuestaCorrecta, explicacion) {
+            const botones = document.querySelectorAll('.btn-opcion');
+            
+            botones.forEach(btn => {
+                btn.disabled = true;
+                if (btn.innerText === respuestaCorrecta) {
+                    btn.classList.add('correcta');
+                } else if (btn === btnSeleccionado && !esCorrecta) {
+                    btn.classList.add('incorrecta');
+                }
+            });
+
+            const elExplicacion = document.getElementById('explicacion');
+            const elBtnAccion = document.getElementById('btn-accion');
+
+            elExplicacion.style.display = 'block';
+            elBtnAccion.innerText = 'Siguiente Dato 🎲';
+            elBtnAccion.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
