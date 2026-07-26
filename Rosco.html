@@ -16,16 +16,16 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 15px;
+            padding: 10px;
             user-select: none;
         }
 
         .container {
             width: 100%;
-            max-width: 650px;
+            max-width: 420px; /* Tamaño optimizado para móvil */
             background: #1e293b;
             border-radius: 24px;
-            padding: 25px;
+            padding: 20px;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
             border: 2px solid #334155;
             display: flex;
@@ -39,22 +39,22 @@
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .titulo {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 900;
             color: #38bdf8;
-            letter-spacing: 1px;
+            line-height: 1.1;
         }
 
         .timer-box {
             background: #0f172a;
             color: #fbbf24;
-            padding: 6px 16px;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: bold;
             border: 1px solid #334155;
         }
@@ -62,9 +62,9 @@
         /* --- CIRCULO DEL ROSCO --- */
         .rosco-wrapper {
             position: relative;
-            width: 320px;
-            height: 320px;
-            margin: 10px 0 25px 0;
+            width: 290px;
+            height: 290px;
+            margin: 10px 0 15px 0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -73,33 +73,34 @@
         .rosco-center {
             position: absolute;
             text-align: center;
-            width: 180px;
+            width: 150px;
         }
 
         .letra-actual {
-            font-size: 3rem;
+            font-size: 2.8rem;
             font-weight: 900;
             color: #38bdf8;
             line-height: 1;
         }
 
         .tipo-letra {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #94a3b8;
             text-transform: uppercase;
             margin-top: 4px;
             font-weight: bold;
+            letter-spacing: 0.5px;
         }
 
         .letra-node {
             position: absolute;
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background: #2563eb;
             color: white;
             font-weight: 800;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -123,41 +124,51 @@
             background: #0f172a;
             border: 2px solid #334155;
             border-radius: 16px;
-            padding: 18px;
-            font-size: 1.1rem;
+            padding: 15px;
+            font-size: 1rem;
             line-height: 1.4;
-            min-height: 85px;
+            min-height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            margin-bottom: 18px;
+            margin-bottom: 15px;
         }
 
+        /* Rediseño de controles para encajar en móvil */
         .input-group {
             display: flex;
+            flex-direction: column;
             gap: 10px;
             width: 100%;
         }
 
         .input-respuesta {
-            flex-grow: 1;
+            width: 100%;
             background: #0f172a;
             border: 2px solid #334155;
             border-radius: 14px;
-            padding: 14px 18px;
-            font-size: 1.1rem;
+            padding: 14px 16px;
+            font-size: 1.05rem;
             color: white;
             outline: none;
             text-transform: uppercase;
+            text-align: center;
         }
 
         .input-respuesta:focus { border-color: #38bdf8; }
 
+        .botones-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+        }
+
         .btn {
             border: none;
-            padding: 14px 20px;
-            font-size: 1rem;
+            padding: 14px 10px;
+            font-size: 0.95rem;
             font-weight: 800;
             border-radius: 14px;
             cursor: pointer;
@@ -169,13 +180,13 @@
 
         .btn-enviar { background: #22c55e; color: white; }
         .btn-pasapalabra { background: #eab308; color: #0f172a; }
-        .btn-reiniciar { background: #38bdf8; color: #0f172a; width: 100%; margin-top: 10px; }
+        .btn-reiniciar { background: #38bdf8; color: #0f172a; width: 100%; }
 
         .marcadores {
             display: flex;
-            gap: 20px;
+            gap: 12px;
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         .aciertos-cnt { color: #22c55e; }
@@ -186,7 +197,7 @@
 
     <div class="container">
         <div class="header">
-            <div class="titulo">EL ROSCO 🔤</div>
+            <div class="titulo">EL ROSCO</div>
             <div class="marcadores">
                 <span class="aciertos-cnt">✓ <span id="cnt-aciertos">0</span></span>
                 <span class="fallos-cnt">✗ <span id="cnt-fallos">0</span></span>
@@ -208,9 +219,11 @@
         <div id="controles" style="width: 100%;">
             <button id="btn-inicio" class="btn btn-reiniciar" onclick="iniciarJuego()">¡Empezar Rosco!</button>
             <div id="grupo-juego" class="input-group" style="display: none;">
-                <input type="text" id="input-resp" class="input-respuesta" placeholder="Escribe tu respuesta..." autocomplete="off">
-                <button class="btn btn-enviar" onclick="comprobarRespuesta()">Enviar</button>
-                <button class="btn btn-pasapalabra" onclick="pasapalabra()">Pasapalabra</button>
+                <input type="text" id="input-resp" class="input-respuesta" placeholder="ESCRIBE TU RESPUESTA..." autocomplete="off">
+                <div class="botones-row">
+                    <button class="btn btn-enviar" onclick="comprobarRespuesta()">Enviar</button>
+                    <button class="btn btn-pasapalabra" onclick="pasapalabra()">Pasapalabra</button>
+                </div>
             </div>
         </div>
     </div>
@@ -227,7 +240,6 @@
         let timerInterval = null;
         let juegoTerminado = false;
 
-        // Dibujar el círculo de letras al cargar
         window.onload = () => {
             dibujarRoscoUI();
             document.getElementById('input-resp').addEventListener('keypress', (e) => {
@@ -237,17 +249,16 @@
 
         function dibujarRoscoUI() {
             const container = document.getElementById('rosco-container');
-            // Limpiar si existían
             const nodosAntiguos = container.querySelectorAll('.letra-node');
             nodosAntiguos.forEach(n => n.remove());
 
             const total = LETRAS.length;
-            const radio = 130; // Distancia del centro
+            const radio = 118; // Radio ajustado para móvil (290px container)
 
             LETRAS.forEach((letra, i) => {
-                const angulo = (i / total) * 2 * Math.PI - (Math.PI / 2); // Empezar arriba (-90deg)
-                const x = 160 + radio * Math.cos(angulo) - 16;
-                const y = 160 + radio * Math.sin(angulo) - 16;
+                const angulo = (i / total) * 2 * Math.PI - (Math.PI / 2);
+                const x = 145 + radio * Math.cos(angulo) - 14;
+                const y = 145 + radio * Math.sin(angulo) - 14;
 
                 const node = document.createElement('div');
                 node.className = 'letra-node';
@@ -261,7 +272,7 @@
 
         async function iniciarJuego() {
             document.getElementById('btn-inicio').style.display = 'none';
-            document.getElementById('definicion').innerText = 'Generando rosco completo con IA... 🧠 (puede tardar unos segundos)';
+            document.getElementById('definicion').innerText = 'Generando rosco completo con IA... 🧠';
             
             aciertos = 0;
             fallos = 0;
@@ -302,10 +313,9 @@
                 
                 const resultado = JSON.parse(rawText);
                 
-                // Preparar datos con estado
                 roscoDatos = resultado.rosco.map(item => ({
                     ...item,
-                    estado: 'pendiente' // 'pendiente', 'correcta', 'incorrecta'
+                    estado: 'pendiente'
                 }));
 
                 indiceActual = 0;
@@ -335,7 +345,6 @@
         function cargarLetraActual() {
             if (juegoTerminado) return;
 
-            // Buscar la siguiente letra pendiente desde la posición actual
             let pendientes = roscoDatos.filter(d => d.estado === 'pendiente');
             
             if (pendientes.length === 0) {
@@ -343,21 +352,18 @@
                 return;
             }
 
-            // Buscar el siguiente pendiente a partir de indiceActual
             while (roscoDatos[indiceActual].estado !== 'pendiente') {
                 indiceActual = (indiceActual + 1) % roscoDatos.length;
             }
 
             const actual = roscoDatos[indiceActual];
 
-            // Actualizar interfaz
             document.getElementById('letra-centro').innerText = actual.letra;
             document.getElementById('tipo-centro').innerText = actual.tipo === 'empieza' ? 'Empieza por' : 'Contiene la';
             document.getElementById('definicion').innerText = actual.definicion;
             document.getElementById('input-resp').value = '';
             document.getElementById('input-resp').focus();
 
-            // Resaltar en el rosco UI
             document.querySelectorAll('.letra-node').forEach(n => n.classList.remove('activa'));
             const nodeActual = document.getElementById(`node-${actual.letra}`);
             if (nodeActual) nodeActual.classList.add('activa');
