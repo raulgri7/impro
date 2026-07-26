@@ -3,218 +3,302 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trivial Pursuit Genus 🧠</title>
+    <title>El Rosco Individual 🔤</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
             font-family: system-ui, -apple-system, sans-serif;
-            background-color: #121212;
+            background-color: #0f172a;
             color: #ffffff;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding: 10px;
+            user-select: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px; /* Tamaño optimizado para móvil */
+            background: #1e293b;
+            border-radius: 24px;
             padding: 20px;
-        }
-
-        h1 {
-            font-size: 1.8rem;
-            letter-spacing: 2px;
-            color: #ccc;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        /* --- QUESITO SVG PERFECTO --- */
-        .quesito-container {
-            width: 320px;
-            height: 320px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            border: 2px solid #334155;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             position: relative;
         }
 
-        svg {
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             width: 100%;
-            height: 100%;
-            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.1));
+            margin-bottom: 10px;
         }
 
-        .sector-path {
-            cursor: pointer;
-            transition: transform 0.2s, filter 0.2s;
-            transform-origin: 160px 160px;
-        }
-
-        .sector-path:hover {
-            filter: brightness(1.25);
-            transform: scale(1.03);
-        }
-
-        .sector-icon {
-            font-size: 28px;
-            pointer-events: none;
-            user-select: none;
-            text-anchor: middle;
-            dominant-baseline: central;
-        }
-
-        /* --- PANTALLA DE PREGUNTA --- */
-        .card-pregunta {
-            display: none;
-            background: #1e1e1e;
-            border: 2px solid #333;
-            border-radius: 16px;
-            padding: 25px;
-            max-width: 650px;
-            width: 100%;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .categoria-badge {
-            display: inline-block;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            margin-bottom: 15px;
-            color: #fff;
-        }
-
-        .texto-pregunta {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            line-height: 1.4;
-        }
-
-        .opciones-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-        }
-
-        .btn-opcion {
-            background: #2a2a2a;
-            color: #fff;
-            border: 2px solid #444;
-            padding: 14px 20px;
-            border-radius: 10px;
-            font-size: 1rem;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-opcion:hover:not([disabled]) {
-            background: #3a3a3a;
-            border-color: #666;
-        }
-
-        .btn-opcion.correcta {
-            background-color: #27ae60 !important;
-            border-color: #2ecc71 !important;
-            color: white !important;
-            font-weight: bold;
-        }
-
-        .btn-opcion.incorrecta {
-            background-color: #c0392b !important;
-            border-color: #e74c3c !important;
-            color: white !important;
-        }
-
-        .btn-reiniciar {
-            display: none;
-            margin-top: 20px;
-            background: #ffffff;
-            color: #121212;
-            border: none;
-            padding: 12px 30px;
-            font-size: 1rem;
-            font-weight: bold;
-            border-radius: 30px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 15px rgba(255,255,255,0.2);
-        }
-
-        .loading-text {
-            display: none;
+        .titulo {
             font-size: 1.2rem;
-            color: #aaa;
-            margin-top: 20px;
+            font-weight: 900;
+            color: #38bdf8;
+            line-height: 1.1;
         }
+
+        .timer-box {
+            background: #0f172a;
+            color: #fbbf24;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: 1px solid #334155;
+        }
+
+        /* --- CIRCULO DEL ROSCO --- */
+        .rosco-wrapper {
+            position: relative;
+            width: 290px;
+            height: 290px;
+            margin: 10px 0 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rosco-center {
+            position: absolute;
+            text-align: center;
+            width: 150px;
+        }
+
+        .letra-actual {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #38bdf8;
+            line-height: 1;
+        }
+
+        .tipo-letra {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-top: 4px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .letra-node {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #2563eb;
+            color: white;
+            font-weight: 800;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #1d4ed8;
+            transition: all 0.2s ease;
+        }
+
+        .letra-node.activa {
+            transform: scale(1.3);
+            border-color: #ffffff;
+            box-shadow: 0 0 12px #38bdf8;
+            z-index: 10;
+        }
+
+        .letra-node.correcta { background: #22c55e; border-color: #16a34a; }
+        .letra-node.incorrecta { background: #ef4444; border-color: #dc2626; }
+
+        /* --- PREGUNTA Y ENTRADA --- */
+        .def-box {
+            width: 100%;
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 16px;
+            padding: 15px;
+            font-size: 1rem;
+            line-height: 1.4;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        /* Rediseño de controles para encajar en móvil */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .input-respuesta {
+            width: 100%;
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-size: 1.05rem;
+            color: white;
+            outline: none;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .input-respuesta:focus { border-color: #38bdf8; }
+
+        .botones-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn {
+            border: none;
+            padding: 14px 10px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            border-radius: 14px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: transform 0.1s;
+        }
+
+        .btn:active { transform: scale(0.96); }
+
+        .btn-enviar { background: #22c55e; color: white; }
+        .btn-pasapalabra { background: #eab308; color: #0f172a; }
+        .btn-reiniciar { background: #38bdf8; color: #0f172a; width: 100%; }
+
+        .marcadores {
+            display: flex;
+            gap: 12px;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .aciertos-cnt { color: #22c55e; }
+        .fallos-cnt { color: #ef4444; }
     </style>
 </head>
 <body>
 
-    <h1>Trivial Pursuit - Edición Genus</h1>
+    <div class="container">
+        <div class="header">
+            <div class="titulo">EL ROSCO</div>
+            <div class="marcadores">
+                <span class="aciertos-cnt">✓ <span id="cnt-aciertos">0</span></span>
+                <span class="fallos-cnt">✗ <span id="cnt-fallos">0</span></span>
+            </div>
+            <div id="timer" class="timer-box">200s</div>
+        </div>
 
-    <!-- El Quesito Creado con SVG Perfecto (320x320) -->
-    <div id="quesito" class="quesito-container">
-        <svg viewBox="0 0 320 320">
-            <!-- Borde exterior de la ruleta -->
-            <circle cx="160" cy="160" r="155" fill="none" stroke="#333" stroke-width="4"/>
+        <div class="rosco-wrapper" id="rosco-container">
+            <div class="rosco-center">
+                <div id="letra-centro" class="letra-actual">-</div>
+                <div id="tipo-centro" class="tipo-letra">Empieza por</div>
+            </div>
+        </div>
 
-            <!-- 1. Geografía (Azul) 0º a 60º -->
-            <path class="sector-path" fill="#0072ce" d="M160,160 L310,160 A150,150 0 0,1 235,289.9 Z" onclick="seleccionarCategoria('Geografía', '#0072ce')"/>
-            <text x="235" y="200" class="sector-icon">🌍</text>
+        <div id="definicion" class="def-box">
+            Pulsa "Empezar Rosco" para generar una nueva partida con IA.
+        </div>
 
-            <!-- 2. Espectáculos (Rosa) 60º a 120º -->
-            <path class="sector-path" fill="#e03c8a" d="M160,160 L235,289.9 A150,150 0 0,1 85,289.9 Z" onclick="seleccionarCategoria('Espectáculos', '#e03c8a')"/>
-            <text x="160" y="245" class="sector-icon">🎭</text>
-
-            <!-- 3. Historia (Amarillo) 120º a 180º -->
-            <path class="sector-path" fill="#ffcc00" d="M160,160 L85,289.9 A150,150 0 0,1 10,160 Z" onclick="seleccionarCategoria('Historia', '#ffcc00')"/>
-            <text x="85" y="200" class="sector-icon">📜</text>
-
-            <!-- 4. Arte y Literatura (Marrón) 180º a 240º -->
-            <path class="sector-path" fill="#8d5524" d="M160,160 L10,160 A150,150 0 0,1 85,30.1 Z" onclick="seleccionarCategoria('Arte y Literatura', '#8d5524')"/>
-            <text x="85" y="120" class="sector-icon">🎨</text>
-
-            <!-- 5. Ciencias y Naturaleza (Verde) 240º a 300º -->
-            <path class="sector-path" fill="#009e49" d="M160,160 L85,30.1 A150,150 0 0,1 235,30.1 Z" onclick="seleccionarCategoria('Ciencias y Naturaleza', '#009e49')"/>
-            <text x="160" y="75" class="sector-icon">🔬</text>
-
-            <!-- 6. Ocio y Deportes (Naranja) 300º a 360º -->
-            <path class="sector-path" fill="#ff6600" d="M160,160 L235,30.1 A150,150 0 0,1 310,160 Z" onclick="seleccionarCategoria('Ocio y Deportes', '#ff6600')"/>
-            <text x="235" y="120" class="sector-icon">⚽</text>
-        </svg>
+        <div id="controles" style="width: 100%;">
+            <button id="btn-inicio" class="btn btn-reiniciar" onclick="iniciarJuego()">¡Empezar Rosco!</button>
+            <div id="grupo-juego" class="input-group" style="display: none;">
+                <input type="text" id="input-resp" class="input-respuesta" placeholder="ESCRIBE TU RESPUESTA..." autocomplete="off">
+                <div class="botones-row">
+                    <button class="btn btn-enviar" onclick="comprobarRespuesta()">Enviar</button>
+                    <button class="btn btn-pasapalabra" onclick="pasapalabra()">Pasapalabra</button>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div id="loading" class="loading-text">Generando pregunta de Trivial... 🧠</div>
-
-    <!-- Card de la Pregunta -->
-    <div id="card" class="card-pregunta">
-        <div id="badge" class="categoria-badge">CATEGORÍA</div>
-        <div id="pregunta" class="texto-pregunta">Cargando pregunta...</div>
-        <div id="opciones" class="opciones-grid"></div>
-    </div>
-
-    <button id="btn-nuevo" class="btn-reiniciar" onclick="volverAlQuesito()">Elegir otro quesito</button>
 
     <script>
         const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+        const LETRAS = ["A","B","C","D","E","F","G","H","I","J","L","M","N","Ñ","O","P","Q","R","S","T","U","V","X","Y","Z"];
 
-        let respuestaCorrectaIndex = null;
-        let respondido = false;
+        let roscoDatos = [];
+        let indiceActual = 0;
+        let aciertos = 0;
+        let fallos = 0;
+        let tiempoRestante = 200;
+        let timerInterval = null;
+        let juegoTerminado = false;
 
-        async function seleccionarCategoria(categoria, color) {
-            document.getElementById('quesito').style.display = 'none';
-            document.getElementById('loading').style.display = 'block';
+        window.onload = () => {
+            dibujarRoscoUI();
+            document.getElementById('input-resp').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') comprobarRespuesta();
+            });
+        };
 
-            const prompt = `Genera una pregunta tipo Trivial Pursuit de nivel medio sobre la categoría: ${categoria}.
-            Devuelve ÚNICAMENTE un objeto JSON válido (sin Markdown, sin explicaciones) con la siguiente estructura:
+        function dibujarRoscoUI() {
+            const container = document.getElementById('rosco-container');
+            const nodosAntiguos = container.querySelectorAll('.letra-node');
+            nodosAntiguos.forEach(n => n.remove());
+
+            const total = LETRAS.length;
+            const radio = 118; // Radio ajustado para móvil (290px container)
+
+            LETRAS.forEach((letra, i) => {
+                const angulo = (i / total) * 2 * Math.PI - (Math.PI / 2);
+                const x = 145 + radio * Math.cos(angulo) - 14;
+                const y = 145 + radio * Math.sin(angulo) - 14;
+
+                const node = document.createElement('div');
+                node.className = 'letra-node';
+                node.id = `node-${letra}`;
+                node.innerText = letra;
+                node.style.left = `${x}px`;
+                node.style.top = `${y}px`;
+                container.appendChild(node);
+            });
+        }
+
+        async function iniciarJuego() {
+            document.getElementById('btn-inicio').style.display = 'none';
+            document.getElementById('definicion').innerText = 'Generando rosco completo con IA... 🧠';
+            
+            aciertos = 0;
+            fallos = 0;
+            tiempoRestante = 200;
+            juegoTerminado = false;
+            document.getElementById('cnt-aciertos').innerText = '0';
+            document.getElementById('cnt-fallos').innerText = '0';
+            document.getElementById('timer').innerText = '200s';
+
+            dibujarRoscoUI();
+
+            const prompt = `Genera un rosco completo para el juego Pasapalabra en español para las siguientes 25 letras: ${LETRAS.join(', ')}.
+            
+            Devuelve ÚNICAMENTE un JSON válido (sin Markdown) que contenga un array llamado "rosco" con 25 objetos.
+            Cada objeto debe incluir:
+            - "letra": La letra correspondiente.
+            - "tipo": "empieza" o "contiene".
+            - "palabra": La palabra exacta objetivo.
+            - "definicion": La definición clara estilo diccionario sin nombrar la palabra objetivo.
+
+            Ejemplo de estructura JSON:
             {
-              "pregunta": "Texto de la pregunta aquí",
-              "opciones": ["Opción A", "Opción B", "Opción C", "Opción D"],
-              "correcta": 0
-            }
-            Donde "correcta" es el índice (0, 1, 2 o 3) de la respuesta correcta.`;
+              "rosco": [
+                { "letra": "A", "tipo": "empieza", "palabra": "AGUA", "definicion": "Líquido transparente e inodoro que forma los mares y ríos." }
+              ]
+            }`;
 
             try {
                 const response = await fetch(URL_WORKER, {
@@ -225,65 +309,116 @@
 
                 const data = await response.json();
                 let rawText = data.candidates[0].content.parts[0].text;
-                
                 rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-                const jsonPregunta = JSON.parse(rawText);
+                
+                const resultado = JSON.parse(rawText);
+                
+                roscoDatos = resultado.rosco.map(item => ({
+                    ...item,
+                    estado: 'pendiente'
+                }));
 
-                mostrarPregunta(jsonPregunta, categoria, color);
+                indiceActual = 0;
+                document.getElementById('grupo-juego').style.display = 'flex';
+                iniciarTimer();
+                cargarLetraActual();
 
             } catch (e) {
-                alert("Error al conectar con la IA. Inténtalo de nuevo.");
-                volverAlQuesito();
+                document.getElementById('definicion').innerText = 'Error al generar el rosco. Inténtalo de nuevo.';
+                document.getElementById('btn-inicio').style.display = 'block';
             }
         }
 
-        function mostrarPregunta(datos, categoria, color) {
-            document.getElementById('loading').style.display = 'none';
+        function iniciarTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                tiempoRestante--;
+                document.getElementById('timer').innerText = tiempoRestante + 's';
+
+                if (tiempoRestante <= 0) {
+                    clearInterval(timerInterval);
+                    finalizarJuego("¡TIEMPO AGOTADO!");
+                }
+            }, 1000);
+        }
+
+        function cargarLetraActual() {
+            if (juegoTerminado) return;
+
+            let pendientes = roscoDatos.filter(d => d.estado === 'pendiente');
             
-            const badge = document.getElementById('badge');
-            badge.innerText = categoria;
-            badge.style.backgroundColor = color;
-
-            document.getElementById('pregunta').innerText = datos.pregunta;
-            respuestaCorrectaIndex = datos.correcta;
-            respondido = false;
-
-            const contenedorOpciones = document.getElementById('opciones');
-            contenedorOpciones.innerHTML = '';
-
-            datos.opciones.forEach((opcion, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'btn-opcion';
-                btn.innerText = `${String.fromCharCode(65 + index)}) ${opcion}`;
-                btn.onclick = () => responder(index, btn);
-                contenedorOpciones.appendChild(btn);
-            });
-
-            document.getElementById('card').style.display = 'block';
-        }
-
-        function responder(indiceSeleccionado, botonPulsado) {
-            if (respondido) return;
-            respondido = true;
-
-            const botones = document.querySelectorAll('.btn-opcion');
-            botones.forEach(btn => btn.disabled = true);
-
-            if (indiceSeleccionado === respuestaCorrectaIndex) {
-                botonPulsado.classList.add('correcta');
-            } else {
-                botonPulsado.classList.add('incorrecta');
-                botones[respuestaCorrectaIndex].classList.add('correcta');
+            if (pendientes.length === 0) {
+                finalizarJuego("¡HAS COMPLETADO EL ROSCO!");
+                return;
             }
 
-            document.getElementById('btn-nuevo').style.display = 'block';
+            while (roscoDatos[indiceActual].estado !== 'pendiente') {
+                indiceActual = (indiceActual + 1) % roscoDatos.length;
+            }
+
+            const actual = roscoDatos[indiceActual];
+
+            document.getElementById('letra-centro').innerText = actual.letra;
+            document.getElementById('tipo-centro').innerText = actual.tipo === 'empieza' ? 'Empieza por' : 'Contiene la';
+            document.getElementById('definicion').innerText = actual.definicion;
+            document.getElementById('input-resp').value = '';
+            document.getElementById('input-resp').focus();
+
+            document.querySelectorAll('.letra-node').forEach(n => n.classList.remove('activa'));
+            const nodeActual = document.getElementById(`node-${actual.letra}`);
+            if (nodeActual) nodeActual.classList.add('activa');
         }
 
-        function volverAlQuesito() {
-            document.getElementById('card').style.display = 'none';
-            document.getElementById('btn-nuevo').style.display = 'none';
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('quesito').style.display = 'block';
+        function normalizarTexto(texto) {
+            return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        }
+
+        function comprobarRespuesta() {
+            if (juegoTerminado) return;
+
+            const input = document.getElementById('input-resp');
+            const respUsuario = normalizarTexto(input.value);
+            if (!respUsuario) return;
+
+            const actual = roscoDatos[indiceActual];
+            const respCorrecta = normalizarTexto(actual.palabra);
+
+            const nodeActual = document.getElementById(`node-${actual.letra}`);
+
+            if (respUsuario === respCorrecta) {
+                actual.estado = 'correcta';
+                aciertos++;
+                document.getElementById('cnt-aciertos').innerText = aciertos;
+                if (nodeActual) nodeActual.classList.add('correcta');
+            } else {
+                actual.estado = 'incorrecta';
+                fallos++;
+                document.getElementById('cnt-fallos').innerText = fallos;
+                if (nodeActual) nodeActual.classList.add('incorrecta');
+            }
+
+            indiceActual = (indiceActual + 1) % roscoDatos.length;
+            cargarLetraActual();
+        }
+
+        function pasapalabra() {
+            if (juegoTerminado) return;
+            indiceActual = (indiceActual + 1) % roscoDatos.length;
+            cargarLetraActual();
+        }
+
+        function finalizarJuego(mensaje) {
+            juegoTerminado = true;
+            clearInterval(timerInterval);
+            
+            document.getElementById('grupo-juego').style.display = 'none';
+            document.getElementById('btn-inicio').style.display = 'block';
+            document.getElementById('btn-inicio').innerText = 'Jugar otro Rosco';
+
+            document.getElementById('definicion').innerHTML = `
+                <strong>${mensaje}</strong><br>
+                Resultado final: <strong>${aciertos} Aciertos</strong> y <strong>${fallos} Fallos</strong>.
+            `;
         }
     </script>
 </body>
