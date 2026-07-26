@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glosario Secreto 📖</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #0f172a;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            user-select: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: #1e293b;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            border: 2px solid #334155;
+            text-align: center;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #334155;
+        }
+
+        .titulo {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: #c084fc;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .racha-box {
+            background: #0f172a;
+            color: #fbbf24;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: 1px solid #334155;
+        }
+
+        .palabra-display {
+            margin: 15px 0 5px 0;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #f8fafc;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .tipo-gramatical {
+            font-size: 0.95rem;
+            color: #94a3b8;
+            font-style: italic;
+            margin-bottom: 25px;
+        }
+
+        .lista-opciones {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .btn-opcion {
+            background: #0f172a;
+            color: #e2e8f0;
+            border: 2px solid #334155;
+            padding: 16px;
+            font-size: 1rem;
+            line-height: 1.4;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .btn-opcion:hover:not(:disabled) {
+            border-color: #c084fc;
+            background: #1e1b4b;
+        }
+
+        .btn-opcion.correcta {
+            background: #15803d !important;
+            border-color: #22c55e !important;
+            color: white;
+            font-weight: bold;
+        }
+
+        .btn-opcion.incorrecta {
+            background: #991b1b !important;
+            border-color: #ef4444 !important;
+            color: white;
+            opacity: 0.6;
+        }
+
+        .contexto-box {
+            background: #0f172a;
+            border: 2px solid #c084fc;
+            border-radius: 16px;
+            padding: 18px;
+            margin-top: 15px;
+            text-align: left;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #cbd5e1;
+            display: none;
+        }
+
+        .btn-siguiente {
+            background: #c084fc;
+            color: #0f172a;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            border-radius: 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 15px;
+            transition: transform 0.1s;
+        }
+
+        .btn-siguiente:active { transform: scale(0.97); }
+
+        .loading {
+            color: #94a3b8;
+            font-style: italic;
+            padding: 30px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div class="titulo">GLOSARIO SECRETO 📖</div>
+            <div class="racha-box">Racha: <span id="cnt-racha">0</span> 🔥</div>
+        </div>
+
+        <div id="pantalla-juego">
+            <div id="palabra" class="palabra-display">---</div>
+            <div id="tipo" class="tipo-gramatical">Pulsa para empezar</div>
+
+            <div id="opciones" class="lista-opciones"></div>
+            <div id="contexto" class="contexto-box"></div>
+        </div>
+
+        <button id="btn-accion" class="btn-siguiente" onclick="cargarNuevaPalabra()">Empezar Partida 🎲</button>
+    </div>
+
+    <script>
+        const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+        let racha = 0;
+
+        async function cargarNuevaPalabra() {
+            const elPalabra = document.getElementById('palabra');
+            const elTipo = document.getElementById('tipo');
+            const elOpciones = document.getElementById('opciones');
+            const elContexto = document.getElementById('contexto');
+            const elBtnAccion = document.getElementById('btn-accion');
+
+            elOpciones.innerHTML = '';
+            elContexto.style.display = 'none';
+            elPalabra.innerText = 'Buscando palabra...';
+            elTipo.innerText = 'Consultando el diccionario de la RAE... 🧠';
+            elBtnAccion.style.display = 'none';
+
+            const semilla = Date.now() + '_' + Math.floor(Math.random() * 10000);
+
+            const prompt = `Selecciona una palabra real en español que sea muy poco común, culta, rara o en desuso (ejemplos del tipo de rareza: 'Sicofanta', 'Truchimán', 'Sempiterno', 'Abotagado', 'Zuncho', 'Inane', 'Vituperio', 'Hálito').
+            Semilla de variación: ${semilla}.
+
+            Genera:
+            1. "palabra": La palabra seleccionada.
+            2. "categoria": Categoría gramatical (ej: "sustantivo masculino", "adjetivo", etc.).
+            3. "correcta": La definición real y precisa del diccionario.
+            4. "falsas": Tres definiciones FALSAS pero redactadas de forma académica, creíble y convincente.
+            5. "contexto": Una frase de ejemplo breve utilizando la palabra correctamente.
+
+            Devuelve ÚNICAMENTE un JSON válido sin markdown:
+            {
+              "palabra": "Sicofanta",
+              "categoria": "sustantivo masculino",
+              "correcta": "Impostor, calumniador o delator profesional.",
+              "falsas": [
+                "Instrumento de viento antiguo similar a la flauta travesera.",
+                "Planta trepadora de origen tropical con flores perfumadas.",
+                "Especialista en el estudio de las estructuras cristalinas."
+              ],
+              "contexto": "El consejero actuó como un verdadero sicofanta para ganarse el favor del rey."
+            }`;
+
+            try {
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                const data = await response.json();
+                let rawText = data.candidates[0].content.parts[0].text;
+                rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                
+                const datos = JSON.parse(rawText);
+                renderizarPregunta(datos);
+
+            } catch (e) {
+                elPalabra.innerText = 'Error de conexión';
+                elTipo.innerText = 'Inténtalo de nuevo';
+                elBtnAccion.innerText = 'Reintentar';
+                elBtnAccion.style.display = 'block';
+            }
+        }
+
+        function renderizarPregunta(datos) {
+            document.getElementById('palabra').innerText = datos.palabra;
+            document.getElementById('tipo').innerText = `(${datos.categoria})`;
+
+            const elOpciones = document.getElementById('opciones');
+            const elContexto = document.getElementById('contexto');
+
+            const todasLasOpciones = [
+                { texto: datos.correcta, esCorrecta: true },
+                ...datos.falsas.map(f => ({ texto: f, esCorrecta: false }))
+            ].sort(() => Math.random() - 0.5);
+
+            elOpciones.innerHTML = '';
+            todasLasOpciones.forEach((op, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-opcion';
+                btn.innerText = `${String.fromCharCode(65 + index)}) ${op.texto}`;
+                btn.onclick = () => verificarRespuesta(btn, op.esCorrecta, datos.correcta, datos.contexto);
+                elOpciones.appendChild(btn);
+            });
+
+            elContexto.innerHTML = `<strong>Ejemplo de uso:</strong><br><em>«${datos.contexto}»</em>`;
+        }
+
+        function verificarRespuesta(btnSeleccionado, esCorrecta, respuestaCorrecta, contexto) {
+            const botones = document.querySelectorAll('.btn-opcion');
+            
+            botones.forEach(btn => {
+                btn.disabled = true;
+                if (btn.innerText.includes(respuestaCorrecta)) {
+                    btn.classList.add('correcta');
+                } else if (btn === btnSeleccionado && !esCorrecta) {
+                    btn.classList.add('incorrecta');
+                }
+            });
+
+            if (esCorrecta) {
+                racha++;
+            } else {
+                racha = 0;
+            }
+            document.getElementById('cnt-racha').innerText = racha;
+
+            const elContexto = document.getElementById('contexto');
+            const elBtnAccion = document.getElementById('btn-accion');
+
+            elContexto.style.display = 'block';
+            elBtnAccion.innerText = 'Siguiente Palabra 🎲';
+            elBtnAccion.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

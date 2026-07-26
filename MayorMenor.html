@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mayor o Menor 📊</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #0f172a;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            user-select: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: #1e293b;
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            border: 2px solid #334155;
+            text-align: center;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #334155;
+        }
+
+        .titulo {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: #38bdf8;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .racha-box {
+            background: #0f172a;
+            color: #fbbf24;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: 1px solid #334155;
+        }
+
+        .metrica-tag {
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: inline-block;
+            border: 1px solid #334155;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 500px) {
+            .cards-grid { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 18px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+            position: relative;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #f8fafc;
+            margin-bottom: 10px;
+        }
+
+        .card-value {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #38bdf8;
+            margin-top: 5px;
+        }
+
+        .card-unit {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        .vs-badge {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #e11d48;
+            color: white;
+            font-weight: 900;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #1e293b;
+            z-index: 5;
+        }
+
+        .grid-botones {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn {
+            border: none;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+            text-transform: uppercase;
+        }
+
+        .btn:active { transform: scale(0.96); }
+
+        .btn-mayor { background: #22c55e; color: white; }
+        .btn-menor { background: #ef4444; color: white; }
+        .btn-reiniciar { background: #38bdf8; color: #0f172a; width: 100%; grid-column: span 2; }
+
+        .loading-text {
+            color: #94a3b8;
+            font-style: italic;
+            padding: 40px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div class="titulo">MAYOR O MENOR 📊</div>
+            <div class="racha-box">Racha: <span id="cnt-racha">0</span> 🔥</div>
+        </div>
+
+        <div id="metrica" class="metrica-tag">Pulsa "Empezar" para comenzar</div>
+
+        <div id="juego-area" style="position: relative;">
+            <div class="cards-grid">
+                <div class="card" id="card-a">
+                    <div class="card-title" id="title-a">---</div>
+                    <div class="card-value" id="val-a">?</div>
+                    <div class="card-unit" id="unit-a"></div>
+                </div>
+
+                <div class="card" id="card-b">
+                    <div class="card-title" id="title-b">---</div>
+                    <div class="card-value" id="val-b">?</div>
+                    <div class="card-unit" id="unit-b"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="controles">
+            <button id="btn-inicio" class="btn btn-reiniciar" onclick="iniciarJuego()">¡Empezar Partida!</button>
+            <div id="grupo-decisorio" class="grid-botones" style="display: none;">
+                <button class="btn btn-mayor" onclick="evaluar('mayor')">MAYOR ⬆️</button>
+                <button class="btn btn-menor" onclick="evaluar('menor')">MENOR ⬇️</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+        
+        let racha = 0;
+        let itemA = null;
+        let itemB = null;
+
+        async function iniciarJuego() {
+            racha = 0;
+            document.getElementById('cnt-racha').innerText = '0';
+            document.getElementById('btn-inicio').style.display = 'none';
+            document.getElementById('metrica').innerText = 'Generando el primer duelo... 🧠';
+            
+            await obtenerParInicial();
+        }
+
+        async function obtenerParInicial() {
+            const semilla = Date.now() + '_' + Math.floor(Math.random() * 10000);
+
+            const prompt = `Genera un duelo comparativo para el juego "Mayor o Menor" en español.
+            Semilla: ${semilla}.
+            
+            Requisitos:
+            1. Elige una métrica clara y objetiva (ej: "Búsquedas mensuales globales en Google", "Población aproximada", "Velocidad máxima en km/h", "Año de invención/estreno", "Altura en metros", "Precio medio en USD").
+            2. Proporciona 2 elementos con sus valores numéricos exactos para comparar sobre esa misma métrica.
+            3. Asegúrate de que los dos valores sean diferentes.
+
+            Devuelve ÚNICAMENTE un JSON válido sin markdown:
+            {
+              "metrica": "Búsquedas mensuales en Google",
+              "unidad": "búsquedas/mes",
+              "itemA": { "nombre": "Pizza", "valor": 12000000 },
+              "itemB": { "nombre": "Sushi", "valor": 7500000 }
+            }`;
+
+            try {
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                const data = await response.json();
+                let rawText = data.candidates[0].content.parts[0].text;
+                rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                
+                const datos = JSON.parse(rawText);
+                
+                itemA = datos.itemA;
+                itemB = datos.itemB;
+                itemA.unidad = datos.unidad;
+                itemB.unidad = datos.unidad;
+                itemA.metrica = datos.metrica;
+
+                renderizarDuelo();
+
+            } catch (e) {
+                document.getElementById('metrica').innerText = 'Error al cargar. Reintentando...';
+                document.getElementById('btn-inicio').style.display = 'block';
+            }
+        }
+
+        async function obtenerSiguienteContrincante() {
+            const semilla = Date.now() + '_' + Math.floor(Math.random() * 10000);
+
+            const prompt = `Genera el SIGUIENTE elemento para el juego "Mayor o Menor" en español.
+            Métrica actual: "${itemA.metrica}" (Unidad: ${itemA.unidad}).
+            Elemento actual en pantalla: "${itemA.nombre}" con valor ${itemA.valor}.
+            Semilla: ${semilla}.
+            
+            Genera un NUEVO elemento dentro de la misma métrica ("${itemA.metrica}") para comparar con "${itemA.nombre}".
+            El valor numérico debe ser real y diferente de ${itemA.valor}.
+
+            Devuelve ÚNICAMENTE un JSON válido sin markdown:
+            {
+              "nombre": "Nombre del nuevo elemento",
+              "valor": 123456
+            }`;
+
+            try {
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                const data = await response.json();
+                let rawText = data.candidates[0].content.parts[0].text;
+                rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                
+                const nuevoItem = JSON.parse(rawText);
+                itemB = { ...nuevoItem, unidad: itemA.unidad };
+
+                renderizarDuelo();
+
+            } catch (e) {
+                // Si falla el siguiente dentro de la misma métrica, cargamos un par completamente nuevo
+                obtenerParInicial();
+            }
+        }
+
+        function renderizarDuelo() {
+            document.getElementById('metrica').innerText = `Métrica: ${itemA.metrica}`;
+            
+            // Tarjeta A (Revelada)
+            document.getElementById('title-a').innerText = itemA.nombre;
+            document.getElementById('val-a').innerText = itemA.valor.toLocaleString('es-ES');
+            document.getElementById('unit-a').innerText = itemA.unidad;
+
+            // Tarjeta B (Oculta)
+            document.getElementById('title-b').innerText = itemB.nombre;
+            document.getElementById('val-b').innerText = '?';
+            document.getElementById('unit-b').innerText = itemB.unidad;
+
+            document.getElementById('grupo-decisorio').style.display = 'grid';
+        }
+
+        function evaluar(eleccion) {
+            document.getElementById('grupo-decisorio').style.display = 'none';
+
+            // Revelar valor B
+            document.getElementById('val-b').innerText = itemB.valor.toLocaleString('es-ES');
+
+            const esMayor = itemB.valor >= itemA.valor;
+            const acierto = (eleccion === 'mayor' && esMayor) || (eleccion === 'menor' && !esMayor);
+
+            setTimeout(() => {
+                if (acierto) {
+                    racha++;
+                    document.getElementById('cnt-racha').innerText = racha;
+                    
+                    // B pasa a ser A
+                    itemA = { ...itemB, metrica: itemA.metrica };
+                    
+                    // Transición al siguiente
+                    document.getElementById('metrica').innerText = '¡Correcto! Buscando siguiente desafío... 🧠';
+                    document.getElementById('title-b').innerText = 'Cargando...';
+                    document.getElementById('val-b').innerText = '?';
+                    
+                    obtenerSiguienteContrincante();
+                } else {
+                    document.getElementById('metrica').innerText = `¡INCORRECTO! Racha final: ${racha} aciertos.`;
+                    document.getElementById('btn-inicio').style.display = 'block';
+                    document.getElementById('btn-inicio').innerText = 'Jugar de Nuevo 🎲';
+                }
+            }, 1200);
+        }
+    </script>
+</body>
+</html>
