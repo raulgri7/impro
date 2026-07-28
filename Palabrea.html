@@ -2,10 +2,16 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Palabrea Express 🎲</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            /* Previene el zoom por doble toque en móviles */
+            touch-action: manipulation;
+        }
         
         body {
             font-family: system-ui, -apple-system, sans-serif;
@@ -18,15 +24,7 @@
             align-items: center;
             padding: 20px;
             user-select: none;
-            overflow-x: hidden;
-        }
-
-        .header {
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-            color: #888;
-            text-transform: uppercase;
-            font-weight: bold;
+            overflow: hidden;
         }
 
         .tablero {
@@ -34,14 +32,14 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 15px;
+            gap: 20px;
             flex-grow: 1;
             width: 100%;
         }
 
         /* Letra en formato gigante */
         .letra-box {
-            font-size: clamp(6rem, 20vw, 14rem);
+            font-size: clamp(7rem, 25vw, 16rem);
             font-weight: 900;
             line-height: 1;
             color: #ffcc00;
@@ -57,7 +55,7 @@
             gap: 15px;
             background: #1e1e1e;
             border: 3px solid #333;
-            padding: 15px 30px;
+            padding: 20px 35px;
             border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             max-width: 90vw;
@@ -65,11 +63,11 @@
         }
 
         .categoria-icono {
-            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-size: clamp(2.8rem, 7vw, 5rem);
         }
 
         .categoria-nombre {
-            font-size: clamp(1.5rem, 4vw, 3rem);
+            font-size: clamp(1.8rem, 4.5vw, 3.2rem);
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -81,7 +79,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             width: 100%;
             max-width: 400px;
         }
@@ -90,8 +88,8 @@
             background-color: #ff3366;
             color: white;
             border: none;
-            padding: 16px 40px;
-            font-size: 1.5rem;
+            padding: 18px 40px;
+            font-size: 1.6rem;
             font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
@@ -151,16 +149,13 @@
             body {
                 padding: 10px 20px;
             }
-            .header {
-                display: none; /* Ocultamos título en horizontal para ganar espacio */
-            }
             .tablero {
                 flex-direction: row;
                 justify-content: center;
                 gap: 40px;
             }
             .letra-box {
-                font-size: clamp(5rem, 18vh, 10rem);
+                font-size: clamp(5rem, 20vh, 10rem);
             }
             .categoria-box {
                 padding: 10px 20px;
@@ -170,10 +165,10 @@
                 flex-wrap: wrap;
                 justify-content: center;
                 max-width: 600px;
-                gap: 8px;
+                gap: 10px;
             }
             .btn-generar {
-                padding: 10px 30px;
+                padding: 12px 30px;
                 font-size: 1.2rem;
                 width: auto;
             }
@@ -185,14 +180,12 @@
 </head>
 <body>
 
-    <div class="header">PALABREA</div>
-
     <div class="tablero">
-        <div class="letra-box" id="letra">?</div>
+        <div class="letra-box" id="letra">-</div>
         
         <div class="categoria-box">
             <span class="categoria-icono" id="icono">🎲</span>
-            <span class="categoria-nombre" id="categoria">PULSA PARA EMPEZAR</span>
+            <span class="categoria-nombre" id="categoria">-</span>
         </div>
     </div>
 
@@ -236,7 +229,6 @@
         let ultimaLetra = '';
         let ultimaCategoria = '';
         
-        // Variables para el temporizador de 15 segundos
         let autoInterval = null;
         const TIEMPO_AUTO = 15;
 
@@ -259,14 +251,14 @@
             const elemLetra = document.getElementById('letra');
             elemLetra.innerText = nuevaLetra;
             
-            // Efecto visual rápido
+            // Efecto de pulso rápido
             elemLetra.style.transform = 'scale(1.1)';
             setTimeout(() => elemLetra.style.transform = 'scale(1)', 100);
 
             document.getElementById('icono').innerText = nuevaCat.icono;
             document.getElementById('categoria').innerText = nuevaCat.nombre;
 
-            // Si el temporizador automático está encendido, lo reiniciamos
+            // Reiniciar temporizador auto si está activado
             reiniciarTimerAuto();
         }
 
@@ -303,7 +295,7 @@
 
                 if (currentStep >= totalSteps) {
                     pararTimerAuto();
-                    siguienteTurno(); // Activa automáticamente la siguiente letra/categoría
+                    siguienteTurno();
                 }
             }, intervalMs);
         }
@@ -312,13 +304,26 @@
             if (autoInterval) clearInterval(autoInterval);
         }
 
-        // Permitir usar la barra espaciadora
+        // Previene el zoom táctil al pulsar rápido repetidamente en pantalla
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Control con la barra espaciadora
         document.addEventListener('keydown', function(event) {
             if (event.code === 'Space') {
                 event.preventDefault();
                 siguienteTurno();
             }
         });
+
+        // ARRANCAR DIRECTAMENTE AL CREGAR LA PÁGINA
+        window.onload = siguienteTurno;
     </script>
 
 </body>
