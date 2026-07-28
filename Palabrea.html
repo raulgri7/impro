@@ -9,7 +9,6 @@
             box-sizing: border-box; 
             margin: 0; 
             padding: 0; 
-            /* Previene el zoom por doble toque en móviles */
             touch-action: manipulation;
         }
         
@@ -17,14 +16,16 @@
             font-family: system-ui, -apple-system, sans-serif;
             background-color: #121212;
             color: #ffffff;
-            min-height: 100vh;
+            height: 100vh;
+            height: 100svh; /* Se ajusta exactamente al espacio visible sin barras navegadoras */
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 10px 15px;
             user-select: none;
             overflow: hidden;
+            gap: 15px;
         }
 
         .tablero {
@@ -32,45 +33,44 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 20px;
-            flex-grow: 1;
+            gap: 10px;
             width: 100%;
         }
 
-        /* Letra en formato gigante */
+        /* Letra ajustada para evitar empujar la pantalla */
         .letra-box {
-            font-size: clamp(7rem, 25vw, 16rem);
+            font-size: clamp(5rem, 16vh, 9rem);
             font-weight: 900;
             line-height: 1;
             color: #ffcc00;
-            text-shadow: 0 10px 30px rgba(255, 204, 0, 0.3);
+            text-shadow: 0 6px 20px rgba(255, 204, 0, 0.3);
             transition: transform 0.1s ease;
         }
 
-        /* Categoría con icono y texto gigante */
+        /* Categoría compacta */
         .categoria-box {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
+            gap: 12px;
             background: #1e1e1e;
-            border: 3px solid #333;
-            padding: 20px 35px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            max-width: 90vw;
+            border: 2px solid #333;
+            padding: 10px 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            max-width: 95vw;
             text-align: center;
         }
 
         .categoria-icono {
-            font-size: clamp(2.8rem, 7vw, 5rem);
+            font-size: clamp(2rem, 5vh, 3.5rem);
         }
 
         .categoria-nombre {
-            font-size: clamp(1.8rem, 4.5vw, 3.2rem);
+            font-size: clamp(1.2rem, 3.5vh, 2.2rem);
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             color: #ffffff;
         }
 
@@ -79,21 +79,21 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             width: 100%;
-            max-width: 400px;
+            max-width: 360px;
         }
 
         .btn-generar {
             background-color: #ff3366;
             color: white;
             border: none;
-            padding: 18px 40px;
-            font-size: 1.6rem;
+            padding: 14px 30px;
+            font-size: 1.4rem;
             font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 6px 20px rgba(255, 51, 102, 0.4);
+            box-shadow: 0 4px 15px rgba(255, 51, 102, 0.4);
             transition: all 0.1s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -102,7 +102,7 @@
 
         .btn-generar:active {
             transform: scale(0.95);
-            box-shadow: 0 2px 10px rgba(255, 51, 102, 0.4);
+            box-shadow: 0 2px 8px rgba(255, 51, 102, 0.4);
         }
 
         /* CHECKBOX AUTOMÁTICO Y BARRA DE TIEMPO */
@@ -110,9 +110,10 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             color: #aaa;
             cursor: pointer;
+            padding: 2px 0;
         }
 
         .auto-box input[type="checkbox"] {
@@ -124,7 +125,7 @@
 
         .progress-container {
             width: 100%;
-            height: 6px;
+            height: 5px;
             background: #222;
             border-radius: 10px;
             overflow: hidden;
@@ -139,38 +140,44 @@
         }
 
         .instrucciones {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: #555;
             text-align: center;
         }
 
         /* RESPONSIVE EN PANTALLA HORIZONTAL (LANDSCAPE) */
-        @media (orientation: landscape) and (max-height: 550px) {
+        @media (orientation: landscape) {
             body {
+                flex-direction: row;
+                justify-content: space-evenly;
                 padding: 10px 20px;
+                gap: 20px;
             }
             .tablero {
                 flex-direction: row;
-                justify-content: center;
-                gap: 40px;
+                width: auto;
+                gap: 25px;
             }
             .letra-box {
-                font-size: clamp(5rem, 20vh, 10rem);
+                font-size: clamp(4rem, 25vh, 7rem);
             }
             .categoria-box {
-                padding: 10px 20px;
+                padding: 8px 16px;
+            }
+            .categoria-icono {
+                font-size: clamp(1.8rem, 8vh, 3rem);
+            }
+            .categoria-nombre {
+                font-size: clamp(1rem, 5vh, 1.8rem);
             }
             .controls-wrapper {
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-                max-width: 600px;
-                gap: 10px;
+                width: auto;
+                min-width: 260px;
+                gap: 6px;
             }
             .btn-generar {
-                padding: 12px 30px;
-                font-size: 1.2rem;
-                width: auto;
+                padding: 10px 20px;
+                font-size: 1.1rem;
             }
             .instrucciones {
                 display: none;
@@ -205,14 +212,12 @@
     </div>
 
     <script>
-        // ABECEDARIO ESPAÑOL COMPLETO (27 letras)
         const letras = [
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
             'L', 'M', 'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 
             'V', 'W', 'X', 'Y', 'Z'
         ];
 
-        // Las 10 categorías calcadas de tu carta física de Palabrea
         const categorias = [
             { nombre: "Animal", icono: "🐓" },
             { nombre: "Ciudad", icono: "🏙️" },
@@ -233,36 +238,30 @@
         const TIEMPO_AUTO = 15;
 
         function siguienteTurno() {
-            // Seleccionar letra sin repetir consecutivamente
             let nuevaLetra;
             do {
                 nuevaLetra = letras[Math.floor(Math.random() * letras.length)];
             } while (nuevaLetra === ultimaLetra);
             ultimaLetra = nuevaLetra;
 
-            // Seleccionar categoría sin repetir consecutivamente
             let nuevaCat;
             do {
                 nuevaCat = categorias[Math.floor(Math.random() * categorias.length)];
             } while (nuevaCat.nombre === ultimaCategoria);
             ultimaCategoria = nuevaCat.nombre;
 
-            // Renderizar en pantalla
             const elemLetra = document.getElementById('letra');
             elemLetra.innerText = nuevaLetra;
             
-            // Efecto de pulso rápido
             elemLetra.style.transform = 'scale(1.1)';
             setTimeout(() => elemLetra.style.transform = 'scale(1)', 100);
 
             document.getElementById('icono').innerText = nuevaCat.icono;
             document.getElementById('categoria').innerText = nuevaCat.nombre;
 
-            // Reiniciar temporizador auto si está activado
             reiniciarTimerAuto();
         }
 
-        // --- LÓGICA DEL TEMPORIZADOR AUTO 15s ---
         function toggleAutoTimer() {
             const chk = document.getElementById('chk-auto');
             const progressContainer = document.getElementById('progress-container');
@@ -304,7 +303,6 @@
             if (autoInterval) clearInterval(autoInterval);
         }
 
-        // Previene el zoom táctil al pulsar rápido repetidamente en pantalla
         let lastTouchEnd = 0;
         document.addEventListener('touchend', function (event) {
             const now = (new Date()).getTime();
@@ -314,7 +312,6 @@
             lastTouchEnd = now;
         }, false);
 
-        // Control con la barra espaciadora
         document.addEventListener('keydown', function(event) {
             if (event.code === 'Space') {
                 event.preventDefault();
@@ -322,7 +319,6 @@
             }
         });
 
-        // ARRANCAR DIRECTAMENTE AL CREGAR LA PÁGINA
         window.onload = siguienteTurno;
     </script>
 
