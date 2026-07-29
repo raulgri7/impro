@@ -382,12 +382,14 @@
         let respondido = false;
         let categoriaEnJuego = null;
 
+        // Historial de preguntas formuladas durante la partida
+        let preguntasHechas = [];
+
         const cachePreguntas = {
             adulto: {},
             nino: {}
         };
 
-        // Inicialización al cargar la página
         window.onload = function() {
             cambiarNumJugadores();
         };
@@ -416,11 +418,19 @@
         }
 
         async function pedirPreguntaIA(categoria, esNino) {
+            // Nivel infantil elevado: 10 a 14 años, escolar con punto de reto
             const nivelText = esNino 
-                ? "muy sencilla y divertida, adaptada para niños de 8 a 12 años" 
-                : "de nivel medio para adultos (estilo Genus clásico)";
+                ? "adaptada para niños y jóvenes de 10 a 14 años, con un toque escolar y de cultura general entretenido pero retador (no demasiado infantil ni obvio)" 
+                : "de nivel medio-alto para adultos (estilo Genus clásico)";
+
+            // Control estricto de no-repetición
+            const ultimasPreguntas = preguntasHechas.slice(-20).join(' || ');
+            const instruccionExclusion = ultimasPreguntas 
+                ? `CRÍTICO: Queda prohibido hacer preguntas iguales o muy parecidas a estas que ya se han preguntado: [${ultimasPreguntas}].` 
+                : '';
 
             const prompt = `Genera una pregunta tipo Trivial Pursuit ${nivelText} sobre la categoría: ${categoria}.
+            ${instruccionExclusion}
             Devuelve ÚNICAMENTE un objeto JSON válido (sin Markdown, sin explicaciones) con esta estructura:
             {
               "pregunta": "Texto de la pregunta aquí",
@@ -465,6 +475,7 @@
 
             const nombresShuffled = [...NOMBRES_WORMS].sort(() => Math.random() - 0.5);
             jugadores = [];
+            preguntasHechas = []; // Reiniciamos el historial
             
             let roles = [];
             for (let i = 0; i < numNinos; i++) roles.push({ esNino: true });
@@ -501,7 +512,7 @@
             
             document.getElementById('current-player-name').innerText = jugadorActual.nombre;
             document.getElementById('current-player-type').innerText = 
-                jugadorActual.esNino ? "Pregunta Infantil 🎈" : "Pregunta Genus 🧠";
+                jugadorActual.esNino ? "Pregunta Junior 🎈" : "Pregunta Genus 🧠";
 
             Object.keys(CATEGORIAS).forEach(cat => {
                 const sector = document.getElementById(`sector-${cat}`);
@@ -561,6 +572,8 @@
                 }
 
                 mostrarPregunta(jsonPregunta, categoria, color);
+                
+                // Reponer inmediatamente la precarga para la siguiente vez
                 precargarCategoria(categoria, jugadorActual.esNino);
 
             } catch (e) {
@@ -572,6 +585,11 @@
         function mostrarPregunta(datos, categoria, color) {
             document.getElementById('loading').style.display = 'none';
             
+            // Guardar en el historial para evitar repetidos
+            if (datos && datos.pregunta) {
+                preguntasHechas.push(datos.pregunta);
+            }
+
             const badge = document.getElementById('badge');
             badge.innerText = categoria;
             badge.style.backgroundColor = color;
