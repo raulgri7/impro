@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Trivial Pursuit Deluxe 🧠</title>
+    <style>
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            touch-action: manipulation;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            min-height: 100vh;
+            min-height: 100svh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 15px;
+            user-select: none;
+            overflow-x: hidden;
+            gap: 12px;
+        }
+
+        h1 {
+            font-size: clamp(1.1rem, 3.5vh, 1.6rem);
+            letter-spacing: 1.5px;
+            color: #ccc;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        /* CONFIGURACIÓN INICIAL */
+        .setup-card {
+            background: #1e1e1e;
+            border: 2px solid #333;
+            border-radius: 16px;
+            padding: 20px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 0.9rem;
+            color: #aaa;
+            font-weight: bold;
+        }
+
+        select, button {
+            background: #2a2a2a;
+            color: #fff;
+            border: 2px solid #444;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        select:focus { border-color: #666; }
+
+        .btn-primary {
+            background: #ffffff;
+            color: #121212;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: transform 0.1s ease;
+            margin-top: 10px;
+        }
+
+        .btn-primary:active { transform: scale(0.96); }
+
+        /* TABLERO DE JUEGO */
+        .game-layout {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .turn-header {
+            text-align: center;
+            background: #1e1e1e;
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid #333;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .player-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffcc00;
+        }
+
+        .player-type {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        /* QUESITO Y MARCADORES */
+        .main-game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .quesito-container {
+            width: clamp(200px, 38vh, 300px);
+            height: clamp(200px, 38vh, 300px);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.1));
+        }
+
+        .sector-path {
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s, fill 0.3s;
+            transform-origin: 160px 160px;
+        }
+
+        .sector-path:hover:not(.desactivado) {
+            filter: brightness(1.25);
+            transform: scale(1.03);
+        }
+
+        .sector-path.desactivado {
+            fill: #333333 !important;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .sector-icon {
+            font-size: 28px;
+            pointer-events: none;
+            user-select: none;
+            text-anchor: middle;
+            dominant-baseline: central;
+        }
+
+        /* MARCADOR DE JUGADORES */
+        .players-tracker {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .player-card-mini {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            min-width: 90px;
+        }
+
+        .player-card-mini.active {
+            border-color: #ffcc00;
+            background: #252520;
+        }
+
+        .wedges-mini {
+            display: flex;
+            gap: 3px;
+        }
+
+        .dot-wedge {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #333;
+        }
+
+        /* CARD PREGUNTA */
+        .card-pregunta {
+            display: none;
+            background: #1e1e1e;
+            border: 2px solid #333;
+            border-radius: 16px;
+            padding: 15px 18px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .categoria-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .texto-pregunta {
+            font-size: clamp(0.95rem, 2.5vh, 1.2rem);
+            font-weight: 600;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        .opciones-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .btn-opcion {
+            background: #2a2a2a;
+            color: #fff;
+            border: 2px solid #444;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-opcion:hover:not([disabled]) {
+            background: #3a3a3a;
+        }
+
+        .btn-opcion.correcta {
+            background-color: #27ae60 !important;
+            border-color: #2ecc71 !important;
+        }
+
+        .btn-opcion.incorrecta {
+            background-color: #c0392b !important;
+            border-color: #e74c3c !important;
+        }
+
+        .loading-text {
+            display: none;
+            font-size: 1rem;
+            color: #aaa;
+            text-align: center;
+        }
+
+        @media (orientation: landscape) and (max-height: 500px) {
+            body { flex-direction: row; }
+            .setup-card { max-width: 350px; }
+            .main-game-area { flex-direction: row; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PANTALLA DE CONFIGURACIÓN INICIAL -->
+    <div id="setup-screen" class="setup-card">
+        <h1>Trivial Pursuit</h1>
+        
+        <div class="form-group">
+            <label>Edición de juego:</label>
+            <select id="select-edicion" onchange="cambiarEdicion()">
+                <option value="genus">Genus (Adultos)</option>
+                <option value="familiar">Familiar (Adultos + Niños)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Número de Jugadores:</label>
+            <select id="select-jugadores" onchange="cambiarNumJugadores()">
+                <option value="1">1 Jugador</option>
+                <option value="2">2 Jugadores</option>
+                <option value="3" selected>3 Jugadores</option>
+                <option value="4">4 Jugadores</option>
+                <option value="5">5 Jugadores</option>
+                <option value="6">6 Jugadores</option>
+                <option value="7">7 Jugadores</option>
+                <option value="8">8 Jugadores</option>
+            </select>
+        </div>
+
+        <div id="group-ninos" class="form-group" style="display: none;">
+            <label>¿Cuántos son niños?</label>
+            <select id="select-ninos">
+                <!-- Se rellena dinámicamente -->
+            </select>
+        </div>
+
+        <button class="btn-primary" onclick="iniciarJuego()">¡Empezar Partida!</button>
+    </div>
+
+    <!-- PANTALLA PRINCIPAL DE JUEGO -->
+    <div id="game-screen" class="game-layout">
+        
+        <div class="turn-header">
+            <div>Turno de: <span id="current-player-name" class="player-name">-</span></div>
+            <div id="current-player-type" class="player-type">-</div>
+        </div>
+
+        <div class="main-game-area">
+            <!-- El Quesito -->
+            <div id="quesito" class="quesito-container">
+                <svg viewBox="0 0 320 320">
+                    <circle cx="160" cy="160" r="155" fill="none" stroke="#333" stroke-width="4"/>
+                    <path id="sector-Geografía" class="sector-path" fill="#0072ce" d="M160,160 L310,160 A150,150 0 0,1 235,289.9 Z" onclick="seleccionarCategoria('Geografía', '#0072ce')"/>
+                    <text x="235" y="200" class="sector-icon">🌍</text>
+                    <path id="sector-Espectáculos" class="sector-path" fill="#e03c8a" d="M160,160 L235,289.9 A150,150 0 0,1 85,289.9 Z" onclick="seleccionarCategoria('Espectáculos', '#e03c8a')"/>
+                    <text x="160" y="245" class="sector-icon">🎭</text>
+                    <path id="sector-Historia" class="sector-path" fill="#ffcc00" d="M160,160 L85,289.9 A150,150 0 0,1 10,160 Z" onclick="seleccionarCategoria('Historia', '#ffcc00')"/>
+                    <text x="85" y="200" class="sector-icon">📜</text>
+                    <path id="sector-Arte y Literatura" class="sector-path" fill="#8d5524" d="M160,160 L10,160 A150,150 0 0,1 85,30.1 Z" onclick="seleccionarCategoria('Arte y Literatura', '#8d5524')"/>
+                    <text x="85" y="120" class="sector-icon">🎨</text>
+                    <path id="sector-Ciencias y Naturaleza" class="sector-path" fill="#009e49" d="M160,160 L85,30.1 A150,150 0 0,1 235,30.1 Z" onclick="seleccionarCategoria('Ciencias y Naturaleza', '#009e49')"/>
+                    <text x="160" y="75" class="sector-icon">🔬</text>
+                    <path id="sector-Ocio y Deportes" class="sector-path" fill="#ff6600" d="M160,160 L235,30.1 A150,150 0 0,1 310,160 Z" onclick="seleccionarCategoria('Ocio y Deportes', '#ff6600')"/>
+                    <text x="235" y="120" class="sector-icon">⚽</text>
+                </svg>
+            </div>
+
+            <div id="loading" class="loading-text">Preparando pregunta... 🧠</div>
+
+            <!-- Card Pregunta -->
+            <div id="card" class="card-pregunta">
+                <div id="badge" class="categoria-badge">CATEGORÍA</div>
+                <div id="pregunta" class="texto-pregunta">Cargando...</div>
+                <div id="opciones" class="opciones-grid"></div>
+                <button id="btn-siguiente" class="btn-primary" style="display:none; width:100%;" onclick="siguienteTurno()">Pasar Turno ➔</button>
+            </div>
+        </div>
+
+        <!-- Tracker de todos los jugadores -->
+        <div id="players-tracker" class="players-tracker"></div>
+    </div>
+
+    <script>
+        const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+
+        // Nombres clásicos al estilo Worms
+        const NOMBRES_WORMS = [
+            "Boggy B", "Brutus", "Commando", "Rambo", "Dynamite", 
+            "Granada", "Pichón", "Ninja", "Destructor", "Viper", 
+            "Bandido", "Kamikaze", "Topo", "Torpedo", "Capitán"
+        ];
+
+        const CATEGORIAS = {
+            'Geografía': '#0072ce',
+            'Espectáculos': '#e03c8a',
+            'Historia': '#ffcc00',
+            'Arte y Literatura': '#8d5524',
+            'Ciencias y Naturaleza': '#009e49',
+            'Ocio y Deportes': '#ff6600'
+        };
+
+        // Estado del Juego
+        let jugadores = [];
+        let turnoActualIndex = 0;
+        let edicionJuego = 'genus';
+        let respuestaCorrectaIndex = null;
+        let respondido = false;
+        let categoriaEnJuego = null;
+
+        // Caché de promesas divididas por perfil (adulto vs niño)
+        const cachePreguntas = {
+            adulto: {},
+            nino: {}
+        };
+
+        // UI SETUP
+        function cambiarEdicion() {
+            edicionJuego = document.getElementById('select-edicion').value;
+            const groupNinos = document.getElementById('group-ninos');
+            if (edicionJuego === 'familiar') {
+                groupNinos.style.display = 'flex';
+                cambiarNumJugadores();
+            } else {
+                groupNinos.style.display = 'none';
+            }
+        }
+
+        function cambiarNumJugadores() {
+            const num = parseInt(document.getElementById('select-jugadores').value);
+            const selectNinos = document.getElementById('select-ninos');
+            selectNinos.innerHTML = '';
+            for (let i = 0; i <= num; i++) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.innerText = i === 0 ? "Ninguno (todos adultos)" : `${i} niño(s)`;
+                selectNinos.appendChild(opt);
+            }
+        }
+
+        // MOTOR DE PREGUNTAS (WORKER + PROMESAS)
+        async function pedirPreguntaIA(categoria, esNino) {
+            const nivelText = esNino 
+                ? "muy sencilla y divertida, adaptada para niños de 8 a 12 años" 
+                : "de nivel medio para adultos (estilo Genus clásico)";
+
+            const prompt = `Genera una pregunta tipo Trivial Pursuit ${nivelText} sobre la categoría: ${categoria}.
+            Devuelve ÚNICAMENTE un objeto JSON válido (sin Markdown, sin explicaciones) con esta estructura:
+            {
+              "pregunta": "Texto de la pregunta aquí",
+              "opciones": ["Opción A", "Opción B", "Opción C", "Opción D"],
+              "correcta": 0
+            }
+            Donde "correcta" es el índice (0, 1, 2 o 3) de la respuesta correcta.`;
+
+            const response = await fetch(URL_WORKER, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+
+            const data = await response.json();
+            let rawText = data.candidates[0].content.parts[0].text;
+            rawText = rawText.replace(/```json/g, '').replace(/
