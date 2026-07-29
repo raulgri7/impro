@@ -2,33 +2,31 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>La Bomba 💣 - Juego de Palabras</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            touch-action: manipulation;
+        }
 
         body {
             font-family: system-ui, -apple-system, sans-serif;
             background-color: #111;
             color: #fff;
             height: 100vh;
+            height: 100svh; /* Ajuste perfecto al espacio visible en móviles */
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 10px 15px;
             text-align: center;
             user-select: none;
             overflow: hidden;
-        }
-
-        .header {
-            font-size: 1.2rem;
-            letter-spacing: 3px;
-            color: #666;
-            text-transform: uppercase;
-            font-weight: bold;
-            margin-top: 10px;
+            gap: 15px;
         }
 
         .tablero {
@@ -36,15 +34,15 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 25px;
-            flex-grow: 1;
+            gap: 10px;
             width: 100%;
         }
 
         .bomba-icon {
-            font-size: clamp(6rem, 18vw, 12rem);
+            font-size: clamp(4rem, 12vh, 7rem);
             transition: transform 0.1s ease;
             filter: drop-shadow(0 0 20px rgba(255, 68, 68, 0.2));
+            line-height: 1;
         }
 
         .activa {
@@ -57,22 +55,23 @@
         }
 
         .regla-box {
-            font-size: clamp(1.5rem, 4vw, 2.8rem);
+            font-size: clamp(1.1rem, 3.2vh, 1.8rem);
             font-weight: 700;
             color: #ffcc00;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             background: #222;
-            padding: 10px 30px;
+            padding: 8px 24px;
             border-radius: 50px;
             border: 2px solid #333;
+            max-width: 90vw;
         }
 
         .silaba-box {
-            font-size: clamp(5rem, 16vw, 10rem);
+            font-size: clamp(4rem, 14vh, 8rem);
             font-weight: 900;
             color: #ffffff;
-            letter-spacing: 4px;
+            letter-spacing: 3px;
             text-shadow: 0 5px 20px rgba(255,255,255,0.2);
             line-height: 1;
         }
@@ -81,16 +80,17 @@
             background: #e74c3c;
             color: white;
             border: none;
-            padding: 20px 50px;
-            font-size: 1.8rem;
+            padding: 14px 35px;
+            font-size: 1.4rem;
             font-weight: 900;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
             text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: all 0.2s;
-            margin-bottom: 20px;
+            letter-spacing: 1.5px;
+            transition: all 0.1s ease;
+            width: 100%;
+            max-width: 340px;
         }
 
         .btn-bomba:active {
@@ -110,15 +110,44 @@
             80% { transform: translate(1px, -2px) rotate(1deg); }
             100% { transform: translate(-1px, 2px) rotate(-1deg); }
         }
+
+        /* RESPONSIVE EN PANTALLA HORIZONTAL (LANDSCAPE) */
+        @media (orientation: landscape) {
+            body {
+                flex-direction: row;
+                justify-content: space-evenly;
+                padding: 10px 20px;
+                gap: 20px;
+            }
+            .tablero {
+                flex-direction: row;
+                width: auto;
+                gap: 20px;
+            }
+            .bomba-icon {
+                font-size: clamp(3.5rem, 20vh, 6rem);
+            }
+            .silaba-box {
+                font-size: clamp(3.5rem, 22vh, 6.5rem);
+            }
+            .regla-box {
+                font-size: clamp(1rem, 5vh, 1.5rem);
+                padding: 6px 16px;
+            }
+            .btn-bomba {
+                width: auto;
+                min-width: 240px;
+                padding: 12px 25px;
+                font-size: 1.2rem;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">TIC TAC BOUM</div>
-
     <div class="tablero">
         <div id="bomba" class="bomba-icon">💣</div>
-        <div id="regla" class="regla-box">PULSA PARA ACTIVAR</div>
+        <div id="regla" class="regla-box">--</div>
         <div id="silaba" class="silaba-box">--</div>
     </div>
 
@@ -144,7 +173,6 @@
         let estaActiva = false;
         let audioCtx = null;
 
-        // Desbloqueo explícito del audio del navegador al interactuar
         async function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -191,6 +219,14 @@
             }
         }
 
+        function generarTurno() {
+            const silabaRandom = silabas[Math.floor(Math.random() * silabas.length)];
+            const reglaRandom = reglas[Math.floor(Math.random() * reglas.length)];
+
+            document.getElementById('silaba').innerText = silabaRandom;
+            document.getElementById('regla').innerText = reglaRandom;
+        }
+
         async function toggleBomba() {
             await initAudio();
 
@@ -205,11 +241,8 @@
             estaActiva = true;
             document.body.classList.remove('explosion');
 
-            const silabaRandom = silabas[Math.floor(Math.random() * silabas.length)];
-            const reglaRandom = reglas[Math.floor(Math.random() * reglas.length)];
+            generarTurno();
 
-            document.getElementById('silaba').innerText = silabaRandom;
-            document.getElementById('regla').innerText = reglaRandom;
             document.getElementById('bomba').classList.add('activa');
             document.getElementById('bomba').innerText = '💣';
             document.getElementById('btn').innerText = 'REINICIAR';
@@ -217,7 +250,7 @@
 
             const tiempoTotalMs = Math.floor(Math.random() * (60000 - 15000 + 1)) + 15000;
 
-            sonarTic(); // Primer tic inmediato
+            sonarTic();
             intervaloSonido = setInterval(sonarTic, 800);
 
             temporizador = setTimeout(() => {
@@ -249,13 +282,25 @@
             iniciarBomba();
         }
 
+        // Previene zoom por doble toque acelerado en móviles
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
         document.addEventListener('keydown', function(event) {
             if (event.code === 'Space') {
                 event.preventDefault();
                 toggleBomba();
             }
         });
+
+        // Generar sílaba y regla de inicio al cargar
+        window.onload = generarTurno;
     </script>
 </body>
 </html>
-
