@@ -250,7 +250,7 @@
             font-size: clamp(0.95rem, 2.5vh, 1.2rem);
             font-weight: 600;
             margin-bottom: 12px;
-            line-height: 1.3;
+            line-height: 1.35;
         }
 
         .opciones-grid {
@@ -337,7 +337,7 @@
         <div class="turn-header">
             <div>Turno de: <span id="current-player-name" class="player-name">-</span></div>
             <div id="current-player-type" class="player-type">-</div>
-            <div id="last-round-banner" class="last-round-banner" style="display: none;">⚠️ ¡Última ronda para empatar!</div>
+            <div id="last-round-banner" class="last-round-banner" style="display: none;">⚠️ ¡Últimos turnos de la ronda para empatar!</div>
         </div>
 
         <div class="main-game-area">
@@ -401,11 +401,10 @@
         let respondido = false;
         let categoriaEnJuego = null;
 
-        // Control de turnos y fin de juego (opción de empate)
+        // Control de fin de ronda
         let alguienHaCompletado = false;
-        let indicePrimerGanador = null;
 
-        // Historial de preguntas formuladas durante la partida
+        // Historial ÚNICO de preguntas formuladas durante la partida
         let preguntasHechas = [];
 
         const cachePreguntas = {
@@ -442,25 +441,21 @@
 
         async function pedirPreguntaIA(categoria, esNino) {
             const nivelText = esNino 
-                ? "para niños/jóvenes de 10 a 14 años, escolar de cultura general" 
-                : "para adultos (estilo Genus clásico)";
+                ? "para niños/jóvenes de 10 a 14 años. La pregunta debe ser CORTA y DIRECTA (máximo 12-15 palabras)" 
+                : "para adultos estilo Trivial Genus clásico, interesante, de nivel medio-alto y con buen contexto redactado";
 
-            const ultimasPreguntas = preguntasHechas.slice(-20).join(' || ');
+            // Historial global sin distinguir entre niños y adultos para evitar cruces
+            const ultimasPreguntas = preguntasHechas.slice(-30).join(' || ');
             const instruccionExclusion = ultimasPreguntas 
-                ? `CRÍTICO: Queda prohibido repetir estas preguntas: [${ultimasPreguntas}].` 
+                ? `CRÍTICO Y OBLIGATORIO: Esta prohibido hacer preguntas iguales o conceptualmente parecidas a estas que ya salieron en la partida: [${ultimasPreguntas}].` 
                 : '';
 
-            // INSTRUCCIÓN ESTRICTA DE BREVEDAD EN PREGUNTAS Y RESPUESTAS
             const prompt = `Genera una pregunta tipo Trivial Pursuit ${nivelText} sobre la categoría: ${categoria}.
             ${instruccionExclusion}
-            
-             REGLA DE ORO DE FORMATO:
-            - La pregunta debe ser MUY CORTA y DIRECTA (máximo 15 palabras). Evita enunciados largos, preámbulos o explicaciones.
-            - Las 4 opciones deben ser breves (1 a 4 palabras cada una).
 
             Devuelve ÚNICAMENTE un objeto JSON válido (sin Markdown, sin explicaciones) con esta estructura:
             {
-              "pregunta": "Pregunta corta aquí",
+              "pregunta": "Texto de la pregunta",
               "opciones": ["Opción A", "Opción B", "Opción C", "Opción D"],
               "correcta": 0
             }
@@ -504,7 +499,6 @@
             jugadores = [];
             preguntasHechas = [];
             alguienHaCompletado = false;
-            indicePrimerGanador = null;
             
             let roles = [];
             for (let i = 0; i < numNinos; i++) roles.push({ esNino: true });
@@ -653,10 +647,9 @@
                 botonPulsado.classList.add('correcta');
                 jugadorActual.quesitos.add(categoriaEnJuego);
                 
-                // Marcar que alguien ha conseguido los 6 quesitos
-                if (jugadorActual.quesitos.size === 6 && !alguienHaCompletado) {
+                // Si alguien consigue los 6 quesitos, activamos la bandera de última ronda
+                if (jugadorActual.quesitos.size === 6) {
                     alguienHaCompletado = true;
-                    indicePrimerGanador = turnoActualIndex;
                 }
             } else {
                 botonPulsado.classList.add('incorrecta');
@@ -669,9 +662,9 @@
         function siguienteTurno() {
             let siguienteIndex = (turnoActualIndex + 1) % jugadores.length;
 
-            // Si alguien ya completó los 6 quesitos y al avanzar el turno volvemos al que ganó primero,
-            // significa que todos han tenido exactamente el mismo número de oportunidades/turnos.
-            if (alguienHaCompletado && siguienteIndex === indicePrimerGanador) {
+            // Si alguien ha ganado en esta ronda y el siguiente turno le toca al Jugador 1 (siguienteIndex === 0),
+            // significa que la ronda ha finalizado y todos han tenido EXACTAMENTE el mismo número de turnos.
+            if (alguienHaCompletado && siguienteIndex === 0) {
                 evaluarFinDeJuego();
                 return;
             }
@@ -687,7 +680,7 @@
                 alert(`🎉 ¡¡${ganadores[0].nombre} HA GANADO LA PARTIDA!! 🎉\nHa completado los 6 quesitos.`);
             } else if (ganadores.length > 1) {
                 const nombres = ganadores.map(g => g.nombre).join(' y ');
-                alert(`🤝 ¡¡EMPATE HISTÓRICO!! 🤝\n${nombres} han completado los 6 quesitos en el mismo número de turnos.`);
+                alert(`🤝 ¡¡EMPATE HISTÓRICO!! 🤝\n${nombres} han completado los 6 quesitos en el mismo número de turnos de la ronda.`);
             }
             location.reload();
         }
