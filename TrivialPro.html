@@ -413,6 +413,7 @@
         };
 
         window.onload = function() {
+            cambiarEdicion();
             cambiarNumJugadores();
         };
 
@@ -444,7 +445,6 @@
                 ? "para niños/jóvenes de 10 a 14 años. La pregunta debe ser CORTA y DIRECTA (máximo 12-15 palabras)." 
                 : "para adultos estilo Trivial Genus clásico. La pregunta debe ser clara y equilibrada (MÁXIMO 25-30 PALABRAS). Evita rodeos innecesarios o parrafadas largas.";
 
-            // Historial global sin distinguir entre niños y adultos para evitar cruces
             const ultimasPreguntas = preguntasHechas.slice(-30).join(' || ');
             const instruccionExclusion = ultimasPreguntas 
                 ? `CRÍTICO Y OBLIGATORIO: Esta prohibido hacer preguntas iguales o conceptualmente parecidas a estas que ya salieron en la partida: [${ultimasPreguntas}].` 
