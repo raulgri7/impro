@@ -96,6 +96,7 @@
             word-break: break-word;
         }
 
+        /* CONTENEDOR DEL LIENZO Y HERRAMIENTAS MAXIMIZADO */
         .canvas-container {
             display: none;
             flex-direction: column;
@@ -120,6 +121,7 @@
             flex-grow: 1;
         }
 
+        /* PANEL SUPERIOR: Ajustado para que los botones de acción NUNCA queden fuera */
         .controls-panel {
             display: flex;
             justify-content: space-between;
@@ -130,25 +132,36 @@
             border-radius: 12px;
             border: 1px solid #333;
             gap: 6px;
+            overflow: hidden;
         }
 
+        /* PALETA DE COLORES: Scrollable en pantallas estrechas */
         .color-palette {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+            flex-shrink: 1;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .color-palette::-webkit-scrollbar {
+            display: none;
+        }
+        .color-palette {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
 
         .color-btn {
-            width: 28px;
-            height: 28px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             border: 2px solid #555;
             cursor: pointer;
             transition: transform 0.1s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
+            flex-shrink: 0;
         }
 
         .color-btn.active {
@@ -160,6 +173,7 @@
         .action-btns {
             display: flex;
             gap: 6px;
+            flex-shrink: 0; /* Asegura que Deshacer y Borrar siempre se vean */
         }
 
         .btn-action {
@@ -170,6 +184,7 @@
             font-size: 0.8rem;
             cursor: pointer;
             font-weight: bold;
+            white-space: nowrap;
         }
 
         .btn-undo {
@@ -195,7 +210,7 @@
     <div id="screen-start" class="card">
         <p style="color: #aaa;">Listos para jugar en grupo o parejas casuales</p>
         <button class="btn btn-primary" onclick="mostrarPalabra()">Nueva palabra</button>
-        <div id="status-cargando" class="status-badge">Preparando palabras... 🧠</div>
+        <div id="status-cargando" class="status-badge">Palabras de inicio listas 🚀</div>
     </div>
 
     <!-- PANTALLA 2: SELECCIÓN DE PALABRA -->
@@ -211,7 +226,7 @@
 
     <!-- PANTALLA 3: PAD DE DIBUJO MAXIMIZADO -->
     <div id="screen-canvas" class="canvas-container">
-        <!-- Panel de Colores (incluye Goma) + Deshacer + Borrar -->
+        <!-- Panel de 5 colores + Deshacer + Borrar -->
         <div class="controls-panel">
             <div class="color-palette">
                 <div class="color-btn active" style="background-color: #000000;" onclick="setColor('#000000', this)"></div>
@@ -219,8 +234,6 @@
                 <div class="color-btn" style="background-color: #2ecc71;" onclick="setColor('#2ecc71', this)"></div>
                 <div class="color-btn" style="background-color: #3498db;" onclick="setColor('#3498db', this)"></div>
                 <div class="color-btn" style="background-color: #f1c40f;" onclick="setColor('#f1c40f', this)"></div>
-                <!-- Goma de borrar incorporada como color blanco -->
-                <div class="color-btn" style="background-color: #ffffff; color: #000;" title="Goma" onclick="setColor('#ffffff', this)">🧹</div>
             </div>
 
             <div class="action-btns">
@@ -238,20 +251,34 @@
     <script>
         const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
 
-        // Lotes de palabras e historial para no repetir
-        let bancoPalabras = [];
+        // 100 PALABRAS INICIALES DE CARGA INMEDIATA
+        const palabrasIniciales = [
+            "Sol", "Casa", "Árbol", "Coche", "Gato", "Perro", "Flor", "Luna", "Manzana", "Barco",
+            "Avión", "Reloj", "Estrella", "Pez", "Pájaro", "Silla", "Mesa", "Lápiz", "Libro", "Teléfono",
+            "Pelota", "Sombrero", "Zapatos", "Taza", "Cuchara", "Tenedor", "Cama", "Puerta", "Ventana", "Corazón",
+            "Llave", "Paraguas", "Campana", "Ojo", "Mano", "Pie", "Caramelo", "Tarta", "Helado", "Queso",
+            "Plátano", "Fresa", "Sombra", "Nube", "Lluvia", "Fuego", "Montaña", "Río", "Mar", "Isla",
+            "Castillo", "Corona", "Moneda", "Bolsa", "Botella", "Vaso", "Cuchillo", "Peine", "Cepillo", "Tijeras",
+            "Guitarra", "Tambor", "Pintura", "Pincel", "Caja", "Carta", "Regalo", "Globo", "Cometa", "Bicicleta",
+            "Tren", "Camión", "Autobús", "Semáforo", "Puente", "Escalera", "Martillo", "Clavo", "Sierra", "Anillo",
+            "Gafas", "Botón", "Cremallera", "Cinturón", "Calcetín", "Pantalón", "Camiseta", "Chaqueta", "Guante", "Mariposa",
+            "Abeja", "Araña", "Serpiente", "Rana", "Tortuga", "Caracol", "Ratón", "Elefante", "León"
+        ];
+
+        // Arrancamos directamente con las 100 palabras iniciales
+        let bancoPalabras = [...palabrasIniciales];
         let palabrasUsadas = [];
         let pidiendoIA = false;
         let palabraSeleccionada = "";
 
         // Variables del Canvas
         const canvas = document.getElementById('paint-pad');
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const ctx = canvas.getContext('2d');
         let dibujando = false;
         let colorActual = '#000000';
-        let grosorActual = 3;
+        const GROSOR_FINO = 3;
 
-        // Historial de trazos para la función Deshacer
+        // Historial de trazos para la función Deshacer (Ctrl+Z)
         let historialTrazos = [];
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -259,37 +286,12 @@
             setTimeout(pedirLotePalabrasIA, 100);
         });
 
-        // Reajusta el canvas sin perder el dibujo actual al rotar el móvil
         function ajustarResolucionCanvas() {
             const rect = canvas.getBoundingClientRect();
-            
-            // Si el lienzo ya tenía contenido, creamos una copia temporal
-            const tempCanvas = document.createElement('canvas');
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCanvas.width = canvas.width;
-            tempCanvas.height = canvas.height;
-            if (canvas.width > 0 && canvas.height > 0) {
-                tempCtx.drawImage(canvas, 0, 0);
-            }
-
             canvas.width = rect.width;
             canvas.height = rect.height;
-
-            // Rellenar fondo blanco
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Redibujar la imagen guardada
-            if (tempCanvas.width > 0 && tempCanvas.height > 0) {
-                ctx.drawImage(tempCanvas, 0, 0);
-            }
+            limpiarLienzo();
         }
-
-        window.addEventListener('resize', () => {
-            if (document.getElementById('screen-canvas').style.display === 'flex') {
-                ajustarResolucionCanvas();
-            }
-        });
 
         // --- LÓGICA DE IA CON MEMORIA DE EXCLUSIÓN ---
 
@@ -297,15 +299,8 @@
             if (pidiendoIA) return;
             pidiendoIA = true;
 
-            document.getElementById('status-cargando').innerText = "Conectando con la IA... 🧠";
-
-            let exclusionTexto = "";
-            if (Array.isArray(palabrasUsadas) && palabrasUsadas.length > 0) {
-                exclusionTexto = `NO utilices NINGUNA de las siguientes palabras ya usadas: ${palabrasUsadas.join(', ')}.`;
-            }
-
             const prompt = `Genera un lote de 20 palabras o conceptos variados e intuitivos para jugar al Pictionary (objetos, animales, profesiones, acciones o lugares sencillos de representar visualmente).
-            ${exclusionTexto}
+            ${palabrasUsadas.length > 0 ? `NO utilices NINGUNA de las siguientes palabras ya usadas: ${palabrasUsadas.join(', ')}.` : ''}
             
             Devuelve ÚNICAMENTE un array JSON válido de cadenas de texto (sin Markdown, sin explicaciones):
             ["Palabra 1", "Palabra 2", "Palabra 3", ...]`;
@@ -317,12 +312,9 @@
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`Error HTTP: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
 
                 const data = await response.json();
-                
                 if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
                     throw new Error("Respuesta de IA con estructura inesperada");
                 }
@@ -335,14 +327,11 @@
                 if (Array.isArray(nuevasPalabras) && nuevasPalabras.length > 0) {
                     const filtradas = nuevasPalabras.filter(p => !palabrasUsadas.includes(p));
                     bancoPalabras.push(...filtradas);
-                    console.log("Palabras cargadas con éxito:", bancoPalabras);
+                    console.log("Palabras de IA añadidas al banco:", filtradas);
                     document.getElementById('status-cargando').innerText = `Palabras listas: ${bancoPalabras.length}`;
-                } else {
-                    throw new Error("El JSON recibido no es un array válido");
                 }
             } catch (e) {
-                console.error("Error cargando lote de palabras desde la IA:", e);
-                document.getElementById('status-cargando').innerText = "Servicio listo (modo contingencia activo)";
+                console.error("Error cargando lote de la IA:", e);
             } finally {
                 pidiendoIA = false;
             }
@@ -364,10 +353,10 @@
 
             let seleccion = "";
             if (bancoPalabras.length > 0) {
-                seleccion = bancoPalabras.shift();
+                const idx = Math.floor(Math.random() * bancoPalabras.length);
+                seleccion = bancoPalabras.splice(idx, 1)[0];
             } else {
-                const respaldo = ["Mochila", "Faro", "Sombrilla", "Astronauta", "Guitarra", "Pirata", "Reloj", "Telescopio", "Canguro"];
-                seleccion = respaldo[Math.floor(Math.random() * respaldo.length)];
+                seleccion = palabrasIniciales[Math.floor(Math.random() * palabrasIniciales.length)];
             }
 
             registrarPalabraUsada(seleccion);
@@ -397,7 +386,6 @@
             
             setTimeout(() => {
                 ajustarResolucionCanvas();
-                limpiarLienzo();
             }, 50);
         }
 
@@ -439,6 +427,8 @@
             if (historialTrazos.length > 0) {
                 const ultimoEstado = historialTrazos.pop();
                 ctx.putImageData(ultimoEstado, 0, 0);
+            } else {
+                limpiarLienzo();
             }
         }
 
@@ -459,12 +449,6 @@
             const pos = obtenerPosicion(e);
             ctx.beginPath();
             ctx.moveTo(pos.x, pos.y);
-            // Dibuja un punto si solo se hace un tap rápido
-            ctx.arc(pos.x, pos.y, (colorActual === '#ffffff' ? 12 : grosorActual) / 2, 0, Math.PI * 2);
-            ctx.fillStyle = colorActual;
-            ctx.fill();
-            ctx.beginPath();
-            ctx.moveTo(pos.x, pos.y);
         }
 
         function dibujar(e) {
@@ -473,8 +457,7 @@
 
             ctx.lineTo(pos.x, pos.y);
             ctx.strokeStyle = colorActual;
-            // Si es goma (blanco), usamos un grosor mayor
-            ctx.lineWidth = colorActual === '#ffffff' ? 24 : grosorActual;
+            ctx.lineWidth = GROSOR_FINO;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.stroke();
