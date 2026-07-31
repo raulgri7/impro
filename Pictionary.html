@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pictionary Express ✏️</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            min-height: 100vh;
+            min-height: 100svh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 15px;
+            user-select: none;
+            overflow-x: hidden;
+            gap: 12px;
+        }
+
+        h1 {
+            font-size: clamp(1.2rem, 3.5vh, 1.8rem);
+            letter-spacing: 1.5px;
+            color: #ccc;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .card {
+            background: #1e1e1e;
+            border: 2px solid #333;
+            border-radius: 16px;
+            padding: 20px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .btn {
+            background: #2a2a2a;
+            color: #fff;
+            border: 2px solid #444;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-primary {
+            background: #ffffff;
+            color: #121212;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: #333;
+            color: #ffcc00;
+            border-color: #ffcc00;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .palabra-display {
+            font-size: clamp(1.8rem, 5vh, 2.5rem);
+            font-weight: 800;
+            color: #ffcc00;
+            margin: 10px 0;
+            word-break: break-word;
+        }
+
+        /* LIENZO DE DIBUJO Y HERRAMIENTAS */
+        .canvas-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        canvas {
+            background-color: #ffffff;
+            border-radius: 12px;
+            border: 3px solid #444;
+            cursor: crosshair;
+            touch-action: none; /* Evita el scroll mientras se dibuja en móvil */
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            width: 100%;
+            aspect-ratio: 1 / 1;
+        }
+
+        .controls-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            background: #1e1e1e;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            gap: 10px;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 8px;
+        }
+
+        .color-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #555;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        .color-btn.active {
+            transform: scale(1.2);
+            border-color: #ffffff;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+        }
+
+        .brush-sizes {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .size-btn {
+            background: #2a2a2a;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .size-btn.active {
+            background: #ffcc00;
+            color: #121212;
+            font-weight: bold;
+        }
+
+        .btn-clear {
+            background: #c0392b;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: -5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Pictionary Express ✏️</h1>
+
+    <!-- PANTALLA 1: BOTÓN INICIAL -->
+    <div id="screen-start" class="card">
+        <p style="color: #aaa;">Listos para jugar en grupo o parejas casuales</p>
+        <button class="btn btn-primary" onclick="mostrarPalabra()">Nueva palabra</button>
+        <div id="status-cargando" class="status-badge">Preparando palabras... 🧠</div>
+    </div>
+
+    <!-- PANTALLA 2: SELECCIÓN DE PALABRA -->
+    <div id="screen-word" class="card" style="display: none;">
+        <div style="font-size: 0.9rem; color: #888;">Tu palabra para dibujar es:</div>
+        <div id="word-display" class="palabra-display">---</div>
+        
+        <div class="btn-group">
+            <button class="btn btn-secondary" onclick="otraPalabra()">Otra 🔄</button>
+            <button class="btn btn-primary" onclick="empezarAProyectar()">Dibujar 🎨</button>
+        </div>
+    </div>
+
+    <!-- PANTALLA 3: PAD DE DIBUJO -->
+    <div id="screen-canvas" class="canvas-container">
+        <!-- Panel de herramientas -->
+        <div class="controls-panel">
+            <div class="color-palette">
+                <div class="color-btn active" style="background-color: #000000;" onclick="setColor('#000000', this)"></div>
+                <div class="color-btn" style="background-color: #e74c3c;" onclick="setColor('#e74c3c', this)"></div>
+                <div class="color-btn" style="background-color: #2ecc71;" onclick="setColor('#2ecc71', this)"></div>
+                <div class="color-btn" style="background-color: #3498db;" onclick="setColor('#3498db', this)"></div>
+                <div class="color-btn" style="background-color: #f1c40f;" onclick="setColor('#f1c40f', this)"></div>
+            </div>
+
+            <div class="brush-sizes">
+                <button class="size-btn" onclick="setGrosor(3, this)">Fino</button>
+                <button class="size-btn active" onclick="setGrosor(7, this)">Medio</button>
+                <button class="size-btn" onclick="setGrosor(15, this)">Grueso</button>
+            </div>
+
+            <button class="btn-clear" onclick="limpiarLienzo()">Borrar</button>
+        </div>
+
+        <!-- El Lienzo Canvas -->
+        <canvas id="paint-pad" width="500" height="500"></canvas>
+
+        <button class="btn btn-primary" onclick="reiniciarJuego()" style="margin-top: 5px;">Nueva palabra 🔄</button>
+    </div>
+
+    <script>
+        const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+
+        // Lote de palabras acumuladas en memoria
+        let bancoPalabras = [];
+        let pidiendoIA = false;
+        let palabraSeleccionada = "";
+
+        // Variables del Canvas
+        const canvas = document.getElementById('paint-pad');
+        const ctx = canvas.getContext('2d');
+        let dibujando = false;
+        let colorActual = '#000000';
+        let grosorActual = 7;
+
+        window.onload = function() {
+            ajustarResolucionCanvas();
+            pedirLotePalabrasIA();
+            configurarEventosDibujo();
+        };
+
+        // Redimensiona internamente el lienzo para evitar trazos deformados
+        function ajustarResolucionCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width || 500;
+            canvas.height = rect.height || 500;
+            limpiarLienzo();
+        }
+
+        // --- LÓGICA DE IA Y PRECARGA DE PALABRAS ---
+
+        async function pedirLotePalabrasIA() {
+            if (pidiendoIA) return;
+            pidiendoIA = true;
+
+            const prompt = `Genera un lote de 20 palabras o conceptos variados e intuitivos para jugar al Pictionary (objetos, animales, profesiones, acciones o lugares sencillos de representar visualmente).
+            
+            Devuelve ÚNICAMENTE un array JSON válido de cadenas de texto (sin Markdown, sin explicaciones):
+            ["Palabra 1", "Palabra 2", "Palabra 3", ...]`;
+
+            try {
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                const data = await response.json();
+                let rawText = data.candidates[0].content.parts[0].text;
+                rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                
+                const nuevasPalabras = JSON.parse(rawText);
+                if (Array.isArray(nuevasPalabras)) {
+                    bancoPalabras.push(...nuevasPalabras);
+                    document.getElementById('status-cargando').innerText = `Palabras listas en memoria: ${bancoPalabras.length}`;
+                }
+            } catch (e) {
+                console.error("Error cargando lote de palabras:", e);
+                document.getElementById('status-cargando').innerText = "Servicio listo (modo contingencia activo)";
+            } finally {
+                pidiendoIA = false;
+            }
+        }
+
+        function obtenerSiguientePalabra() {
+            // Si el banco baja de 5 palabras, llamamos en background de inmediato a por 20 más
+            if (bancoPalabras.length <= 5) {
+                pedirLotePalabrasIA();
+            }
+
+            // Si hay palabras extraemos una, de lo contrario usamos un respaldo local de seguridad
+            if (bancoPalabras.length > 0) {
+                return bancoPalabras.shift();
+            } else {
+                const respaldo = ["Mochila", "Faro", "Sombrilla", "Astronauta", "Guitarra", "Pirata"];
+                return respaldo[Math.floor(Math.random() * respaldo.length)];
+            }
+        }
+
+        // --- FLUJO DE LA INTERFAZ ---
+
+        function mostrarPalabra() {
+            palabraSeleccionada = obtenerSiguientePalabra();
+            document.getElementById('word-display').innerText = palabraSeleccionada;
+            
+            document.getElementById('screen-start').style.display = 'none';
+            document.getElementById('screen-word').style.display = 'flex';
+        }
+
+        function otraPalabra() {
+            palabraSeleccionada = obtenerSiguientePalabra();
+            document.getElementById('word-display').innerText = palabraSeleccionada;
+        }
+
+        function empezarAProyectar() {
+            document.getElementById('screen-word').style.display = 'none';
+            document.getElementById('screen-canvas').style.display = 'flex';
+            
+            // Reajustar resolución tras visibilidad
+            setTimeout(() => {
+                ajustarResolucionCanvas();
+            }, 50);
+        }
+
+        function reiniciarJuego() {
+            limpiarLienzo();
+            document.getElementById('screen-canvas').style.display = 'none';
+            mostrarPalabra();
+        }
+
+        // --- SISTEMA DE DIBUJO EN CANVAS (TÁCTIL Y RATÓN) ---
+
+        function configurarEventosDibujo() {
+            // Eventos de Ratón
+            canvas.addEventListener('mousedown', empezarDibujo);
+            canvas.addEventListener('mousemove', dibujar);
+            canvas.addEventListener('mouseup', detenerDibujo);
+            canvas.addEventListener('mouseleave', detenerDibujo);
+
+            // Eventos Táctiles (Móvil / Tablet)
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                empezarDibujo(touch);
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                dibujar(touch);
+            });
+
+            canvas.addEventListener('touchend', detenerDibujo);
+        }
+
+        function obtenerPosicion(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            return {
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
+            };
+        }
+
+        function empezarDibujo(e) {
+            dibujando = true;
+            const pos = obtenerPosicion(e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        }
+
+        function dibujar(e) {
+            if (!dibujando) return;
+            const pos = obtenerPosicion(e);
+
+            ctx.lineTo(pos.x, pos.y);
+            ctx.strokeStyle = colorActual;
+            ctx.lineWidth = grosorActual;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        }
+
+        function detenerDibujo() {
+            if (dibujando) {
+                ctx.closePath();
+                dibujando = false;
+            }
+        }
+
+        function limpiarLienzo() {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function setColor(color, elemento) {
+            colorActual = color;
+            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
+            elemento.classList.add('active');
+        }
+
+        function setGrosor(grosor, elemento) {
+            grosorActual = grosor;
+            document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
+            elemento.classList.add('active');
+        }
+    </script>
+</body>
+</html>
