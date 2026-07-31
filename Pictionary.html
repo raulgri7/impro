@@ -96,7 +96,6 @@
             word-break: break-word;
         }
 
-        /* CONTENEDOR DEL LIENZO Y HERRAMIENTAS MAXIMIZADO */
         .canvas-container {
             display: none;
             flex-direction: column;
@@ -121,78 +120,43 @@
             flex-grow: 1;
         }
 
-        /* PANEL SUPERIOR: Ajustado para que los botones de acción NUNCA queden fuera */
         .controls-panel {
             display: flex;
-            justify-content: space-between;
+            justify-content: space-around;
             align-items: center;
             width: 100%;
             background: #1e1e1e;
-            padding: 8px 12px;
+            padding: 8px 10px;
             border-radius: 12px;
             border: 1px solid #333;
             gap: 6px;
-            overflow: hidden;
+            flex-wrap: nowrap;
         }
 
-        /* PALETA DE COLORES: Scrollable en pantallas estrechas */
-        .color-palette {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            overflow-x: auto;
-            white-space: nowrap;
-            flex-shrink: 1;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .color-palette::-webkit-scrollbar {
-            display: none;
-        }
-        .color-palette {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .color-btn {
-            width: 30px;
-            height: 30px;
+        .round-btn {
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             border: 2px solid #555;
             cursor: pointer;
             transition: transform 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            color: #fff;
             flex-shrink: 0;
+            background-color: #2a2a2a;
         }
 
-        .color-btn.active {
+        .round-btn:active {
+            transform: scale(0.9);
+        }
+
+        .round-btn.active {
             transform: scale(1.15);
             border-color: #ffffff;
             box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
-        }
-
-        .action-btns {
-            display: flex;
-            gap: 6px;
-            flex-shrink: 0; /* Asegura que Deshacer y Borrar siempre se vean */
-        }
-
-        .btn-action {
-            color: #fff;
-            border: none;
-            padding: 8px 10px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            font-weight: bold;
-            white-space: nowrap;
-        }
-
-        .btn-undo {
-            background: #d35400;
-        }
-
-        .btn-clear {
-            background: #c0392b;
         }
 
         .status-badge {
@@ -206,14 +170,14 @@
 
     <h1 id="main-title">Pictionary Express ✏️</h1>
 
-    <!-- PANTALLA 1: BOTÓN INICIAL -->
+    <!-- PANTALLA 1 -->
     <div id="screen-start" class="card">
         <p style="color: #aaa;">Listos para jugar en grupo o parejas casuales</p>
         <button class="btn btn-primary" onclick="mostrarPalabra()">Nueva palabra</button>
-        <div id="status-cargando" class="status-badge">Palabras de inicio listas 🚀</div>
+        <div id="status-cargando" class="status-badge">Conectando con IA... ⏳</div>
     </div>
 
-    <!-- PANTALLA 2: SELECCIÓN DE PALABRA -->
+    <!-- PANTALLA 2 -->
     <div id="screen-word" class="card" style="display: none;">
         <div style="font-size: 0.9rem; color: #888;">Tu palabra para dibujar es:</div>
         <div id="word-display" class="palabra-display">---</div>
@@ -224,25 +188,19 @@
         </div>
     </div>
 
-    <!-- PANTALLA 3: PAD DE DIBUJO MAXIMIZADO -->
+    <!-- PANTALLA 3 -->
     <div id="screen-canvas" class="canvas-container">
-        <!-- Panel de 5 colores + Deshacer + Borrar -->
         <div class="controls-panel">
-            <div class="color-palette">
-                <div class="color-btn active" style="background-color: #000000;" onclick="setColor('#000000', this)"></div>
-                <div class="color-btn" style="background-color: #e74c3c;" onclick="setColor('#e74c3c', this)"></div>
-                <div class="color-btn" style="background-color: #2ecc71;" onclick="setColor('#2ecc71', this)"></div>
-                <div class="color-btn" style="background-color: #3498db;" onclick="setColor('#3498db', this)"></div>
-                <div class="color-btn" style="background-color: #f1c40f;" onclick="setColor('#f1c40f', this)"></div>
-            </div>
-
-            <div class="action-btns">
-                <button class="btn-action btn-undo" onclick="deshacerUltimoTrazo()">↩ Deshacer</button>
-                <button class="btn-action btn-clear" onclick="limpiarLienzo()">Borrar</button>
-            </div>
+            <div class="round-btn active" style="background-color: #000000;" onclick="setColor('#000000', this)"></div>
+            <div class="round-btn" style="background-color: #e74c3c;" onclick="setColor('#e74c3c', this)"></div>
+            <div class="round-btn" style="background-color: #3498db;" onclick="setColor('#3498db', this)"></div>
+            <div class="round-btn" style="background-color: #f1c40f;" onclick="setColor('#f1c40f', this)"></div>
+            
+            <div class="round-btn" style="background-color: #ffffff; color: #000;" title="Goma" onclick="setColor('#ffffff', this)">🧹</div>
+            <div class="round-btn" style="background-color: #d35400;" title="Deshacer" onclick="deshacerUltimoTrazo()">↩</div>
+            <div class="round-btn" style="background-color: #c0392b;" title="Borrar lienzo" onclick="limpiarLienzo()">🗑️</div>
         </div>
 
-        <!-- El Lienzo Canvas -->
         <canvas id="paint-pad"></canvas>
 
         <button class="btn btn-primary" onclick="reiniciarJuego()">Nueva palabra 🔄</button>
@@ -251,7 +209,7 @@
     <script>
         const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
 
-        // 100 PALABRAS INICIALES DE CARGA INMEDIATA
+        // 100 PALABRAS INICIALES (Sólo respaldo offline/arranque)
         const palabrasIniciales = [
             "Sol", "Casa", "Árbol", "Coche", "Gato", "Perro", "Flor", "Luna", "Manzana", "Barco",
             "Avión", "Reloj", "Estrella", "Pez", "Pájaro", "Silla", "Mesa", "Lápiz", "Libro", "Teléfono",
@@ -265,25 +223,22 @@
             "Abeja", "Araña", "Serpiente", "Rana", "Tortuga", "Caracol", "Ratón", "Elefante", "León"
         ];
 
-        // Arrancamos directamente con las 100 palabras iniciales
-        let bancoPalabras = [...palabrasIniciales];
+        let bancoIA = []; // Banco exclusivo de la IA
         let palabrasUsadas = [];
         let pidiendoIA = false;
         let palabraSeleccionada = "";
 
-        // Variables del Canvas
+        // Canvas
         const canvas = document.getElementById('paint-pad');
         const ctx = canvas.getContext('2d');
         let dibujando = false;
         let colorActual = '#000000';
         const GROSOR_FINO = 3;
-
-        // Historial de trazos para la función Deshacer (Ctrl+Z)
         let historialTrazos = [];
 
         window.addEventListener('DOMContentLoaded', () => {
             configurarEventosDibujo();
-            setTimeout(pedirLotePalabrasIA, 100);
+            pedirLotePalabrasIA();
         });
 
         function ajustarResolucionCanvas() {
@@ -292,8 +247,6 @@
             canvas.height = rect.height;
             limpiarLienzo();
         }
-
-        // --- LÓGICA DE IA CON MEMORIA DE EXCLUSIÓN ---
 
         async function pedirLotePalabrasIA() {
             if (pidiendoIA) return;
@@ -315,10 +268,6 @@
                 if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
 
                 const data = await response.json();
-                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-                    throw new Error("Respuesta de IA con estructura inesperada");
-                }
-
                 let rawText = data.candidates[0].content.parts[0].text;
                 rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
                 
@@ -326,12 +275,12 @@
                 
                 if (Array.isArray(nuevasPalabras) && nuevasPalabras.length > 0) {
                     const filtradas = nuevasPalabras.filter(p => !palabrasUsadas.includes(p));
-                    bancoPalabras.push(...filtradas);
-                    console.log("Palabras de IA añadidas al banco:", filtradas);
-                    document.getElementById('status-cargando').innerText = `Palabras listas: ${bancoPalabras.length}`;
+                    bancoIA.push(...filtradas);
+                    document.getElementById('status-cargando').innerText = `IA conectada 🤖 (${bancoIA.length} palabras)`;
                 }
             } catch (e) {
                 console.error("Error cargando lote de la IA:", e);
+                document.getElementById('status-cargando').innerText = "Modo offline (lista local) 📦";
             } finally {
                 pidiendoIA = false;
             }
@@ -347,23 +296,25 @@
         }
 
         function obtenerSiguientePalabra() {
-            if (bancoPalabras.length <= 5) {
+            if (bancoIA.length <= 5) {
                 pedirLotePalabrasIA();
             }
 
             let seleccion = "";
-            if (bancoPalabras.length > 0) {
-                const idx = Math.floor(Math.random() * bancoPalabras.length);
-                seleccion = bancoPalabras.splice(idx, 1)[0];
+
+            // Prioridad a la IA si hay palabras disponibles
+            if (bancoIA.length > 0) {
+                const idx = Math.floor(Math.random() * bancoIA.length);
+                seleccion = bancoIA.splice(idx, 1)[0];
             } else {
-                seleccion = palabrasIniciales[Math.floor(Math.random() * palabrasIniciales.length)];
+                // Si aún no ha llegado respuesta de la IA, usamos el respaldo local
+                const idx = Math.floor(Math.random() * palabrasIniciales.length);
+                seleccion = palabrasIniciales[idx];
             }
 
             registrarPalabraUsada(seleccion);
             return seleccion;
         }
-
-        // --- FLUJO DE LA INTERFAZ ---
 
         function mostrarPalabra() {
             palabraSeleccionada = obtenerSiguientePalabra();
@@ -394,8 +345,6 @@
             document.getElementById('screen-canvas').style.display = 'none';
             mostrarPalabra();
         }
-
-        // --- DIBUJO EN CANVAS Y DESHACER ---
 
         function configurarEventosDibujo() {
             canvas.addEventListener('mousedown', empezarDibujo);
@@ -457,7 +406,7 @@
 
             ctx.lineTo(pos.x, pos.y);
             ctx.strokeStyle = colorActual;
-            ctx.lineWidth = GROSOR_FINO;
+            ctx.lineWidth = colorActual === '#ffffff' ? 20 : GROSOR_FINO;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.stroke();
@@ -478,7 +427,7 @@
 
         function setColor(color, elemento) {
             colorActual = color;
-            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.round-btn').forEach(btn => btn.classList.remove('active'));
             elemento.classList.add('active');
         }
     </script>
