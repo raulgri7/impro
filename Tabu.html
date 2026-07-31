@@ -2,22 +2,24 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tabú Express 🚫</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
         
         body {
             font-family: system-ui, -apple-system, sans-serif;
             background-color: #0f172a;
             color: #ffffff;
             min-height: 100vh;
+            min-height: 100svh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: 20px;
+            padding: 15px;
             user-select: none;
+            overflow-x: hidden;
         }
 
         .header {
@@ -25,7 +27,7 @@
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            max-width: 500px;
+            max-width: 480px;
             margin-bottom: 10px;
         }
 
@@ -55,13 +57,14 @@
             justify-content: center;
             width: 100%;
             max-width: 480px;
+            margin: 10px 0;
         }
 
         .card {
             background: #ffffff;
             color: #0f172a;
             border-radius: 24px;
-            padding: 30px;
+            padding: 25px 20px;
             width: 100%;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
             text-align: center;
@@ -69,77 +72,83 @@
         }
 
         .palabra-clave {
-            font-size: 2.2rem;
+            font-size: clamp(1.8rem, 5vh, 2.3rem);
             font-weight: 900;
             color: #2563eb;
             text-transform: uppercase;
             letter-spacing: 1px;
-            padding-bottom: 15px;
+            padding-bottom: 12px;
             border-bottom: 4px solid #f1f5f9;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            word-break: break-word;
         }
 
         .seccion-prohibidas {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         .prohibida-tag {
             background: #ffe4e6;
             color: #e11d48;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
-            padding: 10px;
+            padding: 8px 12px;
             border-radius: 12px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        /* --- BOTONES DE CONTROL --- */
-        .controles-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+        /* --- BOTÓN DE CONTROL ÚNICO --- */
+        .controles-container {
             width: 100%;
             max-width: 480px;
-            margin-top: 20px;
         }
 
         .btn {
             border: none;
             padding: 18px;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: 800;
             border-radius: 16px;
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 1px;
             transition: transform 0.1s;
+            width: 100%;
+            background: #3b82f6;
+            color: white;
         }
 
         .btn:active { transform: scale(0.96); }
 
-        .btn-acierto { background: #22c55e; color: white; }
-        .btn-falta { background: #ef4444; color: white; grid-column: span 2; font-size: 1.4rem; }
-        .btn-siguiente { background: #3b82f6; color: white; grid-column: span 2; font-size: 1.4rem; }
-
         .loading {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: #94a3b8;
             text-align: center;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            color: #64748b;
+            text-align: center;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="titulo">TABÚ</div>
+        <div class="titulo">TABÚ 🚫</div>
         <div id="timer" class="timer-box">60s</div>
     </div>
 
     <div class="tarjeta-container">
-        <div id="loading" class="loading">Pulsa "Siguiente Tarjeta" para empezar 🎲</div>
+        <div id="loading" class="loading">
+            Pulsa para empezar 🎲
+            <div id="status-cargando" class="status-badge">Conectando IA... ⏳</div>
+        </div>
         
         <div id="card" class="card">
             <div id="palabra-clave" class="palabra-clave">---</div>
@@ -147,31 +156,128 @@
         </div>
     </div>
 
-    <div class="controles-grid">
-        <button id="btn-siguiente" class="btn btn-siguiente" onclick="nuevaTarjeta()">¡Siguiente Tarjeta!</button>
-        <button id="btn-acierto" class="btn btn-acierto" style="display:none;" onclick="acierto()">Acierto (+1)</button>
-        <button id="btn-falta" class="btn btn-falta" style="display:none;" onclick="sonarBuzzer()">¡FALTA / TABÚ! 🚨</button>
+    <div class="controles-container">
+        <button id="btn-siguiente" class="btn" onclick="nuevaTarjeta()">¡Empezar Turno! 🚀</button>
     </div>
 
     <script>
         const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
+        
+        // --- 100 TARJETAS LOCALES OFFLINE / INICIALES ---
+        const tarjetasIniciales = [
+            { palabra: "PIZZA", prohibidas: ["ITALIA", "QUESO", "MASA", "HORNO"] },
+            { palabra: "PLAYA", prohibidas: ["MAR", "ARENA", "VERANO", "SOL"] },
+            { palabra: "TELÉFONO", prohibidas: ["LLAMAR", "MÓVIL", "PANTALLA", "HABLAR"] },
+            { palabra: "FÚTBOL", prohibidas: ["BALÓN", "GOL", "PARTIDO", "CAMPO"] },
+            { palabra: "VAMPIRO", prohibidas: ["SANGRE", "DRÁCULA", "MURCIÉLAGO", "DIENTES"] },
+            { palabra: "CINE", prohibidas: ["PELÍCULA", "PALOMITAS", "PANTALLA", "ACTOR"] },
+            { palabra: "HOSPITAL", prohibidas: ["MÉDICO", "ENFERMERO", "ENFERMO", "AMBULANCIA"] },
+            { palabra: "RELOJ", prohibidas: ["HORA", "MINUTOS", "TIEMPO", "MUÑECA"] },
+            { palabra: "AVIÓN", prohibidas: ["VOLAR", "PILOTO", "AEROPUERTO", "ALAS"] },
+            { palabra: "PERRO", prohibidas: ["ANIMAL", "LADRAR", "MASCOTA", "HUESO"] },
+            { palabra: "GATO", prohibidas: ["ANIMAL", "MAULLAR", "FELINO", "MASCOTA"] },
+            { palabra: "SUPERMERCADO", prohibidas: ["COMPRAR", "COMIDA", "CARRO", "CAJA"] },
+            { palabra: "COCHE", prohibidas: ["CONDUCIR", "RUEDAS", "MOTOR", "CARRETERA"] },
+            { palabra: "CUMPLEAÑOS", prohibidas: ["FIESTA", "TARTA", "VELAS", "REGALOS"] },
+            { palabra: "GUITARRA", prohibidas: ["MÚSICA", "CUERDAS", "TOCAR", "INSTRUMENTO"] },
+            { palabra: "DENTISTA", prohibidas: ["DIENTES", "BOCA", "DOLOR", "CLÍNICA"] },
+            { palabra: "CHOCOLATE", prohibidas: ["DULCE", "CACAO", "TABLETA", "NEGRO"] },
+            { palabra: "ZAPATOS", prohibidas: ["PIES", "CALZADO", "ATAR", "SUELA"] },
+            { palabra: "PARAGUAS", prohibidas: ["LLUVIA", "AGUA", "MOJARSE", "ABRIR"] },
+            { palabra: "SOL", prohibidas: ["DIA", "CALOR", "ESTRELLA", "LUZ"] },
+            { palabra: "LUNA", prohibidas: ["NOCHE", "CIELO", "SATÉLITE", "LLENA"] },
+            { palabra: "LIBRO", prohibidas: ["LEER", "PÁGINAS", "AUTOR", "BIBLIOTECA"] },
+            { palabra: "CAFÉ", prohibidas: ["TAZA", "DESAYUNO", "BEBIDA", "CALIENTE"] },
+            { palabra: "HELADO", prohibidas: ["VERANO", "CUCURUCHO", "FRÍO", "BOLA"] },
+            { palabra: "PAN", prohibidas: ["HARINA", "PANADERÍA", "COMER", "BOCADILLO"] },
+            { palabra: "TREN", prohibidas: ["VÍAS", "ESTACIÓN", "VAGÓN", "VIAJAR"] },
+            { palabra: "FUEGO", prohibidas: ["LLAMA", "QUEMAR", "HUMO", "CALOR"] },
+            { palabra: "NUBE", prohibidas: ["CIELO", "LLUVIA", "BLANCA", "ALTA"] },
+            { palabra: "MONTAÑA", prohibidas: ["ALTA", "SUBIR", "NIEVE", "CUMBRE"] },
+            { palabra: "ESPEJO", prohibidas: ["MIRAR", "REFLEJO", "CRISTAL", "CARA"] },
+            { palabra: "CAMA", prohibidas: ["DORMIR", "COLCHÓN", "SÁBANAS", "NOCHE"] },
+            { palabra: "SILLA", prohibidas: ["SENTARSE", "MESA", "CULO", "PATAS"] },
+            { palabra: "VENTANA", prohibidas: ["CRISTAL", "ABRIR", "CASA", "MIRAR"] },
+            { palabra: "PUERTA", prohibidas: ["ABRIR", "CERRAR", "ENTRAR", "LLAVE"] },
+            { palabra: "ORQUESTA", prohibidas: ["MÚSICA", "DIRECTOR", "INSTRUMENTOS", "CONCIERTO"] },
+            { palabra: "BICICLETA", prohibidas: ["PEDALES", "RUEDAS", "CASCO", "CADENA"] },
+            { palabra: "PISCINA", prohibidas: ["AGUA", "NADAR", "BANADOR", "VERANO"] },
+            { palabra: "SERPIENTE", prohibidas: ["REPTIL", "VENENO", "ARRASTRASE", "COBRA"] },
+            { palabra: "ESCUELA", prohibidas: ["COLEGIO", "PROFESOR", "ESTUDIAR", "NIÑOS"] },
+            { palabra: "REPOSTERÍA", prohibidas: ["PASTELES", "TARTAS", "DULCE", "HORNO"] },
+            { palabra: "JARDÍN", prohibidas: ["FLORES", "PLANTAS", "CÉSPED", "CASA"] },
+            { palabra: "VAMPIRO", prohibidas: ["DRÁCULA", "SANGRE", "COLMILLOS", "NOCHE"] },
+            { palabra: "MANZANA", prohibidas: ["FRUTA", "ROJA", "COMER", "ÁRBOL"] },
+            { palabra: "CARTA", prohibidas: ["SOBRE", "CORREO", "ESCRIBIR", "BUZÓN"] },
+            { palabra: "POLICÍA", prohibidas: ["LEY", "MULTA", "PATRULLA", "SIRENA"] },
+            { palabra: "BOMBERO", prohibidas: ["FUEGO", "MANGUERA", "AGUA", "CAMIÓN"] },
+            { palabra: "AEROPUERTO", prohibidas: ["AVIÓN", "VOLAR", "VUELO", "MALETAS"] },
+            { palabra: "FOTOGRAFÍA", prohibidas: ["CÁMARA", "FOTO", "IMAGEN", "DISPARAR"] },
+            { palabra: "PERIÓDICO", prohibidas: ["NOTICIAS", "PAPEL", "PRENSA", "LEER"] },
+            { palabra: "TELERREALIDAD", prohibidas: ["TELEVISIÓN", "CONCURSO", "PROGRAMA", "FAMA"] },
+            { palabra: "MICROFONO", prohibidas: ["Voz", "HABLAR", "CANTAR", "SONIDO"] },
+            { palabra: "TEATRO", prohibidas: ["ACTOR", "ESCENARIO", "OBRA", "PÚBLICO"] },
+            { palabra: "MARIPOSA", prohibidas: ["INSECTO", "ALAS", "VOLAR", "ORUGA"] },
+            { palabra: "CAMIONETA", prohibidas: ["COCHE", "CARGA", "CONDUCIR", "RUEDAS"] },
+            { palabra: "LÁPIZ", prohibidas: ["ESCRIBIR", "DIBUJAR", "GOMA", "GRAFITO"] },
+            { palabra: "TESORO", prohibidas: ["PIRATA", "ORO", "COFRE", "MONEDAS"] },
+            { palabra: "ASTRONAUTA", prohibidas: ["ESPACIO", "LUNA", "COHETE", "TRAJE"] },
+            { palabra: "PIRATA", prohibidas: ["BARCO", "PARCHE", "TESORO", "MAR"] },
+            { palabra: "DINOSAURIO", prohibidas: ["FÓSIL", "EXTINTO", "PREHISTORIA", "T-REX"] },
+            { palabra: "CIRCO", prohibidas: ["CARPA", "PAYASO", "MALABARES", "MAGO"] },
+            { palabra: "ROBOT", prohibidas: ["MÁQUINA", "METAL", "FUTURO", "CABLE"] },
+            { palabra: "LLAVE", prohibidas: ["CERRADURA", "ABRIR", "PUERTA", "LLAVERO"] },
+            { palabra: "CUMPLEAÑOS", prohibidas: ["REGALO", "TARTA", "AÑOS", "FIESTA"] },
+            { palabra: "FARMACIA", prohibidas: ["MEDICINAS", "PASTILLAS", "MÉDICO", "COMPRAR"] },
+            { palabra: "ISLA", prohibidas: ["MAR", "AGUA", "RODEADA", "PALMERA"] },
+            { palabra: "ZAPATILLAS", prohibidas: ["CORRER", "PIES", "DEPORTE", "CORDONES"] },
+            { palabra: "CANDADO", prohibidas: ["LLAVE", "CERRAR", "SEGURIDAD", "CADENA"] },
+            { palabra: "MONEDA", prohibidas: ["DINERO", "PAGAR", "METAL", "CAMBIO"] },
+            { palabra: "BILLETERA", prohibidas: ["DINERO", "TARJETAS", "BOLSILLO", "PAGAR"] },
+            { palabra: "CEPILLO", prohibidas: ["DIENTES", "PELO", "LIMPIAR", "PASTA"] },
+            { palabra: "JABÓN", prohibidas: ["DUCHA", "MANOS", "LIMPIAR", "AGUA"] },
+            { palabra: "TOALLA", prohibidas: ["SECAR", "DUCHA", "PLAYA", "AGUA"] },
+            { palabra: "ALMOHADA", prohibidas: ["CAMA", "CABEZA", "DORMIR", "BLANDA"] },
+            { palabra: "ESCALERA", prohibIDA: ["SUBIR", "BAJAR", "PELDAÑOS", "PISOS"] },
+            { palabra: "TELESCOPIO", prohibidas: ["ESTRELLAS", "ESPACIO", "MIRAR", "CIELO"] },
+            { palabra: "BRÚJULA", prohibidas: ["NORTE", "ORIENTACIÓN", "AGUJA", "MAPA"] },
+            { palabra: "MAPA", prohibidas: ["CIUDAD", "PAÍS", "ORIENTARSE", "RUTA"] },
+            { palabra: "ANILLO", prohibidas: ["DEDO", "JOYAS", "BODA", "ORO"] },
+            { palabra: "CADENA", prohibidas: ["COLLAR", "METAL", "ESLABONES", "BICI"] },
+            { palabra: "ESPECTÁCULO", prohibidas: ["FUNCION", "VER", "TEATRO", "VER"] },
+            { palabra: "CARAMELO", prohibidas: ["DULCE", "AZÚCAR", "BOCA", "ENVOLTORIO"] },
+            { palabra: "CHICLE", prohibidas: ["MASCAR", "BOCA", "BURBUJA", "SABOR"] },
+            { palabra: "TORTUGA", prohibidas: ["ANIMAL", "CAPARAZÓN", "LENTA", "REPTIL"] },
+            { palabra: "PINGÜINO", prohibidas: ["AVE", "HIELO", "NATIVE", "VOLAR"] },
+            { palabra: "TIBURÓN", prohibidas: ["MAR", "PEZ", "DIENTES", "PELIGRO"] },
+            { palabra: "BALLENA", prohibidas: ["MAR", "MAMÍFERO", "GIGANTE", "AGUA"] },
+            { palabra: "ELEFANTE", prohibidas: ["ANIMAL", "TROMPA", "OREJAS", "GRANDE"] },
+            { palabra: "JIRAFA", prohibidas: ["ANIMAL", "CUELLO", "ALTO", "MANCHAS"] },
+            { palabra: "LEÓN", prohibidas: ["ANIMAL", "REY", "SELVA", "MELENA"] },
+            { palabra: "TIGRE", prohibidas: ["ANIMAL", "RAYAS", "FELINO", "SELVA"] },
+            { palabra: "OSO", prohibidas: ["ANIMAL", "MIEL", "BOSQUE", "PELUDO"] },
+            { palabra: "PELOTA", prohibidas: ["JUGAR", "REDONDA", "BOTAR", "BALÓN"] },
+            { palabra: "CONCIERTO", prohibidas: ["MÚSICA", "CANTANTE", "ENTRADAS", "EN DIRECTO"] },
+            { palabra: "CEMENTERIO", prohibidas: ["MUERTOS", "TUMBAS", "FLORES", "FANTASMA"] },
+            { palabra: "CASTILLO", prohibidas: ["REY", "PRÍNCIPE", "TORRE", "MURALLA"] },
+            { palabra: "VACACIONES", prohibidas: ["VERANO", "VIAJAR", "DESCANSO", "TRABAJO"] },
+            { palabra: "TAXI", prohibidas: ["COCHE", "CONDUCTOR", "PAGAR", "CIUDAD"] },
+            { palabra: "AUTOBÚS", prohibidas: ["VIAJEROS", "PARADA", "CONDUCTOR", "TRANSPORTE"] },
+            { palabra: "METRO", prohibidas: ["TREN", "SUBTERRÁNEO", "ESTACIÓN", "CIUDAD"] },
+            { palabra: "AVIONETA", prohibidas: ["AVIÓN", "VOLAR", "PEQUEÑA", "PILOTO"] }
+        ];
+
+        let bancoIA = [];
+        let palabrasUsadas = [];
+        let pidiendoIA = false;
+        
         let tiempoRestante = 60;
         let timerInterval = null;
         let audioCtx = null;
 
-        // Categorías temáticas para forzar variabilidad extrema en cada llamada
-        const categoriasTematicas = [
-            "Objetos cotidianos raros o antiguos",
-            "Profundidades del océano y naturaleza salvaje",
-            "Eventos históricos y conceptos de ciencia",
-            "Comidas del mundo y elementos de gastronomía",
-            "Profesiones inusuales o aficiones",
-            "Lugares geográficos, monumentos o fenómenos naturales",
-            "Cine, música, literatura y arte pop",
-            "Tecnología, informática y universo digital",
-            "Emociones humanas, gestos o sensaciones físicas",
-            "Deportes, juegos tradicionales y herramientas"
-        ];
+        window.addEventListener('DOMContentLoaded', () => {
+            pedirLoteTarjetasIA();
+        });
 
         function initAudio() {
             if (!audioCtx) {
@@ -200,6 +306,84 @@
             osc.stop(audioCtx.currentTime + 0.4);
         }
 
+        // --- PRECARGA Y LÓGICA DE IA (LOTES DE 10, RECARGA EN <= 3) ---
+
+        async function pedirLoteTarjetasIA() {
+            if (pidiendoIA) return;
+            pidiendoIA = true;
+
+            const prompt = `Genera un lote de 10 tarjetas para el juego Tabú en español.
+            CRÍTICO Y OBLIGATORIO:
+            1. Usa SOLO palabras clave muy sencillas, conocidas y cotidianas (ejemplos: Parapente, Microondas, Dentista, Acuario, Canguro, Barco, Fotógrafo).
+            2. NUNCA utilices expresiones compuestas, modismos raros ni conceptos rebuscados/técnicos.
+            ${palabrasUsadas.length > 0 ? `3. NO repitas NINGUNA de estas palabras ya usadas: ${palabrasUsadas.join(', ')}.` : ''}
+            
+            Devuelve ÚNICAMENTE un array JSON válido de objetos (sin Markdown, sin bloques de código):
+            [
+              { "palabra": "PALABRA 1", "prohibidas": ["PROHIBIDA 1", "PROHIBIDA 2", "PROHIBIDA 3", "PROHIBIDA 4"] },
+              { "palabra": "PALABRA 2", "prohibidas": ["PROHIBIDA 1", "PROHIBIDA 2", "PROHIBIDA 3", "PROHIBIDA 4"] }
+            ]`;
+
+            try {
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+
+                const data = await response.json();
+                let rawText = data.candidates[0].content.parts[0].text;
+                rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                
+                const nuevasTarjetas = JSON.parse(rawText);
+                
+                if (Array.isArray(nuevasTarjetas) && nuevasTarjetas.length > 0) {
+                    const filtradas = nuevasTarjetas.filter(t => !palabrasUsadas.includes(t.palabra.toUpperCase()));
+                    bancoIA.push(...filtradas);
+                    document.getElementById('status-cargando').innerText = `IA activa 🤖 (${bancoIA.length} preparadas)`;
+                }
+            } catch (e) {
+                console.error("Error al cargar tarjetas de IA:", e);
+                document.getElementById('status-cargando').innerText = "Modo offline (lista local) 📦";
+            } finally {
+                pidiendoIA = false;
+            }
+        }
+
+        function obtenerSiguienteTarjeta() {
+            // Si nos quedan 3 o menos en el saco de la IA, pedimos 10 más de inmediato
+            if (bancoIA.length <= 3) {
+                pedirLoteTarjetasIA();
+            }
+
+            let seleccion = null;
+
+            // Prioridad a la IA si tiene tarjetas disponibles
+            if (bancoIA.length > 0) {
+                const idx = Math.floor(Math.random() * bancoIA.length);
+                seleccion = bancoIA.splice(idx, 1)[0];
+            } 
+            // Si aún no ha vuelto la IA, usamos la lista de 100 locales
+            else {
+                const idx = Math.floor(Math.random() * tarjetasIniciales.length);
+                seleccion = tarjetasIniciales[idx];
+            }
+
+            if (seleccion) {
+                const palabraUpper = seleccion.palabra.toUpperCase();
+                if (!palabrasUsadas.includes(palabraUpper)) {
+                    palabrasUsadas.push(palabraUpper);
+                    if (palabrasUsadas.length > 150) palabrasUsadas.shift();
+                }
+            }
+
+            return seleccion;
+        }
+
+        // --- CONTROL DE TIEMPO Y FLUJO DE JUEGO ---
+
         function iniciarTimer() {
             clearInterval(timerInterval);
             tiempoRestante = 60;
@@ -212,48 +396,19 @@
                 if (tiempoRestante <= 0) {
                     clearInterval(timerInterval);
                     sonarBuzzer();
-                    alert("¡TIEMPO AGOTADO!");
+                    alert("¡TIEMPO AGOTADO! ⌛");
                 }
             }, 1000);
         }
 
-        async function nuevaTarjeta() {
+        function nuevaTarjeta() {
             initAudio();
-            document.getElementById('card').style.display = 'none';
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('loading').innerText = 'Generando tarjeta con IA... 🧠';
-
-            // Seleccionar temática al azar e inyectar semilla única
-            const tematicaAzar = categoriasTematicas[Math.floor(Math.random() * categoriasTematicas.length)];
-            const semilla = Date.now() + '_' + Math.floor(Math.random() * 10000);
-
-            const prompt = `Genera una tarjeta original para el juego Tabú en español.
-            Temática sugerida para inspirarte: ${tematicaAzar}.
-            Semilla de variación única: ${semilla}.
-            Sé creativo y evita palabras obvias o repetitivas.
+            const datos = obtenerSiguienteTarjeta();
             
-            Devuelve ÚNICAMENTE un JSON válido (sin Markdown, sin bloques de código) con este formato:
-            {
-              "palabra": "PALABRA CLAVE",
-              "prohibidas": ["PROHIBIDA 1", "PROHIBIDA 2", "PROHIBIDA 3", "PROHIBIDA 4"]
-            }`;
-
-            try {
-                const response = await fetch(URL_WORKER, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
-
-                const data = await response.json();
-                let rawText = data.candidates[0].content.parts[0].text;
-                rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-                
-                const jsonCard = JSON.parse(rawText);
-                renderizarTarjeta(jsonCard);
-
-            } catch (e) {
-                document.getElementById('loading').innerText = 'Error al cargar tarjeta. Reintenta.';
+            if (datos) {
+                renderizarTarjeta(datos);
+                document.getElementById('btn-siguiente').innerText = '¡Siguiente Tarjeta! ⏩';
+                iniciarTimer();
             }
         }
 
@@ -272,14 +427,6 @@
             });
 
             document.getElementById('card').style.display = 'block';
-            document.getElementById('btn-acierto').style.display = 'block';
-            document.getElementById('btn-falta').style.display = 'block';
-
-            iniciarTimer();
-        }
-
-        function acierto() {
-            nuevaTarjeta();
         }
     </script>
 </body>
