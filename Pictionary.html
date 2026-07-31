@@ -1,343 +1,503 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Juego de Palabras y Dibujo</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pictionary Express ✏️</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            touch-action: manipulation;
+        }
 
-    body {
-      background-color: #121212;
-      color: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      padding: 10px;
-    }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            min-height: 100vh;
+            min-height: 100svh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            user-select: none;
+            overflow-x: hidden;
+            gap: 10px;
+        }
 
-    /* BARRA SUPERIOR: Ajustada para scroll horizontal si no cabe */
-    .toolbar {
-      width: 100%;
-      max-width: 500px;
-      background-color: #1e1e1e;
-      border-radius: 16px;
-      padding: 8px 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      overflow-x: auto; /* Permite scroll horizontal si no cabe en móviles estrechos */
-      white-space: nowrap;
-      -webkit-overflow-scrolling: touch;
-      margin-bottom: 10px;
-    }
+        h1 {
+            font-size: clamp(1.2rem, 3.5vh, 1.8rem);
+            letter-spacing: 1.5px;
+            color: #ccc;
+            text-transform: uppercase;
+            text-align: center;
+        }
 
-    /* Ocultar barra de scroll estética */
-    .toolbar::-webkit-scrollbar {
-      display: none;
-    }
-    .toolbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
+        .card {
+            background: #1e1e1e;
+            border: 2px solid #333;
+            border-radius: 16px;
+            padding: 20px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            text-align: center;
+        }
 
-    .color-picker {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
+        .btn {
+            background: #2a2a2a;
+            color: #fff;
+            border: 2px solid #444;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+        }
 
-    .color-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      cursor: pointer;
-      transition: transform 0.1s ease;
-    }
+        .btn:active {
+            transform: scale(0.96);
+        }
 
-    .color-btn.active {
-      border-color: #ffffff;
-      transform: scale(1.15);
-      box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-    }
+        .btn-primary {
+            background: #ffffff;
+            color: #121212;
+            border: none;
+        }
 
-    .action-btn {
-      background-color: #d35400;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 10px;
-      font-weight: bold;
-      font-size: 13px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      flex-shrink: 0;
-    }
+        .btn-secondary {
+            background: #333;
+            color: #ffcc00;
+            border-color: #ffcc00;
+        }
 
-    .action-btn.clear-btn {
-      background-color: #c0392b;
-    }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
 
-    /* LIENZO DE DIBUJO */
-    .canvas-container {
-      width: 100%;
-      max-width: 500px;
-      aspect-ratio: 1 / 1.2;
-      background-color: #ffffff;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-      touch-action: none; /* Evita scroll de pantalla mientras se dibuja */
-    }
+        .palabra-display {
+            font-size: clamp(1.8rem, 5vh, 2.5rem);
+            font-weight: 800;
+            color: #ffcc00;
+            margin: 10px 0;
+            word-break: break-word;
+        }
 
-    canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
+        .canvas-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            max-width: 600px;
+            height: 100vh;
+            height: 100svh;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
 
-    /* BOTÓN INFERIOR */
-    .bottom-bar {
-      width: 100%;
-      max-width: 500px;
-      margin-top: 10px;
-    }
+        canvas {
+            background-color: #ffffff;
+            border-radius: 12px;
+            border: 3px solid #444;
+            cursor: crosshair;
+            touch-action: none;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            width: 100%;
+            flex-grow: 1;
+        }
 
-    .next-btn {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(180deg, #ffffff 0%, #e0e0e0 100%);
-      color: #000000;
-      border: none;
-      border-radius: 14px;
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: 1px;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    }
+        .controls-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            background: #1e1e1e;
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            gap: 6px;
+        }
 
-    .next-btn:active {
-      transform: scale(0.98);
-    }
-  </style>
+        .color-palette {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .color-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid #555;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        .color-btn.active {
+            transform: scale(1.15);
+            border-color: #ffffff;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-action {
+            color: #fff;
+            border: none;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-undo {
+            background: #d35400;
+        }
+
+        .btn-clear {
+            background: #c0392b;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: -5px;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- BARRA DE HERRAMIENTAS SUPERIOR -->
-  <div class="toolbar">
-    <div class="color-picker">
-      <button class="color-btn active" style="background-color: #000000;" data-color="#000000"></button>
-      <button class="color-btn" style="background-color: #e74c3c;" data-color="#e74c3c"></button>
-      <button class="color-btn" style="background-color: #2ecc71;" data-color="#2ecc71"></button>
-      <button class="color-btn" style="background-color: #3498db;" data-color="#3498db"></button>
-      <button class="color-btn" style="background-color: #f1c40f;" data-color="#f1c40f"></button>
+    <h1 id="main-title">Pictionary Express ✏️</h1>
+
+    <!-- PANTALLA 1: BOTÓN INICIAL -->
+    <div id="screen-start" class="card">
+        <p style="color: #aaa;">Listos para jugar en grupo o parejas casuales</p>
+        <button class="btn btn-primary" onclick="mostrarPalabra()">Nueva palabra</button>
+        <div id="status-cargando" class="status-badge">Preparando palabras... 🧠</div>
     </div>
-    <button class="action-btn" id="undoBtn">🔄 Deshacer</button>
-    <button class="action-btn clear-btn" id="clearBtn">🗑️ Borrar</button>
-  </div>
 
-  <!-- LIENZO -->
-  <div class="canvas-container">
-    <canvas id="paintCanvas"></canvas>
-  </div>
-
-  <!-- BOTÓN INFERIOR -->
-  <div class="bottom-bar">
-    <button class="next-btn" id="nextWordBtn">
-      <span id="wordDisplay">CARGANDO...</span> 🔄
-    </button>
-  </div>
-
-  <script>
-    // -------------------------------------------------------------
-    // 1. LISTA DE 100 PALABRAS DE INICIO (Instantáneas)
-    // -------------------------------------------------------------
-    const initialWords = [
-      "Sol", "Casa", "Árbol", "Coche", "Gato", "Perro", "Flor", "Luna", "Manzana", "Barco",
-      "Avión", "Reloj", "Estrella", "Pez", "Pájaro", "Silla", "Mesa", "Lápiz", "Libro", "Teléfono",
-      "Pelota", "Sombrero", "Zapatos", "Taza", "Cuchara", "Tenedor", "Cama", "Puerta", "Ventana", "Corazón",
-      "Llave", "Paraguas", "Campana", "Ojo", "Mano", "Pie", "Caramelo", "Tarta", "Helado", "Queso",
-      "Plátano", "Fresa", "Sombra", "Nube", "Lluvia", "Fuego", "Montaña", "Río", "Mar", "Isla",
-      "Castillo", "Corona", "Moneda", "Bolsa", "Botella", "Vaso", "Cuchillo", "Peine", "Cepillo", "Tijeras",
-      "Guitarra", "Tambor", "Pintura", "Pincel", "Caja", "Carta", "Regalo", "Globo", "Cometa", "Bicicleta",
-      "Tren", "Camión", "Autobús", "Semáforo", "Puente", "Escalera", "Martillo", "Clavo", "Sierra", "Anillo",
-      "Gafas", "Reloj", "Botón", "Cremallera", "Cinturón", "Calcetín", "Pantalón", "Camiseta", "Chaqueta", "Guante",
-      "Mariposa", "Abeja", "Araña", "Serpiente", "Rana", "Tortuga", "Caracol", "Ratón", "Elefante", "León"
-    ];
-
-    let currentWordList = [...initialWords];
-    let iaWordsLoaded = false;
-
-    // -------------------------------------------------------------
-    // 2. LÓGICA DE SELECCIÓN DE PALABRA
-    // -------------------------------------------------------------
-    const wordDisplay = document.getElementById("wordDisplay");
-    const nextWordBtn = document.getElementById("nextWordBtn");
-
-    function getRandomWord() {
-      if (currentWordList.length === 0) return "DIBUJO";
-      const randomIndex = Math.floor(Math.random() * currentWordList.length);
-      return currentWordList.splice(randomIndex, 1)[0].toUpperCase();
-    }
-
-    function showNextWord() {
-      const nextWord = getRandomWord();
-      wordDisplay.textContent = nextWord;
-      clearCanvas(); // Opcional: limpia el lienzo al cambiar de palabra
-    }
-
-    // Cargar palabra de inicio inmediatamente
-    showNextWord();
-
-    // -------------------------------------------------------------
-    // 3. SIMULACIÓN DE CARGA DE IA (Reemplaza la lista tras la respuesta)
-    // -------------------------------------------------------------
-    function fetchIAWords() {
-      // Aquí irá tu llamada real a la API de la IA.
-      // Cuando la IA responda con sus 20 palabras:
-      setTimeout(() => {
-        const iaWords = [
-          "Cohete", "Dinosaurio", "Submarino", "Astronauta", "Pirámide",
-          "Volcán", "Faro", "Robot", "Dragón", "Unicornio",
-          "Brújula", "Telescopio", "Microscopio", "Cactus", "Palmera",
-          "Mochila", "Brújula", "Sirena", "Extraterrestre", "Tesoro"
-        ];
+    <!-- PANTALLA 2: SELECCIÓN DE PALABRA -->
+    <div id="screen-word" class="card" style="display: none;">
+        <div style="font-size: 0.9rem; color: #888;">Tu palabra para dibujar es:</div>
+        <div id="word-display" class="palabra-display">---</div>
         
-        // Reemplazamos la lista por las 20 de la IA
-        currentWordList = iaWords;
-        iaWordsLoaded = true;
-        console.log("Palabras de la IA cargadas con éxito.");
-      }, 3000); // Simula 3 segundos de latencia de red/IA
-    }
+        <div class="btn-group">
+            <button class="btn btn-secondary" onclick="otraPalabra()">Otra 🔄</button>
+            <button class="btn btn-primary" onclick="empezarAProyectar()">Dibujar 🎨</button>
+        </div>
+    </div>
 
-    fetchIAWords();
+    <!-- PANTALLA 3: PAD DE DIBUJO MAXIMIZADO -->
+    <div id="screen-canvas" class="canvas-container">
+        <!-- Panel de Colores (incluye Goma) + Deshacer + Borrar -->
+        <div class="controls-panel">
+            <div class="color-palette">
+                <div class="color-btn active" style="background-color: #000000;" onclick="setColor('#000000', this)"></div>
+                <div class="color-btn" style="background-color: #e74c3c;" onclick="setColor('#e74c3c', this)"></div>
+                <div class="color-btn" style="background-color: #2ecc71;" onclick="setColor('#2ecc71', this)"></div>
+                <div class="color-btn" style="background-color: #3498db;" onclick="setColor('#3498db', this)"></div>
+                <div class="color-btn" style="background-color: #f1c40f;" onclick="setColor('#f1c40f', this)"></div>
+                <!-- Goma de borrar incorporada como color blanco -->
+                <div class="color-btn" style="background-color: #ffffff; color: #000;" title="Goma" onclick="setColor('#ffffff', this)">🧹</div>
+            </div>
 
-    nextWordBtn.addEventListener("click", showNextWord);
+            <div class="action-btns">
+                <button class="btn-action btn-undo" onclick="deshacerUltimoTrazo()">↩ Deshacer</button>
+                <button class="btn-action btn-clear" onclick="limpiarLienzo()">Borrar</button>
+            </div>
+        </div>
 
-    // -------------------------------------------------------------
-    // 4. LÓGICA DEL CANVAS Y DIBUJO
-    // -------------------------------------------------------------
-    const canvas = document.getElementById("paintCanvas");
-    const ctx = canvas.getContext("2d");
-    let isDrawing = false;
-    let currentColor = "#000000";
-    let paths = []; // Historial para el botón 'Deshacer'
-    let currentPath = [];
+        <!-- El Lienzo Canvas -->
+        <canvas id="paint-pad"></canvas>
 
-    function resizeCanvas() {
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * window.devicePixelRatio;
-      canvas.height = rect.height * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-      redrawCanvas();
-    }
+        <button class="btn btn-primary" onclick="reiniciarJuego()">Nueva palabra 🔄</button>
+    </div>
 
-    window.addEventListener("resize", resizeCanvas);
+    <script>
+        const URL_WORKER = 'https://generador-impro.raul-grigelmo3.workers.dev';
 
-    function startDrawing(e) {
-      isDrawing = true;
-      const pos = getPos(e);
-      currentPath = [{ x: pos.x, y: pos.y, color: currentColor }];
-      ctx.beginPath();
-      ctx.moveTo(pos.x, pos.y);
-      ctx.strokeStyle = currentColor;
-      ctx.lineWidth = 4;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-    }
+        // Lotes de palabras e historial para no repetir
+        let bancoPalabras = [];
+        let palabrasUsadas = [];
+        let pidiendoIA = false;
+        let palabraSeleccionada = "";
 
-    function draw(e) {
-      if (!isDrawing) return;
-      const pos = getPos(e);
-      currentPath.push({ x: pos.x, y: pos.y, color: currentColor });
-      ctx.lineTo(pos.x, pos.y);
-      ctx.stroke();
-    }
+        // Variables del Canvas
+        const canvas = document.getElementById('paint-pad');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        let dibujando = false;
+        let colorActual = '#000000';
+        let grosorActual = 3;
 
-    function stopDrawing() {
-      if (isDrawing) {
-        isDrawing = false;
-        paths.push(currentPath);
-        currentPath = [];
-      }
-    }
+        // Historial de trazos para la función Deshacer
+        let historialTrazos = [];
 
-    function getPos(e) {
-      const rect = canvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return {
-        x: clientX - rect.left,
-        y: clientY - rect.top
-      };
-    }
+        window.addEventListener('DOMContentLoaded', () => {
+            configurarEventosDibujo();
+            setTimeout(pedirLotePalabrasIA, 100);
+        });
 
-    function clearCanvas() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      paths = [];
-    }
+        // Reajusta el canvas sin perder el dibujo actual al rotar el móvil
+        function ajustarResolucionCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            
+            // Si el lienzo ya tenía contenido, creamos una copia temporal
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            if (canvas.width > 0 && canvas.height > 0) {
+                tempCtx.drawImage(canvas, 0, 0);
+            }
 
-    function redrawCanvas() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      paths.forEach(path => {
-        if (path.length < 2) return;
-        ctx.beginPath();
-        ctx.moveTo(path[0].x, path[0].y);
-        ctx.strokeStyle = path[0].color;
-        ctx.lineWidth = 4;
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
-        for (let i = 1; i < path.length; i++) {
-          ctx.lineTo(path[i].x, path[i].y);
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+
+            // Rellenar fondo blanco
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Redibujar la imagen guardada
+            if (tempCanvas.width > 0 && tempCanvas.height > 0) {
+                ctx.drawImage(tempCanvas, 0, 0);
+            }
         }
-        ctx.stroke();
-      });
-    }
 
-    // Eventos Mouse y Touch
-    canvas.addEventListener("mousedown", startDrawing);
-    canvas.addEventListener("mousemove", draw);
-    canvas.addEventListener("mouseup", stopDrawing);
-    canvas.addEventListener("mouseleave", stopDrawing);
+        window.addEventListener('resize', () => {
+            if (document.getElementById('screen-canvas').style.display === 'flex') {
+                ajustarResolucionCanvas();
+            }
+        });
 
-    canvas.addEventListener("touchstart", (e) => { e.preventDefault(); startDrawing(e); });
-    canvas.addEventListener("touchmove", (e) => { e.preventDefault(); draw(e); });
-    canvas.addEventListener("touchend", stopDrawing);
+        // --- LÓGICA DE IA CON MEMORIA DE EXCLUSIÓN ---
 
-    // Selección de Color
-    document.querySelectorAll(".color-btn").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        document.querySelectorAll(".color-btn").forEach(b => b.classList.remove("active"));
-        e.target.classList.add("active");
-        currentColor = e.target.getAttribute("data-color");
-      });
-    });
+        async function pedirLotePalabrasIA() {
+            if (pidiendoIA) return;
+            pidiendoIA = true;
 
-    // Deshacer y Borrar
-    document.getElementById("undoBtn").addEventListener("click", () => {
-      paths.pop();
-      redrawCanvas();
-    });
+            document.getElementById('status-cargando').innerText = "Conectando con la IA... 🧠";
 
-    document.getElementById("clearBtn").addEventListener("click", clearCanvas);
+            let exclusionTexto = "";
+            if (Array.isArray(palabrasUsadas) && palabrasUsadas.length > 0) {
+                exclusionTexto = `NO utilices NINGUNA de las siguientes palabras ya usadas: ${palabrasUsadas.join(', ')}.`;
+            }
 
-    // Inicializar tamaño
-    resizeCanvas();
-  </script>
+            const prompt = `Genera un lote de 20 palabras o conceptos variados e intuitivos para jugar al Pictionary (objetos, animales, profesiones, acciones o lugares sencillos de representar visualmente).
+            ${exclusionTexto}
+            
+            Devuelve ÚNICAMENTE un array JSON válido de cadenas de texto (sin Markdown, sin explicaciones):
+            ["Palabra 1", "Palabra 2", "Palabra 3", ...]`;
+
+            try {
+                const response = await fetch(URL_WORKER, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+                    throw new Error("Respuesta de IA con estructura inesperada");
+                }
+
+                let rawText = data.candidates[0].content.parts[0].text;
+                rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                
+                const nuevasPalabras = JSON.parse(rawText);
+                
+                if (Array.isArray(nuevasPalabras) && nuevasPalabras.length > 0) {
+                    const filtradas = nuevasPalabras.filter(p => !palabrasUsadas.includes(p));
+                    bancoPalabras.push(...filtradas);
+                    console.log("Palabras cargadas con éxito:", bancoPalabras);
+                    document.getElementById('status-cargando').innerText = `Palabras listas: ${bancoPalabras.length}`;
+                } else {
+                    throw new Error("El JSON recibido no es un array válido");
+                }
+            } catch (e) {
+                console.error("Error cargando lote de palabras desde la IA:", e);
+                document.getElementById('status-cargando').innerText = "Servicio listo (modo contingencia activo)";
+            } finally {
+                pidiendoIA = false;
+            }
+        }
+
+        function registrarPalabraUsada(palabra) {
+            if (palabra && !palabrasUsadas.includes(palabra)) {
+                palabrasUsadas.push(palabra);
+                if (palabrasUsadas.length > 200) {
+                    palabrasUsadas.shift();
+                }
+            }
+        }
+
+        function obtenerSiguientePalabra() {
+            if (bancoPalabras.length <= 5) {
+                pedirLotePalabrasIA();
+            }
+
+            let seleccion = "";
+            if (bancoPalabras.length > 0) {
+                seleccion = bancoPalabras.shift();
+            } else {
+                const respaldo = ["Mochila", "Faro", "Sombrilla", "Astronauta", "Guitarra", "Pirata", "Reloj", "Telescopio", "Canguro"];
+                seleccion = respaldo[Math.floor(Math.random() * respaldo.length)];
+            }
+
+            registrarPalabraUsada(seleccion);
+            return seleccion;
+        }
+
+        // --- FLUJO DE LA INTERFAZ ---
+
+        function mostrarPalabra() {
+            palabraSeleccionada = obtenerSiguientePalabra();
+            document.getElementById('word-display').innerText = palabraSeleccionada;
+            
+            document.getElementById('main-title').style.display = 'block';
+            document.getElementById('screen-start').style.display = 'none';
+            document.getElementById('screen-word').style.display = 'flex';
+        }
+
+        function otraPalabra() {
+            palabraSeleccionada = obtenerSiguientePalabra();
+            document.getElementById('word-display').innerText = palabraSeleccionada;
+        }
+
+        function empezarAProyectar() {
+            document.getElementById('main-title').style.display = 'none';
+            document.getElementById('screen-word').style.display = 'none';
+            document.getElementById('screen-canvas').style.display = 'flex';
+            
+            setTimeout(() => {
+                ajustarResolucionCanvas();
+                limpiarLienzo();
+            }, 50);
+        }
+
+        function reiniciarJuego() {
+            limpiarLienzo();
+            document.getElementById('screen-canvas').style.display = 'none';
+            mostrarPalabra();
+        }
+
+        // --- DIBUJO EN CANVAS Y DESHACER ---
+
+        function configurarEventosDibujo() {
+            canvas.addEventListener('mousedown', empezarDibujo);
+            canvas.addEventListener('mousemove', dibujar);
+            canvas.addEventListener('mouseup', detenerDibujo);
+            canvas.addEventListener('mouseleave', detenerDibujo);
+
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                empezarDibujo(e.touches[0]);
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                dibujar(e.touches[0]);
+            });
+
+            canvas.addEventListener('touchend', detenerDibujo);
+        }
+
+        function guardarEstado() {
+            if (historialTrazos.length >= 25) {
+                historialTrazos.shift();
+            }
+            historialTrazos.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        }
+
+        function deshacerUltimoTrazo() {
+            if (historialTrazos.length > 0) {
+                const ultimoEstado = historialTrazos.pop();
+                ctx.putImageData(ultimoEstado, 0, 0);
+            }
+        }
+
+        function obtenerPosicion(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            return {
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
+            };
+        }
+
+        function empezarDibujo(e) {
+            guardarEstado();
+            dibujando = true;
+            const pos = obtenerPosicion(e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+            // Dibuja un punto si solo se hace un tap rápido
+            ctx.arc(pos.x, pos.y, (colorActual === '#ffffff' ? 12 : grosorActual) / 2, 0, Math.PI * 2);
+            ctx.fillStyle = colorActual;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        }
+
+        function dibujar(e) {
+            if (!dibujando) return;
+            const pos = obtenerPosicion(e);
+
+            ctx.lineTo(pos.x, pos.y);
+            ctx.strokeStyle = colorActual;
+            // Si es goma (blanco), usamos un grosor mayor
+            ctx.lineWidth = colorActual === '#ffffff' ? 24 : grosorActual;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        }
+
+        function detenerDibujo() {
+            if (dibujando) {
+                ctx.closePath();
+                dibujando = false;
+            }
+        }
+
+        function limpiarLienzo() {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            historialTrazos = [];
+        }
+
+        function setColor(color, elemento) {
+            colorActual = color;
+            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
+            elemento.classList.add('active');
+        }
+    </script>
 </body>
 </html>
