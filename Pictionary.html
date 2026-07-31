@@ -249,10 +249,10 @@
         // Historial de trazos para la función Deshacer (Ctrl+Z)
         let historialTrazos = [];
 
-        window.onload = function() {
-            pedirLotePalabrasIA();
+        window.addEventListener('DOMContentLoaded', () => {
             configurarEventosDibujo();
-        };
+            setTimeout(pedirLotePalabrasIA, 100);
+        });
 
         function ajustarResolucionCanvas() {
             const rect = canvas.getBoundingClientRect();
@@ -261,15 +261,18 @@
             limpiarLienzo();
         }
 
-        // --- LÓGICA DE IA CON MEMORIA REFORZADA ---
+        // --- LÓGICA DE IA CON MEMORIA DE EXCLUSIÓN ---
 
         async function pedirLotePalabrasIA() {
             if (pidiendoIA) return;
             pidiendoIA = true;
 
-            const exclusionTexto = palabrasUsadas.length > 0 
-                ? `NO utilices NINGUNA de las siguientes palabras ya usadas: ${JSON.stringify(palabrasUsadas)}.`
-                : '';
+            document.getElementById('status-cargando').innerText = "Conectando con la IA... 🧠";
+
+            let exclusionTexto = "";
+            if (Array.isArray(palabrasUsadas) && palabrasUsadas.length > 0) {
+                exclusionTexto = `NO utilices NINGUNA de las siguientes palabras ya usadas: ${palabrasUsadas.join(', ')}.`;
+            }
 
             const prompt = `Genera un lote de 20 palabras o conceptos variados e intuitivos para jugar al Pictionary (objetos, animales, profesiones, acciones o lugares sencillos de representar visualmente).
             ${exclusionTexto}
@@ -284,6 +287,181 @@
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
 
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+
                 const data = await response.json();
+                
+                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+                    throw new Error("Respuesta de IA con estructura inesperada");
+                }
+
                 let rawText = data.candidates[0].content.parts[0].text;
-                rawText = rawText.replace(/```json/g, '').replace(/
+                rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                
+                const nuevasPalabras = JSON.parse(rawText);
+                
+                if (Array.isArray(nuevasPalabras) && nuevasPalabras.length > 0) {
+                    const filtradas = nuevasPalabras.filter(p => !palabrasUsadas.includes(p));
+                    bancoPalabras.push(...filtradas);
+                    console.log("Palabras cargadas con éxito:", bancoPalabras);
+                    document.getElementById('status-cargando').innerText = `Palabras listas: ${bancoPalabras.length}`;
+                } else {
+                    throw new Error("El JSON recibido no es un array válido");
+                }
+            } catch (e) {
+                console.error("Error cargando lote de palabras desde la IA:", e);
+                document.getElementById('status-cargando').innerText = "Servicio listo (modo contingencia activo)";
+            } finally {
+                pidiendoIA = false;
+            }
+        }
+
+        function registrarPalabraUsada(palabra) {
+            if (palabra && !palabrasUsadas.includes(palabra)) {
+                palabrasUsadas.push(palabra);
+                if (palabrasUsadas.length > 200) {
+                    palabrasUsadas.shift();
+                }
+            }
+        }
+
+        function obtenerSiguientePalabra() {
+            if (bancoPalabras.length <= 5) {
+                pedirLotePalabrasIA();
+            }
+
+            let seleccion = "";
+            if (bancoPalabras.length > 0) {
+                seleccion = bancoPalabras.shift();
+            } else {
+                const respaldo = ["Mochila", "Faro", "Sombrilla", "Astronauta", "Guitarra", "Pirata", "Reloj", "Telescopio", "Canguro"];
+                seleccion = respaldo[Math.floor(Math.random() * respaldo.length)];
+            }
+
+            registrarPalabraUsada(seleccion);
+            return seleccion;
+        }
+
+        // --- FLUJO DE LA INTERFAZ ---
+
+        function mostrarPalabra() {
+            palabraSeleccionada = obtenerSiguientePalabra();
+            document.getElementById('word-display').innerText = palabraSeleccionada;
+            
+            document.getElementById('main-title').style.display = 'block';
+            document.getElementById('screen-start').style.display = 'none';
+            document.getElementById('screen-word').style.display = 'flex';
+        }
+
+        function otraPalabra() {
+            palabraSeleccionada = obtenerSiguientePalabra();
+            document.getElementById('word-display').innerText = palabraSeleccionada;
+        }
+
+        function empezarAProyectar() {
+            document.getElementById('main-title').style.display = 'none';
+            document.getElementById('screen-word').style.display = 'none';
+            document.getElementById('screen-canvas').style.display = 'flex';
+            
+            setTimeout(() => {
+                ajustarResolucionCanvas();
+            }, 50);
+        }
+
+        function reiniciarJuego() {
+            limpiarLienzo();
+            document.getElementById('screen-canvas').style.display = 'none';
+            mostrarPalabra();
+        }
+
+        // --- DIBUJO EN CANVAS Y DESHACER ---
+
+        function configurarEventosDibujo() {
+            canvas.addEventListener('mousedown', empezarDibujo);
+            canvas.addEventListener('mousemove', dibujar);
+            canvas.addEventListener('mouseup', detenerDibujo);
+            canvas.addEventListener('mouseleave', detenerDibujo);
+
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                empezarDibujo(e.touches[0]);
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                dibujar(e.touches[0]);
+            });
+
+            canvas.addEventListener('touchend', detenerDibujo);
+        }
+
+        function guardarEstado() {
+            if (historialTrazos.length >= 25) {
+                historialTrazos.shift();
+            }
+            historialTrazos.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        }
+
+        function deshacerUltimoTrazo() {
+            if (historialTrazos.length > 0) {
+                const ultimoEstado = historialTrazos.pop();
+                ctx.putImageData(ultimoEstado, 0, 0);
+            } else {
+                limpiarLienzo();
+            }
+        }
+
+        function obtenerPosicion(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            return {
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
+            };
+        }
+
+        function empezarDibujo(e) {
+            guardarEstado();
+            dibujando = true;
+            const pos = obtenerPosicion(e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        }
+
+        function dibujar(e) {
+            if (!dibujando) return;
+            const pos = obtenerPosicion(e);
+
+            ctx.lineTo(pos.x, pos.y);
+            ctx.strokeStyle = colorActual;
+            ctx.lineWidth = GROSOR_FINO;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        }
+
+        function detenerDibujo() {
+            if (dibujando) {
+                ctx.closePath();
+                dibujando = false;
+            }
+        }
+
+        function limpiarLienzo() {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            historialTrazos = [];
+        }
+
+        function setColor(color, elemento) {
+            colorActual = color;
+            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
+            elemento.classList.add('active');
+        }
+    </script>
+</body>
+</html>
