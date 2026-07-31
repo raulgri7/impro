@@ -130,17 +130,18 @@
             padding: 8px 12px;
             border-radius: 12px;
             border: 1px solid #333;
+            gap: 6px;
         }
 
         .color-palette {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: center;
         }
 
         .color-btn {
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             border: 2px solid #555;
             cursor: pointer;
@@ -153,15 +154,27 @@
             box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
         }
 
-        .btn-clear {
-            background: #c0392b;
+        .action-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-action {
             color: #fff;
             border: none;
-            padding: 8px 14px;
+            padding: 8px 10px;
             border-radius: 8px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             cursor: pointer;
             font-weight: bold;
+        }
+
+        .btn-undo {
+            background: #d35400;
+        }
+
+        .btn-clear {
+            background: #c0392b;
         }
 
         .status-badge {
@@ -195,7 +208,7 @@
 
     <!-- PANTALLA 3: PAD DE DIBUJO MAXIMIZADO -->
     <div id="screen-canvas" class="canvas-container">
-        <!-- Panel de 5 colores + borrar -->
+        <!-- Panel de 5 colores + Deshacer + Borrar -->
         <div class="controls-panel">
             <div class="color-palette">
                 <div class="color-btn active" style="background-color: #000000;" onclick="setColor('#000000', this)"></div>
@@ -205,7 +218,10 @@
                 <div class="color-btn" style="background-color: #f1c40f;" onclick="setColor('#f1c40f', this)"></div>
             </div>
 
-            <button class="btn-clear" onclick="limpiarLienzo()">Borrar</button>
+            <div class="action-btns">
+                <button class="btn-action btn-undo" onclick="deshacerUltimoTrazo()">↩ Deshacer</button>
+                <button class="btn-action btn-clear" onclick="limpiarLienzo()">Borrar</button>
+            </div>
         </div>
 
         <!-- El Lienzo Canvas -->
@@ -228,14 +244,16 @@
         const ctx = canvas.getContext('2d');
         let dibujando = false;
         let colorActual = '#000000';
-        const GROSOR_FINO = 3; // Grosor siempre fijo
+        const GROSOR_FINO = 3;
+
+        // Historial de trazos para la función Deshacer (Ctrl+Z)
+        let historialTrazos = [];
 
         window.onload = function() {
             pedirLotePalabrasIA();
             configurarEventosDibujo();
         };
 
-        // Redimensiona el lienzo ajustándolo al contenedor visible
         function ajustarResolucionCanvas() {
             const rect = canvas.getBoundingClientRect();
             canvas.width = rect.width;
@@ -243,7 +261,7 @@
             limpiarLienzo();
         }
 
-        // --- LÓGICA DE IA CON MEMORIA DE PALABRAS USADAS ---
+        // --- LÓGICA DE IA CON MEMORIA REFORZADA ---
 
         async function pedirLotePalabrasIA() {
             if (pidiendoIA) return;
@@ -268,151 +286,4 @@
 
                 const data = await response.json();
                 let rawText = data.candidates[0].content.parts[0].text;
-                rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-                
-                const nuevasPalabras = JSON.parse(rawText);
-                if (Array.isArray(nuevasPalabras)) {
-                    // Filtrar por si acaso viniera alguna repetida
-                    const filtradas = nuevasPalabras.filter(p => !palabrasUsadas.includes(p));
-                    bancoPalabras.push(...filtradas);
-                    document.getElementById('status-cargando').innerText = `Palabras listas: ${bancoPalabras.length}`;
-                }
-            } catch (e) {
-                console.error("Error cargando lote de palabras:", e);
-                document.getElementById('status-cargando').innerText = "Servicio listo (modo contingencia activo)";
-            } finally {
-                pidiendoIA = false;
-            }
-        }
-
-        function registrarPalabraUsada(palabra) {
-            if (!palabrasUsadas.includes(palabra)) {
-                palabrasUsadas.push(palabra);
-                // Controlamos el límite máximo de 200 palabras guardadas
-                if (palabrasUsadas.length > 200) {
-                    palabrasUsadas.shift();
-                }
-            }
-        }
-
-        function obtenerSiguientePalabra() {
-            if (bancoPalabras.length <= 5) {
-                pedirLotePalabrasIA();
-            }
-
-            let seleccion = "";
-            if (bancoPalabras.length > 0) {
-                seleccion = bancoPalabras.shift();
-            } else {
-                const respaldo = ["Mochila", "Faro", "Sombrilla", "Astronauta", "Guitarra", "Pirata"];
-                seleccion = respaldo[Math.floor(Math.random() * respaldo.length)];
-            }
-
-            registrarPalabraUsada(seleccion);
-            return seleccion;
-        }
-
-        // --- FLUJO DE LA INTERFAZ ---
-
-        function mostrarPalabra() {
-            palabraSeleccionada = obtenerSiguientePalabra();
-            document.getElementById('word-display').innerText = palabraSeleccionada;
-            
-            document.getElementById('main-title').style.display = 'block';
-            document.getElementById('screen-start').style.display = 'none';
-            document.getElementById('screen-word').style.display = 'flex';
-        }
-
-        function otraPalabra() {
-            palabraSeleccionada = obtenerSiguientePalabra();
-            document.getElementById('word-display').innerText = palabraSeleccionada;
-        }
-
-        function empezarAProyectar() {
-            // Ocultamos el título principal para ganar todo el espacio en pantalla
-            document.getElementById('main-title').style.display = 'none';
-            document.getElementById('screen-word').style.display = 'none';
-            document.getElementById('screen-canvas').style.display = 'flex';
-            
-            setTimeout(() => {
-                ajustarResolucionCanvas();
-            }, 50);
-        }
-
-        function reiniciarJuego() {
-            limpiarLienzo();
-            document.getElementById('screen-canvas').style.display = 'none';
-            mostrarPalabra();
-        }
-
-        // --- DIBUJO EN CANVAS (TRAZO FINO Y SENSITIVO) ---
-
-        function configurarEventosDibujo() {
-            canvas.addEventListener('mousedown', empezarDibujo);
-            canvas.addEventListener('mousemove', dibujar);
-            canvas.addEventListener('mouseup', detenerDibujo);
-            canvas.addEventListener('mouseleave', detenerDibujo);
-
-            canvas.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                empezarDibujo(e.touches[0]);
-            });
-
-            canvas.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                dibujar(e.touches[0]);
-            });
-
-            canvas.addEventListener('touchend', detenerDibujo);
-        }
-
-        function obtenerPosicion(e) {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-
-            return {
-                x: (e.clientX - rect.left) * scaleX,
-                y: (e.clientY - rect.top) * scaleY
-            };
-        }
-
-        function empezarDibujo(e) {
-            dibujando = true;
-            const pos = obtenerPosicion(e);
-            ctx.beginPath();
-            ctx.moveTo(pos.x, pos.y);
-        }
-
-        function dibujar(e) {
-            if (!dibujando) return;
-            const pos = obtenerPosicion(e);
-
-            ctx.lineTo(pos.x, pos.y);
-            ctx.strokeStyle = colorActual;
-            ctx.lineWidth = GROSOR_FINO;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.stroke();
-        }
-
-        function detenerDibujo() {
-            if (dibujando) {
-                ctx.closePath();
-                dibujando = false;
-            }
-        }
-
-        function limpiarLienzo() {
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-
-        function setColor(color, elemento) {
-            colorActual = color;
-            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
-            elemento.classList.add('active');
-        }
-    </script>
-</body>
-</html>
+                rawText = rawText.replace(/```json/g, '').replace(/
