@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meowdoku</title>
+  <style>
+    :root {
+      --bg: #f8f6f0;
+      --card-bg: #ffffff;
+      --text: #2d3748;
+      --accent: #8b5cf6;
+      --accent-hover: #7c3aed;
+      --danger: #ef4444;
+      --border: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1.5rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin-top: 0.25rem;
+    }
+
+    .config-panel {
+      background: var(--card-bg);
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      margin-bottom: 1.5rem;
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .input-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .input-group input, .input-group select {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .input-group input:focus {
+      border-color: var(--accent);
+    }
+
+    .controls-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    button {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      flex: 1;
+    }
+
+    button:hover { background-color: var(--accent-hover); }
+    button:active { transform: scale(0.98); }
+
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      width: 100%;
+      max-width: 450px;
+    }
+
+    .tool-bar {
+      display: flex;
+      gap: 0.5rem;
+      background: var(--card-bg);
+      padding: 0.4rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .tool-btn {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid transparent;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.9rem;
+      border-radius: 6px;
+    }
+
+    .tool-btn.active {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      font-weight: bold;
+    }
+
+    #board {
+      display: grid;
+      gap: 3px;
+      background: #334155;
+      padding: 4px;
+      border-radius: 12px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .cell {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.15s, transform 0.05s;
+      position: relative;
+    }
+
+    .cell:active { transform: scale(0.95); }
+
+    .cell.error {
+      animation: pulse-red 0.8s infinite alternate;
+      box-shadow: inset 0 0 0 3px var(--danger);
+    }
+
+    .cell.x-mark::after {
+      content: "✕";
+      font-size: 1.1rem;
+      color: #64748b;
+      font-weight: 800;
+    }
+
+    .status-msg {
+      font-weight: 600;
+      font-size: 1rem;
+      min-height: 1.5rem;
+      text-align: center;
+    }
+
+    .status-msg.win { color: #16a34a; }
+    .status-msg.error-msg { color: var(--danger); }
+
+    @keyframes pulse-red {
+      from { background-color: #fca5a5; }
+      to { background-color: #ef4444; }
+    }
+
+    @media (max-width: 480px) {
+      .cell { font-size: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🐱 Meowdoku</h1>
+    <div class="subtitle">Un gato por fila, columna y región de color. ¡Sin tocarse!</div>
+  </header>
+
+  <section class="config-panel">
+    <div class="input-group">
+      <label for="workerUrl">URL de tu Worker</label>
+      <input type="url" id="workerUrl" placeholder="https://tu-worker.workers.dev" value="">
+    </div>
+
+    <div class="controls-row">
+      <div class="input-group" style="flex: 1;">
+        <label for="gridSize">Tamaño</label>
+        <select id="gridSize">
+          <option value="5">5 x 5</option>
+          <option value="6" selected>6 x 6</option>
+          <option value="7">7 x 7</option>
+          <option value="8">8 x 8</option>
+        </select>
+      </div>
+      <button id="btnFetch" style="margin-top: auto;">✨ Generar Nivel</button>
+    </div>
+  </section>
+
+  <main class="game-container">
+    <div class="tool-bar">
+      <button class="tool-btn active" id="toolCat">🐱 Gato (Click izq)</button>
+      <button class="tool-btn" id="toolX">❌ Marca (Click der)</button>
+    </div>
+
+    <div class="status-msg" id="status">Presiona "Generar Nivel" para empezar</div>
+
+    <div id="board"></div>
+
+    <div style="display: flex; gap: 0.5rem; width: 100%;">
+      <button id="btnReset" style="background-color: #64748b;">Reiniciar</button>
+      <button id="btnCheck" style="background-color: #059669;">Validar</button>
+    </div>
+  </main>
+
+  <script>
+    // Paleta de colores suaves para las regiones
+    const REGION_COLORS = [
+      '#fef08a', '#bbf7d0', '#bfdbfe', '#fbcfe8',
+      '#fed7aa', '#ddd6fe', '#c7d2fe', '#fecdd3'
+    ];
+
+    let N = 6;
+    let regions = [];
+    let state = []; // 0: vacía, 1: X, 2: Gato
+    let currentTool = 2; // 2 = Gato, 1 = X
+
+    const boardEl = document.getElementById('board');
+    const statusEl = document.getElementById('status');
+    const workerUrlInput = document.getElementById('workerUrl');
+    const gridSizeSelect = document.getElementById('gridSize');
+
+    // Cargar URL guardada si existe
+    if (localStorage.getItem('meowdoku_worker_url')) {
+      workerUrlInput.value = localStorage.getItem('meowdoku_worker_url');
+    }
+
+    workerUrlInput.addEventListener('change', () => {
+      localStorage.setItem('meowdoku_worker_url', workerUrlInput.value.trim());
+    });
+
+    // Herramientas de marcado táctil/móvil
+    document.getElementById('toolCat').addEventListener('click', (e) => {
+      currentTool = 2;
+      updateToolUI();
+    });
+    document.getElementById('toolX').addEventListener('click', (e) => {
+      currentTool = 1;
+      updateToolUI();
+    });
+
+    function updateToolUI() {
+      document.getElementById('toolCat').classList.toggle('active', currentTool === 2);
+      document.getElementById('toolX').classList.toggle('active', currentTool === 1);
+    }
+
+    // Petición al Worker o Fallback Local
+    document.getElementById('btnFetch').addEventListener('click', async () => {
+      N = parseInt(gridSizeSelect.value, 10);
+      const url = workerUrlInput.value.trim();
+
+      statusEl.className = 'status-msg';
+      statusEl.innerText = 'Cargando nivel...';
+
+      if (url) {
+        try {
+          const prompt = `Genera un juego Meowdoku/Queens de tamaño ${N}x${N}. Devuelve ÚNICAMENTE un objeto JSON válido sin formato Markdown adicional, con este esquema: {"regions": [[0,0,1...], ...]}, donde regions es una matriz ${N}x${N} de enteros de 0 a ${N-1} indicando la región de color de cada casilla. Asegúrate de que el tablero tenga solución válida con exactamente un gato por fila, columna y región sin que se toquen ni en diagonal.`;
+
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: prompt, contents: prompt })
+          });
+
+          const data = await response.json();
+          let jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text || data.response || data.text || JSON.stringify(data);
+          
+          // Limpiar delimitadores markdown si el modelo los incluyó
+          jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
+          const parsed = JSON.parse(jsonText);
+
+          if (parsed.regions && parsed.regions.length === N) {
+            regions = parsed.regions;
+            initGame();
+            statusEl.innerText = '¡Nivel cargado desde tu Worker!';
+            return;
+          }
+        } catch (err) {
+          console.warn('Error conectando con Worker, usando generador local:', err);
+        }
+      }
+
+      // Generador de respaldo local si el Worker no está configurado o falla
+      generateFallbackLevel();
+      initGame();
+      statusEl.innerText = url ? 'Worker no respondió. Se generó nivel local.' : '¡Nivel local listo!';
+    });
+
+    function generateFallbackLevel() {
+      // Genera regiones aleatorias agrupadas por bloques simples
+      regions = Array(N).fill(null).map(() => Array(N).fill(0));
+      for (let r = 0; r < N; r++) {
+        for (let c = 0; c < N; c++) {
+          regions[r][c] = Math.floor((r * N + c) / N);
+        }
+      }
+    }
+
+    function initGame() {
+      state = Array(N).fill(null).map(() => Array(N).fill(0));
+      renderBoard();
+    }
+
+    function renderBoard() {
+      boardEl.style.gridTemplateColumns = `repeat(${N}, 1fr)`;
+      boardEl.style.width = `${Math.min(N * 55, 420)}px`;
+      boardEl.innerHTML = '';
+
+      for (let r = 0; r < N; r++) {
+        for (let c = 0; c < N; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          const regionId = regions[r][c] % REGION_COLORS.length;
+          cell.style.backgroundColor = REGION_COLORS[regionId];
+
+          cell.addEventListener('click', () => handleCellClick(r, c));
+          cell.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            handleCellRightClick(r, c);
+          });
+
+          boardEl.appendChild(cell);
+        }
+      }
+      updateBoardView();
+    }
+
+    function handleCellClick(r, c) {
+      if (currentTool === 2) {
+        // Toggle gato
+        state[r][c] = state[r][c] === 2 ? 0 : 2;
+      } else {
+        // Toggle marca X
+        state[r][c] = state[r][c] === 1 ? 0 : 1;
+      }
+      updateBoardView();
+      validateBoard(false);
+    }
+
+    function handleCellRightClick(r, c) {
+      // Clic derecho siempre conmuta X
+      state[r][c] = state[r][c] === 1 ? 0 : 1;
+      updateBoardView();
+      validateBoard(false);
+    }
+
+    function updateBoardView() {
+      const cells = boardEl.children;
+      for (let r = 0; r < N; r++) {
+        for (let c = 0; c < N; c++) {
+          const idx = r * N + c;
+          const cell = cells[idx];
+          const val = state[r][c];
+
+          cell.innerText = val === 2 ? '🐱' : '';
+          cell.classList.toggle('x-mark', val === 1);
+        }
+      }
+    }
+
+    function validateBoard(showSuccessModal = true) {
+      const cells = boardEl.children;
+      let hasErrors = false;
+      let catCount = 0;
+
+      // Limpiar marcas de error previas
+      for (let i = 0; i < cells.length; i++) {
+        cells[i].classList.remove('error');
+      }
+
+      const cats = [];
+      for (let r = 0; r < N; r++) {
+        for (let c = 0; c < N; c++) {
+          if (state[r][c] === 2) {
+            cats.push({ r, c, region: regions[r][c] });
+            catCount++;
+          }
+        }
+      }
+
+      // Validar reglas entre gatos
+      for (let i = 0; i < cats.length; i++) {
+        for (let j = i + 1; j < cats.length; j++) {
+          const c1 = cats[i];
+          const c2 = cats[j];
+
+          const sameRow = c1.r === c2.r;
+          const sameCol = c1.c === c2.c;
+          const sameRegion = c1.region === c2.region;
+          const isAdjacent = Math.abs(c1.r - c2.r) <= 1 && Math.abs(c1.c - c2.c) <= 1;
+
+          if (sameRow || sameCol || sameRegion || isAdjacent) {
+            hasErrors = true;
+            cells[c1.r * N + c1.c].classList.add('error');
+            cells[c2.r * N + c2.c].classList.add('error');
+          }
+        }
+      }
+
+      statusEl.className = 'status-msg';
+
+      if (hasErrors) {
+        statusEl.classList.add('error-msg');
+        statusEl.innerText = '⚠️ Hay gatos que se pelean (reglas violadas)';
+        return false;
+      }
+
+      if (catCount === N) {
+        statusEl.classList.add('win');
+        statusEl.innerText = '🎉 ¡Felicidades! Has resuelto el Meowdoku.';
+        return true;
+      } else {
+        statusEl.innerText = `Gatos colocados: ${catCount} / ${N}`;
+        return false;
+      }
+    }
+
+    document.getElementById('btnReset').addEventListener('click', () => {
+      if (regions.length) initGame();
+    });
+
+    document.getElementById('btnCheck').addEventListener('click', () => {
+      validateBoard(true);
+    });
+
+    // Cargar juego por defecto
+    generateFallbackLevel();
+    initGame();
+  </script>
+</body>
+</html>
