@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receta: Arroz del Senyoret</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fcf8f2;
+            --card-bg: #ffffff;
+            --primary: #c85a32;
+            --primary-soft: #fbf0ea;
+            --accent: #d99b26;
+            --leaf-green: #6b7c59;
+            --text-dark: #2d2623;
+            --text-muted: #6e655f;
+            --border-color: #f0e6d8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            line-height: 1.6;
+            padding: 20px 15px;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(107, 124, 89, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 90%, rgba(200, 90, 50, 0.05) 0%, transparent 20%);
+        }
+
+        .recipe-card {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(45, 38, 35, 0.06);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header-image-container {
+            width: 100%;
+            text-align: center;
+            background-color: #fff;
+            padding: 25px 20px 10px 20px;
+            border-bottom: 2px dashed var(--border-color);
+        }
+
+        .header-image-container img {
+            max-width: 100%;
+            height: auto;
+            max-height: 180px;
+            object-fit: contain;
+        }
+
+        .floral-divider {
+            text-align: center;
+            margin: 15px 0 5px 0;
+            color: var(--accent);
+            font-size: 1.2rem;
+            letter-spacing: 6px;
+        }
+
+        .recipe-body {
+            padding: 30px 40px;
+        }
+
+        @media (max-width: 600px) {
+            .recipe-body {
+                padding: 20px 20px;
+            }
+        }
+
+        .title-area {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .recipe-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.1;
+            margin-bottom: 8px;
+        }
+
+        .servings-badge {
+            display: inline-block;
+            background-color: var(--primary-soft);
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 6px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(200, 90, 50, 0.2);
+            margin-top: 5px;
+        }
+
+        .section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--leaf-green);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title span {
+            font-size: 1.2rem;
+        }
+
+        .ingredients-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 10px 20px;
+            margin-bottom: 40px;
+            background: #faf7f2;
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .ingredients-list li {
+            position: relative;
+            padding-left: 24px;
+            font-size: 0.98rem;
+            color: var(--text-dark);
+        }
+
+        .ingredients-list li::before {
+            content: "🌸";
+            position: absolute;
+            left: 0;
+            top: 2px;
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .instructions-list {
+            list-style: none;
+            counter-reset: step-counter;
+            margin-bottom: 40px;
+        }
+
+        .instructions-list li {
+            position: relative;
+            counter-increment: step-counter;
+            padding-left: 50px;
+            margin-bottom: 18px;
+            font-size: 0.98rem;
+        }
+
+        .instructions-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 32px;
+            height: 32px;
+            background-color: var(--primary-soft);
+            color: var(--primary);
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            border: 1px solid rgba(200, 90, 50, 0.2);
+        }
+
+        .sub-list {
+            list-style: disc;
+            margin-top: 8px;
+            margin-left: 20px;
+            color: var(--text-muted);
+        }
+
+        .sub-list li {
+            padding-left: 0;
+            margin-bottom: 4px;
+        }
+
+        .sub-list li::before {
+            display: none;
+        }
+
+        .box-feature {
+            background-color: #f7f9f4;
+            border-left: 4px solid var(--leaf-green);
+            padding: 20px;
+            border-radius: 0 12px 12px 0;
+            margin-top: 25px;
+            font-size: 0.95rem;
+        }
+
+        .box-feature h4 {
+            color: var(--leaf-green);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            margin-bottom: 6px;
+        }
+
+        .footer-decoration {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2rem;
+            color: var(--accent);
+            border-top: 1px solid var(--border-color);
+            background: #faf7f2;
+        }
+    </style>
+</head>
+<body>
+
+    <article class="recipe-card">
+        <header class="header-image-container">
+            <img src="50veranos.png" alt="50 Veranos">
+            <div class="floral-divider">❀ 🌿 ❀</div>
+        </header>
+
+        <div class="recipe-body">
+            <div class="title-area">
+                <h1 class="recipe-title">Arroz del Senyoret</h1>
+                <span class="servings-badge">🥘 15 Personas</span>
+            </div>
+
+            <section>
+                <h2 class="section-title"><span>🌿</span> Ingredientes</h2>
+                <ul class="ingredients-list">
+                    <li>1,5 kg de arroz redondo</li>
+                    <li>700 g de calamar troceado</li>
+                    <li>1 kg de gamba pelada</li>
+                    <li>2 cebollas medianas</li>
+                    <li>1 pimiento rojo</li>
+                    <li>1 pimiento amarillo</li>
+                    <li>1 pimiento verde</li>
+                    <li>1 bote grande de tomate triturado (700–800 g)</li>
+                    <li>4 dientes de ajo</li>
+                    <li>5 litros de caldo de pescado</li>
+                    <li>150 ml de aceite de oliva virgen extra</li>
+                    <li>1 cucharada de pimentón dulce</li>
+                    <li>Sal al gusto</li>
+                    <li>3–4 limones para servir</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2 class="section-title"><span>🔥</span> Elaboración</h2>
+                <ol class="instructions-list">
+                    <li>Calentar el aceite en la paellera.</li>
+                    <li>Sofreír la cebolla picada y el ajo hasta que estén transparentes.</li>
+                    <li>Añadir los tres pimientos cortados en dados pequeños y cocinar unos 8 minutos.</li>
+                    <li>Incorporar el calamar troceado y sofreír 4–5 minutos.</li>
+                    <li>Añadir el tomate triturado y cocinar 10–15 minutos hasta que el sofrito quede bien concentrado.</li>
+                    <li>Agregar el pimentón dulce y remover rápidamente para que no se queme.</li>
+                    <li>Añadir el arroz y remover durante 1 minuto para impregnarlo bien del sofrito.</li>
+                    <li>Verter los 5 litros de caldo de pescado caliente.</li>
+                    <li>Cocinar:
+                        <ul class="sub-list">
+                            <li>10 minutos a fuego fuerte.</li>
+                            <li>8–10 minutos a fuego medio.</li>
+                        </ul>
+                    </li>
+                    <li>Cuando falten unos 5 minutos, incorporar las gambas peladas repartidas por toda la paella.</li>
+                    <li>Ajustar de sal y dejar cocinar hasta que el arroz esté en su punto y el caldo se haya absorbido.</li>
+                    <li>Retirar del fuego y dejar reposar 5 minutos tapado con un paño limpio o papel de aluminio.</li>
+                </ol>
+            </section>
+
+            <section>
+                <div class="box-feature">
+                    <h4>🍋 Presentación</h4>
+                    <p>Decorar con unas tiras de pimiento rojo y amarillo reservadas previamente y servir con gajos de limón alrededor de la paella.</p>
+                </div>
+            </section>
+        </div>
+
+        <footer class="footer-decoration">
+            ✿ ❁ 🦩 ❁ ✿
+        </footer>
+    </article>
+
+</body>
+</html>
