@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Adivina el Grupo | K-Pop & Pop Global</title>
+  <title>K-Pop Global & New Generation Quiz</title>
   <style>
     * {
       box-sizing: border-box;
@@ -22,7 +22,7 @@
       padding: 10px;
     }
 
-    /* BARRA SUPERIOR: Ajustada para scroll horizontal si no cabe */
+    /* BARRA SUPERIOR CON SCROLL SI NO CABE */
     .toolbar {
       width: 100%;
       max-width: 500px;
@@ -35,18 +35,11 @@
       gap: 10px;
       overflow-x: auto;
       white-space: nowrap;
-      -webkit-overflow-scrolling: touch;
       margin-bottom: 10px;
     }
 
-    /* Ocultar barra de scroll estética */
-    .toolbar::-webkit-scrollbar {
-      display: none;
-    }
-    .toolbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
+    .toolbar::-webkit-scrollbar { display: none; }
+    .toolbar { -ms-overflow-style: none; scrollbar-width: none; }
 
     .stat-badge {
       background-color: #2a2a2a;
@@ -58,26 +51,40 @@
       flex-shrink: 0;
     }
 
-    .action-btn {
-      background-color: #d35400;
-      color: white;
-      border: none;
+    .tag-kpop-global {
+      background: linear-gradient(90deg, #00f2fe, #ff007f);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* BANNER NOTIFICACIÓN DE CANCIÓN NUEVA */
+    .new-song-banner {
+      width: 100%;
+      max-width: 500px;
+      background: linear-gradient(90deg, #00f2fe 0%, #ff007f 100%);
+      color: #ffffff;
       padding: 8px 12px;
-      border-radius: 10px;
-      font-weight: bold;
-      font-size: 13px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      flex-shrink: 0;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 10px;
+      display: none;
+      animation: popIn 0.3s ease-out;
+      box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4);
     }
 
-    .action-btn.mode-btn {
-      background-color: #8e44ad;
+    @keyframes popIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
 
-    /* CONTENEDOR CENTRAL / JUEGO */
+    /* CONTENEDOR CENTRAL DE JUEGO */
     .canvas-container {
       width: 100%;
       max-width: 500px;
@@ -100,8 +107,8 @@
       border-radius: 50%;
       overflow: hidden;
       border: 4px solid #333;
-      margin-top: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.8);
+      margin-top: 5px;
+      box-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
       cursor: pointer;
     }
 
@@ -109,7 +116,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      filter: blur(15px);
+      filter: blur(16px);
       transition: filter 0.5s ease;
     }
 
@@ -127,16 +134,16 @@
       align-items: center;
       justify-content: center;
       font-size: 2rem;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.35);
     }
 
     .song-info {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
-      color: #3498db;
+      color: #00f2fe;
       text-align: center;
       min-height: 20px;
-      margin: 8px 0;
+      margin: 6px 0;
     }
 
     .options-grid {
@@ -152,12 +159,12 @@
       border: 2px solid #333;
       padding: 12px 8px;
       border-radius: 12px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
       cursor: pointer;
       text-align: center;
       transition: background-color 0.15s, border-color 0.15s;
-      min-height: 50px;
+      min-height: 48px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -169,18 +176,19 @@
     }
 
     .option-btn.correct {
-      background-color: #2ecc71 !important;
-      border-color: #27ae60 !important;
+      background-color: #00e676 !important;
+      border-color: #00c853 !important;
       color: #000;
+      font-weight: 800;
     }
 
     .option-btn.incorrect {
-      background-color: #e74c3c !important;
-      border-color: #c0392b !important;
+      background-color: #ff1744 !important;
+      border-color: #d50000 !important;
       color: #fff;
     }
 
-    /* BOTÓN INFERIOR */
+    /* BOTÓN INFERIOR ADAPTADO */
     .bottom-bar {
       width: 100%;
       max-width: 500px;
@@ -190,19 +198,20 @@
     .next-btn {
       width: 100%;
       padding: 14px;
-      background: linear-gradient(180deg, #ffffff 0%, #e0e0e0 100%);
+      background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
       color: #000000;
       border: none;
       border-radius: 14px;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 800;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
       cursor: pointer;
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+      transition: transform 0.1s;
     }
 
     .next-btn:active {
@@ -212,70 +221,68 @@
 </head>
 <body>
 
-  <!-- BARRA DE HERRAMIENTAS SUPERIOR -->
+  <!-- BARRA SUPERIOR -->
   <div class="toolbar">
     <div class="stat-badge" id="scoreDisplay">PUNTOS: 0</div>
+    <span class="tag-kpop-global">GLOBAL K-POP & ROOKIES</span>
     <div class="stat-badge" id="roundDisplay">1/10</div>
-    <button class="action-btn mode-btn" id="modeBtn">🌐 MODOS</button>
   </div>
 
-  <!-- CONTENEDOR PRINCIPAL DEL JUEGO -->
+  <!-- BANNER NOTIFICACIÓN DE CANCIÓN AÑADIDA -->
+  <div class="new-song-banner" id="newSongBanner">
+    ✨ ¡Se ha añadido un nuevo tema a la lista!
+  </div>
+
+  <!-- CONTENEDOR CENTRAL -->
   <div class="canvas-container">
-    <div class="album-art-container" onclick="replayAudio()" title="Clic para escuchar de nuevo">
+    <div class="album-art-container" onclick="replayAudio()" title="Haz clic para volver a escuchar">
       <img id="albumArt" class="album-art" src="" alt="Album Art">
       <div id="playOverlay" class="play-overlay">▶️</div>
     </div>
 
-    <div id="songInfo" class="song-info">Adivina quién canta...</div>
+    <div id="songInfo" class="song-info">¿Qué grupo o artista canta esta canción?</div>
 
     <div class="options-grid" id="optionsGrid">
-      <!-- Botones de opciones -->
+      <!-- Opciones dinámicas -->
     </div>
   </div>
 
-  <!-- BOTÓN INFERIOR -->
+  <!-- BOTÓN INFERIOR CAMBIADO -->
   <div class="bottom-bar">
     <button class="next-btn" id="nextBtn">
-      <span id="btnText">SIGUIENTE CANCIÓN</span> 🔄
+      <span id="btnText">SIGUIENTE PISTA GLOBAL</span> ⚡
     </button>
   </div>
 
   <script>
-    // BASE DE DATOS DE ARTISTAS Y CANCIONES
-    const MUSIC_DATABASE = {
-      kpop: [
-        { artist: "BTS", song: "Dynamite" },
-        { artist: "BTS", song: "Butter" },
-        { artist: "BLACKPINK", song: "How You Like That" },
-        { artist: "BLACKPINK", song: "Pink Venom" },
-        { artist: "TWICE", song: "The Feels" },
-        { artist: "NewJeans", song: "Super Shy" },
-        { artist: "Stray Kids", song: "S-Class" },
-        { artist: "SEVENTEEN", song: "Super" },
-        { artist: "IVE", song: "LOVE DIVE" },
-        { artist: "LE SSERAFIM", song: "ANTIFRAGILE" },
-        { artist: "aespa", song: "Supernova" },
-        { artist: "ITZY", song: "WANNABE" },
-        { artist: "ILLIT", song: "Magnetic" },
-        { artist: "FIFTY FIFTY", song: "Cupid" }
-      ],
-      pop: [
-        { artist: "Taylor Swift", song: "Cruel Summer" },
-        { artist: "Bruno Mars", song: "24K Magic" },
-        { artist: "Dua Lipa", song: "Levitating" },
-        { artist: "Billie Eilish", song: "bad guy" },
-        { artist: "Ariana Grande", song: "7 rings" },
-        { artist: "The Weeknd", song: "Blinding Lights" },
-        { artist: "Olivia Rodrigo", song: "good 4 u" },
-        { artist: "Sabrina Carpenter", song: "Espresso" },
-        { artist: "Harry Styles", song: "As It Was" },
-        { artist: "Lady Gaga", song: "Bad Romance" }
-      ]
-    };
+    // BASE DE DATOS EXCLUSIVA: K-POP GLOBAL, ROOKIES Y NUEVA GENERACIÓN
+    const KPOP_GLOBAL_DATABASE = [
+      { artist: "KATSEYE", song: "Touch" },
+      { artist: "KATSEYE", song: "My Way" },
+      { artist: "SAINT SATINE", song: "Prelude" },
+      { artist: "KiiiKiii", song: "I Do Me" },
+      { artist: "KiiiKiii", song: "Dancing Alone" },
+      { artist: "ILLIT", song: "Magnetic" },
+      { artist: "ILLIT", song: "Cherish (My Love)" },
+      { artist: "MEOVV", song: "MEOW" },
+      { artist: "MEOVV", song: "BODY" },
+      { artist: "BABYMONSTER", song: "DRIP" },
+      { artist: "BABYMONSTER", song: "SHEESH" },
+      { artist: "TWS", song: "Plot Twist" },
+      { artist: "TWS", song: "Last Bell" },
+      { artist: "izna", song: "IZNA" },
+      { artist: "KickFlip", song: "Twenty" },
+      { artist: "BADVILLAIN", song: "BADVILLAIN" },
+      { artist: "RESCENE", song: "Love Attack" },
+      { artist: "ARTMS", song: "Virtual Angel" },
+      { artist: "Hearts2Hearts", song: "RUDE!" },
+      { artist: "NMIXX", song: "DASH" },
+      { artist: "RIIZE", song: "Impossible" },
+      { artist: "ZEROBASEONE", song: "GOOD SO BAD" },
+      { artist: "KISS OF LIFE", song: "Sticky" },
+      { artist: "QWER", song: "T.B.H" }
+    ];
 
-    let currentModeIndex = 0; // 0: Mix, 1: K-Pop, 2: Pop
-    const modes = ['MIX', 'K-POP', 'POP GLOBAL'];
-    
     let playlist = [];
     let currentTrackIndex = 0;
     let score = 0;
@@ -284,35 +291,24 @@
 
     const scoreDisplay = document.getElementById("scoreDisplay");
     const roundDisplay = document.getElementById("roundDisplay");
-    const modeBtn = document.getElementById("modeBtn");
     const albumArt = document.getElementById("albumArt");
     const playOverlay = document.getElementById("playOverlay");
     const songInfo = document.getElementById("songInfo");
     const optionsGrid = document.getElementById("optionsGrid");
     const nextBtn = document.getElementById("nextBtn");
     const btnText = document.getElementById("btnText");
+    const newSongBanner = document.getElementById("newSongBanner");
 
-    // CAMBIAR DE MODO
-    modeBtn.addEventListener("click", () => {
-      currentModeIndex = (currentModeIndex + 1) % modes.length;
-      modeBtn.textContent = `🌐 ${modes[currentModeIndex]}`;
-      initGame();
-    });
-
-    // INICIALIZAR PARTIDA
+    // INICIALIZAR EL JUEGO MEZCLANDO LA BASE DE DATOS
     async function initGame() {
       audioPlayer.pause();
       score = 0;
       currentTrackIndex = 0;
       scoreDisplay.textContent = `PUNTOS: ${score}`;
-      btnText.textContent = "CARGANDO PISTAS...";
+      btnText.textContent = "BUSCANDO PISTAS NUEVAS...";
 
-      let pool = [];
-      if (modes[currentModeIndex] === 'K-POP') pool = [...MUSIC_DATABASE.kpop];
-      else if (modes[currentModeIndex] === 'POP GLOBAL') pool = [...MUSIC_DATABASE.pop];
-      else pool = [...MUSIC_DATABASE.kpop, ...MUSIC_DATABASE.pop];
-
-      pool.sort(() => Math.random() - 0.5);
+      // Seleccionar 10 temas al azar sin repetir
+      let pool = [...KPOP_GLOBAL_DATABASE].sort(() => Math.random() - 0.5);
       const selected = pool.slice(0, 10);
 
       playlist = [];
@@ -332,36 +328,36 @@
             });
           }
         } catch (e) {
-          console.error("Error buscando pista:", e);
+          console.error("Error buscando pista de audio:", e);
         }
       }
 
       if (playlist.length === 0) {
-        songInfo.textContent = "Error al conectar con la API de música.";
+        songInfo.textContent = "Error al conectar con la red de canciones.";
         return;
       }
 
-      btnText.textContent = "SIGUIENTE CANCIÓN";
+      btnText.textContent = "SIGUIENTE PISTA GLOBAL ⚡";
       loadTrack();
     }
 
-    // CARGAR RONDA
+    // CARGAR CADA CANCIÓN Y MOSTRAR LA NOTIFICACIÓN DE CANCIÓN AÑADIDA
     function loadTrack() {
       isAnswered = false;
       const current = playlist[currentTrackIndex];
 
       roundDisplay.textContent = `${currentTrackIndex + 1}/${playlist.length}`;
-      songInfo.textContent = "Adivina quién canta...";
+      songInfo.textContent = "¿Qué grupo o artista canta esta canción?";
       albumArt.src = current.artwork;
       albumArt.classList.remove("revealed");
       playOverlay.style.display = "flex";
 
-      // Opciones
-      const allArtists = Array.from(new Set([
-        ...MUSIC_DATABASE.kpop.map(a => a.artist),
-        ...MUSIC_DATABASE.pop.map(a => a.artist)
-      ]));
+      // MOSTRAR BANNER NOTIFICANDO LA CANCIÓN INCORPORADA A LA RONDA
+      newSongBanner.style.display = "block";
+      newSongBanner.innerHTML = `🔥 ¡Se ha añadido una nueva canción!: <b>"${current.songTitle}"</b> de <b>${current.artist}</b>`;
 
+      // Generar 4 opciones (1 correcta + 3 distractores del ecosistema K-Pop / K-Pop Global)
+      const allArtists = Array.from(new Set(KPOP_GLOBAL_DATABASE.map(a => a.artist)));
       const wrong = allArtists.filter(a => a !== current.artist).sort(() => Math.random() - 0.5).slice(0, 3);
       const options = [current.artist, ...wrong].sort(() => Math.random() - 0.5);
 
@@ -391,7 +387,7 @@
       if (audioPlayer.src) playAudio();
     }
 
-    // COMPROBAR RESPUESTA
+    // COMPROBAR LA RESPUESTA
     function checkAnswer(selectedArtist, btn) {
       if (isAnswered) return;
       isAnswered = true;
@@ -416,18 +412,18 @@
       allBtns.forEach(b => b.onclick = null);
     }
 
-    // NAVEGACIÓN
+    // EVENTO DEL BOTÓN INFERIOR CAMBIADO
     nextBtn.addEventListener("click", () => {
       if (currentTrackIndex < playlist.length - 1) {
         currentTrackIndex++;
         loadTrack();
       } else {
+        btnText.textContent = "REINICIAR RONDA GLOBAL 🔄";
         initGame();
       }
     });
 
-    // Arrancar el juego al cargar
-    modeBtn.textContent = `🌐 ${modes[currentModeIndex]}`;
+    // Arrancar el juego automáticamente al cargar
     initGame();
   </script>
 </body>
