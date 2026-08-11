@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>K-Pop Global & New Generation Quiz</title>
+  <title>Adivina el Grupo | K-Pop Hits & Variedad</title>
   <style>
     * {
       box-sizing: border-box;
@@ -22,7 +22,7 @@
       padding: 10px;
     }
 
-    /* BARRA SUPERIOR CON SCROLL SI NO CABE */
+    /* BARRA SUPERIOR */
     .toolbar {
       width: 100%;
       max-width: 500px;
@@ -51,8 +51,8 @@
       flex-shrink: 0;
     }
 
-    .tag-kpop-global {
-      background: linear-gradient(90deg, #00f2fe, #ff007f);
+    .tag-viral {
+      background: linear-gradient(90deg, #ff0000, #ff007f);
       color: #fff;
       padding: 4px 8px;
       border-radius: 6px;
@@ -62,11 +62,11 @@
       letter-spacing: 0.5px;
     }
 
-    /* BANNER NOTIFICACIÓN DE CANCIÓN NUEVA */
+    /* BANNER DE NOTIFICACIÓN DE CANCIÓN AÑADIDA */
     .new-song-banner {
       width: 100%;
       max-width: 500px;
-      background: linear-gradient(90deg, #00f2fe 0%, #ff007f 100%);
+      background: linear-gradient(90deg, #ff0000 0%, #ff007f 100%);
       color: #ffffff;
       padding: 8px 12px;
       border-radius: 12px;
@@ -76,7 +76,7 @@
       margin-bottom: 10px;
       display: none;
       animation: popIn 0.3s ease-out;
-      box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4);
+      box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
     }
 
     @keyframes popIn {
@@ -84,7 +84,7 @@
       to { transform: scale(1); opacity: 1; }
     }
 
-    /* CONTENEDOR CENTRAL DE JUEGO */
+    /* CONTENEDOR PRINCIPAL */
     .canvas-container {
       width: 100%;
       max-width: 500px;
@@ -108,7 +108,7 @@
       overflow: hidden;
       border: 4px solid #333;
       margin-top: 5px;
-      box-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
+      box-shadow: 0 0 20px rgba(255, 0, 127, 0.5);
       cursor: pointer;
     }
 
@@ -140,7 +140,7 @@
     .song-info {
       font-size: 13px;
       font-weight: bold;
-      color: #00f2fe;
+      color: #ff007f;
       text-align: center;
       min-height: 20px;
       margin: 6px 0;
@@ -188,7 +188,7 @@
       color: #fff;
     }
 
-    /* BOTÓN INFERIOR ADAPTADO */
+    /* BOTÓN INFERIOR */
     .bottom-bar {
       width: 100%;
       max-width: 500px;
@@ -198,8 +198,8 @@
     .next-btn {
       width: 100%;
       padding: 14px;
-      background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
-      color: #000000;
+      background: linear-gradient(135deg, #ff007f 0%, #ff0055 100%);
+      color: #ffffff;
       border: none;
       border-radius: 14px;
       font-size: 16px;
@@ -210,7 +210,7 @@
       justify-content: center;
       align-items: center;
       gap: 8px;
-      box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+      box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4);
       transition: transform 0.1s;
     }
 
@@ -224,18 +224,18 @@
   <!-- BARRA SUPERIOR -->
   <div class="toolbar">
     <div class="stat-badge" id="scoreDisplay">PUNTOS: 0</div>
-    <span class="tag-kpop-global">GLOBAL K-POP & ROOKIES</span>
+    <span class="tag-viral">🔥 POPULAR & B-SIDES</span>
     <div class="stat-badge" id="roundDisplay">1/10</div>
   </div>
 
-  <!-- BANNER NOTIFICACIÓN DE CANCIÓN AÑADIDA -->
+  <!-- NOTIFICACIÓN DE CANCIÓN DEL ÁLBUM -->
   <div class="new-song-banner" id="newSongBanner">
-    ✨ ¡Se ha añadido un nuevo tema a la lista!
+    ✨ ¡Nueva canción en juego!
   </div>
 
   <!-- CONTENEDOR CENTRAL -->
   <div class="canvas-container">
-    <div class="album-art-container" onclick="replayAudio()" title="Haz clic para volver a escuchar">
+    <div class="album-art-container" onclick="replayAudio()" title="Toca para escuchar de nuevo">
       <img id="albumArt" class="album-art" src="" alt="Album Art">
       <div id="playOverlay" class="play-overlay">▶️</div>
     </div>
@@ -247,40 +247,120 @@
     </div>
   </div>
 
-  <!-- BOTÓN INFERIOR CAMBIADO -->
+  <!-- BOTÓN INFERIOR -->
   <div class="bottom-bar">
     <button class="next-btn" id="nextBtn">
-      <span id="btnText">SIGUIENTE PISTA GLOBAL</span> ⚡
+      <span id="btnText">SIGUIENTE CANCIÓN</span> ⚡
     </button>
   </div>
 
   <script>
-    // BASE DE DATOS EXCLUSIVA: K-POP GLOBAL, ROOKIES Y NUEVA GENERACIÓN
-    const KPOP_GLOBAL_DATABASE = [
+    // BASE DE DATOS AMPLIADA: MÁS DE 70 CANCIONES VARIADAS DE SUS ÁLBUMES Y SHORTS
+    const VIRAL_SHORTS_DATABASE = [
+      // BLACKPINK
+      { artist: "BLACKPINK", song: "How You Like That" },
+      { artist: "BLACKPINK", song: "Pink Venom" },
+      { artist: "BLACKPINK", song: "Kill This Love" },
+      { artist: "BLACKPINK", song: "Shut Down" },
+      { artist: "BLACKPINK", song: "DDU-DU DDU-DU" },
+      { artist: "BLACKPINK", song: "Lovesick Girls" },
+      { artist: "BLACKPINK", song: "Pretty Savage" },
+      { artist: "BLACKPINK", song: "As If It's Your Last" },
+
+      // BTS
+      { artist: "BTS", song: "Dynamite" },
+      { artist: "BTS", song: "Butter" },
+      { artist: "BTS", song: "Boy With Luv" },
+      { artist: "BTS", song: "Mic Drop" },
+      { artist: "BTS", song: "Permission to Dance" },
+      { artist: "BTS", song: "DNA" },
+      { artist: "BTS", song: "Run BTS" },
+      { artist: "BTS", song: "Fake Love" },
+
+      // KATSEYE
       { artist: "KATSEYE", song: "Touch" },
+      { artist: "KATSEYE", song: "Debut" },
       { artist: "KATSEYE", song: "My Way" },
-      { artist: "SAINT SATINE", song: "Prelude" },
-      { artist: "KiiiKiii", song: "I Do Me" },
-      { artist: "KiiiKiii", song: "Dancing Alone" },
-      { artist: "ILLIT", song: "Magnetic" },
-      { artist: "ILLIT", song: "Cherish (My Love)" },
+
+      // ITZY
+      { artist: "ITZY", song: "WANNABE" },
+      { artist: "ITZY", song: "UNTOUCHABLE" },
+      { artist: "ITZY", song: "LOCO" },
+      { artist: "ITZY", song: "Not Shy" },
+      { artist: "ITZY", song: "DALLA DALLA" },
+      { artist: "ITZY", song: "SNEAKERS" },
+      { artist: "ITZY", song: "CAKE" },
+
+      // LE SSERAFIM
+      { artist: "LE SSERAFIM", song: "ANTIFRAGILE" },
+      { artist: "LE SSERAFIM", song: "EASY" },
+      { artist: "LE SSERAFIM", song: "UNFORGIVEN" },
+      { artist: "LE SSERAFIM", song: "FEARLESS" },
+      { artist: "LE SSERAFIM", song: "Smart" },
+      { artist: "LE SSERAFIM", song: "Perfect Night" },
+      { artist: "LE SSERAFIM", song: "Eve, Psyche & the Bluebeard's wife" },
+
+      // BABYMONSTER
+      { artist: "BABYMONSTER", song: "SHEESH" },
+      { artist: "BABYMONSTER", song: "DRIP" },
+      { artist: "BABYMONSTER", song: "BATTER UP" },
+      { artist: "BABYMONSTER", song: "LIKE THAT" },
+      { artist: "BABYMONSTER", song: "Stuck In The Middle" },
+
+      // MEOVV
       { artist: "MEOVV", song: "MEOW" },
       { artist: "MEOVV", song: "BODY" },
-      { artist: "BABYMONSTER", song: "DRIP" },
-      { artist: "BABYMONSTER", song: "SHEESH" },
-      { artist: "TWS", song: "Plot Twist" },
-      { artist: "TWS", song: "Last Bell" },
-      { artist: "izna", song: "IZNA" },
-      { artist: "KickFlip", song: "Twenty" },
-      { artist: "BADVILLAIN", song: "BADVILLAIN" },
-      { artist: "RESCENE", song: "Love Attack" },
-      { artist: "ARTMS", song: "Virtual Angel" },
-      { artist: "Hearts2Hearts", song: "RUDE!" },
+
+      // NMIXX
       { artist: "NMIXX", song: "DASH" },
-      { artist: "RIIZE", song: "Impossible" },
-      { artist: "ZEROBASEONE", song: "GOOD SO BAD" },
-      { artist: "KISS OF LIFE", song: "Sticky" },
-      { artist: "QWER", song: "T.B.H" }
+      { artist: "NMIXX", song: "Love Me Like This" },
+      { artist: "NMIXX", song: "O.O" },
+      { artist: "NMIXX", song: "DICE" },
+      { artist: "NMIXX", song: "See that?" },
+      { artist: "NMIXX", song: "Roller Coaster" },
+
+      // ILLIT
+      { artist: "ILLIT", song: "Magnetic" },
+      { artist: "ILLIT", song: "Cherish (My Love)" },
+      { artist: "ILLIT", song: "Lucky Girl Attitude" },
+
+      // KiiiKiii / Hearts2Hearts
+      { artist: "KiiiKiii", song: "I Do Me" },
+      { artist: "Hearts2Hearts", song: "RUDE!" },
+
+      // Stray Kids
+      { artist: "Stray Kids", song: "S-Class" },
+      { artist: "Stray Kids", song: "Maniac" },
+      { artist: "Stray Kids", song: "God's Menu" },
+      { artist: "Stray Kids", song: "LALALALA" },
+      { artist: "Stray Kids", song: "Chk Chk Boom" },
+      { artist: "Stray Kids", song: "Thunderous" },
+
+      // TWICE
+      { artist: "TWICE", song: "The Feels" },
+      { artist: "TWICE", song: "FANCY" },
+      { artist: "TWICE", song: "What is Love?" },
+      { artist: "TWICE", song: "Talk that Talk" },
+
+      // NewJeans
+      { artist: "NewJeans", song: "Super Shy" },
+      { artist: "NewJeans", song: "OMG" },
+      { artist: "NewJeans", song: "Hype Boy" },
+      { artist: "NewJeans", song: "ETA" },
+      { artist: "NewJeans", song: "Ditto" },
+      { artist: "NewJeans", song: "How Sweet" },
+
+      // aespa
+      { artist: "aespa", song: "Supernova" },
+      { artist: "aespa", song: "Armageddon" },
+      { artist: "aespa", song: "Next Level" },
+      { artist: "aespa", song: "Drama" },
+
+      // IVE
+      { artist: "IVE", song: "LOVE DIVE" },
+      { artist: "IVE", song: "I AM" },
+      { artist: "IVE", song: "AFTER LIKE" },
+      { artist: "IVE", song: "HEYA" }
     ];
 
     let playlist = [];
@@ -299,16 +379,16 @@
     const btnText = document.getElementById("btnText");
     const newSongBanner = document.getElementById("newSongBanner");
 
-    // INICIALIZAR EL JUEGO MEZCLANDO LA BASE DE DATOS
+    // INICIALIZAR EL JUEGO
     async function initGame() {
       audioPlayer.pause();
       score = 0;
       currentTrackIndex = 0;
       scoreDisplay.textContent = `PUNTOS: ${score}`;
-      btnText.textContent = "BUSCANDO PISTAS NUEVAS...";
+      btnText.textContent = "CARGANDO TEMAZOS...";
 
-      // Seleccionar 10 temas al azar sin repetir
-      let pool = [...KPOP_GLOBAL_DATABASE].sort(() => Math.random() - 0.5);
+      // Seleccionar 10 canciones totalmente al azar del catálogo variado
+      let pool = [...VIRAL_SHORTS_DATABASE].sort(() => Math.random() - 0.5);
       const selected = pool.slice(0, 10);
 
       playlist = [];
@@ -328,20 +408,20 @@
             });
           }
         } catch (e) {
-          console.error("Error buscando pista de audio:", e);
+          console.error("Error cargando tema:", e);
         }
       }
 
       if (playlist.length === 0) {
-        songInfo.textContent = "Error al conectar con la red de canciones.";
+        songInfo.textContent = "Error al cargar la música. Inténtalo de nuevo.";
         return;
       }
 
-      btnText.textContent = "SIGUIENTE PISTA GLOBAL ⚡";
+      btnText.textContent = "SIGUIENTE CANCIÓN ⚡";
       loadTrack();
     }
 
-    // CARGAR CADA CANCIÓN Y MOSTRAR LA NOTIFICACIÓN DE CANCIÓN AÑADIDA
+    // CARGAR CADA RONDA
     function loadTrack() {
       isAnswered = false;
       const current = playlist[currentTrackIndex];
@@ -352,12 +432,12 @@
       albumArt.classList.remove("revealed");
       playOverlay.style.display = "flex";
 
-      // MOSTRAR BANNER NOTIFICANDO LA CANCIÓN INCORPORADA A LA RONDA
+      // AVISO EN PANTALLA
       newSongBanner.style.display = "block";
-      newSongBanner.innerHTML = `🔥 ¡Se ha añadido una nueva canción!: <b>"${current.songTitle}"</b> de <b>${current.artist}</b>`;
+      newSongBanner.innerHTML = `🎵 Suena: <b>"${current.songTitle}"</b> de <b>${current.artist}</b>`;
 
-      // Generar 4 opciones (1 correcta + 3 distractores del ecosistema K-Pop / K-Pop Global)
-      const allArtists = Array.from(new Set(KPOP_GLOBAL_DATABASE.map(a => a.artist)));
+      // 4 opciones con los nombres de los grupos principales
+      const allArtists = Array.from(new Set(VIRAL_SHORTS_DATABASE.map(a => a.artist)));
       const wrong = allArtists.filter(a => a !== current.artist).sort(() => Math.random() - 0.5).slice(0, 3);
       const options = [current.artist, ...wrong].sort(() => Math.random() - 0.5);
 
@@ -387,7 +467,7 @@
       if (audioPlayer.src) playAudio();
     }
 
-    // COMPROBAR LA RESPUESTA
+    // VERIFICAR RESPUESTA
     function checkAnswer(selectedArtist, btn) {
       if (isAnswered) return;
       isAnswered = true;
@@ -412,18 +492,18 @@
       allBtns.forEach(b => b.onclick = null);
     }
 
-    // EVENTO DEL BOTÓN INFERIOR CAMBIADO
+    // BOTÓN INFERIOR
     nextBtn.addEventListener("click", () => {
       if (currentTrackIndex < playlist.length - 1) {
         currentTrackIndex++;
         loadTrack();
       } else {
-        btnText.textContent = "REINICIAR RONDA GLOBAL 🔄";
+        btnText.textContent = "NUEVA RONDA ALEATORIA 🔄";
         initGame();
       }
     });
 
-    // Arrancar el juego automáticamente al cargar
+    // Iniciar juego al abrir
     initGame();
   </script>
 </body>
