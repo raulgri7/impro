@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adivina el Grupo | K-Pop & Pop Global</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 10px;
+    }
+
+    /* BARRA SUPERIOR: Ajustada para scroll horizontal si no cabe */
+    .toolbar {
+      width: 100%;
+      max-width: 500px;
+      background-color: #1e1e1e;
+      border-radius: 16px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+      margin-bottom: 10px;
+    }
+
+    /* Ocultar barra de scroll estética */
+    .toolbar::-webkit-scrollbar {
+      display: none;
+    }
+    .toolbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .stat-badge {
+      background-color: #2a2a2a;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #ffcc00;
+      flex-shrink: 0;
+    }
+
+    .action-btn {
+      background-color: #d35400;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .action-btn.mode-btn {
+      background-color: #8e44ad;
+    }
+
+    /* CONTENEDOR CENTRAL / JUEGO */
+    .canvas-container {
+      width: 100%;
+      max-width: 500px;
+      aspect-ratio: 1 / 1.2;
+      background-color: #1e1e1e;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .album-art-container {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 4px solid #333;
+      margin-top: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.8);
+      cursor: pointer;
+    }
+
+    .album-art {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: blur(15px);
+      transition: filter 0.5s ease;
+    }
+
+    .album-art.revealed {
+      filter: blur(0px);
+    }
+
+    .play-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .song-info {
+      font-size: 14px;
+      font-weight: bold;
+      color: #3498db;
+      text-align: center;
+      min-height: 20px;
+      margin: 8px 0;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .option-btn {
+      background-color: #2a2a2a;
+      color: #ffffff;
+      border: 2px solid #333;
+      padding: 12px 8px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.15s, border-color 0.15s;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      word-break: break-word;
+    }
+
+    .option-btn:active {
+      transform: scale(0.97);
+    }
+
+    .option-btn.correct {
+      background-color: #2ecc71 !important;
+      border-color: #27ae60 !important;
+      color: #000;
+    }
+
+    .option-btn.incorrect {
+      background-color: #e74c3c !important;
+      border-color: #c0392b !important;
+      color: #fff;
+    }
+
+    /* BOTÓN INFERIOR */
+    .bottom-bar {
+      width: 100%;
+      max-width: 500px;
+      margin-top: 10px;
+    }
+
+    .next-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(180deg, #ffffff 0%, #e0e0e0 100%);
+      color: #000000;
+      border: none;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .next-btn:active {
+      transform: scale(0.98);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BARRA DE HERRAMIENTAS SUPERIOR -->
+  <div class="toolbar">
+    <div class="stat-badge" id="scoreDisplay">PUNTOS: 0</div>
+    <div class="stat-badge" id="roundDisplay">1/10</div>
+    <button class="action-btn mode-btn" id="modeBtn">🌐 MODOS</button>
+  </div>
+
+  <!-- CONTENEDOR PRINCIPAL DEL JUEGO -->
+  <div class="canvas-container">
+    <div class="album-art-container" onclick="replayAudio()" title="Clic para escuchar de nuevo">
+      <img id="albumArt" class="album-art" src="" alt="Album Art">
+      <div id="playOverlay" class="play-overlay">▶️</div>
+    </div>
+
+    <div id="songInfo" class="song-info">Adivina quién canta...</div>
+
+    <div class="options-grid" id="optionsGrid">
+      <!-- Botones de opciones -->
+    </div>
+  </div>
+
+  <!-- BOTÓN INFERIOR -->
+  <div class="bottom-bar">
+    <button class="next-btn" id="nextBtn">
+      <span id="btnText">SIGUIENTE CANCIÓN</span> 🔄
+    </button>
+  </div>
+
+  <script>
+    // BASE DE DATOS DE ARTISTAS Y CANCIONES
+    const MUSIC_DATABASE = {
+      kpop: [
+        { artist: "BTS", song: "Dynamite" },
+        { artist: "BTS", song: "Butter" },
+        { artist: "BLACKPINK", song: "How You Like That" },
+        { artist: "BLACKPINK", song: "Pink Venom" },
+        { artist: "TWICE", song: "The Feels" },
+        { artist: "NewJeans", song: "Super Shy" },
+        { artist: "Stray Kids", song: "S-Class" },
+        { artist: "SEVENTEEN", song: "Super" },
+        { artist: "IVE", song: "LOVE DIVE" },
+        { artist: "LE SSERAFIM", song: "ANTIFRAGILE" },
+        { artist: "aespa", song: "Supernova" },
+        { artist: "ITZY", song: "WANNABE" },
+        { artist: "ILLIT", song: "Magnetic" },
+        { artist: "FIFTY FIFTY", song: "Cupid" }
+      ],
+      pop: [
+        { artist: "Taylor Swift", song: "Cruel Summer" },
+        { artist: "Bruno Mars", song: "24K Magic" },
+        { artist: "Dua Lipa", song: "Levitating" },
+        { artist: "Billie Eilish", song: "bad guy" },
+        { artist: "Ariana Grande", song: "7 rings" },
+        { artist: "The Weeknd", song: "Blinding Lights" },
+        { artist: "Olivia Rodrigo", song: "good 4 u" },
+        { artist: "Sabrina Carpenter", song: "Espresso" },
+        { artist: "Harry Styles", song: "As It Was" },
+        { artist: "Lady Gaga", song: "Bad Romance" }
+      ]
+    };
+
+    let currentModeIndex = 0; // 0: Mix, 1: K-Pop, 2: Pop
+    const modes = ['MIX', 'K-POP', 'POP GLOBAL'];
+    
+    let playlist = [];
+    let currentTrackIndex = 0;
+    let score = 0;
+    let isAnswered = false;
+    let audioPlayer = new Audio();
+
+    const scoreDisplay = document.getElementById("scoreDisplay");
+    const roundDisplay = document.getElementById("roundDisplay");
+    const modeBtn = document.getElementById("modeBtn");
+    const albumArt = document.getElementById("albumArt");
+    const playOverlay = document.getElementById("playOverlay");
+    const songInfo = document.getElementById("songInfo");
+    const optionsGrid = document.getElementById("optionsGrid");
+    const nextBtn = document.getElementById("nextBtn");
+    const btnText = document.getElementById("btnText");
+
+    // CAMBIAR DE MODO
+    modeBtn.addEventListener("click", () => {
+      currentModeIndex = (currentModeIndex + 1) % modes.length;
+      modeBtn.textContent = `🌐 ${modes[currentModeIndex]}`;
+      initGame();
+    });
+
+    // INICIALIZAR PARTIDA
+    async function initGame() {
+      audioPlayer.pause();
+      score = 0;
+      currentTrackIndex = 0;
+      scoreDisplay.textContent = `PUNTOS: ${score}`;
+      btnText.textContent = "CARGANDO PISTAS...";
+
+      let pool = [];
+      if (modes[currentModeIndex] === 'K-POP') pool = [...MUSIC_DATABASE.kpop];
+      else if (modes[currentModeIndex] === 'POP GLOBAL') pool = [...MUSIC_DATABASE.pop];
+      else pool = [...MUSIC_DATABASE.kpop, ...MUSIC_DATABASE.pop];
+
+      pool.sort(() => Math.random() - 0.5);
+      const selected = pool.slice(0, 10);
+
+      playlist = [];
+      for (const item of selected) {
+        try {
+          const query = encodeURIComponent(`${item.artist} ${item.song}`);
+          const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=song&limit=1`);
+          const data = await res.json();
+
+          if (data.results && data.results.length > 0) {
+            const track = data.results[0];
+            playlist.push({
+              artist: item.artist,
+              songTitle: track.trackName,
+              previewUrl: track.previewUrl,
+              artwork: track.artworkUrl100.replace('100x100bb', '300x300bb')
+            });
+          }
+        } catch (e) {
+          console.error("Error buscando pista:", e);
+        }
+      }
+
+      if (playlist.length === 0) {
+        songInfo.textContent = "Error al conectar con la API de música.";
+        return;
+      }
+
+      btnText.textContent = "SIGUIENTE CANCIÓN";
+      loadTrack();
+    }
+
+    // CARGAR RONDA
+    function loadTrack() {
+      isAnswered = false;
+      const current = playlist[currentTrackIndex];
+
+      roundDisplay.textContent = `${currentTrackIndex + 1}/${playlist.length}`;
+      songInfo.textContent = "Adivina quién canta...";
+      albumArt.src = current.artwork;
+      albumArt.classList.remove("revealed");
+      playOverlay.style.display = "flex";
+
+      // Opciones
+      const allArtists = Array.from(new Set([
+        ...MUSIC_DATABASE.kpop.map(a => a.artist),
+        ...MUSIC_DATABASE.pop.map(a => a.artist)
+      ]));
+
+      const wrong = allArtists.filter(a => a !== current.artist).sort(() => Math.random() - 0.5).slice(0, 3);
+      const options = [current.artist, ...wrong].sort(() => Math.random() - 0.5);
+
+      optionsGrid.innerHTML = "";
+      options.forEach(artistName => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
+        btn.textContent = artistName;
+        btn.onclick = () => checkAnswer(artistName, btn);
+        optionsGrid.appendChild(btn);
+      });
+
+      audioPlayer.src = current.previewUrl;
+      playAudio();
+    }
+
+    function playAudio() {
+      audioPlayer.currentTime = 0;
+      audioPlayer.play().then(() => {
+        playOverlay.style.display = "none";
+      }).catch(() => {
+        playOverlay.style.display = "flex";
+      });
+    }
+
+    function replayAudio() {
+      if (audioPlayer.src) playAudio();
+    }
+
+    // COMPROBAR RESPUESTA
+    function checkAnswer(selectedArtist, btn) {
+      if (isAnswered) return;
+      isAnswered = true;
+
+      const current = playlist[currentTrackIndex];
+      albumArt.classList.add("revealed");
+      songInfo.textContent = `🎵 ${current.songTitle} - ${current.artist}`;
+
+      const allBtns = document.querySelectorAll(".option-btn");
+
+      if (selectedArtist === current.artist) {
+        btn.classList.add("correct");
+        score += 100;
+        scoreDisplay.textContent = `PUNTOS: ${score}`;
+      } else {
+        btn.classList.add("incorrect");
+        allBtns.forEach(b => {
+          if (b.textContent === current.artist) b.classList.add("correct");
+        });
+      }
+
+      allBtns.forEach(b => b.onclick = null);
+    }
+
+    // NAVEGACIÓN
+    nextBtn.addEventListener("click", () => {
+      if (currentTrackIndex < playlist.length - 1) {
+        currentTrackIndex++;
+        loadTrack();
+      } else {
+        initGame();
+      }
+    });
+
+    // Arrancar el juego al cargar
+    modeBtn.textContent = `🌐 ${modes[currentModeIndex]}`;
+    initGame();
+  </script>
+</body>
+</html>
