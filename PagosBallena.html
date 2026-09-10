@@ -124,7 +124,7 @@
   <div class="card">
     <h2>Anotar Pago</h2>
     <form id="pagoForm">
-      
+
       <!-- 1. GRUPO -->
       <div class="form-group">
         <label for="grupo">Grupo</label>
@@ -184,18 +184,33 @@
       <button type="submit" id="btnGuardar">Registrar Pago</button>
       <div id="status"></div>
     </form>
+
+    <div style="margin-top: 15px; text-align: center;">
+      <a href="InformeBallena.html" style="color: #0a84ff; text-decoration: none; font-size: 0.9rem; font-weight: 500;">📊 Ir a Consulta de Pagos</a>
+    </div>
   </div>
 
   <script>
-    // SUSTITUYE ESTA URL CON TU ENLACE DE DESPLIEGUE DE GOOGLE APPS SCRIPT
+    // URL DE TU DESPLIEGUE DE GOOGLE APPS SCRIPT
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl9Rbou1Hf2CY4FdWAoNJnMFzTlyWYiRz4Kb04wLyMdqXr8k7NvykFkoqsdmjUJJcs/exec';
+
+    // Precarga inmediata de datos al interpretar el script (antes de window.onload)
+    const promesaCargaInicial = fetch(APPS_SCRIPT_URL).then(res => res.json());
 
     let listaPersonas = [];
     let listaGrupos = [];
+    let listaMesesEstructurada = [];
+    let listaMesesEstandar = [];
+    let historialPagos = [];
+
+    function normalizar(texto) {
+      if (!texto) return "";
+      return String(texto).toLowerCase().replace(/\s+/g, ' ').trim();
+    }
 
     async function cargarDatosIniciales() {
       const status = document.getElementById('status');
-      
+
       if (APPS_SCRIPT_URL.includes('PONES_AQUI') || !APPS_SCRIPT_URL.startsWith('http')) {
         status.textContent = '✕ Error: Falta poner la URL de Apps Script en el HTML';
         status.className = 'error';
@@ -204,8 +219,8 @@
 
       try {
         status.textContent = 'Cargando datos...';
-        const res = await fetch(APPS_SCRIPT_URL);
-        const data = await res.json();
+        // Espera la descarga que arrancó al inicio
+        const data = await promesaCargaInicial;
 
         if (data.status === "error") {
           throw new Error(data.message);
@@ -213,6 +228,9 @@
 
         listaPersonas = data.personas || [];
         listaGrupos = data.grupos || [];
+        listaMesesEstructurada = data.mesesObj || [];
+        listaMesesEstandar = data.meses || [];
+        historialPagos = data.historialPagos || [];
 
         // Rellenar desplegable de Grupos
         const selectGrupo = document.getElementById('grupo');
@@ -232,18 +250,25 @@
           selectFormas.innerHTML += `<option value="${f}">${f}</option>`;
         });
 
-        // Rellenar desplegable de Meses
-        const selectMeses = document.getElementById('mes');
-        selectMeses.innerHTML = '';
-        (data.meses || []).forEach(m => {
-          selectMeses.innerHTML += `<option value="${m}">${m}</option>`;
-        });
+        // Rellenar desplegable de Meses por defecto
+        actualizarOpcionesMeses(listaMesesEstandar);
 
         status.textContent = '';
-
       } catch (err) {
         status.textContent = '✕ Error al cargar: ' + err.message;
         status.className = 'error';
+      }
+    }
+
+    function actualizarOpcionesMeses(mesesArray) {
+      const selectMeses = document.getElementById('mes');
+      selectMeses.innerHTML = '';
+      if (mesesArray.length === 0) {
+        selectMeses.innerHTML = '<option value="">Todos los meses pagados</option>';
+      } else {
+        mesesArray.forEach(m => {
+          selectMeses.innerHTML += `<option value="${m}">${m}</option>`;
+        });
       }
     }
 
@@ -252,6 +277,7 @@
       const selectPersona = document.getElementById('persona');
 
       ocultarNuevoAlumno();
+      actualizarOpcionesMeses(listaMesesEstandar);
 
       if (!grupoSel) {
         selectPersona.innerHTML = '<option value="">Primero selecciona un grupo</option>';
@@ -261,7 +287,6 @@
       }
 
       const personasDelGrupo = listaPersonas.filter(p => p.grupo === grupoSel);
-
       selectPersona.innerHTML = '<option value="">-- Seleccionar Persona --</option>';
       personasDelGrupo.forEach(p => {
         selectPersona.innerHTML += `<option value="${p.nombre}">${p.nombre}</option>`;
@@ -274,16 +299,51 @@
 
     function manejarSeleccionPersona() {
       const personaSel = document.getElementById('persona').value;
+      const grupoSel = document.getElementById('grupo').value;
 
       if (personaSel === '__NUEVO__') {
         mostrarNuevoAlumno();
+        actualizarOpcionesMeses(listaMesesEstandar);
       } else {
         ocultarNuevoAlumno();
         const personaObj = listaPersonas.find(p => p.nombre === personaSel);
+
         if (personaObj) {
           document.getElementById('importe').value = personaObj.importe;
+
+          // 1. Determinar lista base de meses (limitada por últimoMes si tiene fecha de baja)
+          let mesesPermitidosObj = listaMesesEstructurada;
+
+          if (personaObj.ultimoMes && listaMesesEstructurada.length > 0) {
+            const ultimoMesNorm = normalizar(personaObj.ultimoMes);
+            const idxCorte = listaMesesEstructurada.findIndex(m => normalizar(m.etiqueta) === ultimoMesNorm);
+
+            if (idxCorte !== -1) {
+              mesesPermitidosObj = listaMesesEstructurada.filter((m, idx) => idx <= idxCorte);
+            }
+          }
+
+          // Solo tener en cuenta los meses que tengan 'aparece === true'
+          let candidatos = mesesPermitidosObj.filter(m => m.aparece).map(m => m.etiqueta);
+
+          // 2. Filtrar descartando los meses que esta persona ya ha pagado en este grupo
+          const pagosRealizados = historialPagos.filter(p => 
+            normalizar(p.persona) === normalizar(personaSel) && 
+            normalizar(p.grupo) === normalizar(grupoSel)
+          );
+
+          const mesesYaPagadosNorm = pagosRealizados.map(p => normalizar(p.mes));
+
+          const mesesDisponibles = candidatos.filter(mes => {
+            const mesNorm = normalizar(mes);
+            return !mesesYaPagadosNorm.some(pagado => pagado === mesNorm || pagado.includes(mesNorm) || mesNorm.includes(pagado));
+          });
+
+          actualizarOpcionesMeses(mesesDisponibles);
+
         } else {
           document.getElementById('importe').value = '';
+          actualizarOpcionesMeses(listaMesesEstandar);
         }
       }
     }
@@ -341,6 +401,14 @@
         status.textContent = '✓ Pago registrado correctamente';
         status.className = 'success';
 
+        // Actualizar localmente el historial de pagos para que el mes desaparezca de inmediato
+        const nombreRegistrado = esNuevo ? payload.nuevoNombre : payload.persona;
+        historialPagos.push({
+          persona: nombreRegistrado,
+          grupo: payload.grupo,
+          mes: payload.mes
+        });
+
         if (esNuevo) {
           listaPersonas.push({
             nombre: payload.nuevoNombre,
@@ -353,7 +421,6 @@
         document.getElementById('observaciones').value = '';
 
         setTimeout(() => { status.textContent = ''; }, 3000);
-
       } catch (err) {
         status.textContent = '✕ Error al registrar: ' + err.message;
         status.className = 'error';
