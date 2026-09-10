@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estado de Pagos</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 12px;
+    }
+
+    .card {
+      background-color: #1e1e1e;
+      width: 100%;
+      max-width: 480px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      border: 1px solid #2c2c2c;
+      margin-top: 10px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 18px;
+      color: #0a84ff;
+      font-size: 1.3rem;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .form-group {
+      flex: 1;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 5px;
+      color: #a0a0a0;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      background-color: #2c2c2e;
+      color: #ffffff;
+      border: 1px solid #3a3a3c;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #0a84ff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+
+    button:disabled {
+      background-color: #3a3a3c;
+      color: #777;
+    }
+
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      margin-top: 15px;
+      margin-bottom: 8px;
+    }
+
+    .title-no-pagado {
+      background-color: rgba(255, 69, 58, 0.2);
+      color: #ff453a;
+      border-left: 4px solid #ff453a;
+    }
+
+    .title-pagado {
+      background-color: rgba(48, 209, 88, 0.2);
+      color: #30d158;
+      border-left: 4px solid #30d158;
+    }
+
+    .list {
+      list-style: none;
+      margin-bottom: 15px;
+    }
+
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      background-color: #2c2c2e;
+      border-bottom: 1px solid #3a3a3c;
+      border-radius: 6px;
+      margin-bottom: 4px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .icon-btn {
+      text-decoration: none;
+      font-size: 1.2rem;
+      transition: transform 0.1s;
+    }
+
+    .icon-btn:active {
+      transform: scale(1.2);
+    }
+
+    #status {
+      text-align: center;
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+      color: #a0a0a0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Consulta de Pagos</h2>
+    
+    <div class="row">
+      <div class="form-group">
+        <label for="grupo">Grupo</label>
+        <select id="grupo">
+          <option value="">Cargando...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="mes">Mes</label>
+        <select id="mes">
+          <option value="">Cargando...</option>
+        </select>
+      </div>
+    </div>
+
+    <button id="btnConsultar" onclick="consultarEstado()">Consultar Estado</button>
+    <div id="status"></div>
+
+    <div id="resultados" style="display: none;">
+      <div class="section-title title-no-pagado">NO PAGADO (<span id="countNoPagado">0</span>)</div>
+      <ul id="listaNoPagados" class="list"></ul>
+
+      <div class="section-title title-pagado">PAGADO (<span id="countPagado">0</span>)</div>
+      <ul id="listaPagados" class="list"></ul>
+    </div>
+  </div>
+
+  <script>
+    // SUSTITUYE ESTA URL CON TU ENLACE DE DESPLIEGUE DE GOOGLE APPS SCRIPT
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl9Rbou1Hf2CY4FdWAoNJnMFzTlyWYiRz4Kb04wLyMdqXr8k7NvykFkoqsdmjUJJcs/exec';
+
+    async function cargarDatosIniciales() {
+      const status = document.getElementById('status');
+      try {
+        status.textContent = 'Cargando filtros...';
+        const res = await fetch(APPS_SCRIPT_URL);
+        const data = await res.json();
+
+        const selectGrupo = document.getElementById('grupo');
+        selectGrupo.innerHTML = '';
+        (data.grupos || []).forEach(g => {
+          selectGrupo.innerHTML += `<option value="${g}">${g}</option>`;
+        });
+
+        const selectMeses = document.getElementById('mes');
+        selectMeses.innerHTML = '';
+        (data.meses || []).forEach(m => {
+          selectMeses.innerHTML += `<option value="${m}">${m}</option>`;
+        });
+
+        status.textContent = '';
+      } catch (err) {
+        status.textContent = 'Error al conectar con la hoja de cálculo';
+      }
+    }
+
+    async function consultarEstado() {
+      const grupo = document.getElementById('grupo').value;
+      const mes = document.getElementById('mes').value;
+      const status = document.getElementById('status');
+      const btn = document.getElementById('btnConsultar');
+      const resultados = document.getElementById('resultados');
+
+      if (!grupo || !mes) return;
+
+      btn.disabled = true;
+      status.textContent = 'Consultando...';
+      resultados.style.display = 'none';
+
+      try {
+        const url = `${APPS_SCRIPT_URL}?accion=consultar&grupo=${encodeURIComponent(grupo)}&mes=${encodeURIComponent(mes)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        renderListas(data.noPagados, data.pagados);
+        resultados.style.display = 'block';
+        status.textContent = '';
+      } catch (err) {
+        status.textContent = 'Error al consultar la información';
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function renderListas(noPagados, pagados) {
+      const listaNoPagados = document.getElementById('listaNoPagados');
+      const listaPagados = document.getElementById('listaPagados');
+      
+      document.getElementById('countNoPagado').textContent = noPagados.length;
+      document.getElementById('countPagado').textContent = pagados.length;
+
+      listaNoPagados.innerHTML = '';
+      listaPagados.innerHTML = '';
+
+      if (noPagados.length === 0) {
+        listaNoPagados.innerHTML = '<li class="list-item" style="color: #777;">¡Todos han pagado!</li>';
+      } else {
+        noPagados.forEach(p => {
+          let acciones = '';
+          if (p.telefono) {
+            // Formatear el número de teléfono limpio para llamada y WhatsApp
+            const telLimpio = p.telefono.replace(/\s+/g, '').replace(/[^0-9+]/g, '');
+            const telWa = telLimpio.startsWith('+') ? telLimpio.replace('+', '') : `34${telLimpio}`;
+            
+            acciones = `
+              <div class="actions">
+                <a href="tel:${telLimpio}" class="icon-btn" title="Llamar">📞</a>
+                <a href="https://wa.me/${telWa}" target="_blank" class="icon-btn" title="Enviar WhatsApp">💬</a>
+              </div>
+            `;
+          }
+
+          listaNoPagados.innerHTML += `
+            <li class="list-item">
+              <span>${p.nombre}</span>
+              ${acciones}
+            </li>
+          `;
+        });
+      }
+
+      if (pagados.length === 0) {
+        listaPagados.innerHTML = '<li class="list-item" style="color: #777;">Sin registros de pago todavía.</li>';
+      } else {
+        pagados.forEach(p => {
+          listaPagados.innerHTML += `
+            <li class="list-item">
+              <span>${p.nombre}</span>
+              <span style="color: #30d158;">✓</span>
+            </li>
+          `;
+        });
+      }
+    }
+
+    window.onload = cargarDatosIniciales;
+  </script>
+</body>
+</html>
