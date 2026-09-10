@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro de Pagos</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 12px;
+    }
+
+    .card {
+      background-color: #1e1e1e;
+      width: 100%;
+      max-width: 480px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      border: 1px solid #2c2c2c;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 18px;
+      color: #0a84ff;
+      font-size: 1.3rem;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 5px;
+      color: #a0a0a0;
+    }
+
+    select, input, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background-color: #2c2c2e;
+      color: #ffffff;
+      border: 1px solid #3a3a3c;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      border-color: #0a84ff;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .row .form-group {
+      flex: 1;
+    }
+
+    .nuevo-alumno-container {
+      background-color: #262628;
+      border: 1px dashed #0a84ff;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      display: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #0a84ff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.2s;
+    }
+
+    button:active {
+      background-color: #0066cc;
+    }
+
+    button:disabled {
+      background-color: #3a3a3c;
+      color: #777;
+    }
+
+    #status {
+      margin-top: 12px;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 500;
+      min-height: 18px;
+      word-break: break-all;
+    }
+
+    .success { color: #30d158; }
+    .error { color: #ff453a; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Anotar Pago</h2>
+    <form id="pagoForm">
+      
+      <!-- 1. GRUPO -->
+      <div class="form-group">
+        <label for="grupo">Grupo</label>
+        <select id="grupo" required onchange="filtrarPersonasPorGrupo()">
+          <option value="">Cargando grupos...</option>
+        </select>
+      </div>
+
+      <!-- 2. PERSONA -->
+      <div class="form-group">
+        <label for="persona">Persona</label>
+        <select id="persona" required onchange="manejarSeleccionPersona()" disabled>
+          <option value="">Primero selecciona un grupo</option>
+        </select>
+      </div>
+
+      <!-- CAMPOS EXTRA PARA NUEVO ALUMNO -->
+      <div id="seccionNuevoAlumno" class="nuevo-alumno-container">
+        <div class="form-group">
+          <label for="nuevoNombre">Nombre del Nuevo Alumno</label>
+          <input type="text" id="nuevoNombre" placeholder="Ej. Juan Pérez">
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="nuevoImporte">Importe Mensual (€)</label>
+          <input type="number" id="nuevoImporte" value="50" placeholder="50">
+        </div>
+      </div>
+
+      <!-- 3. IMPORTE (PERSONAS EXISTENTES) -->
+      <div class="form-group" id="contenedorImporteExistente">
+        <label for="importe">Importe (€)</label>
+        <input type="number" id="importe" placeholder="0">
+      </div>
+
+      <!-- 4. FORMA DE PAGO Y MES -->
+      <div class="row">
+        <div class="form-group">
+          <label for="formaPago">Forma de Pago</label>
+          <select id="formaPago" required>
+            <option value="">Cargando...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="mes">Mes</label>
+          <select id="mes" required>
+            <option value="">Cargando...</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 5. OBSERVACIONES -->
+      <div class="form-group">
+        <label for="observaciones">Observaciones (Opcional)</label>
+        <textarea id="observaciones" rows="2" placeholder="Notas adicionales..."></textarea>
+      </div>
+
+      <button type="submit" id="btnGuardar">Registrar Pago</button>
+      <div id="status"></div>
+    </form>
+  </div>
+
+  <script>
+    // SUSTITUYE ESTA URL CON TU ENLACE DE DESPLIEGUE DE GOOGLE APPS SCRIPT
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzl9Rbou1Hf2CY4FdWAoNJnMFzTlyWYiRz4Kb04wLyMdqXr8k7NvykFkoqsdmjUJJcs/exec';
+
+    let listaPersonas = [];
+    let listaGrupos = [];
+
+    async function cargarDatosIniciales() {
+      const status = document.getElementById('status');
+      
+      if (APPS_SCRIPT_URL.includes('PONES_AQUI') || !APPS_SCRIPT_URL.startsWith('http')) {
+        status.textContent = '✕ Error: Falta poner la URL de Apps Script en el HTML';
+        status.className = 'error';
+        return;
+      }
+
+      try {
+        status.textContent = 'Cargando datos...';
+        const res = await fetch(APPS_SCRIPT_URL);
+        const data = await res.json();
+
+        if (data.status === "error") {
+          throw new Error(data.message);
+        }
+
+        listaPersonas = data.personas || [];
+        listaGrupos = data.grupos || [];
+
+        // Rellenar desplegable de Grupos
+        const selectGrupo = document.getElementById('grupo');
+        if (listaGrupos.length === 0) {
+          selectGrupo.innerHTML = '<option value="">No se encontraron grupos</option>';
+        } else {
+          selectGrupo.innerHTML = '<option value="">-- Seleccionar Grupo --</option>';
+          listaGrupos.forEach(g => {
+            selectGrupo.innerHTML += `<option value="${g}">${g}</option>`;
+          });
+        }
+
+        // Rellenar desplegable de Formas de Pago
+        const selectFormas = document.getElementById('formaPago');
+        selectFormas.innerHTML = '';
+        (data.formasPago || []).forEach(f => {
+          selectFormas.innerHTML += `<option value="${f}">${f}</option>`;
+        });
+
+        // Rellenar desplegable de Meses
+        const selectMeses = document.getElementById('mes');
+        selectMeses.innerHTML = '';
+        (data.meses || []).forEach(m => {
+          selectMeses.innerHTML += `<option value="${m}">${m}</option>`;
+        });
+
+        status.textContent = '';
+
+      } catch (err) {
+        status.textContent = '✕ Error al cargar: ' + err.message;
+        status.className = 'error';
+      }
+    }
+
+    function filtrarPersonasPorGrupo() {
+      const grupoSel = document.getElementById('grupo').value;
+      const selectPersona = document.getElementById('persona');
+
+      ocultarNuevoAlumno();
+
+      if (!grupoSel) {
+        selectPersona.innerHTML = '<option value="">Primero selecciona un grupo</option>';
+        selectPersona.disabled = true;
+        document.getElementById('importe').value = '';
+        return;
+      }
+
+      const personasDelGrupo = listaPersonas.filter(p => p.grupo === grupoSel);
+
+      selectPersona.innerHTML = '<option value="">-- Seleccionar Persona --</option>';
+      personasDelGrupo.forEach(p => {
+        selectPersona.innerHTML += `<option value="${p.nombre}">${p.nombre}</option>`;
+      });
+
+      selectPersona.innerHTML += '<option value="__NUEVO__">+ Nuevo Alumno</option>';
+      selectPersona.disabled = false;
+      document.getElementById('importe').value = '';
+    }
+
+    function manejarSeleccionPersona() {
+      const personaSel = document.getElementById('persona').value;
+
+      if (personaSel === '__NUEVO__') {
+        mostrarNuevoAlumno();
+      } else {
+        ocultarNuevoAlumno();
+        const personaObj = listaPersonas.find(p => p.nombre === personaSel);
+        if (personaObj) {
+          document.getElementById('importe').value = personaObj.importe;
+        } else {
+          document.getElementById('importe').value = '';
+        }
+      }
+    }
+
+    function mostrarNuevoAlumno() {
+      document.getElementById('seccionNuevoAlumno').style.display = 'block';
+      document.getElementById('contenedorImporteExistente').style.display = 'none';
+      document.getElementById('nuevoNombre').required = true;
+      document.getElementById('nuevoImporte').required = true;
+      document.getElementById('importe').required = false;
+      document.getElementById('nuevoImporte').value = '50';
+    }
+
+    function ocultarNuevoAlumno() {
+      document.getElementById('seccionNuevoAlumno').style.display = 'none';
+      document.getElementById('contenedorImporteExistente').style.display = 'block';
+      document.getElementById('nuevoNombre').required = false;
+      document.getElementById('nuevoImporte').required = false;
+      document.getElementById('importe').required = true;
+      document.getElementById('nuevoNombre').value = '';
+    }
+
+    document.getElementById('pagoForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const btn = document.getElementById('btnGuardar');
+      const status = document.getElementById('status');
+      const esNuevo = document.getElementById('persona').value === '__NUEVO__';
+
+      const payload = {
+        grupo: document.getElementById('grupo').value,
+        persona: document.getElementById('persona').value,
+        esNuevoAlumno: esNuevo,
+        nuevoNombre: document.getElementById('nuevoNombre').value.trim(),
+        nuevoImporte: document.getElementById('nuevoImporte').value,
+        importe: document.getElementById('importe').value,
+        formaPago: document.getElementById('formaPago').value,
+        mes: document.getElementById('mes').value,
+        observaciones: document.getElementById('observaciones').value
+      };
+
+      btn.disabled = true;
+      btn.textContent = 'Registrando...';
+      status.textContent = '';
+      status.className = '';
+
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+
+        status.textContent = '✓ Pago registrado correctamente';
+        status.className = 'success';
+
+        if (esNuevo) {
+          listaPersonas.push({
+            nombre: payload.nuevoNombre,
+            grupo: payload.grupo,
+            importe: payload.nuevoImporte
+          });
+        }
+
+        filtrarPersonasPorGrupo();
+        document.getElementById('observaciones').value = '';
+
+        setTimeout(() => { status.textContent = ''; }, 3000);
+
+      } catch (err) {
+        status.textContent = '✕ Error al registrar: ' + err.message;
+        status.className = 'error';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Registrar Pago';
+      }
+    });
+
+    window.onload = cargarDatosIniciales;
+  </script>
+</body>
+</html>
