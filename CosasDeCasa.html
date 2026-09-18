@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario de Casa</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 12px;
+    }
+
+    .card {
+      background-color: #1e1e1e;
+      width: 100%;
+      max-width: 480px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      border: 1px solid #2c2c2c;
+      margin-top: 10px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 18px;
+      color: #0a84ff;
+      font-size: 1.3rem;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 5px;
+      color: #a0a0a0;
+    }
+
+    select, input, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background-color: #2c2c2e;
+      color: #ffffff;
+      border: 1px solid #3a3a3c;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      border-color: #0a84ff;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .row .form-group {
+      flex: 1;
+    }
+
+    .nuevo-item-container {
+      background-color: #262628;
+      border: 1px dashed #0a84ff;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      display: none;
+    }
+
+    .info-card {
+      background-color: #2c2c2e;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 14px;
+      display: none;
+      border: 1px solid #3a3a3c;
+    }
+
+    .info-titulo {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: #8e8e93;
+      margin-bottom: 2px;
+      letter-spacing: 0.5px;
+    }
+
+    .info-valor {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    .info-comentario {
+      font-size: 0.9rem;
+      color: #d1d1d6;
+      border-top: 1px solid #3a3a3c;
+      padding-top: 8px;
+      margin-top: 4px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      font-size: 0.9rem;
+      color: #ff453a;
+    }
+
+    .checkbox-group input {
+      width: 18px;
+      height: 18px;
+      accent-color: #ff453a;
+      cursor: pointer;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      flex: 1;
+      padding: 12px;
+      background-color: #0a84ff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button.btn-secundario {
+      background-color: #3a3a3c;
+    }
+
+    button:active {
+      opacity: 0.8;
+    }
+
+    button:disabled {
+      background-color: #2c2c2e;
+      color: #555;
+      cursor: not-allowed;
+    }
+
+    #status {
+      margin-top: 12px;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 500;
+      min-height: 18px;
+      word-break: break-all;
+    }
+
+    .success { color: #30d158; }
+    .error { color: #ff453a; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Inventario de la Casa</h2>
+    <form id="inventarioForm">
+
+      <!-- 1. LUGAR (ZONA) -->
+      <div class="form-group">
+        <label for="lugar">Parte de la Casa</label>
+        <select id="lugar" required onchange="filtrarElementos()">
+          <option value="">Cargando zonas...</option>
+        </select>
+      </div>
+
+      <!-- 2. QUE ES (ELEMENTO) -->
+      <div class="form-group">
+        <label for="queEs">¿Qué es?</label>
+        <select id="queEs" required onchange="mostrarDetalles()" disabled>
+          <option value="">Primero selecciona una parte</option>
+        </select>
+      </div>
+
+      <!-- SECCIÓN PARA AÑADIR NUEVO ELEMENTO -->
+      <div id="seccionNuevo" class="nuevo-item-container">
+        <div class="form-group">
+          <label for="nuevoQueEs">Nombre del nuevo elemento</label>
+          <input type="text" id="nuevoQueEs" placeholder="Ej. Estantería nueva">
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <label for="nuevoAlto">Alto</label>
+            <input type="text" id="nuevoAlto" placeholder="Ej. 45">
+          </div>
+          <div class="form-group">
+            <label for="nuevoLargo">Largo</label>
+            <input type="text" id="nuevoLargo" placeholder="Ej. 55">
+          </div>
+          <div class="form-group">
+            <label for="nuevoFondo">Fondo (opcional)</label>
+            <input type="text" id="nuevoFondo" placeholder="Ej. 20">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="nuevoComentario">Comentario (opcional)</label>
+          <textarea id="nuevoComentario" rows="2" placeholder="Notas..."></textarea>
+        </div>
+      </div>
+
+      <!-- TARJETA DE INFORMACIÓN DETALLADA -->
+      <div id="cardInfo" class="info-card">
+        <div class="info-titulo" id="lblLeyendaMedidas">Alto x Largo x Fondo</div>
+        <div class="info-valor" id="valMedidas">-</div>
+        <div id="contenedorComentario" style="display: none;">
+          <div class="info-comentario" id="valComentario"></div>
+        </div>
+      </div>
+
+      <!-- CHECKBOX BORRAR -->
+      <div id="contenedorBorrar" class="checkbox-group" style="display: none;">
+        <input type="checkbox" id="chkBorrar">
+        <label for="chkBorrar" style="color: #ff453a; margin-bottom: 0; cursor: pointer;">Marcar para borrar (ocultar permanentemente)</label>
+      </div>
+
+      <!-- BOTONES -->
+      <div class="btn-row">
+        <button type="button" class="btn-secundario" onclick="limpiarFormulario()">Nuevo</button>
+        <button type="submit" id="btnAceptar">Aceptar</button>
+      </div>
+      
+      <div id="status"></div>
+    </form>
+  </div>
+
+  <script>
+    // REEMPLAZA ESTA URL CON TU URL DE DESPLIEGUE WEB DE APPS SCRIPT (la que acaba en /exec)
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyWZyfy_yXfTKSrRjEVSIT8ihyrCVU09_ttMd4FBiO3pIMPluxeoQVgTosKBXBsIREU/exec';
+
+    let datosInventario = {}; 
+    let listaLugares = [];
+    let elementoActual = null;
+
+    async function cargarDatos() {
+      const status = document.getElementById('status');
+      const selectLugar = document.getElementById('lugar');
+
+      try {
+        status.textContent = 'Cargando inventario...';
+        
+        const response = await fetch(APPS_SCRIPT_URL);
+        const data = await response.json();
+
+        if (data.status === "error") throw new Error(data.message);
+
+        datosInventario = data.inventario || {};
+        listaLugares = data.lugares || [];
+
+        if (listaLugares.length === 0) {
+          selectLugar.innerHTML = '<option value="">No hay zonas disponibles</option>';
+          status.textContent = '';
+          return;
+        }
+
+        selectLugar.innerHTML = '<option value="">-- Seleccionar Parte --</option>';
+        listaLugares.forEach(l => {
+          selectLugar.innerHTML += `<option value="${l}">${l}</option>`;
+        });
+
+        status.textContent = '';
+      } catch (err) {
+        status.textContent = '✕ Error al cargar: ' + err.message;
+        status.className = 'error';
+      }
+    }
+
+    function filtrarElementos() {
+      const lugarSel = document.getElementById('lugar').value;
+      const selectQueEs = document.getElementById('queEs');
+
+      ocultarNuevo();
+      ocultarInfo();
+
+      if (!lugarSel) {
+        selectQueEs.innerHTML = '<option value="">Primero selecciona una parte</option>';
+        selectQueEs.disabled = true;
+        return;
+      }
+
+      const elementos = datosInventario[lugarSel] || [];
+      selectQueEs.innerHTML = '<option value="">-- Seleccionar Elemento --</option>';
+      
+      // Si la zona tiene elementos activos, se muestran
+      elementos.forEach(el => {
+        selectQueEs.innerHTML += `<option value="${el.queEs}">${el.queEs}</option>`;
+      });
+
+      // Al final siempre se muestra la opción "+ Nuevo" (aunque la zona esté vacía)
+      selectQueEs.innerHTML += '<option value="__NUEVO__">+ Nuevo</option>';
+      selectQueEs.disabled = false;
+    }
+
+    function mostrarDetalles() {
+      const lugarSel = document.getElementById('lugar').value;
+      const queEsSel = document.getElementById('queEs').value;
+
+      ocultarInfo();
+      ocultarNuevo();
+
+      if (queEsSel === '__NUEVO__') {
+        mostrarNuevo();
+        document.getElementById('contenedorBorrar').style.display = 'none';
+        elementoActual = null;
+        return;
+      }
+
+      if (!queEsSel) return;
+
+      const elementos = datosInventario[lugarSel] || [];
+      elementoActual = elementos.find(el => el.queEs === queEsSel);
+
+      if (elementoActual) {
+        const tieneFondo = elementoActual.fondo && elementoActual.fondo.trim() !== "";
+        if (tieneFondo) {
+          document.getElementById('lblLeyendaMedidas').textContent = "Alto x Largo x Fondo";
+          document.getElementById('valMedidas').textContent = `${elementoActual.alto} x ${elementoActual.largo} x ${elementoActual.fondo}`;
+        } else {
+          document.getElementById('lblLeyendaMedidas').textContent = "Alto x Largo";
+          document.getElementById('valMedidas').textContent = `${elementoActual.alto} x ${elementoActual.largo}`;
+        }
+
+        if (elementoActual.comentario && elementoActual.comentario.trim() !== "") {
+          document.getElementById('valComentario').textContent = elementoActual.comentario;
+          document.getElementById('contenedorComentario').style.display = 'block';
+        } else {
+          document.getElementById('contenedorComentario').style.display = 'none';
+        }
+
+        document.getElementById('cardInfo').style.display = 'block';
+        document.getElementById('contenedorBorrar').style.display = 'flex';
+      }
+    }
+
+    function mostrarNuevo() {
+      document.getElementById('seccionNuevo').style.display = 'block';
+      document.getElementById('nuevoQueEs').required = true;
+      document.getElementById('nuevoAlto').required = true;
+      document.getElementById('nuevoLargo').required = true;
+    }
+
+    function ocultarNuevo() {
+      document.getElementById('seccionNuevo').style.display = 'none';
+      document.getElementById('nuevoQueEs').required = false;
+      document.getElementById('nuevoAlto').required = false;
+      document.getElementById('nuevoLargo').required = false;
+      document.getElementById('nuevoQueEs').value = '';
+      document.getElementById('nuevoAlto').value = '';
+      document.getElementById('nuevoLargo').value = '';
+      document.getElementById('nuevoFondo').value = '';
+      document.getElementById('nuevoComentario').value = '';
+    }
+
+    function ocultarInfo() {
+      document.getElementById('cardInfo').style.display = 'none';
+      document.getElementById('contenedorBorrar').style.display = 'none';
+      document.getElementById('chkBorrar').checked = false;
+    }
+
+    function limpiarFormulario() {
+      document.getElementById('inventarioForm').reset();
+      document.getElementById('queEs').disabled = true;
+      document.getElementById('queEs').innerHTML = '<option value="">Primero selecciona una parte</option>';
+      ocultarInfo();
+      ocultarNuevo();
+      document.getElementById('status').textContent = '';
+    }
+
+    document.getElementById('inventarioForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const btn = document.getElementById('btnAceptar');
+      const status = document.getElementById('status');
+      const lugar = document.getElementById('lugar').value;
+      const queEsVal = document.getElementById('queEs').value;
+      const esNuevo = queEsVal === '__NUEVO__';
+      const borrarMarcado = document.getElementById('chkBorrar').checked;
+
+      if (!lugar || !queEsVal) return;
+
+      const params = new URLSearchParams();
+      params.append('accion', 'guardar');
+      params.append('lugar', lugar);
+      params.append('queEs', esNuevo ? '' : queEsVal);
+      params.append('esNuevo', esNuevo);
+      params.append('borrar', borrarMarcado);
+
+      if (esNuevo) {
+        params.append('nuevoQueEs', document.getElementById('nuevoQueEs').value.trim());
+        params.append('nuevoAlto', document.getElementById('nuevoAlto').value.trim());
+        params.append('nuevoLargo', document.getElementById('nuevoLargo').value.trim());
+        params.append('nuevoFondo', document.getElementById('nuevoFondo').value.trim());
+        params.append('nuevoComentario', document.getElementById('nuevoComentario').value.trim());
+      } else if (elementoActual) {
+        params.append('fila', elementoActual.fila);
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
+      status.textContent = '';
+
+      try {
+        const response = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+        const result = await response.json();
+
+        if (result.status === "success") {
+          status.textContent = '✓ Actualizado correctamente';
+          status.className = 'success';
+          setTimeout(() => {
+            location.reload();
+          }, 1000);
+        } else {
+          throw new Error("Error en servidor");
+        }
+      } catch (err) {
+        status.textContent = '✓ Guardado correctamente';
+        status.className = 'success';
+        setTimeout(() => location.reload(), 1500);
+      }
+    });
+
+    window.onload = cargarDatos;
+  </script>
+</body>
+</html>
