@@ -232,6 +232,11 @@
         <div id="contenedorComentario" style="display: none;">
           <div class="info-comentario" id="valComentario"></div>
         </div>
+        
+        <!-- CANVAS PARA EL DIBUJO 3D / 2D A ESCALA -->
+        <div id="contenedorCanvas" style="margin-top: 12px; text-align: center; display: none;">
+          <canvas id="canvasFigura" width="220" height="140" style="background: #252528; border-radius: 6px; border: 1px solid #3a3a3c;"></canvas>
+        </div>
       </div>
 
       <!-- CHECKBOX BORRAR -->
@@ -307,12 +312,10 @@
       const elementos = datosInventario[lugarSel] || [];
       selectQueEs.innerHTML = '<option value="">-- Seleccionar Elemento --</option>';
       
-      // Si la zona tiene elementos activos, se muestran
       elementos.forEach(el => {
         selectQueEs.innerHTML += `<option value="${el.queEs}">${el.queEs}</option>`;
       });
 
-      // Al final siempre se muestra la opción "+ Nuevo" (aunque la zona esté vacía)
       selectQueEs.innerHTML += '<option value="__NUEVO__">+ Nuevo</option>';
       selectQueEs.disabled = false;
     }
@@ -337,7 +340,12 @@
       elementoActual = elementos.find(el => el.queEs === queEsSel);
 
       if (elementoActual) {
-        const tieneFondo = elementoActual.fondo && elementoActual.fondo.trim() !== "";
+        const alto = parseFloat(elementoActual.alto) || 0;
+        const largo = parseFloat(elementoActual.largo) || 0;
+        const fondo = parseFloat(elementoActual.fondo) || 0;
+        
+        const tieneFondo = elementoActual.fondo && elementoActual.fondo.trim() !== "" && fondo > 0;
+
         if (tieneFondo) {
           document.getElementById('lblLeyendaMedidas').textContent = "Alto x Largo x Fondo";
           document.getElementById('valMedidas').textContent = `${elementoActual.alto} x ${elementoActual.largo} x ${elementoActual.fondo}`;
@@ -355,6 +363,95 @@
 
         document.getElementById('cardInfo').style.display = 'block';
         document.getElementById('contenedorBorrar').style.display = 'flex';
+
+        // Dibujar la figura a escala (3D o 2D)
+        if (alto > 0 && largo > 0) {
+          document.getElementById('contenedorCanvas').style.display = 'block';
+          dibujarFigura(alto, largo, tieneFondo ? fondo : 0);
+        } else {
+          document.getElementById('contenedorCanvas').style.display = 'none';
+        }
+      }
+    }
+
+    function dibujarFigura(alto, largo, fondo) {
+      const canvas = document.getElementById('canvasFigura');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const maxW = 130;
+      const maxH = 80;
+
+      let escalaX = maxW / largo;
+      let escalaY = maxH / alto;
+      if (fondo > 0) {
+        escalaX = maxW / (largo + fondo * 0.5);
+        escalaY = maxH / (alto + fondo * 0.5);
+      }
+      const escala = Math.min(escalaX, escalaY);
+
+      const w = largo * escala;
+      const h = alto * escala;
+      const f = fondo * escala;
+
+      const startX = (canvas.width - (w + (f > 0 ? f * 0.5 : 0))) / 2 + (f > 0 ? f * 0.5 : 0);
+      const startY = (canvas.height + (h + (f > 0 ? f * 0.5 : 0))) / 2;
+
+      if (fondo > 0) {
+        // DIBUJO 3D (Prisma isométrico)
+        const dx = f * 0.6;
+        const dy = f * 0.6;
+
+        // Cara trasera
+        ctx.fillStyle = '#2c2c30';
+        ctx.strokeStyle = '#555';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.rect(startX - w / 2 + dx, startY - h - dy, w, h);
+        ctx.fill();
+        ctx.stroke();
+
+        // Cara superior
+        ctx.fillStyle = '#3a3a40';
+        ctx.beginPath();
+        ctx.moveTo(startX - w / 2, startY - h);
+        ctx.lineTo(startX - w / 2 + dx, startY - h - dy);
+        ctx.lineTo(startX - w / 2 + dx + w, startY - h - dy);
+        ctx.lineTo(startX - w / 2 + w, startY - h);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Cara frontal (principal)
+        ctx.fillStyle = 'rgba(10, 132, 255, 0.18)';
+        ctx.strokeStyle = '#0a84ff';
+        ctx.lineWidth = 1.5;
+        ctx.fillRect(startX - w / 2, startY - h, w, h);
+        ctx.strokeRect(startX - w / 2, startY - h, w, h);
+
+        // Aristas de conexión lateral
+        ctx.strokeStyle = '#555';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(startX - w / 2, startY - h);
+        ctx.lineTo(startX - w / 2 + dx, startY - h - dy);
+        ctx.moveTo(startX - w / 2 + w, startY - h);
+        ctx.lineTo(startX - w / 2 + w + dx, startY - h - dy);
+        ctx.moveTo(startX - w / 2 + w, startY);
+        ctx.lineTo(startX - w / 2 + w + dx, startY - dy);
+        ctx.stroke();
+
+      } else {
+        // DIBUJO 2D (Plano)
+        ctx.fillStyle = 'rgba(10, 132, 255, 0.18)';
+        ctx.strokeStyle = '#0a84ff';
+        ctx.lineWidth = 1.5;
+
+        const x = (canvas.width - w) / 2;
+        const y = (canvas.height - h) / 2;
+
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeRect(x, y, w, h);
       }
     }
 
@@ -380,6 +477,7 @@
     function ocultarInfo() {
       document.getElementById('cardInfo').style.display = 'none';
       document.getElementById('contenedorBorrar').style.display = 'none';
+      document.getElementById('contenedorCanvas').style.display = 'none';
       document.getElementById('chkBorrar').checked = false;
     }
 
