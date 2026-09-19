@@ -75,7 +75,7 @@
       flex: 1;
     }
 
-    .nuevo-item-container {
+    .nuevo-item-container, .editar-item-container {
       background-color: #262628;
       border: 1px dashed #0a84ff;
       padding: 12px;
@@ -117,20 +117,67 @@
       white-space: pre-line;
     }
 
-    .checkbox-group {
+    /* ESTILOS PARA EL SWITCH DE BORRAR */
+    .switch-container {
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
+      background-color: #2c2c2e;
+      border: 1px solid #3a3a3c;
+      padding: 10px 14px;
+      border-radius: 8px;
       margin-bottom: 14px;
-      font-size: 0.9rem;
-      color: #ff453a;
+      display: none; /* Oculto por defecto hasta que hay item seleccionado */
     }
 
-    .checkbox-group input {
-      width: 18px;
-      height: 18px;
-      accent-color: #ff453a;
+    .switch-label {
+      font-size: 0.9rem;
+      color: #ff453a;
+      font-weight: 500;
+      margin-bottom: 0;
       cursor: pointer;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #3a3a3c;
+      transition: .3s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #ff453a;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
     }
 
     .btn-row {
@@ -153,6 +200,15 @@
 
     button.btn-secundario {
       background-color: #3a3a3c;
+    }
+
+    button.btn-editar {
+      background-color: #30d158;
+      color: #121212;
+    }
+
+    button.btn-peligro {
+      background-color: #ff453a;
     }
 
     button:active {
@@ -222,7 +278,33 @@
         </div>
         <div class="form-group" style="margin-bottom: 0;">
           <label for="nuevoComentario">Comentario (opcional)</label>
-          <textarea id="nuevoComentario" rows="3" placeholder="Notas, acentos, comillas..."></textarea>
+          <textarea id="nuevoComentario" rows="3" placeholder="Notas..."></textarea>
+        </div>
+      </div>
+
+      <!-- SECCIÓN PARA EDITAR ELEMENTO EXISTENTE -->
+      <div id="seccionEditar" class="editar-item-container">
+        <div class="form-group">
+          <label for="editQueEs">Nombre del elemento</label>
+          <input type="text" id="editQueEs">
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <label for="editAlto">Alto</label>
+            <input type="text" id="editAlto">
+          </div>
+          <div class="form-group">
+            <label for="editLargo">Largo</label>
+            <input type="text" id="editLargo">
+          </div>
+          <div class="form-group">
+            <label for="editFondo">Fondo</label>
+            <input type="text" id="editFondo">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="editComentario">Comentario</label>
+          <textarea id="editComentario" rows="3"></textarea>
         </div>
       </div>
 
@@ -240,16 +322,25 @@
         </div>
       </div>
 
-      <!-- CHECKBOX BORRAR -->
-      <div id="contenedorBorrar" class="checkbox-group" style="display: none;">
-        <input type="checkbox" id="chkBorrar">
-        <label for="chkBorrar" style="color: #ff453a; margin-bottom: 0; cursor: pointer;">Marcar para borrar (ocultar permanentemente)</label>
+      <!-- SWITCH DE BORRAR -->
+      <div id="contenedorBorrar" class="switch-container">
+        <label for="chkBorrar" class="switch-label">Borrar</label>
+        <label class="switch">
+          <input type="checkbox" id="chkBorrar" onchange="toggleBorrar()">
+          <span class="slider"></span>
+        </label>
       </div>
 
       <!-- BOTONES -->
-      <div class="btn-row">
+      <div class="btn-row" id="filaBotonesNormal">
         <button type="button" class="btn-secundario" onclick="limpiarFormulario()">Nuevo</button>
-        <button type="submit" id="btnAceptar">Aceptar</button>
+        <button type="button" id="btnModoEditar" class="btn-editar" style="display:none;" onclick="activarEdicion()">Editar</button>
+        <button type="submit" id="btnAceptar" style="display: none;">Aceptar</button>
+      </div>
+
+      <div class="btn-row" id="filaBotonesEdicion" style="display: none;">
+        <button type="button" class="btn-secundario" onclick="cancelarEdicion()">Cancelar</button>
+        <button type="submit" id="btnGuardarEdicion">Guardar Cambios</button>
       </div>
       
       <div id="status"></div>
@@ -257,12 +348,12 @@
   </div>
 
   <script>
-    // REEMPLAZA ESTA URL CON TU URL DE DESPLIEGUE WEB DE APPS SCRIPT
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyWZyfy_yXfTKSrRjEVSIT8ihyrCVU09_ttMd4FBiO3pIMPluxeoQVgTosKBXBsIREU/exec';
 
     let datosInventario = {}; 
     let listaLugares = [];
     let elementoActual = null;
+    let modoEditando = false;
 
     async function cargarDatos() {
       const status = document.getElementById('status');
@@ -301,23 +392,31 @@
       const idLugarSel = document.getElementById('lugar').value;
       const selectQueEs = document.getElementById('queEs');
 
-      ocultarNuevo();
+      selectQueEs.value = "";
+      selectQueEs.disabled = true;
+      selectQueEs.innerHTML = '<option value="">-- Cargando --</option>';
+
+      elementoActual = null;
       ocultarInfo();
+      ocultarNuevo();
+      cancelarEdicion();
 
       if (!idLugarSel) {
         selectQueEs.innerHTML = '<option value="">Primero selecciona una parte</option>';
-        selectQueEs.disabled = true;
         return;
       }
 
       const elementos = datosInventario[idLugarSel] || [];
-      selectQueEs.innerHTML = '<option value="">-- Seleccionar Elemento --</option>';
+      let htmlOpciones = '<option value="">-- Seleccionar Elemento --</option>';
       
       elementos.forEach(el => {
-        selectQueEs.innerHTML += `<option value="${el.queEs}">${el.queEs}</option>`;
+        htmlOpciones += `<option value="${el.queEs}">${el.queEs}</option>`;
       });
 
-      selectQueEs.innerHTML += '<option value="__NUEVO__">+ Nuevo</option>';
+      htmlOpciones += '<option value="__NUEVO__">+ Nuevo</option>';
+      
+      selectQueEs.innerHTML = htmlOpciones;
+      selectQueEs.value = "";
       selectQueEs.disabled = false;
     }
 
@@ -327,10 +426,13 @@
 
       ocultarInfo();
       ocultarNuevo();
+      cancelarEdicion();
 
       if (queEsSel === '__NUEVO__') {
         mostrarNuevo();
         document.getElementById('contenedorBorrar').style.display = 'none';
+        document.getElementById('btnModoEditar').style.display = 'none';
+        document.getElementById('btnAceptar').style.display = 'block';
         elementoActual = null;
         return;
       }
@@ -363,7 +465,9 @@
         }
 
         document.getElementById('cardInfo').style.display = 'block';
-        document.getElementById('contenedorBorrar').style.display = 'flex';
+        document.getElementById('contenedorBorrar').style.display = 'flex'; // Muestra el switch
+        document.getElementById('btnModoEditar').style.display = 'block';
+        document.getElementById('btnAceptar').style.display = 'none';
 
         if (alto > 0 && largo > 0) {
           document.getElementById('contenedorCanvas').style.display = 'block';
@@ -371,6 +475,56 @@
         } else {
           document.getElementById('contenedorCanvas').style.display = 'none';
         }
+      }
+    }
+
+    function activarEdicion() {
+      if (!elementoActual) return;
+      modoEditando = true;
+
+      document.getElementById('editQueEs').value = elementoActual.queEs;
+      document.getElementById('editAlto').value = elementoActual.alto;
+      document.getElementById('editLargo').value = elementoActual.largo;
+      document.getElementById('editFondo').value = elementoActual.fondo || '';
+      document.getElementById('editComentario').value = elementoActual.comentario || '';
+
+      document.getElementById('cardInfo').style.display = 'none';
+      document.getElementById('contenedorBorrar').style.display = 'none';
+      document.getElementById('seccionEditar').style.display = 'block';
+
+      document.getElementById('filaBotonesNormal').style.display = 'none';
+      document.getElementById('filaBotonesEdicion').style.display = 'flex';
+    }
+
+    function cancelarEdicion() {
+      modoEditando = false;
+      document.getElementById('seccionEditar').style.display = 'none';
+      document.getElementById('filaBotonesEdicion').style.display = 'none';
+      document.getElementById('filaBotonesNormal').style.display = 'flex';
+      
+      const queEsSel = document.getElementById('queEs').value;
+      if (queEsSel && queEsSel !== '__NUEVO__') {
+        document.getElementById('cardInfo').style.display = 'block';
+        document.getElementById('contenedorBorrar').style.display = 'flex';
+        document.getElementById('btnModoEditar').style.display = 'block';
+        document.getElementById('btnAceptar').style.display = 'none';
+      }
+    }
+
+    function toggleBorrar() {
+      const marcado = document.getElementById('chkBorrar').checked;
+      const btnAceptar = document.getElementById('btnAceptar');
+      
+      if (marcado) {
+        document.getElementById('btnModoEditar').style.display = 'none';
+        btnAceptar.style.display = 'block';
+        btnAceptar.className = 'btn-peligro';
+        btnAceptar.textContent = 'Confirmar Borrado';
+      } else {
+        document.getElementById('btnModoEditar').style.display = 'block';
+        btnAceptar.style.display = 'none';
+        btnAceptar.className = '';
+        btnAceptar.textContent = 'Aceptar';
       }
     }
 
@@ -472,7 +626,11 @@
       document.getElementById('cardInfo').style.display = 'none';
       document.getElementById('contenedorBorrar').style.display = 'none';
       document.getElementById('contenedorCanvas').style.display = 'none';
+      document.getElementById('btnModoEditar').style.display = 'none';
+      document.getElementById('btnAceptar').style.display = 'none';
       document.getElementById('chkBorrar').checked = false;
+      document.getElementById('btnAceptar').className = '';
+      document.getElementById('btnAceptar').textContent = 'Aceptar';
     }
 
     function limpiarFormulario() {
@@ -481,26 +639,28 @@
       document.getElementById('queEs').innerHTML = '<option value="">Primero selecciona una parte</option>';
       ocultarInfo();
       ocultarNuevo();
+      cancelarEdicion();
+      elementoActual = null;
       document.getElementById('status').textContent = '';
     }
 
     document.getElementById('inventarioForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const btn = document.getElementById('btnAceptar');
       const status = document.getElementById('status');
       const idLugar = document.getElementById('lugar').value;
       const queEsVal = document.getElementById('queEs').value;
       const esNuevo = queEsVal === '__NUEVO__';
       const borrarMarcado = document.getElementById('chkBorrar').checked;
 
-      if (!idLugar || !queEsVal) return;
+      if (!idLugar) return;
 
       const payload = {
         accion: 'guardar',
         idLugar: idLugar,
         queEs: esNuevo ? '' : queEsVal,
         esNuevo: esNuevo,
+        esEdicion: modoEditando,
         borrar: borrarMarcado
       };
 
@@ -510,13 +670,18 @@
         payload.nuevoLargo = document.getElementById('nuevoLargo').value.trim();
         payload.nuevoFondo = document.getElementById('nuevoFondo').value.trim();
         payload.nuevoComentario = document.getElementById('nuevoComentario').value.trim();
+      } else if (modoEditando) {
+        payload.fila = elementoActual.fila;
+        payload.editQueEs = document.getElementById('editQueEs').value.trim();
+        payload.editAlto = document.getElementById('editAlto').value.trim();
+        payload.editLargo = document.getElementById('editLargo').value.trim();
+        payload.editFondo = document.getElementById('editFondo').value.trim();
+        payload.editComentario = document.getElementById('editComentario').value.trim();
       } else if (elementoActual) {
         payload.fila = elementoActual.fila;
       }
 
-      btn.disabled = true;
-      btn.textContent = 'Guardando...';
-      status.textContent = '';
+      status.textContent = 'Guardando...';
 
       try {
         const response = await fetch(APPS_SCRIPT_URL, {
@@ -530,15 +695,13 @@
           status.className = 'success';
           setTimeout(() => {
             location.reload();
-          }, 1000);
+          }, 800);
         } else {
           throw new Error(result.message || "Error en servidor");
         }
       } catch (err) {
         status.textContent = '✕ Error: ' + err.message;
         status.className = 'error';
-        btn.disabled = false;
-        btn.textContent = 'Aceptar';
       }
     });
 
