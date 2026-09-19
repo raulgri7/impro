@@ -256,7 +256,7 @@
   </div>
 
   <script>
-    // REEMPLAZA ESTA URL CON TU URL DE DESPLIEGUE WEB DE APPS SCRIPT (la que acaba en /exec)
+    // REEMPLAZA ESTA URL CON TU URL DE DESPLIEGUE WEB DE APPS SCRIPT
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyWZyfy_yXfTKSrRjEVSIT8ihyrCVU09_ttMd4FBiO3pIMPluxeoQVgTosKBXBsIREU/exec';
 
     let datosInventario = {}; 
@@ -276,17 +276,17 @@
         if (data.status === "error") throw new Error(data.message);
 
         datosInventario = data.inventario || {};
-        listaLugares = data.lugares || [];
+        listaLugares = data.lugares || []; // Array de { id, nombre }
 
         if (listaLugares.length === 0) {
-          selectLugar.innerHTML = '<option value="">No hay zonas disponibles</option>';
+          selectLugar.innerHTML = '<option value="">No hay zonas configuradas en la pestaña "lugares"</option>';
           status.textContent = '';
           return;
         }
 
         selectLugar.innerHTML = '<option value="">-- Seleccionar Parte --</option>';
         listaLugares.forEach(l => {
-          selectLugar.innerHTML += `<option value="${l}">${l}</option>`;
+          selectLugar.innerHTML += `<option value="${l.id}">${l.nombre}</option>`;
         });
 
         status.textContent = '';
@@ -297,19 +297,19 @@
     }
 
     function filtrarElementos() {
-      const lugarSel = document.getElementById('lugar').value;
+      const idLugarSel = document.getElementById('lugar').value;
       const selectQueEs = document.getElementById('queEs');
 
       ocultarNuevo();
       ocultarInfo();
 
-      if (!lugarSel) {
+      if (!idLugarSel) {
         selectQueEs.innerHTML = '<option value="">Primero selecciona una parte</option>';
         selectQueEs.disabled = true;
         return;
       }
 
-      const elementos = datosInventario[lugarSel] || [];
+      const elementos = datosInventario[idLugarSel] || [];
       selectQueEs.innerHTML = '<option value="">-- Seleccionar Elemento --</option>';
       
       elementos.forEach(el => {
@@ -321,7 +321,7 @@
     }
 
     function mostrarDetalles() {
-      const lugarSel = document.getElementById('lugar').value;
+      const idLugarSel = document.getElementById('lugar').value;
       const queEsSel = document.getElementById('queEs').value;
 
       ocultarInfo();
@@ -336,7 +336,7 @@
 
       if (!queEsSel) return;
 
-      const elementos = datosInventario[lugarSel] || [];
+      const elementos = datosInventario[idLugarSel] || [];
       elementoActual = elementos.find(el => el.queEs === queEsSel);
 
       if (elementoActual) {
@@ -364,7 +364,6 @@
         document.getElementById('cardInfo').style.display = 'block';
         document.getElementById('contenedorBorrar').style.display = 'flex';
 
-        // Dibujar la figura a escala (3D o 2D)
         if (alto > 0 && largo > 0) {
           document.getElementById('contenedorCanvas').style.display = 'block';
           dibujarFigura(alto, largo, tieneFondo ? fondo : 0);
@@ -398,11 +397,9 @@
       const startY = (canvas.height + (h + (f > 0 ? f * 0.5 : 0))) / 2;
 
       if (fondo > 0) {
-        // DIBUJO 3D (Prisma isométrico)
         const dx = f * 0.6;
         const dy = f * 0.6;
 
-        // Cara trasera
         ctx.fillStyle = '#2c2c30';
         ctx.strokeStyle = '#555';
         ctx.lineWidth = 1;
@@ -411,7 +408,6 @@
         ctx.fill();
         ctx.stroke();
 
-        // Cara superior
         ctx.fillStyle = '#3a3a40';
         ctx.beginPath();
         ctx.moveTo(startX - w / 2, startY - h);
@@ -422,14 +418,12 @@
         ctx.fill();
         ctx.stroke();
 
-        // Cara frontal (principal)
         ctx.fillStyle = 'rgba(10, 132, 255, 0.18)';
         ctx.strokeStyle = '#0a84ff';
         ctx.lineWidth = 1.5;
         ctx.fillRect(startX - w / 2, startY - h, w, h);
         ctx.strokeRect(startX - w / 2, startY - h, w, h);
 
-        // Aristas de conexión lateral
         ctx.strokeStyle = '#555';
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -442,7 +436,6 @@
         ctx.stroke();
 
       } else {
-        // DIBUJO 2D (Plano)
         ctx.fillStyle = 'rgba(10, 132, 255, 0.18)';
         ctx.strokeStyle = '#0a84ff';
         ctx.lineWidth = 1.5;
@@ -495,16 +488,16 @@
 
       const btn = document.getElementById('btnAceptar');
       const status = document.getElementById('status');
-      const lugar = document.getElementById('lugar').value;
+      const idLugar = document.getElementById('lugar').value;
       const queEsVal = document.getElementById('queEs').value;
       const esNuevo = queEsVal === '__NUEVO__';
       const borrarMarcado = document.getElementById('chkBorrar').checked;
 
-      if (!lugar || !queEsVal) return;
+      if (!idLugar || !queEsVal) return;
 
       const params = new URLSearchParams();
       params.append('accion', 'guardar');
-      params.append('lugar', lugar);
+      params.append('idLugar', idLugar);
       params.append('queEs', esNuevo ? '' : queEsVal);
       params.append('esNuevo', esNuevo);
       params.append('borrar', borrarMarcado);
