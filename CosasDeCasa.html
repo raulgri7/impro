@@ -114,6 +114,7 @@
       border-top: 1px solid #3a3a3c;
       padding-top: 8px;
       margin-top: 4px;
+      white-space: pre-line;
     }
 
     .checkbox-group {
@@ -221,7 +222,7 @@
         </div>
         <div class="form-group" style="margin-bottom: 0;">
           <label for="nuevoComentario">Comentario (opcional)</label>
-          <textarea id="nuevoComentario" rows="2" placeholder="Notas..."></textarea>
+          <textarea id="nuevoComentario" rows="3" placeholder="Notas, acentos, comillas..."></textarea>
         </div>
       </div>
 
@@ -276,10 +277,10 @@
         if (data.status === "error") throw new Error(data.message);
 
         datosInventario = data.inventario || {};
-        listaLugares = data.lugares || []; // Array de { id, nombre }
+        listaLugares = data.lugares || [];
 
         if (listaLugares.length === 0) {
-          selectLugar.innerHTML = '<option value="">No hay zonas configuradas en la pestaña "lugares"</option>';
+          selectLugar.innerHTML = '<option value="">No hay zonas configuradas</option>';
           status.textContent = '';
           return;
         }
@@ -495,21 +496,22 @@
 
       if (!idLugar || !queEsVal) return;
 
-      const params = new URLSearchParams();
-      params.append('accion', 'guardar');
-      params.append('idLugar', idLugar);
-      params.append('queEs', esNuevo ? '' : queEsVal);
-      params.append('esNuevo', esNuevo);
-      params.append('borrar', borrarMarcado);
+      const payload = {
+        accion: 'guardar',
+        idLugar: idLugar,
+        queEs: esNuevo ? '' : queEsVal,
+        esNuevo: esNuevo,
+        borrar: borrarMarcado
+      };
 
       if (esNuevo) {
-        params.append('nuevoQueEs', document.getElementById('nuevoQueEs').value.trim());
-        params.append('nuevoAlto', document.getElementById('nuevoAlto').value.trim());
-        params.append('nuevoLargo', document.getElementById('nuevoLargo').value.trim());
-        params.append('nuevoFondo', document.getElementById('nuevoFondo').value.trim());
-        params.append('nuevoComentario', document.getElementById('nuevoComentario').value.trim());
+        payload.nuevoQueEs = document.getElementById('nuevoQueEs').value.trim();
+        payload.nuevoAlto = document.getElementById('nuevoAlto').value.trim();
+        payload.nuevoLargo = document.getElementById('nuevoLargo').value.trim();
+        payload.nuevoFondo = document.getElementById('nuevoFondo').value.trim();
+        payload.nuevoComentario = document.getElementById('nuevoComentario').value.trim();
       } else if (elementoActual) {
-        params.append('fila', elementoActual.fila);
+        payload.fila = elementoActual.fila;
       }
 
       btn.disabled = true;
@@ -517,7 +519,10 @@
       status.textContent = '';
 
       try {
-        const response = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
         const result = await response.json();
 
         if (result.status === "success") {
@@ -527,12 +532,13 @@
             location.reload();
           }, 1000);
         } else {
-          throw new Error("Error en servidor");
+          throw new Error(result.message || "Error en servidor");
         }
       } catch (err) {
-        status.textContent = '✓ Guardado correctamente';
-        status.className = 'success';
-        setTimeout(() => location.reload(), 1500);
+        status.textContent = '✕ Error: ' + err.message;
+        status.className = 'error';
+        btn.disabled = false;
+        btn.textContent = 'Aceptar';
       }
     });
 
