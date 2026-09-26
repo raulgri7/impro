@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario de Casa</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 12px;
+    }
+
+    .card {
+      background-color: #1e1e1e;
+      width: 100%;
+      max-width: 480px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      border: 1px solid #2c2c2c;
+      margin-top: 10px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 18px;
+      color: #0a84ff;
+      font-size: 1.3rem;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 5px;
+      color: #a0a0a0;
+    }
+
+    select, input, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background-color: #2c2c2e;
+      color: #ffffff;
+      border: 1px solid #3a3a3c;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      border-color: #0a84ff;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .row .form-group {
+      flex: 1;
+    }
+
+    .nuevo-item-container, .editar-item-container {
+      background-color: #262628;
+      border: 1px dashed #0a84ff;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      display: none;
+    }
+
+    .info-card {
+      background-color: #2c2c2e;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 14px;
+      display: none;
+      border: 1px solid #3a3a3c;
+    }
+
+    .info-titulo {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: #8e8e93;
+      margin-bottom: 2px;
+      letter-spacing: 0.5px;
+    }
+
+    .info-valor {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    .info-comentario {
+      font-size: 0.9rem;
+      color: #d1d1d6;
+      border-top: 1px solid #3a3a3c;
+      padding-top: 8px;
+      margin-top: 4px;
+      white-space: pre-line;
+    }
+
+    .foto-miniatura {
+      width: 100%;
+      max-height: 180px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid #3a3a3c;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    /* SWITCH DE BORRAR */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #2c2c2e;
+      border: 1px solid #3a3a3c;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      display: none;
+    }
+
+    .switch-label {
+      font-size: 0.9rem;
+      color: #ff453a;
+      font-weight: 500;
+      margin-bottom: 0;
+      cursor: pointer;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #3a3a3c;
+      transition: .3s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #ff453a;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      flex: 1;
+      padding: 12px;
+      background-color: #0a84ff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button.btn-secundario {
+      background-color: #3a3a3c;
+    }
+
+    button.btn-editar {
+      background-color: #30d158;
+      color: #121212;
+    }
+
+    button.btn-peligro {
+      background-color: #ff453a;
+    }
+
+    button:active {
+      opacity: 0.8;
+    }
+
+    button:disabled {
+      background-color: #2c2c2e;
+      color: #555;
+      cursor: not-allowed;
+    }
+
+    #status {
+      margin-top: 12px;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 500;
+      min-height: 18px;
+      word-break: break-all;
+    }
+
+    .success { color: #30d158; }
+    .error { color: #ff453a; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Inventario de la Casa</h2>
+    <form id="inventarioForm">
+
+      <!-- 1. LUGAR (ZONA) -->
+      <div class="form-group">
+        <label for="lugar">Parte de la Casa</label>
+        <select id="lugar" required onchange="filtrarElementos()">
+          <option value="">Cargando zonas...</option>
+        </select>
+      </div>
+
+      <!-- 2. QUE ES (ELEMENTO) -->
+      <div class="form-group">
+        <label for="queEs">¿Qué es?</label>
+        <select id="queEs" required onchange="mostrarDetalles()" disabled>
+          <option value="">Primero selecciona una parte</option>
+        </select>
+      </div>
+
+      <!-- SECCIÓN PARA AÑADIR NUEVO ELEMENTO -->
+      <div id="seccionNuevo" class="nuevo-item-container">
+        <div class="form-group">
+          <label for="nuevoQueEs">Nombre del nuevo elemento</label>
+          <input type="text" id="nuevoQueEs" placeholder="Ej. Estantería nueva">
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <label for="nuevoAlto">Alto</label>
+            <input type="text" id="nuevoAlto" placeholder="Ej. 45">
+          </div>
+          <div class="form-group">
+            <label for="nuevoLargo">Largo</label>
+            <input type="text" id="nuevoLargo" placeholder="Ej. 55">
+          </div>
+          <div class="form-group">
+            <label for="nuevoFondo">Fondo (opcional)</label>
+            <input type="text" id="nuevoFondo" placeholder="Ej. 20">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="nuevoComentario">Comentario (opcional)</label>
+          <textarea id="nuevoComentario" rows="2" placeholder="Notas..."></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="inputFotoNuevo">Foto (opcional)</label>
+          <input type="file" id="inputFotoNuevo" accept="image/*" capture="environment" onchange="comprimirFoto(this, 'nuevo')">
+          <input type="hidden" id="base64Nuevo">
+        </div>
+      </div>
+
+      <!-- SECCIÓN PARA EDITAR ELEMENTO EXISTENTE -->
+      <div id="seccionEditar" class="editar-item-container">
+        <div class="form-group">
+          <label for="editQueEs">Nombre del elemento</label>
+          <input type="text" id="editQueEs">
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <label for="editAlto">Alto</label>
+            <input type="text" id="editAlto">
+          </div>
+          <div class="form-group">
+            <label for="editLargo">Largo</label>
+            <input type="text" id="editLargo">
+          </div>
+          <div class="form-group">
+            <label for="editFondo">Fondo</label>
+            <input type="text" id="editFondo">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="editComentario">Comentario</label>
+          <textarea id="editComentario" rows="2"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="inputFotoEdit">Cambiar / Añadir Foto</label>
+          <input type="file" id="inputFotoEdit" accept="image/*" capture="environment" onchange="comprimirFoto(this, 'edit')">
+          <input type="hidden" id="base64Edit">
+        </div>
+      </div>
+
+      <!-- TARJETA DE INFORMACIÓN DETALLADA -->
+      <div id="cardInfo" class="info-card">
+        <div class="info-titulo" id="lblLeyendaMedidas">Alto x Largo x Fondo</div>
+        <div class="info-valor" id="valMedidas">-</div>
+        
+        <div id="contenedorComentario" style="display: none;">
+          <div class="info-comentario" id="valComentario"></div>
+        </div>
+
+        <!-- CONTENEDOR DE FOTO GUARDADA -->
+        <div id="contenedorFoto" style="display: none; text-align: center;">
+          <img id="valFoto" class="foto-miniatura" alt="Foto del elemento" onclick="window.open(this.src)">
+        </div>
+        
+        <!-- CANVAS PARA EL DIBUJO 3D / 2D A ESCALA -->
+        <div id="contenedorCanvas" style="margin-top: 12px; text-align: center; display: none;">
+          <canvas id="canvasFigura" width="220" height="140" style="background: #252528; border-radius: 6px; border: 1px solid #3a3a3c;"></canvas>
+        </div>
+      </div>
+
+      <!-- SWITCH DE BORRAR -->
+      <div id="contenedorBorrar" class="switch-container">
+        <label for="chkBorrar" class="switch-label">Borrar</label>
+        <label class="switch">
+          <input type="checkbox" id="chkBorrar" onchange="toggleBorrar()">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- BOTONES -->
+      <div class="btn-row" id="filaBotonesNormal">
+        <button type="button" class="btn-secundario" onclick="limpiarFormulario()">Nuevo</button>
+        <button type="button" id="btnModoEditar" class="btn-editar" style="display:none;" onclick="activarEdicion()">Editar</button>
+        <button type="submit" id="btnAceptar" style="display: none;">Aceptar</button>
+      </div>
+
+      <div class="btn-row" id="filaBotonesEdicion" style="display: none;">
+        <button type="button" class="btn-secundario" onclick="cancelarEdicion()">Cancelar</button>
+        <button type="submit" id="btnGuardarEdicion">Guardar Cambios</button>
+      </div>
+      
+      <div id="status"></div>
+    </form>
+  </div>
+
+  <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8iI5T6Pm_ktTCTxff1A27qQBD1DQGdzHbu_n15zSHI2zJrTgdXDlBJuIQeOcXdPLL/exec';
+
+    let datosInventario = {}; 
+    let listaLugares = [];
+    let elementoActual = null;
+    let modoEditando = false;
+
+    async function cargarDatos() {
+      const status = document.getElementById('status');
+      const selectLugar = document.getElementById('lugar');
+
+      try {
+        status.textContent = 'Cargando inventario...';
+        
+        const response = await fetch(APPS_SCRIPT_URL);
+        const data = await response.json();
+
+        if (data.status === "error") throw new Error(data.message);
+
+        datosInventario = data.inventario || {};
+        listaLugares = data.lugares || [];
+
+        if (listaLugares.length === 0) {
+          selectLugar.innerHTML = '<option value="">No hay zonas configuradas</option>';
+          status.textContent = '';
+          return;
+        }
+
+        selectLugar.innerHTML = '<option value="">-- Seleccionar Parte --</option>';
+        listaLugares.forEach(l => {
+          selectLugar.innerHTML += `<option value="${l.id}">${l.nombre}</option>`;
+        });
+
+        status.textContent = '';
+      } catch (err) {
+        status.textContent = '✕ Error al cargar: ' + err.message;
+        status.className = 'error';
+      }
+    }
+
+    // FUNCIÓN PARA COMPRIMIR FOTOS AUTOMÁTICAMENTE ANTES DE CONVERTIR A BASE64
+    function comprimirFoto(input, destino) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 600; // Redimensionamos para que ocupe muy poco espacio
+          const MAX_HEIGHT = 600;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Exportar a JPEG comprimido al 70% de calidad
+          const base64String = canvas.toDataURL('image/jpeg', 0.7);
+          
+          if (destino === 'nuevo') {
+            document.getElementById('base64Nuevo').value = base64String;
+          } else if (destino === 'edit') {
+            document.getElementById('base64Edit').value = base64String;
+          }
+        }
+      }
+      reader.readAsDataURL(file);
+    }
+
+    function filtrarElementos() {
+      const idLugarSel = document.getElementById('lugar').value;
+      const selectQueEs = document.getElementById('queEs');
+
+      selectQueEs.value = "";
+      selectQueEs.disabled = true;
+      selectQueEs.innerHTML = '<option value="">-- Cargando --</option>';
+
+      elementoActual = null;
+      ocultarInfo();
+      ocultarNuevo();
+      cancelarEdicion();
+
+      if (!idLugarSel) {
+        selectQueEs.innerHTML = '<option value="">Primero selecciona una parte</option>';
+        return;
+      }
+
+      const elementos = datosInventario[idLugarSel] || [];
+      let htmlOpciones = '<option value="">-- Seleccionar Elemento --</option>';
+      
+      elementos.forEach(el => {
+        htmlOpciones += `<option value="${el.queEs}">${el.queEs}</option>`;
+      });
+
+      htmlOpciones += '<option value="__NUEVO__">+ Nuevo</option>';
+      
+      selectQueEs.innerHTML = htmlOpciones;
+      selectQueEs.value = "";
+      selectQueEs.disabled = false;
+    }
+
+    function mostrarDetalles() {
+      const idLugarSel = document.getElementById('lugar').value;
+      const queEsSel = document.getElementById('queEs').value;
+
+      ocultarInfo();
+      ocultarNuevo();
+      cancelarEdicion();
+
+      if (queEsSel === '__NUEVO__') {
+        mostrarNuevo();
+        document.getElementById('contenedorBorrar').style.display = 'none';
+        document.getElementById('btnModoEditar').style.display = 'none';
+        document.getElementById('btnAceptar').style.display = 'block';
+        elementoActual = null;
+        return;
+      }
+
+      if (!queEsSel) return;
+
+      const elementos = datosInventario[idLugarSel] || [];
+      elementoActual = elementos.find(el => el.queEs === queEsSel);
+
+      if (elementoActual) {
+        const alto = parseFloat(elementoActual.alto) || 0;
+        const largo = parseFloat(elementoActual.largo) || 0;
+        const fondo = parseFloat(elementoActual.fondo) || 0;
+        
+        const tieneFondo = elementoActual.fondo && elementoActual.fondo.trim() !== "" && fondo > 0;
+
+        if (tieneFondo) {
+          document.getElementById('lblLeyendaMedidas').textContent = "Alto x Largo x Fondo";
+          document.getElementById('valMedidas').textContent = `${elementoActual.alto} x ${elementoActual.largo} x ${elementoActual.fondo}`;
+        } else {
+          document.getElementById('lblLeyendaMedidas').textContent = "Alto x Largo";
+          document.getElementById('valMedidas').textContent = `${elementoActual.alto} x ${elementoActual.largo}`;
+        }
+
+        if (elementoActual.comentario && elementoActual.comentario.trim() !== "") {
+          document.getElementById('valComentario').textContent = elementoActual.comentario;
+          document.getElementById('contenedorComentario').style.display = 'block';
+        } else {
+          document.getElementById('contenedorComentario').style.display = 'none';
+        }
+
+        // MOSTRAR FOTO SI TIENE
+        if (elementoActual.foto && elementoActual.foto.trim() !== "") {
+          document.getElementById('valFoto').src = elementoActual.foto;
+          document.getElementById('contenedorFoto').style.display = 'block';
+        } else {
+          document.getElementById('contenedorFoto').style.display = 'none';
+        }
+
+        document.getElementById('cardInfo').style.display = 'block';
+        document.getElementById('contenedorBorrar').style.display = 'flex';
+        document.getElementById('btnModoEditar').style.display = 'block';
+        document.getElementById('btnAceptar').style.display = 'none';
+
+        if (alto > 0 && largo > 0) {
+          document.getElementById('contenedorCanvas').style.display = 'block';
+          dibujarFigura(alto, largo, tieneFondo ? fondo : 0);
+        } else {
+          document.getElementById('contenedorCanvas').style.display = 'none';
+        }
+      }
+    }
+
+    function activarEdicion() {
+      if (!elementoActual) return;
+      modoEditando = true;
+
+      document.getElementById('editQueEs').value = elementoActual.queEs;
+      document.getElementById('editAlto').value = elementoActual.alto;
+      document.getElementById('editLargo').value = elementoActual.largo;
+      document.getElementById('editFondo').value = elementoActual.fondo || '';
+      document.getElementById('editComentario').value = elementoActual.comentario || '';
+      document.getElementById('base64Edit').value = elementoActual.foto || ''; // Mantener foto previa si no se cambia
+      document.getElementById('inputFotoEdit').value = ''; // Reset input file
+
+      document.getElementById('cardInfo').style.display = 'none';
+      document.getElementById('contenedorBorrar').style.display = 'none';
+      document.getElementById('seccionEditar').style.display = 'block';
+
+      document.getElementById('filaBotonesNormal').style.display = 'none';
+      document.getElementById('filaBotonesEdicion').style.display = 'flex';
+    }
+
+    function cancelarEdicion() {
+      modoEditando = false;
+      document.getElementById('seccionEditar').style.display = 'none';
+      document.getElementById('filaBotonesEdicion').style.display = 'none';
+      document.getElementById('filaBotonesNormal').style.display = 'flex';
+      
+      const queEsSel = document.getElementById('queEs').value;
+      if (queEsSel && queEsSel !== '__NUEVO__') {
+        document.getElementById('cardInfo').style.display = 'block';
+        document.getElementById('contenedorBorrar').style.display = 'flex';
+        document.getElementById('btnModoEditar').style.display = 'block';
+        document.getElementById('btnAceptar').style.display = 'none';
+      }
+    }
+
+    function toggleBorrar() {
+      const marcado = document.getElementById('chkBorrar').checked;
+      const btnAceptar = document.getElementById('btnAceptar');
+      
+      if (marcado) {
+        document.getElementById('btnModoEditar').style.display = 'none';
+        btnAceptar.style.display = 'block';
+        btnAceptar.className = 'btn-peligro';
+        btnAceptar.textContent = 'Confirmar Borrado';
+      } else {
+        document.getElementById('btnModoEditar').style.display = 'block';
+        btnAceptar.style.display = 'none';
+        btnAceptar.className = '';
+        btnAceptar.textContent = 'Aceptar';
+      }
+    }
+
+    function dibujarFigura(alto, largo, fondo) {
+      const canvas = document.getElementById('canvasFigura');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const maxW = 130;
+      const maxH = 80;
+
+      let escalaX = maxW / largo;
+      let escalaY = maxH / alto;
+      if (fondo > 0) {
+        escalaX = maxW / (largo + fondo * 0.5);
+        escalaY = maxH / (alto + fondo * 0.5);
+      }
+      const escala = Math.min(escalaX, escalaY);
+
+      const w = largo * escala;
+      const h = alto * escala;
+      const f = fondo * escala;
+
+      const startX = (canvas.width - (w + (f > 0 ? f * 0.5 : 0))) / 2 + (f > 0 ? f * 0.5 : 0);
+      const startY = (canvas.height + (h + (f > 0 ? f * 0.5 : 0))) / 2;
+
+      if (fondo > 0) {
+        const dx = f * 0.6;
+        const dy = f * 0.6;
+
+        ctx.fillStyle = '#2c2c30';
+        ctx.strokeStyle = '#555';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.rect(startX - w / 2 + dx, startY - h - dy, w, h);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#3a3a40';
+        ctx.beginPath();
+        ctx.moveTo(startX - w / 2, startY - h);
+        ctx.lineTo(startX - w / 2 + dx, startY - h - dy);
+        ctx.lineTo(startX - w / 2 + dx + w, startY - h - dy);
+        ctx.lineTo(startX - w / 2 + w, startY - h);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(10, 132, 255, 0.18)';
+        ctx.strokeStyle = '#0a84ff';
+        ctx.lineWidth = 1.5;
+        ctx.fillRect(startX - w / 2, startY - h, w, h);
+        ctx.strokeRect(startX - w / 2, startY - h, w, h);
+
+        ctx.strokeStyle = '#555';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(startX - w / 2, startY - h);
+        ctx.lineTo(startX - w / 2 + dx, startY - h - dy);
+        ctx.moveTo(startX - w / 2 + w, startY - h);
+        ctx.lineTo(startX - w / 2 + w + dx, startY - h - dy);
+        ctx.moveTo(startX - w / 2 + w, startY);
+        ctx.lineTo(startX - w / 2 + w + dx, startY - dy);
+        ctx.stroke();
+
+      } else {
+        ctx.fillStyle = 'rgba(10, 132, 255, 0.18)';
+        ctx.strokeStyle = '#0a84ff';
+        ctx.lineWidth = 1.5;
+
+        const x = (canvas.width - w) / 2;
+        const y = (canvas.height - h) / 2;
+
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeRect(x, y, w, h);
+      }
+    }
+
+    function mostrarNuevo() {
+      document.getElementById('seccionNuevo').style.display = 'block';
+      document.getElementById('nuevoQueEs').required = true;
+      document.getElementById('nuevoAlto').required = true;
+      document.getElementById('nuevoLargo').required = true;
+    }
+
+    function ocultarNuevo() {
+      document.getElementById('seccionNuevo').style.display = 'none';
+      document.getElementById('nuevoQueEs').required = false;
+      document.getElementById('nuevoAlto').required = false;
+      document.getElementById('nuevoLargo').required = false;
+      document.getElementById('nuevoQueEs').value = '';
+      document.getElementById('nuevoAlto').value = '';
+      document.getElementById('nuevoLargo').value = '';
+      document.getElementById('nuevoFondo').value = '';
+      document.getElementById('nuevoComentario').value = '';
+      document.getElementById('base64Nuevo').value = '';
+      document.getElementById('inputFotoNuevo').value = '';
+    }
+
+    function ocultarInfo() {
+      document.getElementById('cardInfo').style.display = 'none';
+      document.getElementById('contenedorBorrar').style.display = 'none';
+      document.getElementById('contenedorCanvas').style.display = 'none';
+      document.getElementById('contenedorFoto').style.display = 'none';
+      document.getElementById('btnModoEditar').style.display = 'none';
+      document.getElementById('btnAceptar').style.display = 'none';
+      document.getElementById('chkBorrar').checked = false;
+      document.getElementById('btnAceptar').className = '';
+      document.getElementById('btnAceptar').textContent = 'Aceptar';
+    }
+
+    function limpiarFormulario() {
+      document.getElementById('inventarioForm').reset();
+      document.getElementById('queEs').disabled = true;
+      document.getElementById('queEs').innerHTML = '<option value="">Primero selecciona una parte</option>';
+      ocultarInfo();
+      ocultarNuevo();
+      cancelarEdicion();
+      elementoActual = null;
+      document.getElementById('status').textContent = '';
+    }
+
+    document.getElementById('inventarioForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const status = document.getElementById('status');
+      const idLugar = document.getElementById('lugar').value;
+      const queEsVal = document.getElementById('queEs').value;
+      const esNuevo = queEsVal === '__NUEVO__';
+      const borrarMarcado = document.getElementById('chkBorrar').checked;
+
+      if (!idLugar) return;
+
+      const payload = {
+        accion: 'guardar',
+        idLugar: idLugar,
+        queEs: esNuevo ? '' : queEsVal,
+        esNuevo: esNuevo,
+        esEdicion: modoEditando,
+        borrar: borrarMarcado
+      };
+
+      if (esNuevo) {
+        payload.nuevoQueEs = document.getElementById('nuevoQueEs').value.trim();
+        payload.nuevoAlto = document.getElementById('nuevoAlto').value.trim();
+        payload.nuevoLargo = document.getElementById('nuevoLargo').value.trim();
+        payload.nuevoFondo = document.getElementById('nuevoFondo').value.trim();
+        payload.nuevoComentario = document.getElementById('nuevoComentario').value.trim();
+        payload.nuevoFoto = document.getElementById('base64Nuevo').value;
+      } else if (modoEditando) {
+        payload.fila = elementoActual.fila;
+        payload.editQueEs = document.getElementById('editQueEs').value.trim();
+        payload.editAlto = document.getElementById('editAlto').value.trim();
+        payload.editLargo = document.getElementById('editLargo').value.trim();
+        payload.editFondo = document.getElementById('editFondo').value.trim();
+        payload.editComentario = document.getElementById('editComentario').value.trim();
+        payload.editFoto = document.getElementById('base64Edit').value;
+      } else if (elementoActual) {
+        payload.fila = elementoActual.fila;
+      }
+
+      status.textContent = 'Guardando...';
+
+      try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+
+        if (result.status === "success") {
+          status.textContent = '✓ Actualizado correctamente';
+          status.className = 'success';
+          setTimeout(() => {
+            location.reload();
+          }, 800);
+        } else {
+          throw new Error(result.message || "Error en servidor");
+        }
+      } catch (err) {
+        status.textContent = '✕ Error: ' + err.message;
+        status.className = 'error';
+      }
+    });
+
+    window.onload = cargarDatos;
+  </script>
+</body>
+</html>
