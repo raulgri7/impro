@@ -292,7 +292,7 @@
         </div>
         <div class="form-group" style="margin-bottom: 0;">
           <label for="inputFotoNuevo">Foto (opcional)</label>
-          <input type="file" id="inputFotoNuevo" accept="image/*" capture="environment" onchange="comprimirFoto(this, 'nuevo')">
+	  <input type="file" id="inputFotoNuevo" accept="image/*" onchange="comprimirFoto(this, 'nuevo')">
           <input type="hidden" id="base64Nuevo">
         </div>
       </div>
@@ -323,7 +323,7 @@
         </div>
         <div class="form-group" style="margin-bottom: 0;">
           <label for="inputFotoEdit">Cambiar / Añadir Foto</label>
-          <input type="file" id="inputFotoEdit" accept="image/*" capture="environment" onchange="comprimirFoto(this, 'edit')">
+          <input type="file" id="inputFotoEdit" accept="image/*" onchange="comprimirFoto(this, 'edit')">
           <input type="hidden" id="base64Edit">
         </div>
       </div>
