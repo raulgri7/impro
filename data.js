@@ -9,9 +9,8 @@
 
 window.ALUMNOS_POR_CLASE = {
     "Lunes": [
-        "Alba|F", "Andrea|F", "Beatriz|F", "Beatriz O|F", "Elena|F", 
-        "Estela|F", "Lucía|F", "María|F", "Marta|F", 
-        "Patricia|F", "Raquel|F", "Victoria|F", "Yolanda|F"
+        "Alba|F", "Beatriz G|F", "Beatriz O|F", "Cloe|F", "Cristina L|F", "Cristina M|F", "Elena|F", 
+        "Irene|F", "Lucía|F", "María|F", "Marta|F", "Vic|F"
     ],
     "Martes": [
         "Ainhoa|F", "AnaG|M", "Cris|F", "Carlos 1|M", "Fuen|F", "Judith|F", 
@@ -20,15 +19,15 @@ window.ALUMNOS_POR_CLASE = {
     ],
     "Miércoles": [
         "Bea|F", "Chuchi|M", "Elenita|F", "Esther|F", "Isa|F", 
-        "Isra|M", "Julia|F", "María|F", "Natalia|F", "Paloma|F", "Yesi|F"
+        "Isra|M", "Julia|F", "María|F", "Natalia|F", "Paloma|F"
     ],
     "Jueves 5": [
         "Alex|M", "David|M", "Elena|F", "Félix|M", "Fuen|F", 
         "Gema|F", "Héctor|M", "Irene|F", "Sara|F", "Óscar|M"
     ],
     "Jueves 7": [
-        "Ángeles|F", "Aroa|F", "Beloki|F", "Elena|F", "Eva|F", "Jesús|M", 
-        "María|F", "Paula|F", "Pilar|F", "Raúl|M", "Rous|F", "Virgi|F"
+        "Ángeles|F", "Aroa|F", "Beloki|F", "Cristian|M", "Elena|F", "Eva|F", "Fuen|F", "Lucía|F", "Lucía R|F", 
+        "María|F", "Miguel|M", "Raúl|M", "Virgi|F", "Yesi|F"
     ],
     "Viernes": [
         "Rubén|M", "Lucía|F", "Guillermo|M", "Marina|F", "Álvaro|M", 
