@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MoneyCasa - Resumen y Gráficas</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #121212; color: #e0e0e0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 12px; }
+    .container { width: 100%; max-width: 600px; margin-bottom: 10px; }
+    h2 { text-align: center; margin-bottom: 20px; color: #30d158; font-size: 1.5rem; }
+    
+    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .kpi-card { background-color: #1e1e1e; border: 1px solid #2c2c2c; padding: 14px; border-radius: 12px; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.4); grid-column: span 2; }
+    .kpi-title { font-size: 0.75rem; text-transform: uppercase; color: #8e8e93; margin-bottom: 4px; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+    
+    .comparison-list { font-size: 0.78rem; border-top: 1px solid #2c2c2c; padding-top: 6px; display: flex; flex-direction: column; gap: 3px; color: #b0b0b5; }
+    .comp-item { display: flex; justify-content: space-between; }
+    .positivo { color: #30d158; font-weight: 600; }
+    .negativo { color: #ff453a; font-weight: 600; }
+
+    .chart-card { background-color: #1e1e1e; border: 1px solid #2c2c2c; padding: 18px; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+    .chart-title { font-size: 0.9rem; font-weight: 600; color: #0a84ff; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .chart-container { position: relative; width: 100%; height: 240px; }
+    #status { text-align: center; font-size: 0.9rem; color: #8e8e93; margin-top: 20px; }
+    .error { color: #ff453a; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>MoneyCasa 📊 Resumen</h2>
+    <div id="status">Cargando datos financieros...</div>
+
+    <div class="kpi-grid" id="kpiContainer" style="display: none;">
+      <div class="kpi-card"><div class="kpi-title">Patrimonio Total</div><div class="kpi-value" id="valPatrimonio">-</div><div class="comparison-list" id="compPatrimonio"></div></div>
+      <div class="kpi-card"><div class="kpi-title">Dinero Disponible</div><div class="kpi-value" id="valDineroDisp">-</div><div class="comparison-list" id="compDineroDisp"></div></div>
+      <div class="kpi-card"><div class="kpi-title">Fondo de Pensiones</div><div class="kpi-value" id="valPensiones">-</div><div class="comparison-list" id="compPensiones"></div></div>
+      <div class="kpi-card"><div class="kpi-title">Otros Fondos (N+P+Q+S)</div><div class="kpi-value" id="valOtrosFondos">-</div><div class="comparison-list" id="compOtrosFondos"></div></div>
+      <div class="kpi-card"><div class="kpi-title">Fondo Niñas (Inés y Lucía)</div><div class="kpi-value" id="valFondoNinas">-</div><div class="comparison-list" id="compFondoNinas"></div></div>
+    </div>
+
+    <div class="chart-card" id="cardChartLinea" style="display: none;">
+      <div class="chart-title">Evolución Histórica del Patrimonio</div>
+      <div class="chart-container"><canvas id="graficaEvolucion"></canvas></div>
+    </div>
+
+    <div class="chart-card" id="cardChartVariacion" style="display: none;">
+      <div class="chart-title">Ahorro / Variación Neta vs Mes Anterior (€)</div>
+      <div class="chart-container"><canvas id="graficaVariacion"></canvas></div>
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 600px; text-align: center; margin: 20px 0;">
+    <a href="MoneyCasa.html" target="_blank" style="color: #30d158; text-decoration: none; font-size: 0.95rem; font-weight: 600; display: inline-block;">✏️ Ir al Formulario de Entrada ➔</a>
+  </div>
+
+  <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzuO16meYWIWIR7FwGPnvtrNwRLKwnazaGNuUyjjX2Z5rzuUGk0U5zY4nUpjCcEDvAnuA/exec';
+
+    function obtenerPassword() {
+      let pwd = sessionStorage.getItem("moneycasa_pwd");
+      if (!pwd) {
+        pwd = prompt("Introduce la contraseña de MoneyCasa:");
+        if (pwd) sessionStorage.setItem("moneycasa_pwd", pwd);
+      }
+      return pwd || "";
+    }
+
+    function buscarRegistroCercano(regs, fechaActualStr, diasOffset) {
+      if (!regs || regs.length < 2) return null;
+      const fechaActual = new Date(fechaActualStr);
+      const targetTime = fechaActual.getTime() - (diasOffset * 24 * 60 * 60 * 1000);
+      let mejorReg = null;
+      let menorDiff = Infinity;
+      for (let i = 0; i < regs.length - 1; i++) {
+        const regDate = new Date(regs[i].fecha);
+        const diff = Math.abs(regDate.getTime() - targetTime);
+        if (diff < menorDiff) { menorDiff = diff; mejorReg = regs[i]; }
+      }
+      return mejorReg;
+    }
+
+    function generarHTMLComparativas(regs, idxUltimo, accessorFn) {
+      const actual = regs[idxUltimo];
+      const valActual = accessorFn(actual);
+      let html = '';
+
+      if (idxUltimo >= 1) {
+        const prev = regs[idxUltimo - 1];
+        const diff = valActual - accessorFn(prev);
+        const clase = diff >= 0 ? 'positivo' : 'negativo';
+        const texto = (diff >= 0 ? '+' : '') + diff.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'});
+        html += `<div class="comp-item"><span>vs ${prev.fecha} (anterior):</span><span class="${clase}">${texto}</span></div>`;
+      }
+
+      const reg1Anio = buscarRegistroCercano(regs, actual.fecha, 365);
+      if (reg1Anio && reg1Anio.fecha !== actual.fecha) {
+        const diff = valActual - accessorFn(reg1Anio);
+        const clase = diff >= 0 ? 'positivo' : 'negativo';
+        const texto = (diff >= 0 ? '+' : '') + diff.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'});
+        html += `<div class="comp-item"><span>vs ${reg1Anio.fecha} (1 año):</span><span class="${clase}">${texto}</span></div>`;
+      }
+
+      const reg5Anios = buscarRegistroCercano(regs, actual.fecha, 1825);
+      if (reg5Anios && reg5Anios.fecha !== actual.fecha) {
+        const diff = valActual - accessorFn(reg5Anios);
+        const clase = diff >= 0 ? 'positivo' : 'negativo';
+        const texto = (diff >= 0 ? '+' : '') + diff.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'});
+        html += `<div class="comp-item"><span>vs ${reg5Anios.fecha} (5 años):</span><span class="${clase}">${texto}</span></div>`;
+      }
+
+      const reg10Anios = buscarRegistroCercano(regs, actual.fecha, 3650);
+      if (reg10Anios && reg10Anios.fecha !== actual.fecha) {
+        const diff = valActual - accessorFn(reg10Anios);
+        const clase = diff >= 0 ? 'positivo' : 'negativo';
+        const texto = (diff >= 0 ? '+' : '') + diff.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'});
+        html += `<div class="comp-item"><span>vs ${reg10Anios.fecha} (10 años):</span><span class="${clase}">${texto}</span></div>`;
+      }
+
+      return html || '<div class="comp-item"><span>Sin histórico suficiente</span></div>';
+    }
+
+    async function cargarResumenVisual() {
+      const status = document.getElementById('status');
+      const pwd = obtenerPassword();
+      try {
+        const response = await fetch(APPS_SCRIPT_URL + '?pwd=' + encodeURIComponent(pwd));
+        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+
+        const data = await response.json();
+        if (data.status === "error") throw new Error(data.message);
+
+        const regs = data.registros || [];
+        if (regs.length === 0) {
+          status.textContent = 'No hay registros financieros todavía.';
+          return;
+        }
+
+        status.style.display = 'none';
+
+        const idxUltimo = regs.length - 1;
+        const ultimo = regs[idxUltimo];
+
+        document.getElementById('valPatrimonio').textContent = ultimo.patrimonioTotal.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'});
+        document.getElementById('valDineroDisp').textContent = ultimo.patrimonioSinPension.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'});
+        document.getElementById('valPensiones').textContent = ultimo.planPensionesVal.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'});
+        document.getElementById('valOtrosFondos').textContent = ultimo.otrosFondosVal.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'});
+        document.getElementById('valFondoNinas').textContent = ultimo.fondoNinasVal.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'});
+
+        document.getElementById('compPatrimonio').innerHTML = generarHTMLComparativas(regs, idxUltimo, r => r.patrimonioTotal);
+        document.getElementById('compDineroDisp').innerHTML = generarHTMLComparativas(regs, idxUltimo, r => r.patrimonioSinPension);
+        document.getElementById('compPensiones').innerHTML = generarHTMLComparativas(regs, idxUltimo, r => r.planPensionesVal);
+        document.getElementById('compOtrosFondos').innerHTML = generarHTMLComparativas(regs, idxUltimo, r => r.otrosFondosVal);
+        document.getElementById('compFondoNinas').innerHTML = generarHTMLComparativas(regs, idxUltimo, r => r.fondoNinasVal);
+
+        document.getElementById('kpiContainer').style.display = 'grid';
+
+        const labelsFechas = regs.map(r => r.fecha);
+        const valoresPatrimonio = regs.map(r => r.patrimonioTotal);
+
+        document.getElementById('cardChartLinea').style.display = 'block';
+        new Chart(document.getElementById('graficaEvolucion').getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: labelsFechas,
+            datasets: [{
+              data: valoresPatrimonio,
+              borderColor: '#30d158',
+              backgroundColor: 'rgba(48, 209, 88, 0.1)',
+              borderWidth: 3, fill: true, tension: 0.2, pointBackgroundColor: '#30d158', pointRadius: 4
+            }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#8e8e93', font: { size: 10 } }, grid: { color: '#2c2c2e' } }, y: { ticks: { color: '#8e8e93' }, grid: { color: '#2c2c2e' } } } }
+        });
+
+        const variaciones = [];
+        const coloresBarras = [];
+        for (let i = 0; i < valoresPatrimonio.length; i++) {
+          if (i === 0) { variaciones.push(0); coloresBarras.push('#0a84ff'); }
+          else {
+            const diff = valoresPatrimonio[i] - valoresPatrimonio[i-1];
+            variaciones.push(diff);
+            coloresBarras.push(diff >= 0 ? '#30d158' : '#ff453a');
+          }
+        }
+
+        document.getElementById('cardChartVariacion').style.display = 'block';
+        new Chart(document.getElementById('graficaVariacion').getContext('2d'), {
+          type: 'bar',
+          data: { labels: labelsFechas, datasets: [{ label: 'Ahorro / Variación (€)', data: variaciones, backgroundColor: coloresBarras, borderRadius: 4 }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#8e8e93', font: { size: 10 } }, grid: { color: '#2c2c2e' } }, y: { ticks: { color: '#8e8e93' }, grid: { color: '#2c2c2e' } } } }
+        });
+
+      } catch (err) {
+        status.textContent = '✕ Error de acceso: ' + err.message;
+        status.className = 'error';
+      }
+    }
+
+    window.onload = cargarResumenVisual;
+  </script>
+</body>
+</html>

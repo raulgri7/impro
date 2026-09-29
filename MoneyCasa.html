@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MoneyCasa - Entrada de Datos</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #121212; color: #e0e0e0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 12px; }
+    .card { background-color: #1e1e1e; width: 100%; max-width: 520px; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); border: 1px solid #2c2c2c; margin-top: 10px; }
+    h2 { text-align: center; margin-bottom: 16px; color: #30d158; font-size: 1.4rem; }
+    
+    .bank-section { background-color: #252528; border: 1px solid #333338; border-radius: 10px; padding: 14px; margin-bottom: 14px; }
+    .bank-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; border-bottom: 1px solid #3a3a3c; padding-bottom: 6px; }
+    .bank-logo { width: 26px; height: 26px; object-fit: contain; border-radius: 4px; }
+    .bank-title { font-size: 0.9rem; text-transform: uppercase; color: #0a84ff; font-weight: 700; letter-spacing: 0.5px; }
+    .sub-title { font-size: 0.75rem; text-transform: uppercase; color: #8e8e93; margin: 8px 0 4px 0; font-weight: 600; }
+
+    .form-group { margin-bottom: 10px; }
+    label { display: block; font-size: 0.8rem; margin-bottom: 3px; color: #a0a0a0; }
+    input { width: 100%; padding: 8px 10px; background-color: #1c1c1e; color: #ffffff; border: 1px solid #3a3a3c; border-radius: 8px; font-size: 0.95rem; outline: none; }
+    input:focus { border-color: #30d158; }
+    .row { display: flex; gap: 8px; }
+    .row .form-group { flex: 1; }
+
+    button { width: 100%; padding: 12px; background-color: #30d158; color: #121212; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 10px; transition: opacity 0.2s; }
+    button:active { opacity: 0.8; }
+    #status { margin-top: 12px; text-align: center; font-size: 0.85rem; font-weight: 500; min-height: 22px; word-break: break-all; }
+    .loading-msg { color: #0a84ff; font-style: italic; }
+    .success { color: #30d158; }
+    .error { color: #ff453a; background: rgba(255, 69, 58, 0.1); padding: 8px; border-radius: 6px; border: 1px solid #ff453a; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>MoneyCasa - Nuevo Registro</h2>
+
+    <form id="moneyForm">
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label for="fecha">Fecha del registro</label>
+        <input type="date" id="fecha" required>
+      </div>
+
+      <!-- BANCO 1: ING -->
+      <div class="bank-section">
+        <div class="bank-header"><img src="Ing.png" class="bank-logo" alt="ING"><span class="bank-title">ING</span></div>
+        <div class="sub-title">Cuentas y Efectivo</div>
+        <div class="row">
+          <div class="form-group"><label for="ccNomina">CC Nómina</label><input type="text" id="ccNomina" required></div>
+          <div class="form-group"><label for="ccNaranja">CC Naranja</label><input type="text" id="ccNaranja" required></div>
+        </div>
+        <div class="row">
+          <div class="form-group"><label for="ccComun">CC Común</label><input type="text" id="ccComun" required></div>
+          <div class="form-group"><label for="ahorrosLaura">Ahorros Laura</label><input type="text" id="ahorrosLaura" required></div>
+        </div>
+        <div class="form-group"><label for="ccNaranjaLaura">CC Naranja Laura</label><input type="text" id="ccNaranjaLaura" required></div>
+
+        <div class="sub-title">Fondos e Inversiones</div>
+        <div class="row">
+          <div class="form-group"><label for="fondoIng">Fondo ING</label><input type="text" id="fondoIng" required></div>
+          <div class="form-group"><label for="fondoRentaFija">Renta Fija</label><input type="text" id="fondoRentaFija" required></div>
+        </div>
+        <div class="form-group"><label for="fondoSp">Fondo S&P</label><input type="text" id="fondoSp" required></div>
+
+        <div class="sub-title">Ahorros Infancia</div>
+        <div class="row">
+          <div class="form-group"><label for="ahorrosInes">Ahorros Inés</label><input type="text" id="ahorrosInes" required></div>
+          <div class="form-group"><label for="ahorrosLucia">Ahorros Lucía</label><input type="text" id="ahorrosLucia" required></div>
+        </div>
+        <div class="form-group"><label for="fondosInesLucia">Fondos Inés / Lucía</label><input type="text" id="fondosInesLucia" required></div>
+      </div>
+
+      <!-- BANCO 2: KUTXABANK -->
+      <div class="bank-section">
+        <div class="bank-header"><img src="Kutxabank.svg" class="bank-logo" alt="Kutxabank"><span class="bank-title">Kutxabank</span></div>
+        <div class="sub-title">Cuentas y Fondos</div>
+        <div class="form-group"><label for="ccKutxa">CC Kutxabank</label><input type="text" id="ccKutxa" required></div>
+        <div class="row">
+          <div class="form-group"><label for="planPensiones">Plan Pensiones</label><input type="text" id="planPensiones" required></div>
+          <div class="form-group"><label for="fondoKutxa">Nuevo Fondo</label><input type="text" id="fondoKutxa" required></div>
+        </div>
+      </div>
+
+      <!-- BANCO 3: N26 -->
+      <div class="bank-section">
+        <div class="bank-header"><img src="N26.png" class="bank-logo" alt="N26"><span class="bank-title">N26</span></div>
+        <div class="form-group"><label for="n26">Balance N26</label><input type="text" id="n26" required></div>
+      </div>
+
+      <!-- BANCO 4: REVOLUT -->
+      <div class="bank-section">
+        <div class="bank-header"><img src="Revolut.svg.webp" class="bank-logo" alt="Revolut"><span class="bank-title">Revolut</span></div>
+        <div class="sub-title">Cuentas e Inversiones</div>
+        <div class="form-group"><label for="revCc">Revolut CC</label><input type="text" id="revCc" required></div>
+        <div class="row">
+          <div class="form-group"><label for="revCrypto">Crypto</label><input type="text" id="revCrypto" required></div>
+          <div class="form-group"><label for="revOroPlata">Oro + Plata</label><input type="text" id="revOroPlata" required></div>
+        </div>
+        <div class="form-group"><label for="revAcciones">Acciones</label><input type="text" id="revAcciones" required></div>
+      </div>
+
+      <button type="submit">Guardar Registro MoneyCasa</button>
+      <div id="status" class="loading-msg">Cargando último registro...</div>
+    </form>
+  </div>
+
+  <div style="width: 100%; max-width: 520px; text-align: center; margin: 20px 0;">
+    <a href="MoneyCasaGraficas.html" target="_blank" style="color: #0a84ff; text-decoration: none; font-size: 0.95rem; font-weight: 600; display: inline-block;">📊 Ver Resumen y Gráficas ➔</a>
+  </div>
+
+  <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzuO16meYWIWIR7FwGPnvtrNwRLKwnazaGNuUyjjX2Z5rzuUGk0U5zY4nUpjCcEDvAnuA/exec';
+
+    function obtenerPassword() {
+      let pwd = sessionStorage.getItem("moneycasa_pwd");
+      if (!pwd) {
+        pwd = prompt("Introduce la contraseña de MoneyCasa:");
+        if (pwd) sessionStorage.setItem("moneycasa_pwd", pwd);
+      }
+      return pwd || "";
+    }
+
+    async function precargarUltimo() {
+      const status = document.getElementById('status');
+      const pwd = obtenerPassword();
+      try {
+        const res = await fetch(APPS_SCRIPT_URL + '?modo=ultimo&pwd=' + encodeURIComponent(pwd));
+        const data = await res.json();
+        
+        if (data.status === "error") {
+          throw new Error(data.message);
+        }
+
+        if (data.ultimo) {
+          const u = data.ultimo;
+          if (u.fecha) document.getElementById('fecha').value = u.fecha;
+          else document.getElementById('fecha').valueAsDate = new Date();
+
+          if (u.ccNomina !== undefined) document.getElementById('ccNomina').value = u.ccNomina;
+          if (u.ccNaranja !== undefined) document.getElementById('ccNaranja').value = u.ccNaranja;
+          if (u.ccKutxa !== undefined) document.getElementById('ccKutxa').value = u.ccKutxa;
+          if (u.ccComun !== undefined) document.getElementById('ccComun').value = u.ccComun;
+          if (u.ahorrosLaura !== undefined) document.getElementById('ahorrosLaura').value = u.ahorrosLaura;
+          if (u.ccNaranjaLaura !== undefined) document.getElementById('ccNaranjaLaura').value = u.ccNaranjaLaura;
+          
+          if (u.n26 !== undefined) document.getElementById('n26').value = u.n26;
+          if (u.revCc !== undefined) document.getElementById('revCc').value = u.revCc;
+          if (u.revCrypto !== undefined) document.getElementById('revCrypto').value = u.revCrypto;
+          if (u.revOroPlata !== undefined) document.getElementById('revOroPlata').value = u.revOroPlata;
+          if (u.revAcciones !== undefined) document.getElementById('revAcciones').value = u.revAcciones;
+
+          if (u.fondoIng !== undefined) document.getElementById('fondoIng').value = u.fondoIng;
+          if (u.fondoRentaFija !== undefined) document.getElementById('fondoRentaFija').value = u.fondoRentaFija;
+          if (u.fondoSp !== undefined) document.getElementById('fondoSp').value = u.fondoSp;
+          if (u.planPensiones !== undefined) document.getElementById('planPensiones').value = u.planPensiones;
+          if (u.fondoKutxa !== undefined) document.getElementById('fondoKutxa').value = u.fondoKutxa;
+          
+          if (u.ahorrosInes !== undefined) document.getElementById('ahorrosInes').value = u.ahorrosInes;
+          if (u.ahorrosLucia !== undefined) document.getElementById('ahorrosLucia').value = u.ahorrosLucia;
+          if (u.fondosInesLucia !== undefined) document.getElementById('fondosInesLucia').value = u.fondosInesLucia;
+
+          status.textContent = '✓ Datos cargados. Modifica lo que necesites.';
+          status.className = 'success';
+        } else {
+          document.getElementById('fecha').valueAsDate = new Date();
+          status.textContent = '';
+        }
+      } catch (err) {
+        document.getElementById('fecha').valueAsDate = new Date();
+        status.textContent = '✕ Error de acceso: ' + err.message;
+        status.className = 'error';
+      }
+    }
+
+    function evaluarMatematicas(valor) {
+      if (!valor) return 0;
+      try {
+        const limpio = String(valor).replace(/[^0-9+\-*/().]/g, '');
+        return eval(limpio) || 0;
+      } catch (e) {
+        return parseFloat(valor) || 0;
+      }
+    }
+
+    document.getElementById('moneyForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const status = document.getElementById('status');
+      const pwd = obtenerPassword();
+      
+      const payload = {
+        pwd: pwd,
+        fecha: document.getElementById('fecha').value,
+        ccNomina: evaluarMatematicas(document.getElementById('ccNomina').value),
+        ccNaranja: evaluarMatematicas(document.getElementById('ccNaranja').value),
+        ccKutxa: evaluarMatematicas(document.getElementById('ccKutxa').value),
+        ccComun: evaluarMatematicas(document.getElementById('ccComun').value),
+        ahorrosLaura: evaluarMatematicas(document.getElementById('ahorrosLaura').value),
+        ccNaranjaLaura: evaluarMatematicas(document.getElementById('ccNaranjaLaura').value),
+        n26: evaluarMatematicas(document.getElementById('n26').value),
+        revCc: evaluarMatematicas(document.getElementById('revCc').value),
+        revCrypto: evaluarMatematicas(document.getElementById('revCrypto').value),
+        revOroPlata: evaluarMatematicas(document.getElementById('revOroPlata').value),
+        revAcciones: evaluarMatematicas(document.getElementById('revAcciones').value),
+        fondoIng: evaluarMatematicas(document.getElementById('fondoIng').value),
+        fondoRentaFija: evaluarMatematicas(document.getElementById('fondoRentaFija').value),
+        fondoSp: evaluarMatematicas(document.getElementById('fondoSp').value),
+        planPensiones: evaluarMatematicas(document.getElementById('planPensiones').value),
+        fondoKutxa: evaluarMatematicas(document.getElementById('fondoKutxa').value),
+        ahorrosInes: evaluarMatematicas(document.getElementById('ahorrosInes').value),
+        ahorrosLucia: evaluarMatematicas(document.getElementById('ahorrosLucia').value),
+        fondosInesLucia: evaluarMatematicas(document.getElementById('fondosInesLucia').value)
+      };
+
+      status.textContent = 'Guardando datos...';
+      status.className = 'loading-msg';
+
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify(payload)
+        });
+
+        status.textContent = '✓ ¡Guardado correctamente!';
+        status.className = 'success';
+        setTimeout(() => location.reload(), 1200);
+
+      } catch (err) {
+        status.textContent = '✕ Error al guardar: ' + err.message;
+        status.className = 'error';
+      }
+    });
+
+    window.onload = precargarUltimo;
+  </script>
+</body>
+</html>
