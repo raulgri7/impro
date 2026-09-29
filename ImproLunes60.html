@@ -6,8 +6,8 @@
     <title>Sorteo ImproLUNES 60 💜</title>
     <style>
         /* ----------------------------------------------------------
-           ESTILOS (BASADOS EN COLORES DE IMPROLAB 60)
-           ---------------------------------------------------------- */
+            ESTILOS (BASADOS EN COLORES DE IMPROLAB 60)
+            ---------------------------------------------------------- */
         :root {
             --color-lila-principal: #6c5ce7; /* Morado/Lila de la imagen */
             --color-lila-oscuro: #483d8b;
@@ -170,6 +170,17 @@
             display: block;
             margin-bottom: 5px;
         }
+
+        /* NUEVO: Estilo para la pequeña explicación del juego */
+        .juego-explicacion {
+            font-size: 0.85em;
+            color: #555;
+            margin: 6px 0 10px 0;
+            font-style: italic;
+            border-left: 3px solid var(--color-lila-principal);
+            padding-left: 8px;
+            display: block;
+        }
         
         /* Para mostrar la lista de personas y ejercicios en el Setup */
         .list-display {
@@ -256,6 +267,15 @@
             display: block; 
         }
 
+        /* ESTILO ESPECÍFICO PARA LA EXPLICACIÓN DENTRO DEL ZOOM */
+        .resultado-zoom .juego-explicacion {
+            font-size: 0.6em !important;
+            margin: 15px auto 20px auto;
+            max-width: 90%;
+            padding-left: 12px;
+            border-left-width: 5px;
+        }
+
         /* ESTILO ESPECÍFICO PARA LOS NOMBRES DENTRO DEL ZOOM */
         .resultado-zoom .resultado-grupo strong:last-child {
             font-size: 1.2em !important; 
@@ -311,66 +331,101 @@
 
     <script>
         // ----------------------------------------------------------
-        // --- DATA DE CONFIGURACIÓN ---
+        // --- DATA DE CONFIGURACIÓN Y EXPLICACIONES ---
         // ----------------------------------------------------------
         
+        // Diccionario de explicaciones breves para cada juego de la lista
+        const EXPLICACIONES_JUEGOS = {
+            "2min. 1min. 30seg. 15seg": "La misma escena se repite cuatro veces comprimiendo el tiempo cada vez, obligando a ir directos al grano.",
+            "50 años más tarde": "Los personajes se reencuentran medio siglo después, arrastrando el pasado y su nueva realidad física. O bien son personajes nuevos en el mismo lugar, 50 años después.",
+            "Abecedario": "A cada participante se le asigna una letra del Abecedario, y siempre tiene que empezar a hablar con esa letra.",
+            "Cambio de estilo": "A lo largo de la escena, se grita ¡Cambio! y los actores deben adoptar un género cinematográfico o teatral diferente.",
+            "Completar la frase": "Dos personas del público completan las frases de los actores.",
+            "Congelados": "A una señal, dos actores deben congelarse en su postura actual y los otros dos les reemplazan en la misma postura, empezando otra escena completamente distinta.",
+            "Detective": "Ha habido un crimen y el detective tiene que adivinar, quién ha muerto, cómo ha muerto y quién lo ha matado.",
+            "Cuatro Emociones": "El espacio se divide en cuatro zonas y cada cuadrante obliga a los actores a interpretar una emoción radicalmente distinta.",
+            "Entrevista rara": "Un presentador excéntrico entrevista a invitados peculiares con una característica física o manía inusual.",
+            "Estatuas": "El público coloca a los improvisadores en tres posturas: inicial, media y final, y la impro tiene que pasar por esas tres posturas.",
+            "Excusa para llegar tarde": "Un personaje llega tardísimo a una cita y debe inventar tres justificaciones por las que ha llegado tarde.",
+            "Final alternativo": "Se hace una impro, y cuando se termina, se rebobina a cierto momento, y hay que acabarla distinto.",
+            "Giratoria y esquinas": "Actúan dos, dos más se colocan detrás formando un cuadrado, y el director va cambiándoles de posición de manera que sólo los dos de delante improvisan.",
+            "Idioma inventado": "Se improvisa íntegramente en un idioma jerigonzoso o inventado, donde la emoción y la corporalidad mandan.",
+            "La caja que no se abre": "Todos entran de dos en dos. Hay una caja que nunca llegan a abrir; los últimos dos deciden si la abren o no.",
+            "Libro": "Uno lee frases sueltas de un libro, y el otro le da réplica improvisando.",
+            "Marcas": "Los actores tienen que meter en la impro palabras relacionadas con alguna cosa que les diga el público (ej: marcas de coche, marcas de ropa...).",
+            "Morir": "Los personajes deben encontrar una forma creativa, dramática o cómica de despedirse y morir en escena, las decide el público.",
+            "Neutro+ entra y dice (ronda)": "Todos. Uno espera en neutro, entra otro que le tiene que proponer la escena, y así pasan todos.",
+            "No me chiles que no te veo": "Con auriculares dos. Los otros dos hacen escena y tienen que repetir la misma escena los de los auriculares, que no habrán oído nada.",
+            "Objeto/Animal 100%": "Un personaje adopta por completo los manierismos, tics o la personalidad de un animal u objeto inanimado, poco a poco, en porcentajes.",
+            "Objeto misterioso (empieza cuando adivina)": "Un actor hace como que manipula un objeto; cuando el otro adivina qué objeto es, empieza la impro.",
+            "Objeto sin nombre, sin usar": "Hay un objeto en escena que no se puede nombrar ni usar, pero que afecta a los personajes o hablan de él sin nombrarlo.",
+            "Palabras que meter": "Los actores tienen que colar de forma natural en su diálogo una serie de palabras extrañas o impuestas.",
+            "Pitonisa": "Una adivina lee el futuro de un cliente; tiene que adivinar la respuesta a sus tres preguntas.",
+            "Secreto de dos y otro no sabe": "Dos personajes comparten un secreto jugoso del que el tercero está totalmente excluido, generando tensión cómica.",
+            "Sólo preguntas": "Toda la conversación entre los personajes debe desarrollarse exclusivamente a base de preguntas.",
+            "Sonidos/Banda sonora": "Los actores improvisan, y otros dos actores o alguien del público tiene que hacer sonidos ambientales.",
+            "Tema absurdo, emoción real": "Se improvisa sobre algo absurdo o irreal, pero los actores tienen que sentir como reales todas las emociones.",
+            "Títulos distintos + título escena": "Cada actor tiene un título distinto y tiene que llevar a eso la escena. La escena transcurre y son lo que diga el público.",
+            "Tostadora": "El que se gira, improvisa.",
+            "Votación público": "El público decide al finalizar la impro quién se va, y los que quedan tienen que repetir la impro haciendo el papel de ese actor. Se repite hasta que quede uno."
+        };
+
         // Ejercicios ordenados alfabéticamente y con variantes/TODOS
         const EJERCICIOS_RAW = [
-            	"2min. 1min. 30seg. 15seg;TODOS",
-            	"50 años más tarde;4",
-            	"Abecedario;TODOS",
-            	"Cambio de estilo;3|2",
-            	"Completar la frase;2",
-            	"Congelados;4",
-            	"Detective;2",
-            	"Emociones (escenario en cuatro);4|3",
-            	"Entrevista rara;4|3",
-            	"Estatuas;3|2",
-            	"Excusa para llegar tarde;3",
-            	"Final alternativo;3|2",
-            	"Giratoria y esquinas;4",
-            	"Idioma inventado;4",
-            	"La caja que no se abre;TODOS",
-            	"Libro;2",
-            	"Marcas;2",
-            	"Morir;3|2",
-            	"Neutro+ entra y dice (ronda);TODOS",
-            	"No me chiles que no te veo;4",
-            	"Objeto/Animal 100%;3|2",
-            	"Objeto misterioso (empieza cuando adivina);2",
-            	"Objeto sin nombre, sin usar;2",
-            	"Palabras que meter;2",
-            	"Pitonisa;3",
-            	"Secreto de dos y otro no sabe;3",
-            	"Sólo preguntas;2",
-            	"Sonidos/Banda sonora;2",
-            	"Tema absurdo, emoción real;2",
-            	"Títulos distintos + título escena;3|2",
-            	"Tostadora;TODOS",
-            	"Votación público;4|3"
+            "2min. 1min. 30seg. 15seg;TODOS",
+            "50 años más tarde;4",
+            "Abecedario;TODOS",
+            "Cambio de estilo;3|2",
+            "Completar la frase;2",
+            "Congelados;4",
+            "Detective;2",
+            "Cuatro Emociones;4|3",
+            "Entrevista rara;4|3",
+            "Estatuas;3|2",
+            "Excusa para llegar tarde;3",
+            "Final alternativo;3|2",
+            "Giratoria y esquinas;4",
+            "Idioma inventado;4",
+            "La caja que no se abre;TODOS",
+            "Libro;2",
+            "Marcas;2",
+            "Morir;3|2",
+            "Neutro+ entra y dice (ronda);TODOS",
+            "No me chiles que no te veo;4",
+            "Objeto/Animal 100%;3|2",
+            "Objeto misterioso (empieza cuando adivina);2",
+            "Objeto sin nombre, sin usar;2",
+            "Palabras que meter;2",
+            "Pitonisa;3",
+            "Secreto de dos y otro no sabe;3",
+            "Sólo preguntas;2",
+            "Sonidos/Banda sonora;2",
+            "Tema absurdo, emoción real;2",
+            "Títulos distintos + título escena;3|2",
+            "Tostadora;TODOS",
+            "Votación público;4|3"
          ];
 
         const NOMBRES_INICIALES = [
-			"Alba", "Bea G", "Bea O", "Cloe", "Cristina L", "Cristina M", "Elena", 
-			"Irene", "Lucía", "María", "Marta", 
-			"Vic"
+            "Alba", "Bea G", "Bea O", "Cloe", "Cristina L", "Cristina M", "Elena", 
+            "Irene", "Lucía", "María", "Marta", 
+            "Vic"
         ];
 
         // ----------------------------------------------------------
         // --- ESTADO GLOBAL ---
         // ----------------------------------------------------------
         
-        let ejerciciosDisponibles = []; // Ejercicios NO usados desde la carga de la página
-        let ejerciciosExcluidos = new Set(); // Nombres de ejercicios excluidos manualmente
-        let participantesDisponibles = []; // Participantes presentes Y sin asignar (lista activa)
-        let participantesIniciales = [];  // Lista completa al inicio (para la gestión de ausencias)
-        let participantesAusentes = new Set(); // Nombres de los participantes marcados como ausentes
-        let participantesSorteados = new Set(); // Nombres de los participantes ya asignados en la ronda
+        let ejerciciosDisponibles = []; 
+        let ejerciciosExcluidos = new Set(); 
+        let participantesDisponibles = []; 
+        let participantesIniciales = [];  
+        let participantesAusentes = new Set(); 
+        let participantesSorteados = new Set(); 
         let ruletaIntervalId = null; 
         let minActoresRequeridos = 0;
-        let ultimoEjercicioFueTodos = false; // BANDERA DE CONTROL DE ESTADO
+        let ultimoEjercicioFueTodos = false; 
 
-        // Función auxiliar para mezclar un array
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -378,28 +433,22 @@
             }
         }
 
-        /** Procesa la lista de ejercicios RAW. */
         function procesarEjercicios(rawList) {
             return rawList.map(e => {
                 const [nombre, actoresStr] = e.split(';');
-                // Si es 'TODOS', actores es 0, si no, es un array de posibles actores [4, 3, 2]
                 const actores = actoresStr === 'TODOS' 
                     ? [0] 
-                    : actoresStr.split('|').map(n => parseInt(n)).sort((a, b) => b - a); // Ordenar de mayor a menor
-                
+                    : actoresStr.split('|').map(n => parseInt(n)).sort((a, b) => b - a);
                 return { nombre, actores, usado: false };
             });
         }
 
-        /** Inicializa los datos al cargar la página. */
         function inicializarDatos() {
             participantesIniciales = [...NOMBRES_INICIALES]; 
             participantesDisponibles = [...participantesIniciales];
             
-            // Procesar los ejercicios y establecer el estado de 'usado'
             ejerciciosDisponibles = procesarEjercicios(EJERCICIOS_RAW);
 
-            // Obtener el número mínimo de actores requeridos por cualquier ejercicio (excluyendo 'TODOS')
             const actoresRequeridos = ejerciciosDisponibles
                 .filter(e => e.actores[0] > 0)
                 .flatMap(e => e.actores);
@@ -409,76 +458,50 @@
                 : 0;
 
             mostrarEstadoSetup();
-            // Listener principal para el cierre del zoom
             document.body.addEventListener('click', manejarZoomResultado); 
             
-            // Listeners específicos para los checkboxes
             document.getElementById('participantes-display').addEventListener('change', manejarAusencia);
             document.getElementById('ejercicios-display').addEventListener('change', manejarExclusion);
         }
 
-        /** Maneja el marcado/desmarcado de un ejercicio como excluido. */
         function manejarExclusion(event) {
             if (event.target.type === 'checkbox' && event.target.name === 'excluir-ejercicio') {
                 const nombre = event.target.value;
-                
-                if (event.target.checked) {
-                    ejerciciosExcluidos.add(nombre);
-                } else {
-                    ejerciciosExcluidos.delete(nombre);
-                }
-                
-                mostrarEstadoSetup(); // Refresca el estado para actualizar el botón de sorteo
+                if (event.target.checked) ejerciciosExcluidos.add(nombre);
+                else ejerciciosExcluidos.delete(nombre);
+                mostrarEstadoSetup();
             }
         }
 
-        /** Maneja el marcado/desmarcado de un participante como ausente. */
         function manejarAusencia(event) {
             if (event.target.type === 'checkbox') {
                 const nombre = event.target.value;
-                
-                if (event.target.checked) {
-                    participantesAusentes.add(nombre);
-                } else {
-                    participantesAusentes.delete(nombre);
-                }
-                
+                if (event.target.checked) participantesAusentes.add(nombre);
+                else participantesAusentes.delete(nombre);
                 reinicializarParticipantesDisponibles();
                 mostrarEstadoSetup();
             }
         }
 
-        /** Regenera la lista de participantes disponibles (activos), excluyendo ausentes y sorteados. */
         function reinicializarParticipantesDisponibles() {
             participantesDisponibles = participantesIniciales.filter(nombre => 
                 !participantesAusentes.has(nombre) && !participantesSorteados.has(nombre)
             );
         }
 
-
-        /** Muestra las listas de participantes y ejercicios en el Setup. */
         function mostrarEstadoSetup() {
-            // Muestra todos los ejercicios, permitiendo excluirlos y tachando usados/excluidos.
             const ejerciciosHTML = ejerciciosDisponibles
                 .map(e => {
                     const esUsado = e.usado;
                     const esExcluido = ejerciciosExcluidos.has(e.nombre);
-
                     let estadoClase = '';
                     let isDisabled = false;
                     let isChecked = false;
                     
-                    if (esUsado) {
-                        estadoClase = 'ejercicio-usado';
-                        isDisabled = true;
-                    } else if (esExcluido) {
-                        estadoClase = 'ejercicio-excluido';
-                        isChecked = true;
-                    }
+                    if (esUsado) { estadoClase = 'ejercicio-usado'; isDisabled = true; } 
+                    else if (esExcluido) { estadoClase = 'ejercicio-excluido'; isChecked = true; }
 
-                    let actoresStr = e.actores[0] === 0 
-                        ? 'TODOS' 
-                        : e.actores.join('|') + ' pers.';
+                    let actoresStr = e.actores[0] === 0 ? 'TODOS' : e.actores.join('|') + ' pers.';
                         
                     return `
                         <label class="${estadoClase}">
@@ -490,26 +513,17 @@
                 .join('');
             document.getElementById('ejercicios-display').innerHTML = ejerciciosHTML || '<p style="color:red;">Ninguno disponible</p>';
 
-            // Mostrar el listado COMPLETO de participantes
             const participantesHTML = participantesIniciales
                 .map(nombre => {
                     const isAusente = participantesAusentes.has(nombre);
                     const isSorteado = participantesSorteados.has(nombre);
-                    
                     let estadoClase = '';
                     let estadoTexto = '';
                     let isDisabled = false;
                     let isChecked = false;
 
-                    if (isAusente) {
-                        estadoClase = 'ausente';
-                        estadoTexto = '(Ausente)';
-                        isChecked = true;
-                    } else if (isSorteado) {
-                        estadoClase = 'sorteado';
-                        estadoTexto = '(Sorteado)';
-                        isDisabled = true; 
-                    }
+                    if (isAusente) { estadoClase = 'ausente'; estadoTexto = '(Ausente)'; isChecked = true; } 
+                    else if (isSorteado) { estadoClase = 'sorteado'; estadoTexto = '(Sorteado)'; isDisabled = true; }
 
                     return `
                         <label class="${estadoClase}">
@@ -525,61 +539,48 @@
             const btn = document.getElementById('sortear-btn');
             const participantesPresentesRestantes = participantesDisponibles.length; 
             
-            // Filtrar los ejercicios numerados disponibles (NO USADOS y NO EXCLUIDOS)
             const ejerciciosNumeradosRestantes = ejerciciosDisponibles
                 .filter(e => e.actores[0] > 0 && !e.usado && !ejerciciosExcluidos.has(e.nombre));
             
-            // Filtrar los ejercicios TODOS disponibles (NO USADOS y NO EXCLUIDOS)
             const ejerciciosTodosRestantes = ejerciciosDisponibles
                 .filter(e => e.actores[0] === 0 && !e.usado && !ejerciciosExcluidos.has(e.nombre));
             
-            // Lógica para el botón principal
-            
-            // 1. Caso: NO QUEDA NINGÚN EJERCICIO DISPONIBLE (Final total)
             if (ejerciciosNumeradosRestantes.length === 0 && ejerciciosTodosRestantes.length === 0) {
                  btn.disabled = true;
                  btn.textContent = "✅ ¡FIN DEL SORTEO! No quedan más ejercicios.";
-                 btn.onclick = null; // No hace nada
-
+                 btn.onclick = null;
             } else if (participantesPresentesRestantes < minActoresRequeridos) {
-                 // 2. Caso: No hay suficientes participantes para los ejercicios numerados.
                  if (ejerciciosTodosRestantes.length > 0) {
-                     // Si quedan ejercicios TODOS, sortea TODOS
                     btn.disabled = false;
                     btn.textContent = `🛑 ÚLTIMO EJERCICIO DE RONDA (Sortear TODOS)`;
                     btn.onclick = iniciarSorteoTodos;
                  } else {
-                     // Si no quedan TODOS, solo queda resetear
                     btn.disabled = false;
                     btn.textContent = "INICIAR NUEVA RONDA (Resetear Participantes)";
                     btn.onclick = iniciarNuevaRonda;
                  }
-
-
             } else {
-                 // 3. Caso: Sorteo normal
                  btn.disabled = false;
                  btn.textContent = `SORTEAR PRÓXIMA ESCENA (Quedan ${participantesPresentesRestantes} personas)`;
                  btn.onclick = iniciarSorteo;
             }
         }
         
-        /** Resetea la lista de participantes sorteados para iniciar una nueva ronda. */
         function iniciarNuevaRonda() {
-            participantesSorteados = new Set(); // Vaciamos los sorteados
+            participantesSorteados = new Set();
             reinicializarParticipantesDisponibles();
             
             document.getElementById('resultados-sorteo').insertAdjacentHTML('afterbegin', `
                 <div class="resultado-grupo nuevo" style="background-color: #fce4ec; border-color: #e91e63;">
-                    <strong>¡NUEVA RONDA INICIADA!</strong><br>
-                    <strong>Participantes reseteados. Sorteando con ejercicios restantes.</strong>
+                    <strong>¡NUEVA RONDA INICIADA!</strong>
+                    <span class="juego-explicacion">Participantes reseteados. Sorteando con ejercicios restantes.</span>
+                    <strong>Participantes reseteados.</strong>
                 </div>
             `);
 
             mostrarEstadoSetup();
         }
 
-        /** Lógica de apertura del zoom. Mueve el elemento a la vista de pantalla completa. */
         function abrirZoomResultado(resultadoElement) {
             const zoomExistente = document.querySelector('.resultado-zoom');
             if(zoomExistente) zoomExistente.remove();
@@ -594,188 +595,117 @@
             return resultadoElement;
         }
 
-        /** Inicia el efecto de ruleta con duración fija y desaceleración. */
         function iniciarRuleta(elementoResultado, resultadoFinal) {
-            
             const TAMANO_FIJO_RULETA = 6; 
-            const DURACION_TOTAL = 2500; // 2.5 segundos
-            const INTERVALO_INICIAL = 75; // Rotación rápida inicial (75ms)
+            const DURACION_TOTAL = 2500;
+            const INTERVALO_INICIAL = 75;
             
             const actoresDisponiblesRuleta = participantesIniciales.filter(nombre => !participantesAusentes.has(nombre));
             const ejerciciosDisponiblesRuleta = EJERCICIOS_RAW.map(e => e.split(';')[0]);
 
             const nombreElemento = elementoResultado.querySelector('strong:first-child');
+            const explicacionElemento = elementoResultado.querySelector('.juego-explicacion');
             const improvisanElemento = elementoResultado.querySelector('strong:last-child');
             const ruletaAudio = document.getElementById('ruleta-audio');
             const bingAudio = document.getElementById('bing-audio'); 
             
             let tiempoTranscurrido = 0;
-            
             elementoResultado.style.cursor = 'wait';
             
-            // 1. Iniciar Audio de Ruleta
-            ruletaAudio.play().catch(e => console.log('El audio de ruleta no pudo iniciar.'));
+            ruletaAudio.play().catch(e => console.log('Audio no iniciado.'));
 
-            // Función que realiza una rotación
             const rotar = () => {
-                // Rotar Ejercicio
                 const improFalsa = ejerciciosDisponiblesRuleta[Math.floor(Math.random() * ejerciciosDisponiblesRuleta.length)];
-                
-                // Rotar Participantes (generar grupo aleatorio usando el TAMAÑO FIJO)
                 shuffleArray(actoresDisponiblesRuleta);
                 const grupoFalso = actoresDisponiblesRuleta.slice(0, TAMANO_FIJO_RULETA).join(', '); 
 
                 nombreElemento.innerHTML = `${improFalsa}`;
+                if (explicacionElemento) explicacionElemento.innerHTML = "Girando ruleta...";
                 improvisanElemento.innerHTML = `${grupoFalso}`;
             };
             
-            // Función de control de intervalo y desaceleración
             const loopRuleta = () => {
-                // Calcular el porcentaje de tiempo transcurrido
                 const porcentaje = Math.min(tiempoTranscurrido / DURACION_TOTAL, 1);
-                
-                // Usamos una función cuadrática para simular desaceleración (más lento al final)
                 const factorDesaceleracion = porcentaje * porcentaje;
-                const maxIntervalo = 500; // Intervalo máximo antes de parar
-                
-                // Calculamos el nuevo intervalo (más largo cuanto más cerca del final)
+                const maxIntervalo = 500;
                 const nuevoIntervalo = INTERVALO_INICIAL + (maxIntervalo - INTERVALO_INICIAL) * factorDesaceleracion;
                 
-                // Rotar
                 rotar();
-
                 tiempoTranscurrido += nuevoIntervalo;
 
                 if (tiempoTranscurrido < DURACION_TOTAL) {
                     ruletaIntervalId = setTimeout(loopRuleta, nuevoIntervalo);
                 } else {
-                    // 3. Detener la ruleta y mostrar resultado FINAL
                     clearTimeout(ruletaIntervalId);
                     ruletaIntervalId = null;
                     
-                    // Detener y resetear el audio de giro
                     ruletaAudio.pause();
                     ruletaAudio.currentTime = 0; 
+                    bingAudio.play().catch(e => console.log('Audio BING no iniciado.'));
                     
-                    // Reproducir el BING
-                    bingAudio.play().catch(e => console.log('El audio BING no pudo iniciar.'));
+                    const textoExplicacion = EXPLICACIONES_JUEGOS[resultadoFinal.impro.nombre] || "Ejercicio libre de improvisación.";
                     
-                    // Mostrar el resultado FINAL y real
                     nombreElemento.innerHTML = `${resultadoFinal.impro.nombre}`;
+                    if (explicacionElemento) explicacionElemento.innerHTML = `${textoExplicacion}`;
                     improvisanElemento.innerHTML = `${resultadoFinal.grupo.join(', ')}`;
                     
                     elementoResultado.style.cursor = 'pointer';
                 }
             };
             
-            // Iniciar el bucle de la ruleta
             loopRuleta();
         }
 
-        /** Lógica para sortear un ejercicio con un número fijo de participantes. */
         function iniciarSorteo() {
             if (ruletaIntervalId) return;
             
             const btn = document.getElementById('sortear-btn');
             btn.disabled = true; 
             
-            const participantesPresentesRestantes = participantesDisponibles.length; 
-            const N = participantesPresentesRestantes;
+            const N = participantesDisponibles.length;
             
-            // 1. Obtener ejercicios numerados posibles (excluyendo 'TODOS', usados y EXCLUIDOS)
             let ejerciciosPosibles = ejerciciosDisponibles
                 .filter(e => e.actores[0] > 0 && !e.usado && !ejerciciosExcluidos.has(e.nombre));
             
             let improElegida = null;
             let actoresReales = 0;
 
-
-            // 2. Filtrar ejercicios que puedan ser jugados con los participantes restantes (N)
-            // Criterio inicial: el número MÁS PEQUEÑO de actores que permite el ejercicio debe ser <= N.
             let ejerciciosAjustados = ejerciciosPosibles.filter(e => 
                 e.actores[e.actores.length - 1] <= N
             );
 
-            // --- LÓGICA DE RESTRICCIÓN: NUNCA DEJAR 1 PERSONA SOLA Y REGLAS ESPECÍFICAS ---
-            
             let ejerciciosFiltrados = ejerciciosAjustados.filter(e => {
-                // Obtenemos todos los números de actores que este ejercicio permite Y que caben en N.
                 const opcionesQueCaben = e.actores.filter(a => a <= N);
-                
-                // Regla Anti-Uno: Un ejercicio es válido si tiene AL MENOS una opción de actores 'A'
-                // tal que el resto (N - A) NO sea 1. (N - A) != 1
                 const cumpleAntiUno = opcionesQueCaben.some(a => (N - a) !== 1);
-                
                 if (!cumpleAntiUno) return false;
 
-                // Regla específica N=5: "ya no podía haber ejercicios de 4 personas, debía forzar 2 ó 3"
                 if (N === 5 && e.actores.includes(4)) {
-                    // Si el ejercicio solo permite 4 y no 3 o 2, lo descartamos.
-                    // Si permite 4|3 o 4|2, se mantiene, pero luego forzamos 3 o 2.
-                    if (!e.actores.includes(3) && !e.actores.includes(2)) {
-                        return false; 
-                    }
+                    if (!e.actores.includes(3) && !e.actores.includes(2)) return false; 
                 }
-                
                 return true;
             });
 
-            // Si el filtro estricto deja ejercicios válidos, los usamos. Si no, forzamos la caída a TODOS.
-            if (ejerciciosFiltrados.length > 0) {
-                ejerciciosAjustados = ejerciciosFiltrados;
-            }
+            if (ejerciciosFiltrados.length > 0) ejerciciosAjustados = ejerciciosFiltrados;
+            if (ejerciciosAjustados.length === 0) return iniciarSorteoTodos();
 
-            // Si después del filtro estricto no quedan ejercicios, revisamos si se puede sortear TODOS.
-            if (ejerciciosAjustados.length === 0) {
-                return iniciarSorteoTodos();
-            }
-
-            // 3. Elegir un ejercicio ajustado al azar
             const indiceImpro = Math.floor(Math.random() * ejerciciosAjustados.length);
-            const improCandidata = ejerciciosAjustados[indiceImpro];
-            
-            improElegida = improCandidata;
+            improElegida = ejerciciosAjustados[indiceImpro];
 
-            // 4. Seleccionar el número de actores: el más grande que quepa, con las excepciones de forzado.
-            
-            // Por defecto: Elegimos la opción más grande que quepa (porque ya sabemos que no deja 1).
             for (const numActores of improElegida.actores) {
-                if (numActores <= N) {
-                    actoresReales = numActores;
-                    break;
-                }
+                if (numActores <= N) { actoresReales = numActores; break; }
             }
             
-            // VALIDACIONES ESPECÍFICAS DE FORZADO:
-
-            // N=5: Regla de "forzar 2 o 3" y evitar 4.
             if (N === 5) {
-                // Si el ejercicio tiene opción 3 o 2, forzamos esa opción (la más grande de las dos si existen).
-                if (improElegida.actores.includes(3)) {
-                    actoresReales = 3;
-                } else if (improElegida.actores.includes(2)) {
-                    actoresReales = 2;
-                }
-            }
-            
-            // N=4: Regla de "o de 4 o dos de dos". Si el ejercicio permite 4, lo forzamos. Si no, el más grande.
-            // La elección por defecto ya elige 4 si está disponible.
-            
-            // N=3: Regla de "sólo podía sortear ejercicios de 3". Forzamos 3.
-            else if (N === 3 && improElegida.actores.includes(3)) {
+                if (improElegida.actores.includes(3)) actoresReales = 3;
+                else if (improElegida.actores.includes(2)) actoresReales = 2;
+            } else if (N === 3 && improElegida.actores.includes(3)) {
                 actoresReales = 3;
-            }
-            
-            // N=2: Regla de "sólo ejercicios de dos". Forzamos 2.
-            else if (N === 2 && improElegida.actores.includes(2)) {
+            } else if (N === 2 && improElegida.actores.includes(2)) {
                 actoresReales = 2;
             }
 
-
-            // Marcar el ejercicio como usado
             improElegida.usado = true;
 
-            // 5. Sortear Participantes
             const grupoElegido = [];
             const disponiblesParaSorteo = [...participantesDisponibles];
             
@@ -784,71 +714,44 @@
                 grupoElegido.push(disponiblesParaSorteo.splice(indicePersona, 1)[0]);
             }
             
-            // 6. ACTUALIZAR: Añadir a los sorteados y recalcular disponibles.
             grupoElegido.forEach(nombre => participantesSorteados.add(nombre));
             reinicializarParticipantesDisponibles(); 
 
-            // 7. Mostrar Resultado temporal en la lista
             const resultadoTemporal = { impro: { nombre: '... ROTANDO ...', actores: actoresReales }, grupo: [''] }; 
             const nuevoResultadoElement = mostrarResultado(resultadoTemporal.impro, resultadoTemporal.grupo);
-            
-            // 8. Abrir el zoom
             const elementoZoom = abrirZoomResultado(nuevoResultadoElement);
 
-            // 9. Iniciar la ruleta (incluye desaceleración y audio)
             iniciarRuleta(elementoZoom, { impro: improElegida, grupo: grupoElegido, actores: actoresReales });
-
-
-            // 10. NOTA: La reactivación del botón ocurrirá cuando el usuario
-            // cierre manualmente el zoom (manejador manejarZoomResultado)
         }
 
-        /** Lógica para sortear un ejercicio de la lista "TODOS" al final de la ronda. */
         function iniciarSorteoTodos() {
             if (ruletaIntervalId) return;
 
             const btn = document.getElementById('sortear-btn');
             btn.disabled = true;
-            
-            // 1. Activar bandera de control de estado
             ultimoEjercicioFueTodos = true; 
 
             const participantesPresentesTotales = participantesIniciales.filter(nombre => !participantesAusentes.has(nombre));
-            
-            // Obtener ejercicios "TODOS" restantes (NO USADOS y NO EXCLUIDOS)
             let ejerciciosTodosPosibles = ejerciciosDisponibles.filter(e => e.actores[0] === 0 && !e.usado && !ejerciciosExcluidos.has(e.nombre));
 
-            // Si no quedan, pasamos a la nueva ronda (esto no debería pasar si el botón está bien seteado)
             if (ejerciciosTodosPosibles.length === 0) {
                 btn.disabled = false;
-                ultimoEjercicioFueTodos = false; // Desactivar bandera si se resuelve inmediatamente
+                ultimoEjercicioFueTodos = false; 
                 return iniciarNuevaRonda();
             }
 
-            // Elegir un ejercicio "TODOS" al azar
             const indiceImpro = Math.floor(Math.random() * ejerciciosTodosPosibles.length);
             const improElegida = ejerciciosTodosPosibles[indiceImpro];
-
-            // Marcar el ejercicio como usado
             improElegida.usado = true;
 
-            // El grupo para el DISPLAY es solo "Todos"
             const grupoElegidoDisplay = ["Todos"];
-            
-            // Mostrar Resultado temporal
             const resultadoTemporal = { impro: { nombre: '... ROTANDO ...', actores: participantesPresentesTotales.length }, grupo: [''] }; 
             const nuevoResultadoElement = mostrarResultado(resultadoTemporal.impro, resultadoTemporal.grupo);
-            
             const elementoZoom = abrirZoomResultado(nuevoResultadoElement);
 
-            // Iniciar la ruleta.
             iniciarRuleta(elementoZoom, { impro: improElegida, grupo: grupoElegidoDisplay, actores: participantesPresentesTotales.length });
-            
-            // NOTA: El cierre y la nueva ronda se gestionan ahora en manejarZoomResultado
         }
 
-
-        /** Formatea y añade el resultado a la interfaz. Devuelve la referencia al nuevo elemento DIV. */
         function mostrarResultado(impro, grupo) {
             const resultadosDiv = document.getElementById('resultados-sorteo');
             
@@ -859,80 +762,55 @@
             }
 
             const grupoTexto = grupo.join(', ');
+            const textoExplicacion = EXPLICACIONES_JUEGOS[impro.nombre] || "";
             
             const nuevoResultadoHTML = `
                 <div class="resultado-grupo nuevo">
-                    <strong>${impro.nombre}</strong><br>
+                    <strong>${impro.nombre}</strong>
+                    <span class="juego-explicacion">${textoExplicacion}</span>
                     <strong>${grupoTexto}</strong>
                 </div>
             `;
             
             resultadosDiv.insertAdjacentHTML('afterbegin', nuevoResultadoHTML);
-            const nuevoElemento = resultadosDiv.querySelector('.resultado-grupo.nuevo');
-            
-            return nuevoElemento;
+            return resultadosDiv.querySelector('.resultado-grupo.nuevo');
         }
         
-        /** Maneja la funcionalidad de zoom/pantalla completa. */
         function manejarZoomResultado(event) {
-            // No permitir el cierre si la ruleta está activa.
             if (ruletaIntervalId) return; 
 
             let resultadoGrupo = event.target.closest('.resultado-grupo.nuevo');
             const resultadosDiv = document.getElementById('resultados-sorteo');
             const btn = document.getElementById('sortear-btn'); 
 
-            // Lógica de CIERRE:
             if ((resultadoGrupo && resultadoGrupo.parentNode.classList.contains('resultado-zoom')) || event.target.classList.contains('resultado-zoom')) {
-                
                 const zoomContainer = event.target.classList.contains('resultado-zoom') ? event.target : resultadoGrupo.parentNode;
                 const grupoZoomed = zoomContainer.querySelector('.resultado-grupo.nuevo');
                 
-                // Si la bandera está activa, significa que acabamos de cerrar un ejercicio de TODOS.
                 if (ultimoEjercicioFueTodos) {
-                    // 1. CERRAR ZOOM y mover el resultado al historial (Manual)
-                    if (grupoZoomed) {
-                        resultadosDiv.insertAdjacentElement('afterbegin', grupoZoomed);
-                    }
+                    if (grupoZoomed) resultadosDiv.insertAdjacentElement('afterbegin', grupoZoomed);
                     zoomContainer.remove(); 
-                    
-                    // 2. DESACTIVAR BANDERA
                     ultimoEjercicioFueTodos = false;
-                    
-                    // 3. FORZAR NUEVA RONDA (Esto llama a mostrarEstadoSetup, que re-habilita el botón)
                     iniciarNuevaRonda();
-                    
-                    // Salir para evitar que se ejecute la lógica de reactivación normal
                     return;
                 }
                 
-                // Lógica de cierre para SORTEO NORMAL
-                if (grupoZoomed) {
-                    // Mueve el resultado de vuelta al listado
-                    resultadosDiv.insertAdjacentElement('afterbegin', grupoZoomed);
-                }
+                if (grupoZoomed) resultadosDiv.insertAdjacentElement('afterbegin', grupoZoomed);
                 zoomContainer.remove(); 
                 
-                // Si el botón está deshabilitado, lo volvemos a habilitar llamando a mostrarEstadoSetup()
-                if (btn.disabled) { 
-                    mostrarEstadoSetup(); 
-                }
-                
+                if (btn.disabled) mostrarEstadoSetup(); 
                 return;
             }
             
-            // Lógica de APERTURA MANUAL: 
             if (resultadoGrupo && !resultadoGrupo.parentNode.classList.contains('resultado-zoom')) {
                 abrirZoomResultado(resultadoGrupo);
             }
         }
 
-        // Ejecutar al cargar la página
         window.onload = inicializarDatos;
     </script>
-	
-	
-<hr class="noprint" style="margin-top: 40px; border-color: #ccc;">
+    
+    <hr class="noprint" style="margin-top: 40px; border-color: #ccc;">
     <div class="noprint" style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
         <a href="index.html" style="
             text-decoration: none;
