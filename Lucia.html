@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Matrioska Definitiva...</title>
+    <title>Mensaje muy urgente...</title>
     <style>
         :root {
             --color-fondo: #1e1e24;
@@ -39,7 +39,7 @@
 
         .capa {
             display: none;
-            animation: fadeIn 0.5s ease-in-out forwards;
+            animation: fadeIn 0.4s ease-in-out forwards;
         }
 
         .capa.activa {
@@ -85,30 +85,35 @@
             transform: translateY(1px);
         }
 
+        /* Letra de la carta mucho más oscura y legible */
         .carta-perez {
-            background-color: #fffaf0;
-            color: #2c2c2c;
+            background-color: #fcf8ec;
+            color: #1a1a1a;
             padding: 25px;
             border-radius: 12px;
             text-align: left;
             font-family: 'Georgia', serif;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.15);
             margin-bottom: 25px;
-            border-left: 5px solid #e1b12c;
+            border-left: 5px solid #d4ac0d;
         }
 
         .carta-perez h3 {
-            color: #c23616;
+            color: #900c3f;
             margin-top: 0;
             text-align: center;
+        }
+
+        .carta-perez p {
+            color: #1a1a1a;
         }
 
         .regalo-img-container {
             margin-top: 15px;
             border-radius: 12px;
             overflow: hidden;
-            border: 4px solid #2ed573;
-            box-shadow: 0 5px 20px rgba(46, 213, 115, 0.3);
+            border: 4px solid #ff4757;
+            box-shadow: 0 5px 20px rgba(255, 71, 87, 0.3);
         }
 
         .regalo-img-container img {
@@ -116,194 +121,95 @@
             height: auto;
             display: block;
         }
-
-        .contador-capas {
-            font-size: 0.8rem;
-            color: #718093;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-        }
     </style>
 </head>
 <body>
 
     <div class="container">
 
-        <!-- CAPA 1 -->
+        <!-- CAPA 1: CARTA INICIAL DE PÉREZ -->
         <div class="capa activa" id="capa-1">
-            <div class="contador-capas">Capa 1 de 21</div>
-            <h2>📦 ¿Una caja misteriosa?</h2>
-            <p>Has encontrado una caja cerrada con un lazo digital. Parece que dentro hay algo, pero esto solo acaba de empezar...</p>
-            <button class="btn-matrioska" onclick="siguienteCapa(2)">Abrir capa 1 🔓</button>
-        </div>
-
-        <!-- CAPA 2 -->
-        <div class="capa" id="capa-2">
-            <div class="contador-capas">Capa 2 de 21</div>
-            <h2>🎁 ¡Sorpresa, otra caja!</h2>
-            <p>¿De verdad pensabas que ibas a llegar al final a la primera? Esto es una Matrioska en toda regla. ¡A por la siguiente!</p>
-            <button class="btn-matrioska" onclick="siguienteCapa(3)">Siguiente capa 🎁</button>
-        </div>
-
-        <!-- CAPA 3 -->
-        <div class="capa" id="capa-3">
-            <div class="contador-capas">Capa 3 de 21</div>
-            <h2>🔍 Buscando y cavando...</h2>
-            <p>Quitamos polvo digital, cortamos precintos virtuales y... ¡premio! Otra caja un poco más pequeña.</p>
-            <button class="btn-matrioska" onclick="siguienteCapa(4)">Continuar cavando ✨</button>
-        </div>
-
-        <!-- CAPA 4 -->
-        <div class="capa" id="capa-4">
-            <div class="contador-capas">Capa 4 de 21</div>
-            <h2>🧀 Algo huele por aquí...</h2>
-            <p>¿Has escuchado ese ruidito? No sé, huele a queso y a pisadas diminutas. ¿Seguimos abriendo?</p>
-            <button class="btn-matrioska" onclick="siguienteCapa(5)">Abrir capa 4 🗝️</button>
-        </div>
-
-        <!-- CAPA 5 -->
-        <div class="capa" id="capa-5">
-            <div class="contador-capas">Capa 5 de 21</div>
-            <h2>⏳ Paciencia, amigo/a...</h2>
-            <p>Llevamos un buen cacho, pero todavía queda bastante camino por recorrer. ¡No te rindas ahora!</p>
-            <button class="btn-matrioska" onclick="siguienteCapa(6)">Siguiente caja 📦</button>
-        </div>
-
-        <!-- CAPA 6 -->
-        <div class="capa" id="capa-6">
-            <div class="contador-capas">Capa 6 de 21</div>
-            <h2>🎨 Papel de regalo brillante</h2>
-            <p>Este envoltorio tiene purpurina virtual. Te va a dejar los dedos perdidos, pero hay que quitarlo.</p>
-            <button class="btn-matrioska" onclick="siguienteCapa(7)">Romper envoltorio ✨</button>
-        </div>
-
-        <!-- CAPA 7 -->
-        <div class="capa" id="capa-7">
-            <div class="contador-capas">Capa 7 de 21</div>
-            <h2>🧩 Caja número 7</h2>
-            <p>El número de la buena suerte... o eso dicen. Vamos a comprobar si es verdad abriendo la siguiente.</p>
-            <button class="btn-matrioska" onclick="siguienteCapa(8)">Abrir caja 7 🔓</button>
-        </div>
-
-        <!-- CAPA 8 -->
-        <div class="capa" id="capa-8">
-            <div class="contador-capas">Capa 8 de 21</div>
-            <h2>🚀 Zona intermedio-baja</h2>
-            <p>Ya has pasado el tercio del recorrido. ¿Te arrepientes de haber empezado? ¡Ya es tarde para volverse atrás!</p>
-            <button class="btn-matrioska" onclick="siguienteCapa(9)">Seguir avanzando 🏃‍♂️</button>
-        </div>
-
-        <!-- CAPA 9 -->
-        <div class="capa" id="capa-9">
-            <div class="contador-capas">Capa 9 de 21</div>
-            <h2>🔐 Candado numérico invisible</h2>
-            <p>Menos mal que este candado se abre solo con hacer clic en el botón, porque si tuvieras que adivinar la clave...</p>
-            <button class="btn-matrioska" onclick="siguienteCapa(10)">Forzar candado 🔑</button>
-        </div>
-
-        <!-- CAPA 10 -->
-        <div class="capa" id="capa-10">
-            <div class="contador-capas">Capa 10 de 21</div>
-            <h2>🎯 ¡Mitad de camino!</h2>
-            <p>¡Llegamos a la décima capa! A partir de aquí la presión aumenta y el suspense se corta con un cuchillo.</p>
-            <button class="btn-matrioska" onclick="siguienteCapa(11)">Pasar a la 11 ⚡</button>
-        </div>
-
-        <!-- CAPA 11 -->
-        <div class="capa" id="capa-11">
-            <div class="contador-capas">Capa 11 de 21</div>
-            <h2>📦 Caja de cartón reciclado</h2>
-            <p>Esta es ecológica. Contribuye al medio ambiente digital mientras sigues pulsando botonez sin parar.</p>
-            <button class="btn-matrioska" onclick="siguienteCapa(12)">Reciclar abriendo 🌱</button>
-        </div>
-
-        <!-- CAPA 12 -->
-        <div class="capa" id="capa-12">
-            <div class="contador-capas">Capa 12 de 21</div>
-            <h2>🎭 Misterio total</h2>
-            <p>Cada vez huele más a que hay algo gordo al final. O a lo mejor es solo vapor de agua virtual.</p>
-            <button class="btn-matrioska" onclick="siguienteCapa(13)">Descubrir qué hay 🕵️‍♂️</button>
-        </div>
-
-        <!-- CAPA 13 -->
-        <div class="capa" id="capa-13">
-            <div class="contador-capas">Capa 13 de 21</div>
-            <h2>🐈‍⬛ Número 13</h2>
-            <p>Dicen que da mala suerte, pero en esta Matrioska lo único que da es más ganas de llegar al final.</p>
-            <button class="btn-matrioska" onclick="siguienteCapa(14)">Desafiar a la suerte 🎲</button>
-        </div>
-
-        <!-- CAPA 14 -->
-        <div class="capa" id="capa-14">
-            <div class="contador-capas">Capa 14 de 21</div>
-            <h2>🧱 Ladrillos y más cajas</h2>
-            <p>¿Quién mete una caja dentro de otra de esta manera? Alguien con mucho tiempo libre y mucho cariño hacia ti.</p>
-            <button class="btn-matrioska" onclick="siguienteCapa(15)">Romper muro de cajas 🔨</button>
-        </div>
-
-        <!-- CAPA 15 -->
-        <div class="capa" id="capa-15">
-            <div class="contador-capas">Capa 15 de 21</div>
-            <h2>🎪 Cuenta atrás iniciada</h2>
-            <p>Ya queda un suspiro para llegar al meollo del asunto. ¡Mantén la concentración!</p>
-            <button class="btn-matrioska" onclick="siguienteCapa(16)">Siguiente paso 🎪</button>
-        </div>
-
-        <!-- CAPA 16 -->
-        <div class="capa" id="capa-16">
-            <div class="contador-capas">Capa 16 de 21</div>
-            <h2>🚨 Recta final</h2>
-            <p>Las alarmas del tesoro parpadean en rojo. ¡Estás a solo un par de capas de ver la verdad!</p>
-            <button class="btn-matrioska" onclick="siguienteCapa(17)">Acelerar ritmo 🚀</button>
-        </div>
-
-        <!-- CAPA 17 -->
-        <div class="capa" id="capa-17">
-            <div class="contador-capas">Capa 17 de 21</div>
-            <h2>🎁 Casi, casi...</h2>
-            <p>Se escuchan ruidos extraños al otro lado de esta última capa de cartón. ¿Estás preparado/a?</p>
-            <button class="btn-matrioska" onclick="siguienteCapa(18)">Abrir con miedo 🫣</button>
-        </div>
-
-        <!-- CAPA 18 -->
-        <div class="capa" id="capa-18">
-            <div class="contador-capas">Capa 18 de 21</div>
-            <h2>📜 ¡El penúltimo envoltorio!</h2>
-            <p>Bajo este último trozo de papel se esconde un mensaje muy, muy importante...</p>
-            <button class="btn-matrioska" onclick="siguienteCapa(19)">Leer el mensaje secreto 📜</button>
-        </div>
-
-        <!-- CAPA 19: CARTA DEL RATÓN PÉREZ -->
-        <div class="capa" id="capa-19">
-            <div class="contador-capas">Capa 19 de 21 (Mensaje Oficial)</div>
             <div class="carta-perez">
-                <h3>🐭 Carta Oficial del Ratón Pérez 🧀</h3>
-                <p><em>Estimada persona valiente que ha abierto veinte capas de cajas virtuales:</em></p>
-                <p>He estado inspeccionando los dientes caídos por el barrio y me he dejado olvidado un encargo muy especial en el fondo de esta madriguera digital. Como premio a tu enorme paciencia y destreza abriendo capas, tengo el honor de entregarte lo que tanto estabas esperando.</p>
-                <p>Disfrútalo muchísimo.</p>
-                <p style="text-align: right; margin-bottom: 0;"><strong>— Atentamente, El Ratón Pérez 🎩✨</strong></p>
+                <h3>🧀 ¡Hola, Lucía! Soy Pérez 🎩</h3>
+                <p>Mira, te escribo porque el viernes pasado estuve rondando por tu habitación después de lo del dentista, y ya sé que no te dieron el diente. Me extrañó un montón no verlo por aquí... pero madre mía, lo del truco del diente falso, cuando he mirado con el telescopio... ¡me has engañado totalmente!</p>
+                <p>Me ha encantado la broma, de verdad. Pero claro, siendo tú tan bromista, ahora te toca recibir una a ti por lista. ¿Pensabas que te ibas a librar tan fácil? Como me has intentado colar un diente de mentira, yo te voy a hacer pasar un buen rato hasta que veas la sorpresa. ¡A darle al botoncito se ha dicho!</p>
+                <p style="text-align: right; margin-bottom: 0;"><strong>Pérez 🐁✨</strong></p>
             </div>
-            <button class="btn-matrioska" onclick="siguienteCapa(20)">Ver la antesala 🚪</button>
+            <button class="btn-matrioska" onclick="siguienteCapa(2)">Aceptar el reto 🔓</button>
         </div>
 
-        <!-- CAPA 20 -->
-        <div class="capa" id="capa-20">
-            <div class="contador-capas">Capa 20 de 21 (La última puerta)</div>
-            <h2>🎉 ¡El último botón!</h2>
-            <p>Has superado las 20 capas de la Matrioska con matrícula de honor. Tras este botón se encuentra la foto del regalo definitivo.</p>
-            <button class="btn-matrioska" style="background: linear-gradient(135deg, #2ed573, #26af5f); box-shadow: 0 4px 15px rgba(46, 213, 115, 0.4);" onclick="siguienteCapa(21)">¡Ver el regalo final! 🎁👀</button>
+        <!-- CAPAS INTERMEDIAS (2 a 51) -->
+        <div class="capa" id="capa-2"><p>Vaya, vaya... ¿Con que querías ver qué pasaba eh? Pues esto no ha hecho más que empezar.</p><button class="btn-matrioska" onclick="siguienteCapa(3)">Siguiente botoncito 🖱️</button></div>
+        <div class="capa" id="capa-3"><p>Tengo muuuuucho tiempo libre por las noches, ¿sabes?</p><button class="btn-matrioska" onclick="siguienteCapa(4)">Continuar 🧀</button></div>
+        <div class="capa" id="capa-4"><p>¿Qué tal va el dedo? ¿Te cansas de hacer clic o qué?</p><button class="btn-matrioska" onclick="siguienteCapa(5)">Seguir pulsando ✨</button></div>
+        <div class="capa" id="capa-5"><p>Poco a poco nos acercamos... o nos alejamos, quién sabe cómo funciona esto de los botoncitos.</p><button class="btn-matrioska" onclick="siguienteCapa(6)">Siguiente 🚀</button></div>
+        <div class="capa" id="capa-6"><p>Oye, ¿te dolió mucho lo del dentista el viernes? Espero que no tanto como te va a doler el dedo de hacer clic.</p><button class="btn-matrioska" onclick="siguienteCapa(7)">Venga, otro más 🎯</button></div>
+        <div class="capa" id="capa-7"><p>Menos mal que el telescopio no enfoca ahora de día, porque seguramente veríamos tu cara de aburrimiento.</p><button class="btn-matrioska" onclick="siguienteCapa(8)">Avanzar 🔭</button></div>
+        <div class="capa" id="capa-8"><p>Esto va para largo, te lo avanzo.</p><button class="btn-matrioska" onclick="siguienteCapa(9)">Siguiente 📦</button></div>
+        <div class="capa" id="capa-9"><p>¿Estás sola o hay alguien mirando por encima de tu hombro sufriendo contigo?</p><button class="btn-matrioska" onclick="siguienteCapa(10)">Continuar 🕵️‍♂️</button></div>
+        <div class="capa" id="capa-10"><p>Seguimos adelante con una sonrisa de oreja a oreja.</p><button class="btn-matrioska" onclick="siguienteCapa(11)">Siguiente ⚡</button></div>
+        <div class="capa" id="capa-11"><p>Venga, que te saludo desde mi madriguera. ¡Hola, Lucía!</p><button class="btn-matrioska" onclick="siguienteCapa(12)">Devolver saludo 👋</button></div>
+        <div class="capa" id="capa-12"><p>Seguimos sumando clics sin mirar atrás.</p><button class="btn-matrioska" onclick="siguienteCapa(13)">Seguir 🏃‍♀️</button></div>
+        <div class="capa" id="capa-13"><p>13. Número de la suerte... o de la tortura de los clics.</p><button class="btn-matrioska" onclick="siguienteCapa(14)">Probar suerte 🎲</button></div>
+        <div class="capa" id="capa-14"><p>Otro botoncito más por aquí.</p><button class="btn-matrioska" onclick="siguienteCapa(15)">Siguiente 🛠️️</button></div>
+        <div class="capa" id="capa-15"><p>¡No te rindas ahora que ya no hay vuelta atrás!</p><button class="btn-matrioska" onclick="siguienteCapa(16)">A por el siguiente 🎪</button></div>
+        <div class="capa" id="capa-16"><p>Se rumorea que al final hay una sorpresa, pero los rumores nunca se sabe.</p><button class="btn-matrioska" onclick="siguienteCapa(17)">Averiguarlo 🚀</button></div>
+        <div class="capa" id="capa-17"><p>¿Estás preparada para lo que viene? (Spoiler: más botones).</p><button class="btn-matrioska" onclick="siguienteCapa(18)">Preparada 🎯</button></div>
+        <div class="capa" id="capa-18"><p>Respira hondo y pulsa otra vez.</p><button class="btn-matrioska" onclick="siguienteCapa(19)">Continuar 📜</button></div>
+        <div class="capa" id="capa-19"><p>Menudo repertorio de clics te estás marcando hoy.</p><button class="btn-matrioska" onclick="siguienteCapa(20)">Siguiente 🖱️</button></div>
+        <div class="capa" id="capa-20"><p>¿Te aburres o te hace gracia? Espero que lo segundo.</p><button class="btn-matrioska" onclick="siguienteCapa(21)">Continuar ✨</button></div>
+        <div class="capa" id="capa-21"><p>Seguimos cavando en la madriguera digital de Pérez.</p><button class="btn-matrioska" onclick="siguienteCapa(22)">Siguiente 🧀</button></div>
+        <div class="capa" id="capa-22"><p>Venga, un botoncito más para la saca. ¿Un botón es gnarly?</p><button class="btn-matrioska" onclick="siguienteCapa(23)">Avanzar 🚀</button></div>
+        <div class="capa" id="capa-23"><p>¿Quién gana este pulso, tu dedo o la página web?</p><button class="btn-matrioska" onclick="siguienteCapa(24)">Seguir pulsando 🎯</button></div>
+        <div class="capa" id="capa-24"><p>Ya casi ni te acuerdas de por qué habías empezado, ¿eh?</p><button class="btn-matrioska" onclick="siguienteCapa(25)">Siguiente 🔭</button></div>
+        <div class="capa" id="capa-25"><p>¡Epa! Mitad de camino superada... o eso te gustaría creer a ti.</p><button class="btn-matrioska" onclick="siguienteCapa(26)">Continuar 📦</button></div>
+        <div class="capa" id="capa-26"><p>Seguimos sumando capas de misterio y cartón piedra.</p><button class="btn-matrioska" onclick="siguienteCapa(27)">Siguiente 🕵️‍♂️</button></div>
+        <div class="capa" id="capa-27"><p>El ratón sonríe cada vez que haces clic.</p><button class="btn-matrioska" onclick="siguienteCapa(28)">Sonreír también ⚡</button></div>
+        <div class="capa" id="capa-28"><p>Venga, que el ritmo no pare.</p><button class="btn-matrioska" onclick="siguienteCapa(29)">Siguiente 👋</button></div>
+        <div class="capa" id="capa-29"><p>Cada vez queda menos para descubrir el pastel (o el queso).</p><button class="btn-matrioska" onclick="siguienteCapa(30)">Seguir 🏃‍♀️</button></div>
+        <div class="capa" id="capa-30"><p>¡Otro más para la colección!</p><button class="btn-matrioska" onclick="siguienteCapa(31)">Probar 🎲</button></div>
+        <div class="capa" id="capa-31"><p>¿Sigues ahí? Qué paciencia tienes, Lucía.</p><button class="btn-matrioska" onclick="siguienteCapa(32)">Siguiente 🛠️</button></div>
+        <div class="capa" id="capa-32"><p>Avanzamos sin miedo hacia lo desconocido.</p><button class="btn-matrioska" onclick="siguienteCapa(33)">A por el siguiente 🎪</button></div>
+        <div class="capa" id="capa-33"><p>Esto parece interminable, pero nada es eterno.</p><button class="btn-matrioska" onclick="siguienteCapa(34)">Averiguarlo 🚀</button></div>
+        <div class="capa" id="capa-34"><p>Un pasito más cerca de la gran verdad.</p><button class="btn-matrioska" onclick="siguienteCapa(35)">Continuar 🎯</button></div>
+        <div class="capa" id="capa-35"><p>Venga, respira y dale otra vez.</p><button class="btn-matrioska" onclick="siguienteCapa(36)">Siguiente 📜</button></div>
+        <div class="capa" id="capa-36"><p>Ya falta menos que cuando empezaste.</p><button class="btn-matrioska" onclick="siguienteCapa(37)">Continuar 🖱️</button></div>
+        <div class="capa" id="capa-37"><p>El misterio se intensifica por momentos.</p><button class="btn-matrioska" onclick="siguienteCapa(38)">Siguiente ✨</button></div>
+        <div class="capa" id="capa-38"><p>¿Te imaginas que después de esto no hay nada?</p><button class="btn-matrioska" onclick="siguienteCapa(39)">Seguir 🧀</button></div>
+        <div class="capa" id="capa-39"><p>¡Que no decaiga el ritmo del dedo!</p><button class="btn-matrioska" onclick="siguienteCapa(40)">Avanzar 🚀</button></div>
+        <div class="capa" id="capa-40"><p>Ya estamos en la zona caliente de la broma.</p><button class="btn-matrioska" onclick="siguienteCapa(41)">Siguiente 🎯</button></div>
+        <div class="capa" id="capa-41"><p>El ratón Pérez te manda un saludo muy especial.</p><button class="btn-matrioska" onclick="siguienteCapa(42)">Recibir saludo 🔭</button></div>
+        <div class="capa" id="capa-42"><p>Falta muy, muy poco para el gran desenlace.</p><button class="btn-matrioska" onclick="siguienteCapa(43)">Continuar 📦</button></div>
+        <div class="capa" id="capa-43"><p>Últimos cartuchos de esta aventura digital.</p><button class="btn-matrioska" onclick="siguienteCapa(44)">Siguiente 🕵️‍♂️</button></div>
+        <div class="capa" id="capa-44"><p>Prepárate mentalmente para el final.</p><button class="btn-matrioska" onclick="siguienteCapa(45)">Prepararse ⚡</button></div>
+        <div class="capa" id="capa-45"><p>El último tramo de este camino tan simpático.</p><button class="btn-matrioska" onclick="siguienteCapa(46)">Siguiente 👋</button></div>
+        <div class="capa" id="capa-46"><p>Venga, que ya casi tocas el final con la yema de los dedos.</p><button class="btn-matrioska" onclick="siguienteCapa(47)">Seguir 🏃‍♀️</button></div>
+        <div class="capa" id="capa-47"><p>El penúltimo escalón antes de la verdad.</p><button class="btn-matrioska" onclick="siguienteCapa(48)">Subir escalón 🎲</button></div>
+        <div class="capa" id="capa-48"><p>A un solo paso de leer el mensaje definitivo de Pérez.</p><button class="btn-matrioska" onclick="siguienteCapa(49)">Último paso previo 🛠️</button></div>
+        <div class="capa" id="capa-49"><p>Ahora sí, pulsa con fuerza para ver el veredicto final.</p><button class="btn-matrioska" onclick="siguienteCapa(50)">Ver mensaje final de Pérez 📜</button></div>
+
+        <!-- CAPA 50: REMATE DE LA CARTA DEL RATÓN PÉREZ -->
+        <div class="capa" id="capa-50">
+            <div class="carta-perez">
+                <h3>🧀 Mensaje final de Pérez 🎩</h3>
+                <p>Bueno, Lucía, bromista profesional... Como te prometí una broma a cambio de la tuya del dientecito, aquí va:</p>
+                <p><strong>¡No tienes regalo!</strong> ... Bueno, sí, jajaja. Pero te lo trae <strong>Amazon</strong>. ¡Ale! 📦✨</p>
+                <p>Así que ya ves, te has tragado un montón de botones para descubrir que el cartero digital está en camino y que tienes que esperar, jijiji.</p>
+                <p style="text-align: right; margin-bottom: 0;"><strong> Un beso enorme. Te quiero mucho. Pérez 🐁❤️</strong></p>
+            </div>
+            <button class="btn-matrioska" onclick="siguienteCapa(51)">¿Y cuándo llega? 🕒</button>
         </div>
 
-        <!-- CAPA 21: FOTO DEL REGALO FINAL -->
-        <div class="capa" id="capa-21">
-            <div class="contador-capas">🏆 ¡Destino Final Alcanzado! 🏆</div>
-            <h2>¡Aquí tienes tu regalo!</h2>
-            <p>¡Valió la pena abrir tantas cajas!</p>
+        <!-- CAPA 51: CIERRE FINAL CON FOTO Y AVISO DE COLE -->
+<div class="capa" id="capa-51">
+            <h2>🎁 ¡Misión cumplida!</h2>
+            <p>¿Qué será, será...?</p>
             <div class="regalo-img-container">
-                <!-- Reemplaza el enlace por la foto real de tu regalo -->
-                <img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=600&auto=format&fit=crop" alt="Foto del regalo">
+                <img src="https://clinicakranion.com/wp-content/uploads/2022/10/Banner-vertical-web-1-512x1024.png" alt="Diente" style="max-height: 220px; width: auto; margin: 0 auto; object-fit: contain;">
             </div>
+            <p style="margin-top: 25px; font-size: 1.2rem; color: #ff6b81; font-weight: bold;">
+                Este mediodía, cuando vuelvas del cole... ¡lo sabrás! 🏫🏠
+            </p>
         </div>
 
     </div>
@@ -322,4 +228,3 @@
 
 </body>
 </html>
- 
