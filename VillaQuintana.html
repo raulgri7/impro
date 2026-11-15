@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Villa Quintana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html { overflow-y: scroll; } /* Evita saltos de desplazamiento horizontal al cambiar de pestaña */
+    :root{--pine:#1f4d3a;--moss:#5d8a5a;--pool:#1b7fa8;--stone:#eef2ee;--ink:#1c2a24;--line:#dbe3db}
+    body{font-family:'Instrument Sans',system-ui,sans-serif;color:var(--ink);background:radial-gradient(900px 420px at 85% 0,#dcefe4,transparent),var(--stone);
+      --sky1:#3d5a8a;--sky2:#f3bd7a;--sun:#ffe7ae;--hill1:#6b7a4f;--hill2:#4f6a45;--ground:#3f5c3a;--leaf:#d98a2b;--p:#e0892e}
+    body[data-temp=invierno]{--sky1:#93a9c4;--sky2:#e9f0f6;--sun:#fff;--hill1:#b9c6c2;--hill2:#9fb1ab;--ground:#d3dedb;--leaf:#8a949b;--p:#fff}
+    body[data-temp=primavera]{--sky1:#74bfe8;--sky2:#f1f8e6;--sun:#fff3b0;--hill1:#8dbd6e;--hill2:#6aa85a;--ground:#4f9348;--leaf:#8bc46a;--p:#f6b3c9}
+    body[data-temp=verano]{--sky1:#1b8fd6;--sky2:#c4eaf7;--sun:#fff6c2;--hill1:#9ac16a;--hill2:#6fa04a;--ground:#3f8a3c;--leaf:#2f8340;--p:#fff}
+    body[data-temp=lluvia]{--sky1:#4a5568;--sky2:#718096;--sun:#cbd5e0;--hill1:#4a5568;--hill2:#2d3748;--ground:#2b6cb0;--leaf:#4a5568;--p:#90cdf4}
+    body[data-temp=nublado]{--sky1:#718096;--sky2:#cbd5e0;--sun:#e2e8f0;--hill1:#718096;--hill2:#4a5568;--ground:#4a5568;--leaf:#718096;--p:#e2e8f0}
+
+    h1,h2,h3,.serif{font-family:'Fraunces',Georgia,serif}
+    header{background:rgba(16,44,34,.88);backdrop-filter:blur(14px)}
+    .card{background:#fff;border:1px solid rgba(31,77,58,.1);border-radius:16px;box-shadow:0 1px 2px rgba(22,60,45,.06),0 14px 30px -22px rgba(22,60,45,.45)}
+    .tab{padding:.55rem .95rem;border-radius:999px;font-weight:600;font-size:.85rem;white-space:nowrap;color:#44554b;transition:.15s}
+    .tab:hover{background:#e3ebe3}
+    .tab.on{background:linear-gradient(160deg,var(--pine),#2f7054);color:#fff;box-shadow:0 6px 16px -8px rgba(31,77,58,.7)}
+    .mes{border:1px solid var(--line);background:#fff;border-radius:12px;padding:.45rem .2rem;font-size:.78rem;transition:.15s}
+    .mes:hover{border-color:var(--moss)}
+    .mes.on{background:linear-gradient(160deg,var(--pine),#2f7054);color:#fff;border-color:var(--pine)}
+    .mes.hoy:not(.on){box-shadow:inset 0 0 0 2px var(--pool)}
+    .dot{display:block;width:6px;height:6px;border-radius:50%}
+    .mes.on .dot{box-shadow:0 0 0 1.5px #fff}
+    .p-Crítica{background:#fde2e0;color:#9b1c1c}.p-Alta{background:#fdf0cf;color:#8a5a00}.p-Media{background:#dcebf3;color:#175a78}
+    .btn{background:var(--pine);color:#fff;font-weight:600;border-radius:12px;padding:.6rem 1.1rem;transition:.15s}
+    .btn:hover{background:#17392b}.btn:disabled{opacity:.6}
+    .btn2{background:#fff;border:1px solid var(--line);border-radius:10px;padding:.4rem .8rem;font-size:.78rem;font-weight:600}
+    .btn2:hover{background:#f1f5f1}
+    .ic{width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-size:.8rem;background:#f1f5f1;border:1px solid var(--line)}
+    .ic:hover{background:#e3ebe3}.ic.del:hover{background:#fde2e0;border-color:#f4b4ae}
+    input,select,textarea{outline:none}
+    input:focus,select:focus,textarea:focus{box-shadow:0 0 0 2px var(--moss)}
+    .hecha{opacity:.55}.hecha h4{text-decoration:line-through}
+    .nosb::-webkit-scrollbar{display:none}
+    #toast{position:fixed;left:50%;bottom:1.2rem;transform:translateX(-50%) translateY(2rem);opacity:0;transition:.25s;z-index:90;pointer-events:none}
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    /* Banner / Portada (Estrecho y persistente) */
+    .hero{position:relative;overflow:hidden;min-height:160px;color:#fff;isolation:isolate}
+    .hero svg{position:absolute;inset:0;width:100%;height:100%}
+    .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,28,22,.7),rgba(8,28,22,.2) 65%,transparent);z-index:1}
+    .hero-in{position:relative;z-index:2;padding-top:1rem;padding-bottom:1rem}
+    .hero h2{font-size:clamp(1.2rem,2.8vw,1.9rem);line-height:1.1;font-weight:700;max-width:32ch;text-shadow:0 2px 20px rgba(0,0,0,.4)}
+    .hero p{max-width:52ch}
+    #heroParticulas{position:absolute;inset:0;z-index:1;pointer-events:none}
+    #heroParticulas i{position:absolute;top:-20px;width:var(--sz);height:var(--sz);background:var(--p);border-radius:0 100% 0 100%;opacity:0;animation:caer var(--d) linear var(--dl) infinite}
+    body[data-temp=invierno] #heroParticulas i{border-radius:50%}
+    @keyframes caer{8%{opacity:.9}to{opacity:0;transform:translate(var(--sw),200px) rotate(calc(var(--r) + 540deg))}}
+    #sol{animation:sale 1.8s cubic-bezier(.2,.8,.2,1) both}
+    @keyframes sale{from{transform:translateY(40px);opacity:0}}
+    .st1{stop-color:var(--sky1)}.st2{stop-color:var(--sky2)}.f-sun{fill:var(--sun)}.f-h1{fill:var(--hill1)}.f-h2{fill:var(--hill2)}.f-g{fill:var(--ground)}.f-leaf{fill:var(--leaf)}
+
+    /* Botón y panel Apuntar */
+    #fab{position:fixed;right:1rem;bottom:1rem;z-index:55;box-shadow:0 14px 30px -10px rgba(16,44,34,.7);border-radius:999px;padding:.8rem 1.3rem}
+    #panelApuntar{position:fixed;z-index:65;right:1rem;bottom:1rem;width:min(520px,calc(100vw - 2rem));max-height:85vh;overflow:auto;box-shadow:0 24px 60px -12px rgba(0,0,0,.45)}
+    @media (max-width:767px){
+      nav[aria-label=Secciones]{position:fixed;left:.6rem;right:.6rem;bottom:.6rem;z-index:60;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:20px;padding:.35rem;box-shadow:0 14px 34px -10px rgba(0,0,0,.4);overflow:visible}
+      nav .tab{flex:1;padding:.6rem .05rem;font-size:.68rem;text-align:center}
+      #fab{bottom:5.2rem}#panelApuntar{bottom:5.2rem}#toast{bottom:5.6rem}
+      main{padding-bottom:6rem}
+      header h1{font-size:1.05rem}
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+<!-- CABECERA -->
+<header class="sticky top-0 z-40 text-white shadow">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+    <div>
+      <h1 class="text-xl sm:text-2xl leading-tight">Villa Quintana</h1>
+      <p id="subtituloFecha" class="text-xs text-emerald-100/90 capitalize"></p>
+    </div>
+    <div class="flex items-center gap-2">
+      <span id="estadoConexion" class="text-xs px-3 py-1.5 rounded-full bg-white/15">Conectando…</span>
+      <button onclick="sincronizarDesdeSheet(true)" class="text-xs bg-white/15 hover:bg-white/25 px-3 py-1.5 rounded-full" title="Recargar datos del Excel">Sincronizar</button>
+    </div>
+  </div>
+</header>
+
+<!-- BANNER / PORTADA CLIMÁTICA -->
+<section class="hero" aria-label="Resumen del tiempo y mes">
+  <svg viewBox="0 0 1200 200" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="st1"/><stop offset="1" class="st2"/></linearGradient>
+      <linearGradient id="gPool" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6fd0ee"/><stop offset="1" stop-color="#1b7fa8"/></linearGradient>
+      <g id="arbol"><rect x="203" y="120" width="14" height="80" fill="#4a3a30"/><g class="f-leaf"><circle cx="210" cy="80" r="46"/><circle cx="168" cy="104" r="34"/><circle cx="252" cy="106" r="36"/><circle cx="210" cy="118" r="32"/></g></g>
+    </defs>
+    <rect width="1200" height="200" fill="url(#gSky)"/>
+    <g id="sol"><circle cx="930" cy="60" r="60" class="f-sun" opacity=".2"/><circle cx="930" cy="60" r="32" class="f-sun"/></g>
+    <path d="M0 142 Q200 90 420 130 T800 120 T1200 115 V200 H0Z" class="f-h1"/>
+    <path d="M0 172 Q260 130 520 162 T1200 155 V200 H0Z" class="f-h2"/>
+    <use href="#arbol"/>
+    <use href="#arbol" transform="translate(850 30) scale(.75)"/>
+    <path d="M0 180 Q300 172 600 176 T1200 174 V200 H0Z" class="f-g"/>
+  </svg>
+  <div id="heroParticulas"></div>
+  <div class="hero-in max-w-6xl mx-auto px-4">
+    <p id="heroEtiqueta" class="text-xs font-semibold text-white/90 tracking-wide uppercase"></p>
+    <h2 id="heroTitulo" class="serif mt-0.5"></h2>
+    <p id="heroSub" class="text-xs text-white/85 mt-1"></p>
+  </div>
+</section>
+
+<main class="max-w-6xl mx-auto px-4 mt-4 space-y-5">
+  <nav class="flex gap-1.5 overflow-x-auto nosb pb-1" aria-label="Secciones">
+    <button class="tab on" id="tabBtn-inicio" onclick="cambiarTab('inicio')">Inicio</button>
+    <button class="tab" id="tabBtn-calendario" onclick="cambiarTab('calendario')">Calendario</button>
+    <button class="tab" id="tabBtn-bitacora" onclick="cambiarTab('bitacora')">Historial</button>
+    <button class="tab" id="tabBtn-contactos" onclick="cambiarTab('contactos')">Teléfonos</button>
+    <button class="tab" id="tabBtn-evolucion" onclick="cambiarTab('evolucion')">Evolución</button>
+    <button class="tab" id="tabBtn-ia" onclick="cambiarTab('ia')">Asistente</button>
+  </nav>
+
+  <!-- INICIO -->
+  <section id="vista-inicio" class="space-y-3">
+    <div class="flex items-center justify-between gap-2">
+      <h2 class="text-xl" id="tituloAhora">Lo que toca ahora</h2>
+      <button onclick="irAlHoyEnCalendario()" class="btn2">Abrir calendario</button>
+    </div>
+    <div id="contenedorAhora" class="space-y-4"></div>
+  </section>
+
+  <!-- CALENDARIO -->
+  <section id="vista-calendario" class="hidden space-y-4">
+    <div class="card p-4 space-y-3">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-1.5">
+          <button onclick="cambiarAnio(-1)" class="btn2" aria-label="Año anterior">◀</button>
+          <span id="labelAnioActivo" class="serif text-2xl font-bold px-2" style="color:var(--pine)"></span>
+          <button onclick="cambiarAnio(1)" class="btn2" aria-label="Año siguiente">▶</button>
+        </div>
+        <button onclick="seleccionarMes(0)" class="btn2">Todo <span id="spanAnioBtn"></span></button>
+      </div>
+      <div id="gridMeses" class="grid grid-cols-6 md:grid-cols-12 gap-1.5"></div>
+      <p class="text-xs text-slate-500 flex flex-wrap items-center gap-x-4 gap-y-1">
+        <span class="inline-flex items-center gap-1.5"><i class="dot" style="background:var(--moss)"></i>tiene tareas anuales</span>
+        <span class="inline-flex items-center gap-1.5"><i class="dot" style="background:var(--pool)"></i>tiene cosas puntuales ese año</span>
+      </p>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div class="space-y-3"><h3 id="tituloColCiclica" class="text-lg" style="color:var(--pine)"></h3><div id="contenedorTareasAgenda" class="space-y-3"></div></div>
+      <div class="space-y-3"><h3 id="tituloColHistorica" class="text-lg" style="color:var(--pool)"></h3><div id="contenedorHitosAnioMes" class="space-y-3"></div></div>
+    </div>
+  </section>
+
+  <!-- HISTORIAL -->
+  <section id="vista-bitacora" class="hidden space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3"><h2 class="text-xl">Historial</h2><button class="btn2" onclick="abrirNuevo('Bitacora')">＋ Nuevo</button></div>
+      <input id="buscarBitacora" type="search" oninput="renderizarBitacoraCompleta()" placeholder="Buscar: motor, piscina, 2024…" class="border rounded-lg px-3 py-2 text-sm w-full sm:w-72" style="border-color:var(--line)" />
+    </div>
+    <div id="contenedorBitacora" class="space-y-3"></div>
+  </section>
+
+  <!-- TELÉFONOS (Tarjetas limpias y ordenadas) -->
+  <section id="vista-contactos" class="hidden space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <h2 class="text-xl">Teléfonos y gremios</h2>
+        <button class="btn2" onclick="abrirNuevo('Contactos')">＋ Nuevo</button>
+      </div>
+      <input id="buscarContacto" type="search" oninput="renderizarContactos()" placeholder="Buscar gremio, portón, caldera…" class="border rounded-lg px-3 py-2 text-sm w-full sm:w-72" style="border-color:var(--line)" />
+    </div>
+    <div id="contenedorContactos" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+  </section>
+
+  <!-- EVOLUCIÓN -->
+  <section id="vista-evolucion" class="hidden space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div><h2 class="text-xl">Evolución con fotos</h2><p class="text-xs text-slate-500">Humedades, árboles, obras: compara cómo cambia un punto con los años.</p></div>
+      <button onclick="abrirModalNuevaFotoEvolucion()" class="btn">Añadir foto</button>
+    </div>
+    <div class="flex flex-wrap gap-2" id="selectorObjetivosEvolucion"></div>
+    <div id="contenedorComparadorEvolucion" class="space-y-4"></div>
+  </section>
+
+  <!-- ASISTENTE IA -->
+  <section id="vista-ia" class="hidden space-y-4">
+    <div class="card p-5 space-y-4">
+      <h2 class="text-xl">Pregunta sobre Quintana</h2>
+      <div class="flex flex-wrap gap-2">
+        <button onclick="cargarPreguntaIA('¿Cuándo cambié el motor de la piscina por última vez?')" class="btn2">¿Cuándo cambié el motor de la piscina?</button>
+        <button onclick="cargarPreguntaIA('¿Qué materiales y protecciones usamos para tapar la piscina?')" class="btn2">¿Cómo protegemos la lona?</button>
+        <button onclick="cargarPreguntaIA('¿Cuál es el teléfono para arreglar el portón verde?')" class="btn2">¿Teléfono del portón?</button>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-2">
+        <input id="inputPreguntaIA" type="text" onkeydown="if(event.key==='Enter')consultarIAQuintana()" placeholder="Escribe tu consulta…" class="flex-1 border rounded-xl px-4 py-2.5 text-sm" style="border-color:var(--line)" />
+        <button onclick="consultarIAQuintana()" id="btnEnviarIA" class="btn">Preguntar</button>
+      </div>
+      <div id="cajaRespuestaIA" class="hidden bg-slate-50 border rounded-xl p-4 text-sm whitespace-pre-line"></div>
+    </div>
+    <div class="card p-4 space-y-2">
+      <h3 class="text-sm font-semibold text-slate-600">Consultas anteriores</h3>
+      <div id="contenedorHistorialIA" class="space-y-2"></div>
+    </div>
+  </section>
+</main>
+
+<!-- APUNTAR (IA o manual) -->
+<button id="fab" class="btn" onclick="abrirApuntar()">＋ Apuntar</button>
+<section id="panelApuntar" class="hidden card p-4 space-y-3" role="dialog" aria-label="Apuntar algo">
+  <div class="flex items-center justify-between">
+    <h3 class="text-lg">Apuntar algo</h3>
+    <button class="ic" onclick="cerrarApuntar()" aria-label="Cerrar">✕</button>
+  </div>
+  <p class="text-xs text-slate-500">Escribe una frase y la IA decide dónde guardarla: tarea anual, algo que pasó en una fecha, un teléfono o una foto de seguimiento.</p>
+  <input id="inputMagicoTexto" type="text" onkeydown="if(event.key==='Enter')procesarEntradaMagicaIA()"
+    placeholder="Ej: «En sept 2024 cambié el motor de la piscina» o «Cada enero podar los potos»"
+    class="w-full border rounded-xl px-4 py-2.5 text-sm" style="border-color:var(--line)" />
+  <div class="flex gap-2">
+    <label class="btn2 cursor-pointer flex items-center justify-center shrink-0 px-4">
+      Fotos
+      <input id="inputMagicoFoto" type="file" accept="image/*" multiple class="hidden" onchange="mostrarPreviewMagica(this)" />
+    </label>
+    <button onclick="procesarEntradaMagicaIA()" id="btnMagicoIA" class="btn flex-1">Guardar</button>
+  </div>
+  <div id="previewMagicaCont" class="hidden items-center justify-between gap-2 bg-slate-50 px-3 py-2 rounded-lg border text-xs">
+    <div class="flex items-center gap-2 flex-wrap" id="listaPreviewsMagicas"></div>
+    <div class="flex items-center gap-3 shrink-0">
+      <span id="txtPreviewMagica" class="text-slate-700 font-medium"></span>
+      <button onclick="limpiarFotoMagica()" class="text-red-600 font-semibold">Quitar</button>
+    </div>
+  </div>
+  <div id="feedbackMagicoIA" class="hidden text-xs p-3 rounded-xl border"></div>
+  <div class="border-t pt-3 space-y-2">
+    <p class="text-xs text-slate-500">O rellénalo tú, sin IA:</p>
+    <div class="grid grid-cols-2 gap-2">
+      <button class="btn2" onclick="abrirNuevo('Agenda_Estacional')">Tarea anual</button>
+      <button class="btn2" onclick="abrirNuevo('Bitacora')">Cosa con fecha</button>
+      <button class="btn2" onclick="abrirNuevo('Contactos')">Teléfono</button>
+      <button class="btn2" onclick="abrirNuevo('Evolucion_Visual')">Foto de seguimiento</button>
+    </div>
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div id="modalLightbox" onclick="cerrarLightbox()" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[70] p-4 cursor-zoom-out">
+  <img id="imgLightbox" class="max-h-[90vh] max-w-[92vw] rounded-xl shadow-2xl border-2 border-white object-contain" alt="Foto ampliada" />
+</div>
+
+<!-- MODAL EDICIÓN -->
+<div id="modalEdicion" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[70] p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center border-b pb-2">
+      <h3 class="text-lg" id="modalEdicionTitulo">Editar</h3>
+      <button onclick="cerrarModalEdicion()" class="ic" aria-label="Cerrar">✕</button>
+    </div>
+    <input type="hidden" id="editHoja" /><input type="hidden" id="editId" />
+    <div id="editCamposDinamicos" class="space-y-3"></div>
+    <div class="space-y-1 pt-2 border-t">
+      <label class="text-xs font-semibold text-slate-600">Fotos (quita o añade)</label>
+      <div id="editGaleriaActual" class="flex flex-wrap gap-2"></div>
+      <input id="editNuevaFoto" type="file" accept="image/*" multiple class="w-full text-xs mt-2 border rounded p-2 bg-slate-50" onchange="agregarFotoEdicion(this)" />
+    </div>
+    <div class="flex justify-end gap-2 pt-3 border-t">
+      <button onclick="cerrarModalEdicion()" class="btn2">Cancelar</button>
+      <button id="btnGuardarEdicion" onclick="guardarEdicionModal()" class="btn">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOTO EVOLUCIÓN -->
+<div id="modalEvolucion" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[70] p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-5 space-y-3 shadow-xl">
+    <h3 class="text-lg">Añadir foto de seguimiento</h3>
+    <select id="selectEvoExistente" onchange="cambioSelectorEvoModal()" class="w-full border rounded-lg px-3 py-2 text-sm"></select>
+    <div id="camposNuevoObjetivoEvo" class="space-y-2 hidden">
+      <input id="inputEvoNombre" type="text" placeholder="Nombre (ej: Humedad pared habitación)" class="w-full border rounded-lg px-3 py-2 text-sm" />
+      <input id="inputEvoZona" type="text" placeholder="Zona (ej: Casa Grande - Habitación)" class="w-full border rounded-lg px-3 py-2 text-sm" />
+    </div>
+    <div class="grid grid-cols-2 gap-2">
+      <div><label class="text-xs font-semibold text-slate-600">Fecha</label><input id="inputEvoFecha" type="date" class="w-full border rounded-lg px-3 py-1.5 text-sm mt-1" /></div>
+      <div><label class="text-xs font-semibold text-slate-600">Foto (se comprime sola)</label><input id="inputEvoFile" type="file" accept="image/*" class="w-full text-xs mt-1" /></div>
+    </div>
+    <textarea id="inputEvoComentario" rows="2" placeholder="¿Cómo está hoy?" class="w-full border rounded-lg px-3 py-2 text-sm"></textarea>
+    <div class="flex justify-end gap-2 pt-2">
+      <button onclick="cerrarModales()" class="btn2">Cancelar</button>
+      <button onclick="guardarFotoEvolucionManual()" class="btn">Guardar en el Sheet</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="bg-slate-900 text-white text-sm px-4 py-2.5 rounded-xl shadow-lg max-w-[90vw]"></div>
+
+<script>
+  const CLOUDFLARE_WORKER_URL = "https://generador-impro.raul-grigelmo3.workers.dev";
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxcoQWkLRoDGDkMFIvg0iGnSG7E7cAemKeFYeN2LqFJ7ueDXZJuOHmdcECYAXns9Sra/exec";
+  const NOMBRES_MESES = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const hoyISO = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split("T")[0];
+  const nuevoId = p => `${p}-${Date.now().toString().slice(-6)}${Math.floor(10 + Math.random() * 90)}`;
+  const vacio = t => `<div class="card p-6 text-xs text-slate-500 text-center md:col-span-2 lg:col-span-3">${t}</div>`;
+  const PRIO = { "Crítica": 0, "Alta": 1, "Media": 2 };
+  const SEP = " ||| ";
+  const LIMITE_CELDA = 46000;
+
+  function toast(msg) {
+    const t = $("toast"); if (!t) return;
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 3200);
+  }
+
+  let estado = { agenda: [], bitacora: [], contactos: [], evolucion: [], consultas: [] };
+  let anioActivo = new Date().getFullYear();
+  let mesFiltro = 0;
+  let objetivoEvoActivo = "";
+  let fotosMagicasActuales = [];
+  let editFotosActuales = [];
+
+  let hechas = {};
+  try { hechas = JSON.parse(localStorage.getItem("quintana_hechas") || "{}"); } catch (e) {}
+
+  function estaHecha(t, anio) {
+    return !!hechas[`${anio}-${t.ID}`] || (anio === new Date().getFullYear() && t.Estado_Anual === "Completado");
+  }
+
+  function marcarHecha(id, anio, valor) {
+    const t = estado.agenda.find(x => x.ID === id);
+    hechas[`${anio}-${id}`] = valor;
+    if (!valor && t && t.Estado_Anual === "Completado") t.Estado_Anual = "Pendiente";
+    localStorage.setItem("quintana_hechas", JSON.stringify(hechas));
+    guardarCacheLigera();
+    renderizarTodoCalendario();
+    if (anio === new Date().getFullYear()) enviarAlSheet({ tipo: "toggleEstadoAgenda", id: id, nuevoEstado: valor ? "Completado" : "Pendiente" });
+    toast(valor ? "Tarea marcada como hecha" : "Tarea marcada como pendiente");
+  }
+
+  function obtenerAnioYMesDeFecha(fechaStr) {
+    if (!fechaStr) return { anio: 0, mes: 0, textoCorto: "" };
+    const str = String(fechaStr).split("T")[0], partes = str.split("-");
+    if (partes.length >= 2 && !isNaN(Number(partes[0]))) return { anio: Number(partes[0]), mes: Number(partes[1]), textoCorto: str };
+    const d = new Date(fechaStr);
+    if (!isNaN(d.getTime())) return { anio: d.getFullYear(), mes: d.getMonth() + 1, textoCorto: d.toISOString().split("T")[0] };
+    return { anio: 0, mes: 0, textoCorto: String(fechaStr) };
+  }
+
+  function cambiarAnio(d) { anioActivo += d; renderizarVistaCalendario(); }
+  function fijarAnio(a) { anioActivo = Number(a); renderizarVistaCalendario(); }
+  function seleccionarMes(m) { mesFiltro = m; renderizarVistaCalendario(); }
+  function irAlHoyEnCalendario() {
+    const h = new Date(); anioActivo = h.getFullYear(); mesFiltro = h.getMonth() + 1;
+    cambiarTab("calendario"); renderizarVistaCalendario();
+  }
+
+  /* ===== SINCRONIZAR CLIMA DE QUINTANA DEL PUENTE ===== */
+  async function sincronizarClimaQuintana() {
+    try {
+      const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=42.09&longitude=-4.20&current=temperature_2m,weather_code");
+      const data = await res.json();
+      const code = data.current?.weather_code ?? 0;
+      const temp = data.current?.temperature_2m ?? 15;
+      
+      let tempTag = "primavera";
+      let descClima = "Clima templado";
+      
+      if ([51,53,55,61,63,65,80,81,82,95,96,99].includes(code)) {
+        tempTag = "lluvia";
+        descClima = `Lloviendo en Quintana (${temp}°C)`;
+      } else if ([1,2,3,45,48].includes(code)) {
+        tempTag = "nublado";
+        descClima = `Nublado en Quintana (${temp}°C)`;
+      } else if (temp < 8) {
+        tempTag = "invierno";
+        descClima = `Frío en Quintana (${temp}°C)`;
+      } else if (temp > 24) {
+        tempTag = "verano";
+        descClima = `Cálido en Quintana (${temp}°C)`;
+      } else {
+        const m = new Date().getMonth() + 1;
+        tempTag = m >= 3 && m <= 5 ? "primavera" : m >= 6 && m <= 8 ? "verano" : m >= 9 && m <= 11 ? "otoño" : "invierno";
+        descClima = `Quintana del Puente (${temp}°C)`;
+      }
+
+      document.body.dataset.temp = tempTag;
+      const sub = $("heroSub");
+      if (sub) sub.textContent = `${descClima} · Tiempo en directo`;
+    } catch (e) {
+      console.warn("Clima offline:", e);
+    }
+  }
+
+  /* ===== FOTOS ===== */
+  function extraerListaFotos(raw) {
+    if (!raw) return [];
+    return String(raw).split("|||").map(s => s.trim()).filter(s => s.startsWith("data:image"));
+  }
+  function renderizarGaleriaFotosHTML(raw, alto = "h-36") {
+    const f = extraerListaFotos(raw);
+    if (!f.length) return "";
+    if (f.length === 1) return `<img src="${f[0]}" onclick="abrirLightbox(this.src)" class="mt-2 rounded-lg ${alto} w-full object-cover border cursor-zoom-in" alt="Foto adjunta" />`;
+    return `<div class="mt-2 grid grid-cols-3 gap-1.5">${f.map((s, i) => `<img src="${s}" onclick="abrirLightbox(this.src)" class="rounded-lg h-24 w-full object-cover border cursor-zoom-in" alt="Foto ${i + 1}" />`).join("")}</div>`;
+  }
+  function abrirLightbox(src) { $("imgLightbox").src = src; $("modalLightbox").classList.replace("hidden", "flex"); }
+  function cerrarLightbox() { $("modalLightbox").classList.replace("flex", "hidden"); }
+
+  function comprimirFotoUltraLigera(file, maxLado = 300, maxChars = 38000) {
+    return new Promise(resolve => {
+      if (!file) return resolve("");
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          let lado = maxLado, out = "";
+          for (let i = 0; i < 6; i++) {
+            const c = document.createElement("canvas");
+            let w = img.width, h = img.height;
+            if (w >= h && w > lado) { h = Math.round(h * lado / w); w = lado; }
+            else if (h > w && h > lado) { w = Math.round(w * lado / h); h = lado; }
+            c.width = w; c.height = h;
+            c.getContext("2d").drawImage(img, 0, 0, w, h);
+            out = c.toDataURL("image/webp", 0.48);
+            if (!out.startsWith("data:image/webp")) out = c.toDataURL("image/jpeg", 0.42);
+            if (out.length <= maxChars) break;
+            lado = Math.round(lado * 0.8);
+          }
+          resolve(out.length <= maxChars ? out : "");
+        };
+        img.onerror = () => resolve("");
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function mostrarPreviewMagica(input) {
+    const files = Array.from(input.files || []).slice(0, 4);
+    if (!files.length) return;
+    fotosMagicasActuales = [];
+    const cont = $("listaPreviewsMagicas"); cont.innerHTML = "";
+    const presupuesto = Math.min(38000, Math.floor((LIMITE_CELDA - SEP.length * (files.length - 1)) / files.length));
+    for (const f of files) {
+      const b64 = await comprimirFotoUltraLigera(f, files.length > 1 ? 220 : 320, presupuesto);
+      if (b64) { fotosMagicasActuales.push(b64); cont.innerHTML += `<img src="${b64}" class="h-10 w-10 object-cover rounded border" alt="" />`; }
+    }
+    $("txtPreviewMagica").textContent = `${fotosMagicasActuales.length} foto(s)`;
+    $("previewMagicaCont").classList.replace("hidden", "flex");
+  }
+  function limpiarFotoMagica() {
+    fotosMagicasActuales = [];
+    $("inputMagicoFoto").value = ""; $("listaPreviewsMagicas").innerHTML = "";
+    $("previewMagicaCont").classList.replace("flex", "hidden");
+  }
+
+  function abrirApuntar() { $("panelApuntar").classList.remove("hidden"); $("fab").classList.add("hidden"); $("inputMagicoTexto").focus(); }
+  function cerrarApuntar() { $("panelApuntar").classList.add("hidden"); $("fab").classList.remove("hidden"); }
+
+  /* ===== TARJETAS Y VISTAS ===== */
+  function acciones(hoja, id) {
+    return `<span class="inline-flex gap-1 shrink-0"><button class="ic" title="Editar" aria-label="Editar" onclick="abrirModalEdicion('${hoja}','${esc(id)}')">✏️</button><button class="ic del" title="Borrar" aria-label="Borrar" onclick="eliminarRegistro('${hoja}','${esc(id)}')">🗑️</button></span>`;
+  }
+  function tarjetaTarea(t, anio, compacta) {
+    const hecha = estaHecha(t, anio);
+    return `<div class="card p-3.5 ${hecha ? "hecha" : ""}" style="border-left:4px solid var(--moss)">
+      <div class="flex items-start gap-3">
+        <input type="checkbox" class="mt-0.5 h-5 w-5 accent-green-800 shrink-0" ${hecha ? "checked" : ""} onchange="marcarHecha('${esc(t.ID)}',${anio},this.checked)" aria-label="Hecha en ${anio}" />
+        <div class="min-w-0 flex-1">
+          <h4 class="font-semibold text-sm">${esc(t.Titulo_Tarea)}</h4>
+          <div class="flex flex-wrap items-center gap-1.5 mt-1 text-xs text-slate-500">
+            <span class="px-2 py-0.5 rounded-full font-semibold p-${esc(t.Prioridad)}">${esc(t.Prioridad)}</span>
+            <span>${esc(t.Fecha_Referencia)}</span>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed mt-2 ${compacta ? "line-clamp-2" : "whitespace-pre-line"}">${esc(t.Descripcion_Contexto)}</p>
+          ${compacta ? "" : renderizarGaleriaFotosHTML(t.Imagen_Data)}
+        </div>
+        ${compacta ? "" : acciones("Agenda_Estacional", t.ID)}
+      </div></div>`;
+  }
+  const esProximo = b => { const f = obtenerAnioYMesDeFecha(b.Fecha).textoCorto; return /^\d{4}-\d{2}-\d{2}$/.test(f) && f >= hoyISO(); };
+  const fechaCorta = iso => new Date(iso + "T12:00:00").toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" });
+  function tarjetaProximo(b) {
+    const f = obtenerAnioYMesDeFecha(b.Fecha).textoCorto;
+    return `<div class="card p-3.5" style="border-left:4px solid var(--pool)">
+      <div class="text-xs font-semibold capitalize" style="color:var(--pool)">${esc(fechaCorta(f))}</div>
+      <h4 class="font-semibold text-sm mt-0.5">${esc(b.Titulo)}</h4>
+      <p class="text-xs text-slate-600 leading-relaxed mt-1 line-clamp-2">${esc(b.Detalle_Observacion)}</p>
+    </div>`;
+  }
+  function tarjetaHito(b, conEnlace) {
+    const i = obtenerAnioYMesDeFecha(b.Fecha);
+    return `<div class="card p-3.5" style="border-left:4px solid var(--pool)">
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <div class="text-xs font-semibold" style="color:var(--pool)">${esc(i.textoCorto)} · ${esc(b.Categoria)}${esProximo(b) ? '<span class="ml-1.5 px-2 py-0.5 rounded-full text-[11px] bg-amber-100 text-amber-800">Pendiente</span>' : ""}</div>
+          <h4 class="font-semibold text-sm mt-0.5">${esc(b.Titulo)}</h4>
+        </div>
+        ${acciones("Bitacora", b.ID)}
+      </div>
+      <p class="text-xs text-slate-700 leading-relaxed mt-1.5 whitespace-pre-line">${esc(b.Detalle_Observacion)}</p>
+      ${renderizarGaleriaFotosHTML(b.Imagen_Data)}
+      ${conEnlace ? `<button class="text-xs font-semibold mt-2 hover:underline" style="color:var(--pine)" onclick="fijarAnio(${i.anio});seleccionarMes(${i.mes});cambiarTab('calendario')">Ver en el calendario</button>` : ""}
+    </div>`;
+  }
+
+  /* ===== TELÉFONOS EN TARJETAS LIMPIAS ===== */
+  function tarjetaContacto(c) {
+    const tel = String(c.Telefono || "").trim();
+    const limpio = tel.replace(/[^\d+]/g, "");
+    const llamable = limpio.replace(/\D/g, "").length >= 6;
+    return `<div class="card p-4 flex items-center justify-between gap-3">
+      <div class="min-w-0 flex-1 space-y-1">
+        <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-50 text-emerald-900 border border-emerald-200">${esc(c.Oficio_Categoria || "Gremio")}</span>
+        <h4 class="font-bold text-slate-900 text-base truncate">${esc(c.Nombre)}</h4>
+        <div class="text-sm font-extrabold" style="color:var(--pool)">${esc(tel || "Sin teléfono")}</div>
+        ${c.Comentario ? `<p class="text-xs text-slate-600 line-clamp-2">${esc(c.Comentario)}</p>` : ""}
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        ${llamable ? `<a href="tel:${esc(limpio)}" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-sm transition">Llamar</a>` : ""}
+        ${acciones("Contactos", c.ID)}
+      </div>
+    </div>`;
+  }
+
+  async function eliminarRegistro(hoja, id) {
+    const reg = { Agenda_Estacional: estado.agenda.find(x => x.ID === id), Bitacora: estado.bitacora.find(x => x.ID === id), Contactos: estado.contactos.find(x => x.ID === id), Evolucion_Visual: estado.evolucion.find(x => x.ID_Foto === id) }[hoja];
+    const nombre = reg ? (reg.Titulo_Tarea || reg.Titulo || reg.Nombre || "este elemento") : id;
+    if (!confirm(`¿Borrar "${nombre}"? Se eliminará del Sheet.`)) return;
+    toast("Eliminando…");
+    await enviarAlSheet({ tipo: "eliminar", hoja: hoja, id: id });
+    if (hoja === "Agenda_Estacional") estado.agenda = estado.agenda.filter(x => x.ID !== id);
+    if (hoja === "Bitacora") estado.bitacora = estado.bitacora.filter(x => x.ID !== id);
+    if (hoja === "Contactos") estado.contactos = estado.contactos.filter(x => x.ID !== id);
+    if (hoja === "Evolucion_Visual") estado.evolucion = estado.evolucion.filter(x => x.ID_Foto !== id);
+    guardarCacheLigera(); renderizarTodo(); toast("Eliminado correctamente");
+  }
+
+  const campo = (id, et, v, tipo = "text", extra = "") => `<div><label class="text-xs font-semibold text-slate-600">${et}</label><input id="${id}" type="${tipo}" value="${esc(v)}" ${extra} class="w-full border rounded-lg p-2 text-sm mt-1" /></div>`;
+  const area = (id, et, v) => `<div><label class="text-xs font-semibold text-slate-600">${et}</label><textarea id="${id}" rows="3" class="w-full border rounded-lg p-2 text-sm mt-1">${esc(v)}</textarea></div>`;
+
+  function abrirNuevo(hoja) { cerrarApuntar(); if (hoja === "Evolucion_Visual") return abrirModalNuevaFotoEvolucion(); abrirModalEdicion(hoja, ""); }
+  function abrirModalEdicion(hoja, id = "") {
+    const nuevo = !id;
+    $("editHoja").value = hoja; $("editId").value = id;
+    $("btnGuardarEdicion").textContent = nuevo ? "Guardar" : "Guardar cambios";
+    const campos = $("editCamposDinamicos"); campos.innerHTML = ""; editFotosActuales = [];
+    if (hoja === "Agenda_Estacional") {
+      const t = nuevo ? { Titulo_Tarea: "", Mes_Numero: new Date().getMonth() + 1, Prioridad: "Media", Fecha_Referencia: "", Descripcion_Contexto: "", Imagen_Data: "" } : estado.agenda.find(x => x.ID === id);
+      if (!t) return;
+      $("modalEdicionTitulo").textContent = nuevo ? "Nueva tarea anual" : "Editar tarea anual";
+      editFotosActuales = extraerListaFotos(t.Imagen_Data);
+      const opt = p => `<option value="${p}" ${t.Prioridad === p ? "selected" : ""}>${p}</option>`;
+      campos.innerHTML = campo("editTitulo", "Título", t.Titulo_Tarea) +
+        `<div class="grid grid-cols-2 gap-2">${campo("editMes", "Mes (1-12)", t.Mes_Numero, "number", 'min="1" max="12"')}<div><label class="text-xs font-semibold text-slate-600">Prioridad</label><select id="editPrio" class="w-full border rounded-lg p-2 text-sm mt-1">${opt("Crítica")}${opt("Alta")}${opt("Media")}</select></div></div>` +
+        campo("editFechaRef", "Plazo", t.Fecha_Referencia) + area("editDesc", "Descripción", t.Descripcion_Contexto);
+    } else if (hoja === "Bitacora") {
+      const b = nuevo ? { Titulo: "", Fecha: hoyISO(), Categoria: "", Detalle_Observacion: "", Imagen_Data: "" } : estado.bitacora.find(x => x.ID === id);
+      if (!b) return;
+      $("modalEdicionTitulo").textContent = nuevo ? "Nueva cosa con fecha" : "Editar historial";
+      editFotosActuales = extraerListaFotos(b.Imagen_Data);
+      campos.innerHTML = campo("editBitTitulo", "Título", b.Titulo) +
+        `<div class="grid grid-cols-2 gap-2">${campo("editBitFecha", "Fecha", obtenerAnioYMesDeFecha(b.Fecha).textoCorto, "date")}${campo("editBitCat", "Categoría", b.Categoria)}</div>` +
+        area("editBitDetalle", "Detalle", b.Detalle_Observacion);
+    } else if (hoja === "Contactos") {
+      const c = nuevo ? { Nombre: "", Oficio_Categoria: "", Telefono: "", Comentario: "", Imagen_Tarjeta: "" } : estado.contactos.find(x => x.ID === id);
+      if (!c) return;
+      $("modalEdicionTitulo").textContent = nuevo ? "Nuevo contacto" : "Editar contacto";
+      editFotosActuales = extraerListaFotos(c.Imagen_Tarjeta);
+      campos.innerHTML = campo("editConNombre", "Nombre / empresa", c.Nombre) +
+        `<div class="grid grid-cols-2 gap-2">${campo("editConOficio", "Oficio", c.Oficio_Categoria)}${campo("editConTel", "Teléfono", c.Telefono)}</div>` +
+        area("editConCom", "Comentario", c.Comentario);
+    }
+    pintarGaleriaEdicionModal();
+    $("modalEdicion").classList.replace("hidden", "flex");
+  }
+  function cerrarModalEdicion() { $("modalEdicion").classList.replace("flex", "hidden"); }
+  function pintarGaleriaEdicionModal() {
+    $("editGaleriaActual").innerHTML = editFotosActuales.length ? editFotosActuales.map((src, i) => `
+      <div class="relative"><img src="${src}" class="h-16 w-16 object-cover rounded border" alt="" />
+      <button type="button" onclick="quitarFotoEdicion(${i})" class="absolute -top-1.5 -right-1.5 bg-red-600 text-white rounded-full h-5 w-5 text-[10px] font-bold flex items-center justify-center shadow" title="Quitar foto">✕</button></div>`).join("")
+      : `<span class="text-xs text-slate-400 italic">Sin fotos.</span>`;
+  }
+  function quitarFotoEdicion(i) { editFotosActuales.splice(i, 1); pintarGaleriaEdicionModal(); }
+  async function agregarFotoEdicion(input) {
+    for (const f of Array.from(input.files || [])) {
+      const b64 = await comprimirFotoUltraLigera(f, 300, 38000);
+      if (b64) editFotosActuales.push(b64);
+    }
+    input.value = ""; pintarGaleriaEdicionModal();
+  }
+
+  async function guardarNuevoDesdeModal(hoja, img) {
+    let res;
+    if (hoja === "Agenda_Estacional") {
+      const titulo = $("editTitulo").value.trim(); if (!titulo) return toast("Pon un título a la tarea.");
+      const m = Math.min(12, Math.max(1, Number($("editMes").value) || 1));
+      res = { destino: "agenda", datos: { mesNumero: m, mesNombre: NOMBRES_MESES[m], fechaReferencia: $("editFechaRef").value.trim() || `Cada ${NOMBRES_MESES[m].toLowerCase()}`, categoria: "Mantenimiento Anual", titulo: titulo, descripcion: $("editDesc").value, prioridad: $("editPrio").value } };
+    } else if (hoja === "Bitacora") {
+      const titulo = $("editBitTitulo").value.trim(); if (!titulo) return toast("Pon un título.");
+      const fecha = $("editBitFecha").value; if (!fecha) return toast("Elige fecha.");
+      res = { destino: "bitacora", datos: { fecha: fecha, categoria: $("editBitCat").value.trim() || "Hito", titulo: titulo, detalle: $("editBitDetalle").value } };
+    } else {
+      const nombre = $("editConNombre").value.trim(); if (!nombre) return toast("Pon un nombre.");
+      res = { destino: "contacto", datos: { nombre: nombre, oficio: $("editConOficio").value.trim() || "Gremio", telefono: $("editConTel").value.trim(), comentario: $("editConCom").value } };
+    }
+    cerrarModalEdicion(); toast("Guardando…");
+    await guardarSegunClasificacionIA(res, img);
+  }
+
+  async function guardarEdicionModal() {
+    const hoja = $("editHoja").value, id = $("editId").value, img = editFotosActuales.join(SEP);
+    if (!id) return guardarNuevoDesdeModal(hoja, img);
+    toast("Guardando cambios…"); cerrarModalEdicion();
+    if (hoja === "Agenda_Estacional") {
+      const t = estado.agenda.find(x => x.ID === id);
+      if (t) {
+        t.Titulo_Tarea = $("editTitulo").value; t.Mes_Numero = Number($("editMes").value);
+        t.Mes_Nombre = NOMBRES_MESES[t.Mes_Numero] || ""; t.Prioridad = $("editPrio").value;
+        t.Fecha_Referencia = $("editFechaRef").value; t.Descripcion_Contexto = $("editDesc").value; t.Imagen_Data = img;
+        await enviarAlSheet({ tipo: "editar", hoja: "Agenda_Estacional", id: id, mesNumero: t.Mes_Numero, mesNombre: t.Mes_Nombre, fechaReferencia: t.Fecha_Referencia, categoria: t.Categoria, titulo: t.Titulo_Tarea, descripcion: t.Descripcion_Contexto, prioridad: t.Prioridad, estado: t.Estado_Anual, youtube: t.Enlace_YouTube, imagenData: t.Imagen_Data });
+      }
+    } else if (hoja === "Bitacora") {
+      const b = estado.bitacora.find(x => x.ID === id);
+      if (b) {
+        b.Titulo = $("editBitTitulo").value; b.Fecha = $("editBitFecha").value; b.Categoria = $("editBitCat").value;
+        b.Detalle_Observacion = $("editBitDetalle").value; b.Imagen_Data = img;
+        await enviarAlSheet({ tipo: "editar", hoja: "Bitacora", id: id, fecha: b.Fecha, autor: b.Autor, categoria: b.Categoria, titulo: b.Titulo, detalle: b.Detalle_Observacion, youtube: b.Enlace_YouTube, imagenData: b.Imagen_Data });
+      }
+    } else if (hoja === "Contactos") {
+      const c = estado.contactos.find(x => x.ID === id);
+      if (c) {
+        c.Nombre = $("editConNombre").value; c.Oficio_Categoria = $("editConOficio").value; c.Telefono = $("editConTel").value;
+        c.Comentario = $("editConCom").value; c.Imagen_Tarjeta = img;
+        await enviarAlSheet({ tipo: "editar", hoja: "Contactos", id: id, fecha: c.Fecha_Guardado, nombre: c.Nombre, oficio: c.Oficio_Categoria, telefono: c.Telefono, comentario: c.Comentario, imagenData: c.Imagen_Tarjeta });
+      }
+    }
+    guardarCacheLigera(); renderizarTodo(); toast("Guardado");
+  }
+
+  function abrirModalNuevaFotoEvolucion() {
+    const g = {}; estado.evolucion.forEach(e => { g[e.ID_Objetivo] = e.Nombre_Objetivo; });
+    $("selectEvoExistente").innerHTML = Object.entries(g).map(([id, n]) => `<option value="${esc(id)}">${esc(n)}</option>`).join("") + `<option value="NUEVO">+ Nuevo seguimiento…</option>`;
+    $("inputEvoFecha").value = hoyISO(); cambioSelectorEvoModal();
+    $("modalEvolucion").classList.replace("hidden", "flex");
+  }
+  function cambioSelectorEvoModal() { $("camposNuevoObjetivoEvo").classList.toggle("hidden", $("selectEvoExistente").value !== "NUEVO"); }
+  function cerrarModales() { $("modalEvolucion").classList.replace("flex", "hidden"); }
+
+  async function guardarFotoEvolucionManual() {
+    const v = $("selectEvoExistente").value;
+    const imgData = await comprimirFotoUltraLigera($("inputEvoFile").files[0], 320);
+    const fecha = $("inputEvoFecha").value || hoyISO(), comentario = $("inputEvoComentario").value || "Foto de control";
+    let idObj = v, nombre = "", zona = "Quintana";
+    if (v === "NUEVO") { idObj = nuevoId("OBJ"); nombre = $("inputEvoNombre").value || "Nuevo seguimiento"; zona = $("inputEvoZona").value || "Quintana"; }
+    else { const r = estado.evolucion.find(e => e.ID_Objetivo === v); nombre = r ? r.Nombre_Objetivo : "Seguimiento"; zona = r ? r.Ubicacion_Zona : "Quintana"; }
+    const n = { ID_Foto: nuevoId("EVO"), ID_Objetivo: idObj, Nombre_Objetivo: nombre, Ubicacion_Zona: zona, Fecha_Foto: fecha, Comentario_Estado: comentario, Imagen_Data: imgData };
+    estado.evolucion.push(n); objetivoEvoActivo = idObj;
+    $("inputEvoFile").value = ""; $("inputEvoComentario").value = "";
+    cerrarModales(); renderizarEvolucion(); guardarCacheLigera();
+    await enviarAlSheet({ tipo: "evolucion", idObjetivo: n.ID_Objetivo, nombreObjetivo: n.Nombre_Objetivo, ubicacion: n.Ubicacion_Zona, fecha: n.Fecha_Foto, comentario: n.Comentario_Estado, imagenData: n.Imagen_Data });
+    toast("Foto guardada");
+  }
+
+  async function procesarEntradaMagicaIA() {
+    const texto = $("inputMagicoTexto").value.trim();
+    if (!texto) return toast("Escribe qué quieres guardar.");
+    const btn = $("btnMagicoIA"), fb = $("feedbackMagicoIA");
+    btn.disabled = true; btn.textContent = "Guardando…";
+    fb.className = "text-xs p-3 rounded-xl border bg-slate-50 text-slate-700";
+    fb.textContent = "Clasificando con IA…";
+    const objetivos = [...new Set(estado.evolucion.map(e => `${e.ID_Objetivo}: ${e.Nombre_Objetivo}`))].join(" | ");
+    const prompt = `Eres el clasificador inteligente de "Villa Quintana". Fecha: ${hoyISO()}. Mensaje: "${texto}" Objetivos de Evolución Visual: [${objetivos}]
+1. "agenda" (CÍCLICO ANUAL): SOLO si se repite TODOS LOS AÑOS en un mes determinado.
+2. "bitacora" (COSA PUNTUAL CON FECHA CONCRETA): fecha en formato YYYY-MM-DD.
+3. "contacto": teléfono, gremio, empresa.
+4. "evolucion": foto o comentario de seguimiento temporal.
+Devuelve ÚNICAMENTE un JSON válido: { "destino": "agenda"|"bitacora"|"contacto"|"evolucion", "datos": { ... } }`;
+    let resultado = null;
+    try {
+      const res = await fetch(CLOUDFLARE_WORKER_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: prompt, contents: [{ parts: [{ text: prompt }] }] }) });
+      const raw = await res.json();
+      const t = raw.candidates?.[0]?.content?.parts?.[0]?.text || raw.text || raw.response || JSON.stringify(raw);
+      const m = t.match(/\{[\s\S]*\}/);
+      if (m) resultado = JSON.parse(m[0]);
+    } catch (e) {}
+    if (!resultado || !resultado.destino) resultado = clasificarLocalmenteFallback(texto);
+    await guardarSegunClasificacionIA(resultado, fotosMagicasActuales.join(SEP));
+    $("inputMagicoTexto").value = ""; limpiarFotoMagica(); btn.disabled = false; btn.textContent = "Guardar";
+  }
+
+  function clasificarLocalmenteFallback(texto) {
+    const t = texto.toLowerCase(), tel = texto.match(/(\+?\d[\d\s-]{6,12}\d)/);
+    if (tel || t.includes("teléfono") || t.includes("telefono") || t.includes("tarjeta")) {
+      return { destino: "contacto", datos: { nombre: texto.split(/[0-9]/)[0].trim() || "Contacto", oficio: "Gremio", telefono: tel ? tel[1].trim() : "", comentario: texto } };
+    }
+    if (t.includes("humedad") || t.includes("evolución") || t.includes("evolucion")) {
+      return { destino: "evolucion", datos: { idObjetivo: nuevoId("OBJ"), nombreObjetivo: "Seguimiento", ubicacion: "Quintana", fecha: hoyISO(), comentario: texto } };
+    }
+    if (t.includes("cada ") || t.includes("anual")) {
+      return { destino: "agenda", datos: { mesNumero: 10, mesNombre: "Octubre", fechaReferencia: "Cada octubre", categoria: "Mantenimiento", titulo: texto, descripcion: texto, prioridad: "Media" } };
+    }
+    return { destino: "bitacora", datos: { fecha: hoyISO(), categoria: "Hito", titulo: texto, detalle: texto } };
+  }
+
+  async function guardarSegunClasificacionIA(res, img) {
+    const hoy = hoyISO(), d = res.datos || {};
+    if (res.destino === "contacto") {
+      const n = { ID: nuevoId("CON"), Fecha_Guardado: hoy, Nombre: d.nombre || "Contacto", Oficio_Categoria: d.oficio || "Gremio", Telefono: d.telefono || "", Comentario: d.comentario || "", Imagen_Tarjeta: img || "" };
+      estado.contactos.push(n);
+      await enviarAlSheet({ tipo: "contacto", fecha: hoy, nombre: n.Nombre, oficio: n.Oficio_Categoria, telefono: n.Telefono, comentario: n.Comentario, imagenData: img });
+      cambiarTab("contactos");
+    } else if (res.destino === "evolucion") {
+      const f = d.fecha || hoy;
+      const n = { ID_Foto: nuevoId("EVO"), ID_Objetivo: d.idObjetivo || nuevoId("OBJ"), Nombre_Objetivo: d.nombreObjetivo || "Seguimiento", Ubicacion_Zona: d.ubicacion || "Quintana", Fecha_Foto: f, Comentario_Estado: d.comentario || "", Imagen_Data: img || "" };
+      estado.evolucion.push(n); objetivoEvoActivo = n.ID_Objetivo;
+      await enviarAlSheet({ tipo: "evolucion", idObjetivo: n.ID_Objetivo, nombreObjetivo: n.Nombre_Objetivo, ubicacion: n.Ubicacion_Zona, fecha: f, comentario: n.Comentario_Estado, imagenData: n.Imagen_Data });
+      cambiarTab("evolucion");
+    } else if (res.destino === "agenda") {
+      const m = Number(d.mesNumero) || 1;
+      const n = { ID: nuevoId("AG"), Mes_Numero: m, Mes_Nombre: d.mesNombre || NOMBRES_MESES[m], Fecha_Referencia: d.fechaReferencia || `Cada ${NOMBRES_MESES[m].toLowerCase()}`, Categoria: d.categoria || "Mantenimiento", Titulo_Tarea: d.titulo || "Tarea", Descripcion_Contexto: d.descripcion || "", Prioridad: d.prioridad || "Media", Estado_Anual: "Pendiente", Enlace_YouTube: "", Imagen_Data: img || "" };
+      estado.agenda.push(n); mesFiltro = m;
+      await enviarAlSheet({ tipo: "agenda", mesNumero: n.Mes_Numero, mesNombre: n.Mes_Nombre, fechaReferencia: n.Fecha_Referencia, categoria: n.Categoria, titulo: n.Titulo_Tarea, descripcion: n.Descripcion_Contexto, prioridad: n.Prioridad, estado: "Pendiente", imagenData: img });
+      cambiarTab("calendario");
+    } else {
+      const fecha = d.fecha || hoy, p = String(fecha).split("-");
+      const n = { ID: nuevoId("BIT"), Fecha: fecha, Autor: "Raúl", Categoria: d.categoria || "Hito", Titulo: d.titulo || "Nota", Detalle_Observacion: d.detalle || "", Enlace_YouTube: "", Imagen_Data: img || "" };
+      estado.bitacora.push(n);
+      anioActivo = Number(p[0]) || new Date().getFullYear(); mesFiltro = Number(p[1]) || (new Date().getMonth() + 1);
+      await enviarAlSheet({ tipo: "bitacora", fecha: n.Fecha, autor: "Raúl", categoria: n.Categoria, titulo: n.Titulo, detalle: n.Detalle_Observacion, imagenData: img });
+      cambiarTab("calendario");
+    }
+    guardarCacheLigera(); renderizarTodo(); cerrarApuntar(); toast("Guardado correctamente");
+    setTimeout(() => sincronizarDesdeSheet(false), 1500);
+  }
+
+  function renderizarHistorialIA() {
+    const cont = $("contenedorHistorialIA"); if (!cont) return;
+    cont.innerHTML = [...estado.consultas].reverse().map(c => `<div class="p-3 rounded-lg bg-slate-50 border text-xs space-y-1"><div class="font-semibold text-slate-800">${esc(c.Pregunta_Usuario)} <span class="font-normal text-slate-400">(${esc(obtenerAnioYMesDeFecha(c.Fecha).textoCorto)})</span></div><div class="text-slate-600 whitespace-pre-line">${esc(c.Respuesta_IA)}</div></div>`).join("") || `<p class="text-xs text-slate-500">Todavía no hay consultas.</p>`;
+  }
+  function cargarPreguntaIA(q) { $("inputPreguntaIA").value = q; consultarIAQuintana(); }
+  async function consultarIAQuintana() {
+    const pregunta = $("inputPreguntaIA").value.trim(); if (!pregunta) return;
+    const caja = $("cajaRespuestaIA"), btn = $("btnEnviarIA");
+    caja.classList.remove("hidden"); caja.textContent = "Consultando a la IA…"; btn.disabled = true;
+    const sinFotos = (arr, campo) => arr.map(({ [campo]: _, ...rest }) => rest);
+    const ctx = `Eres el asistente de Villa Quintana. Datos del Sheet: 1) TAREAS: ${JSON.stringify(sinFotos(estado.agenda, "Imagen_Data"))} 2) HITOS: ${JSON.stringify(sinFotos(estado.bitacora, "Imagen_Data"))} 3) CONTACTOS: ${JSON.stringify(sinFotos(estado.contactos, "Imagen_Tarjeta"))} 4) EVOLUCIÓN: ${JSON.stringify(sinFotos(estado.evolucion, "Imagen_Data"))}
+Pregunta: "${pregunta}"`;
+    let respuesta = "";
+    try {
+      const res = await fetch(CLOUDFLARE_WORKER_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: ctx, contents: [{ parts: [{ text: ctx }] }] }) });
+      const data = await res.json();
+      respuesta = data.candidates?.[0]?.content?.parts?.[0]?.text || data.text || data.response || JSON.stringify(data);
+      caja.textContent = respuesta;
+    } catch (e) {
+      caja.textContent = "Error de conexión: " + e.message;
+      btn.disabled = false; return;
+    }
+    estado.consultas.push({ ID: nuevoId("IA"), Fecha: hoyISO(), Pregunta_Usuario: pregunta, Contexto_Detectado: "General", Respuesta_IA: respuesta });
+    guardarCacheLigera(); renderizarHistorialIA(); btn.disabled = false;
+    await enviarAlSheet({ tipo: "consulta_ia", pregunta: pregunta, contextoDetectado: "General", respuesta: respuesta });
+  }
+
+  function renderizarAhora() {
+    const hoy = new Date(), m = hoy.getMonth() + 1, sig = m % 12 + 1, anio = hoy.getFullYear();
+    const bloque = mes => {
+      const an = mes < m ? anio + 1 : anio;
+      const citas = estado.bitacora.filter(b => { const i = obtenerAnioYMesDeFecha(b.Fecha); return i.anio === an && i.mes === mes && esProximo(b); }).sort((a, b) => String(a.Fecha).localeCompare(String(b.Fecha)));
+      const tareas = estado.agenda.filter(t => Number(t.Mes_Numero) === mes).sort((a, b) => (estaHecha(a, an) - estaHecha(b, an)) || ((PRIO[a.Prioridad] ?? 3) - (PRIO[b.Prioridad] ?? 3)));
+      const cuerpo = citas.map(tarjetaProximo).join("") + tareas.map(t => tarjetaTarea(t, an, true)).join("");
+      return cuerpo ? `<div class="space-y-2.5"><h3 class="text-lg" style="color:var(--pine)">${NOMBRES_MESES[mes]}</h3>${cuerpo}</div>` : "";
+    };
+    $("contenedorAhora").innerHTML = bloque(m) + bloque(sig) || vacio("No hay tareas ni citas para este mes ni el siguiente. Pulsa «Apuntar» para añadir algo.");
+  }
+
+  function renderizarVistaCalendario() {
+    $("labelAnioActivo").textContent = anioActivo; $("spanAnioBtn").textContent = anioActivo;
+    const hoy = new Date(), grid = $("gridMeses"); grid.innerHTML = "";
+    for (let m = 1; m <= 12; m++) {
+      const conTareas = estado.agenda.some(t => Number(t.Mes_Numero) === m);
+      const conHitos = estado.bitacora.some(b => { const i = obtenerAnioYMesDeFecha(b.Fecha); return i.anio === anioActivo && i.mes === m; });
+      const b = document.createElement("button");
+      b.onclick = () => seleccionarMes(m);
+      b.className = `mes ${mesFiltro === m ? "on" : ""} ${anioActivo === hoy.getFullYear() && m === hoy.getMonth() + 1 ? "hoy" : ""}`;
+      b.innerHTML = `<div class="font-semibold">${NOMBRES_MESES[m].slice(0, 3)}</div><div class="flex justify-center gap-1 mt-1 h-1.5">${conTareas ? '<i class="dot" style="background:#5d8a5a"></i>' : ""}${conHitos ? '<i class="dot" style="background:#1b7fa8"></i>' : ""}</div>`;
+      grid.appendChild(b);
+    }
+    const periodo = mesFiltro === 0 ? `todo ${anioActivo}` : `${NOMBRES_MESES[mesFiltro].toLowerCase()} de ${anioActivo}`;
+    $("tituloColCiclica").textContent = mesFiltro === 0 ? "Se repite cada año" : `Se repite cada ${NOMBRES_MESES[mesFiltro].toLowerCase()}`;
+    $("tituloColHistorica").textContent = `Cosas puntuales en ${periodo}`;
+
+    const la = estado.agenda.filter(t => mesFiltro === 0 || Number(t.Mes_Numero) === mesFiltro).sort((a, b) => Number(a.Mes_Numero) - Number(b.Mes_Numero));
+    $("contenedorTareasAgenda").innerHTML = la.length ? la.map(t => tarjetaTarea(t, anioActivo, false)).join("") : vacio("Sin tareas anuales en este periodo.");
+    const lh = estado.bitacora.filter(b => { const i = obtenerAnioYMesDeFecha(b.Fecha); return i.anio === anioActivo && (mesFiltro === 0 || i.mes === mesFiltro); }).sort((a, b) => String(a.Fecha).localeCompare(String(b.Fecha)));
+    $("contenedorHitosAnioMes").innerHTML = lh.length ? lh.map(b => tarjetaHito(b, false)).join("") : vacio(`Nada registrado en ${periodo}. Cambia de año con las flechas.`);
+  }
+
+  function renderizarBitacoraCompleta() {
+    const q = ($("buscarBitacora")?.value || "").toLowerCase();
+    const l = [...estado.bitacora].filter(b => (b.Titulo + " " + b.Detalle_Observacion + " " + b.Fecha + " " + b.Categoria).toLowerCase().includes(q)).sort((a, b) => String(b.Fecha).localeCompare(String(a.Fecha)));
+    let h = "", ult = null;
+    l.forEach(b => {
+      const a = obtenerAnioYMesDeFecha(b.Fecha).anio;
+      if (a !== ult) { ult = a; h += `<h3 class="text-2xl pt-2" style="color:var(--pine)">${a || "Sin fecha"}</h3>`; }
+      h += tarjetaHito(b, true);
+    });
+    $("contenedorBitacora").innerHTML = h || vacio("No hay registros que coincidan.");
+  }
+
+  function renderizarContactos() {
+    const f = ($("buscarContacto")?.value || "").toLowerCase();
+    const l = estado.contactos.filter(c => (c.Nombre + " " + c.Oficio_Categoria + " " + c.Comentario + " " + c.Telefono).toLowerCase().includes(f)).reverse();
+    $("contenedorContactos").innerHTML = l.length ? l.map(c => tarjetaContacto(c)).join("") : vacio("No hay contactos que coincidan.");
+  }
+
+  function renderizarEvolucion() {
+    const sel = $("selectorObjetivosEvolucion"), comp = $("contenedorComparadorEvolucion");
+    sel.innerHTML = ""; comp.innerHTML = "";
+    const g = {};
+    estado.evolucion.forEach(i => { (g[i.ID_Objetivo] ||= { nombre: i.Nombre_Objetivo, zona: i.Ubicacion_Zona, fotos: [] }).fotos.push(i); });
+    const ids = Object.keys(g);
+    if (!ids.length) { comp.innerHTML = vacio("Todavía no hay seguimientos. Pulsa «Añadir foto» para empezar."); return; }
+    if (!g[objetivoEvoActivo]) objetivoEvoActivo = ids[0];
+    ids.forEach(id => {
+      const b = document.createElement("button");
+      b.className = "tab border" + (id === objetivoEvoActivo ? " on" : " bg-white"); b.style.borderColor = "var(--line)";
+      b.textContent = `${g[id].nombre} (${g[id].fotos.length})`;
+      b.onclick = () => { objetivoEvoActivo = id; renderizarEvolucion(); };
+      sel.appendChild(b);
+    });
+    const a = g[objetivoEvoActivo], fs = [...a.fotos].sort((x, y) => String(x.Fecha_Foto).localeCompare(String(y.Fecha_Foto)));
+    const fd = x => obtenerAnioYMesDeFecha(x.Fecha_Foto).textoCorto;
+    const sinImg = '<div class="h-32 rounded border border-dashed flex items-center justify-center text-xs text-slate-400">Sin imagen</div>';
+    const caja = (x, et, fuerte) => `<div class="rounded-xl p-3 space-y-2 border ${fuerte ? "border-2" : ""}" style="border-color:${fuerte ? "var(--moss)" : "var(--line)"}">
+      <div class="flex items-center justify-between gap-2"><span class="text-xs font-bold px-2.5 py-0.5 rounded text-white" style="background:${fuerte ? "var(--moss)" : "#33433a"}">${et} · ${esc(fd(x))}</span>
+      <button class="ic del" title="Borrar" aria-label="Borrar" onclick="eliminarRegistro('Evolucion_Visual','${esc(x.ID_Foto)}')">🗑️</button></div>
+      ${renderizarGaleriaFotosHTML(x.Imagen_Data, "h-52") || sinImg}
+      <p class="text-xs text-slate-700">${esc(x.Comentario_Estado)}</p></div>`;
+    const tira = x => { const src = extraerListaFotos(x.Imagen_Data)[0]; return `<figure class="space-y-1">${src ? `<img src="${src}" onclick="abrirLightbox(this.src)" class="w-full h-24 object-cover rounded-lg border cursor-zoom-in" alt="" />` : sinImg}<figcaption class="flex items-center justify-between text-[11px] text-slate-500"><span>${esc(fd(x))}</span><button class="ic del" aria-label="Borrar" onclick="eliminarRegistro('Evolucion_Visual','${esc(x.ID_Foto)}')">🗑️</button></figcaption></figure>`; };
+    comp.innerHTML = `<div class="card p-4 space-y-4">
+      <div><span class="text-xs font-semibold" style="color:var(--moss)">${esc(a.zona)}</span><h3 class="text-lg">${esc(a.nombre)}</h3></div>
+      ${fs.length > 1 ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">${caja(fs[0], "Primera", false)}${caja(fs[fs.length - 1], "Última", true)}</div>` : caja(fs[0], "Única foto", true)}
+      ${fs.length > 2 ? `<div><h4 class="text-sm font-semibold text-slate-600 mb-2">Todas las fotos</h4><div class="grid grid-cols-2 sm:grid-cols-4 gap-3">${fs.map(tira).join("")}</div></div>` : ""}
+    </div>`;
+  }
+
+  function renderizarTodoCalendario() { renderizarVistaCalendario(); renderizarAhora(); actualizarHero(); }
+  function renderizarTodo() { renderizarTodoCalendario(); renderizarBitacoraCompleta(); renderizarContactos(); renderizarEvolucion(); renderizarHistorialIA(); }
+
+  /* ===== PORTADA / HERO DINÁMICO ===== */
+  function lanzarParticulas(n) {
+    const c = $("heroParticulas"); c.innerHTML = "";
+    for (let i = 0; i < n; i++) {
+      const s = document.createElement("i");
+      s.style.cssText = `left:${Math.random() * 100}%;--d:${6 + Math.random() * 8}s;--dl:${-Math.random() * 12}s;--sz:${6 + Math.random() * 9}px;--sw:${Math.random() * 90 - 45}px;--r:${Math.random() * 360}deg`;
+      c.appendChild(s);
+    }
+  }
+
+  function actualizarHero() {
+    const h = new Date(), m = h.getMonth() + 1, anio = h.getFullYear();
+    const t = m >= 3 && m <= 5 ? "primavera" : m >= 6 && m <= 8 ? "verano" : m >= 9 && m <= 11 ? "otoño" : "invierno";
+    if (document.body.dataset.temp !== t && !document.body.dataset.temp) { document.body.dataset.temp = t; lanzarParticulas(t === "verano" ? 0 : t === "invierno" ? 24 : 16); }
+    const pend = estado.agenda.filter(x => Number(x.Mes_Numero) === m && !estaHecha(x, anio)).sort((a, b) => (PRIO[a.Prioridad] ?? 3) - (PRIO[b.Prioridad] ?? 3));
+    const top = pend[0];
+    $("heroEtiqueta").textContent = top ? `${pend.length} pendiente${pend.length > 1 ? "s" : ""} en ${NOMBRES_MESES[m].toLowerCase()}. Lo más urgente:` : NOMBRES_MESES[m];
+    $("heroTitulo").textContent = top ? top.Titulo_Tarea : "Quintana está al día";
+    $("heroSub").textContent = top ? String(top.Descripcion_Contexto || "").slice(0, 150) : "No quedan tareas anuales pendientes este mes.";
+  }
+
+  const TABS = ["inicio", "calendario", "bitacora", "contactos", "evolucion", "ia"];
+  function cambiarTab(tab) {
+    TABS.forEach(t => {
+      $("vista-" + t).classList.toggle("hidden", t !== tab);
+      $("tabBtn-" + t).className = "tab" + (t === tab ? " on" : "");
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function guardarCacheLigera() { try { localStorage.setItem("quintana_cloud_cache", JSON.stringify(estado)); } catch (e) {} }
+
+  async function enviarAlSheet(payload) {
+    try {
+      await fetch(GAS_WEB_APP_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
+    } catch (e) { toast("No se pudo enviar al Sheet."); }
+  }
+
+  async function sincronizarDesdeSheet(forzarMensaje = false) {
+    const badge = $("estadoConexion");
+    try {
+      badge.textContent = "Sincronizando…";
+      const res = await fetch(GAS_WEB_APP_URL + "?action=getAll&t=" + Date.now());
+      const data = await res.json();
+      if (data.status === "ok") {
+        estado.agenda = data.agenda || []; estado.bitacora = data.bitacora || []; estado.contactos = data.contactos || [];
+        estado.evolucion = data.evolucion || []; estado.consultas = data.consultas || [];
+        guardarCacheLigera(); renderizarTodo();
+        badge.textContent = "Sincronizado";
+        if (forzarMensaje) toast("Datos actualizados desde Google Sheets");
+      }
+    } catch (e) {
+      badge.textContent = "Modo local";
+      if (forzarMensaje) toast("No se pudo conectar con el Sheet");
+    }
+  }
+
+  function inicializarApp() {
+    const hoy = new Date();
+    anioActivo = hoy.getFullYear(); mesFiltro = hoy.getMonth() + 1;
+    $("subtituloFecha").textContent = hoy.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+    try { const c = JSON.parse(localStorage.getItem("quintana_cloud_cache")); if (c) estado = { ...estado, ...c }; } catch (e) {}
+    renderizarTodo();
+    sincronizarClimaQuintana();
+    sincronizarDesdeSheet();
+  }
+
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { cerrarLightbox(); cerrarApuntar(); cerrarModalEdicion(); cerrarModales(); } });
+  window.addEventListener("DOMContentLoaded", inicializarApp);
+</script>
+</body>
+</html>
