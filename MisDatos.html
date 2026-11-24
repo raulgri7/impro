@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buscador Universal: Discos y Nubes</title>
+  <style>
+    :root {
+      --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --muted: #94a3b8;
+      --accent: #38bdf8; --accent-hover: #0284c7; --ok: #22c55e; --warn: #f59e0b; --border: #334155;
+    }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+    .container { max-width: 1000px; margin: 0 auto; }
+    header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; }
+    h1 { margin: 0; font-size: 1.4rem; }
+    .status { font-size: 0.85rem; padding: 4px 10px; border-radius: 99px; background: var(--card); border: 1px solid var(--border); }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; background: var(--card); padding: 14px; border-radius: 10px; border: 1px solid var(--border); }
+    button { background: var(--accent); color: #0f172a; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+    button:hover { background: var(--accent-hover); color: #fff; }
+    button.secondary { background: #334155; color: var(--text); }
+    button.secondary:hover { background: #475569; }
+    .search-box { width: 100%; padding: 14px 16px; font-size: 1.05rem; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text); margin-bottom: 12px; outline: none; }
+    .search-box:focus { border-color: var(--accent); }
+    .filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+    select, input[type="text"], input[type="password"] { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--text); }
+    .results-info { color: var(--muted); font-size: 0.9rem; margin-bottom: 10px; }
+    .item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .item-info { min-width: 0; flex: 1; }
+    .item-title { font-weight: 600; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-path { color: var(--muted); font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px; }
+    .badge { display: inline-block; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; font-weight: 600; margin-right: 6px; }
+    .badge-disco { background: #3b82f633; color: #93c5fd; border: 1px solid #3b82f666; }
+    .badge-nube { background: #10b98133; color: #6ee7b7; border: 1px solid #10b98166; }
+    .modal { display: none; position: fixed; inset: 0; background: #000000aa; align-items: center; justify-content: center; padding: 20px; z-index: 50; }
+    .modal.active { display: flex; }
+    .modal-content { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; max-width: 480px; width: 100%; }
+    .modal-content h2 { margin-top: 0; font-size: 1.2rem; }
+    .modal-content label { display: block; margin: 12px 0 4px; font-size: 0.85rem; color: var(--muted); }
+    .modal-content input { width: 100%; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: var(--card); border-left: 4px solid var(--warn); padding: 14px 18px; border-radius: 8px; box-shadow: 0 10px 25px #00000066; max-width: 380px; display: none; z-index: 100; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🗄️ Inventario Discos + Nubes</h1>
+    <span id="statusBadge" class="status">Iniciando...</span>
+  </header>
+
+  <div class="toolbar">
+    <button onclick="indexarDiscoLocal()">💿 Indexar disco / carpeta</button>
+    <button class="secondary" onclick="vincularDiscoSesion()">🔌 Vincular disco enchufado</button>
+    <button class="secondary" onclick="document.getElementById('rcloneInput').click()">☁️ Importar JSON de rclone</button>
+    <input type="file" id="rcloneInput" accept=".json" style="display:none" onchange="importarJsonRclone(event)">
+    <button class="secondary" onclick="sincronizarNube(true)">🔄 Sincronizar</button>
+    <button class="secondary" onclick="abrirConfig()">⚙️ Configurar</button>
+  </div>
+
+  <input type="text" id="searchInput" class="search-box" placeholder="Buscar archivo, película, factura, proyecto..." oninput="filtrar()">
+
+  <div class="filters">
+    <select id="origenFilter" onchange="filtrar()">
+      <option value="">Todos los orígenes</option>
+    </select>
+    <span id="resultsInfo" class="results-info">0 archivos</span>
+  </div>
+
+  <div id="resultsList"></div>
+</div>
+
+<!-- Modal Configuración -->
+<div id="configModal" class="modal">
+  <div class="modal-content">
+    <h2>⚙️ Conexión con Google Apps Script</h2>
+    <label>URL de la aplicación web (Apps Script)</label>
+    <input type="text" id="cfgUrl" placeholder="https://script.google.com/macros/s/.../exec">
+    <label>API Key (la misma que pusiste en el script)</label>
+    <input type="password" id="cfgKey" placeholder="CLAVE_SECRETA_1234">
+    <div style="margin-top: 18px; display: flex; gap: 10px; justify-content: flex-end;">
+      <button class="secondary" onclick="cerrarConfig()">Cancelar</button>
+      <button onclick="guardarConfig()">Guardar y sincronizar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Aviso flotante -->
+<div id="toast" class="toast"></div>
+
+<script>
+  // URL fija integrada (puedes sobrescribirla desde ⚙️ Configurar si lo necesitas)
+  const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbyGI2vKShYEt6LwminO4hBuijHA5xRMCJ86rrQT4YnbQAY-BFqXWJbleaBxOG3AhBXW/exec';
+  const DEFAULT_API_KEY = 'CLAVE_SECRETA_1234';
+
+  function getGasUrl() {
+    return (localStorage.getItem('gas_url') || DEFAULT_GAS_URL).trim();
+  }
+
+  function getApiKey() {
+    return (localStorage.getItem('gas_key') || DEFAULT_API_KEY).trim();
+  }
+
+  let catalogo = [];
+  const handlesActivos = new Map();
+
+  // --- INDEXED DB PARA MODO OFFLINE ---
+  function abrirDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open('InventarioUniversalDB', 1);
+      req.onupgradeneeded = e => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('datos')) db.createObjectStore('datos');
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function guardarLocal(clave, valor) {
+    const db = await abrirDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('datos', 'readwrite');
+      tx.objectStore('datos').put(valor, clave);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  async function leerLocal(clave) {
+    const db = await abrirDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('datos', 'readonly');
+      const req = tx.objectStore('datos').get(clave);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  // --- INICIO Y SINCRONIZACIÓN ---
+  window.addEventListener('DOMContentLoaded', async () => {
+    const cache = await leerLocal('catalogo');
+    if (cache && Array.isArray(cache)) {
+      catalogo = cache;
+      actualizarFiltroOrigenes();
+      filtrar();
+      setStatus(`Offline listo (${catalogo.length} archivos en caché)`);
+    }
+
+    sincronizarNube(false);
+  });
+
+  function setStatus(texto) {
+    document.getElementById('statusBadge').textContent = texto;
+  }
+
+  function mostrarAviso(html, color = 'var(--warn)') {
+    const t = document.getElementById('toast');
+    t.style.borderLeftColor = color;
+    t.innerHTML = html;
+    t.style.display = 'block';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.style.display = 'none'; }, 7000);
+  }
+
+  async function sincronizarNube(forzarAviso) {
+    const url = getGasUrl();
+    if (!url) return abrirConfig();
+    setStatus('Sincronizando...');
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.status === 'ok') {
+        catalogo = data.items;
+        await guardarLocal('catalogo', catalogo);
+        actualizarFiltroOrigenes();
+        filtrar();
+        setStatus(`Sincronizado (${catalogo.length} archivos)`);
+        if (forzarAviso) mostrarAviso('✅ Catálogo actualizado desde Google Sheets.', 'var(--ok)');
+      }
+    } catch (e) {
+      setStatus(`Modo Offline (${catalogo.length} archivos)`);
+      if (forzarAviso) mostrarAviso('⚠️ Sin conexión. Usando copia offline guardada en el navegador.');
+    }
+  }
+
+  // --- ESCANEAR DISCO LOCAL CON FILE SYSTEM ACCESS API ---
+  async function indexarDiscoLocal() {
+    if (!window.showDirectoryPicker) {
+      return alert('Tu navegador no soporta lectura directa de carpetas. Usa Chrome o Edge en PC.');
+    }
+    try {
+      const dirHandle = await window.showDirectoryPicker();
+      const nombreDisco = prompt('¿Qué etiqueta le ponemos a este disco o carpeta?', dirHandle.name);
+      if (!nombreDisco) return;
+
+      handlesActivos.set(nombreDisco, dirHandle);
+      setStatus(`Escaneando ${nombreDisco}...`);
+
+      const items = [];
+      async function recorrer(handle, rutaActual) {
+        for await (const entry of handle.values()) {
+          if (entry.name.startsWith('$') || entry.name === 'System Volume Information') continue;
+          const rutaItem = rutaActual ? `${rutaActual}/${entry.name}` : entry.name;
+          if (entry.kind === 'file') {
+            try {
+              const file = await entry.getFile();
+              items.push({
+                nombre: entry.name,
+                ruta: rutaItem,
+                tamano: file.size,
+                fecha: new Date(file.lastModified).toISOString().split('T')[0],
+                idNube: ''
+              });
+            } catch (_) {}
